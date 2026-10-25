@@ -14,7 +14,6 @@ Un JSON Schema (draft 2020-12) por mensaje: `<type en minúsculas>.schema.json`.
   - un campo tiene otro tipo: `"10"` no es entero, `9.5` tampoco, `"yes"` no es booleano, y un valor de enum desconocido es error
 
   Los campos desconocidos se ignoran, aunque el Schema los rechaza.
-- `Messages.decode` no revisa rangos (0–10, lugar 1–5, round 1–12). Los revisan el Schema y `com.sigebox.core.validation` (CORE-003).
 - Los records validan las mismas reglas que su Schema: requeridos, longitudes, rangos 0–10 / 1–5 / 1–12 y patrones. Los textos no pueden estar vacíos ni traer caracteres de control o de formato (`\n`, U+0000, U+202E…). La central aplica todo esto sin el validador de Schema.
 - La central nunca confía en `seat` ni en `fightId` del mensaje: los compara con la sesión aprobada (CORE-003 `ScoreValidator`, y una prueba en DSK).
 - `ACK.ackId` es el `id` del mensaje que se confirma. El `ACK` sale después de persistir. Un mensaje repetido se reconoce por (lugar de la sesión, `id`), no solo por `id`, y recibe el mismo `ACK`.
