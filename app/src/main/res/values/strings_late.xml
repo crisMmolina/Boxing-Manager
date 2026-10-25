@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Captura tardía (AND-006). Los estados de tarjeta vienen de strings_score.xml. -->
+<resources>
+    <string name="late_title">⚠ Round %1$d cerrado</string>
+    <string name="late_body">Falta tu calificación. Califica ahora.</string>
+    <string name="late_send">Enviar round tardío</string>
+    <string name="late_sent">Calificación tardía enviada</string>
+    <string name="late_error">La central no aceptó la calificación (%1$s)</string>
+</resources>
