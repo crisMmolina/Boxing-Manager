@@ -26,7 +26,7 @@ public final class KillWriter {
         rounds.save(new Round("p-kill", 2, EstadoRound.ABIERTO, 3_000L, null, false));
         new TarjetaRoundRepository(db)
                 .save(new TarjetaRound("p-kill", 1, 2, 10, 9, EstadoTarjeta.ENVIADA, OrigenTarjeta.JUEZ, 3_500L));
-        new ProcessedMessages(db).markIfNew("msg-kill", "p-kill");
+        new ProcessedMessages(db).markIfNew("p-kill", 1, "msg-kill");
         System.out.println("WROTE");
         System.out.flush();
         Runtime.getRuntime().halt(137);

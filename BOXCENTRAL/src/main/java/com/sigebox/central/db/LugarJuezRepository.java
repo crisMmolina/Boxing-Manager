@@ -17,12 +17,17 @@ public final class LugarJuezRepository {
         this.db = db;
     }
 
+    /** Inserta o actualiza el lugar; la llave pública registrada no se toca. */
     public void save(LugarJuez l) {
         db.inTransaction(c -> {
             try (var ps = c.prepareStatement("""
-                    INSERT OR REPLACE INTO judge_seat
+                    INSERT INTO judge_seat
                         (fight_id, number, name, device, credential_hash, connection, approved_by, approved_ms)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    ON CONFLICT (fight_id, number) DO UPDATE SET name = excluded.name,
+                        device = excluded.device, credential_hash = excluded.credential_hash,
+                        connection = excluded.connection, approved_by = excluded.approved_by,
+                        approved_ms = excluded.approved_ms
                     """)) {
                 ps.setString(1, l.peleaId());
                 ps.setInt(2, l.numero());
@@ -35,6 +40,39 @@ public final class LugarJuezRepository {
                 ps.executeUpdate();
             }
             return null;
+        });
+    }
+
+    /**
+     * Registra la llave pública del {@code JOIN} (texto de {@code DeviceProof.encodePublicKey}).
+     * {@code LugarJuez} no la lleva; el servidor la necesita para verificar cada {@code HELLO}.
+     * El lugar debe existir.
+     */
+    public void savePublicKey(String peleaId, int numero, String publicKey) {
+        db.inTransaction(c -> {
+            try (var ps = c.prepareStatement(
+                    "UPDATE judge_seat SET public_key = ? WHERE fight_id = ? AND number = ?")) {
+                ps.setString(1, publicKey);
+                ps.setString(2, peleaId);
+                ps.setInt(3, numero);
+                if (ps.executeUpdate() != 1) {
+                    throw new DbException("no existe el lugar " + numero + " de " + peleaId, null);
+                }
+            }
+            return null;
+        });
+    }
+
+    public Optional<String> publicKey(String peleaId, int numero) {
+        return db.inTransaction(c -> {
+            try (var ps = c.prepareStatement(
+                    "SELECT public_key FROM judge_seat WHERE fight_id = ? AND number = ?")) {
+                ps.setString(1, peleaId);
+                ps.setInt(2, numero);
+                try (var rs = ps.executeQuery()) {
+                    return rs.next() ? Optional.ofNullable(rs.getString(1)) : Optional.<String>empty();
+                }
+            }
         });
     }
 

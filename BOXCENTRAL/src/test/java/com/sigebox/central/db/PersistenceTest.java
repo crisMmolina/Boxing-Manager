@@ -112,24 +112,60 @@ class PersistenceTest {
             var processed = new ProcessedMessages(db);
             var cards = new TarjetaRoundRepository(db);
             assertThrows(DbException.class, () -> db.inTransaction(c -> {
-                processed.markIfNew("m-1", P);
+                processed.markIfNew(P, 1, "m-1");
                 cards.save(new TarjetaRound(P, 1, 1, 10, 99, EstadoTarjeta.ENVIADA, OrigenTarjeta.JUEZ, 1L));
                 return null;
             }));
-            assertFalse(processed.seen("m-1")); // el mensaje no quedó marcado sin su tarjeta
+            assertFalse(processed.seen(P, 1, "m-1")); // el mensaje no quedó marcado sin su tarjeta
         }
     }
 
     @Test
-    void processedMessagesAreIdempotent() {
+    void processedMessagesAreIdempotentPerSeat() {
         try (var db = open()) {
             var processed = new ProcessedMessages(db);
-            assertTrue(processed.markIfNew("m-1", P));
-            assertFalse(processed.markIfNew("m-1", P));
+            assertTrue(processed.markIfNew(P, 1, "m-1"));
+            assertFalse(processed.markIfNew(P, 1, "m-1"));
+            assertTrue(processed.markIfNew(P, 2, "m-1")); // mismo id desde otro lugar: es otro mensaje
         }
         try (var db = open()) {
-            assertFalse(new ProcessedMessages(db).markIfNew("m-1", P));
+            assertFalse(new ProcessedMessages(db).markIfNew(P, 1, "m-1"));
         }
+    }
+
+    @Test
+    void publicKeyIsKeptWhenTheSeatIsUpdated() {
+        try (var db = open()) {
+            new PeleaRepository(db).save(pelea(EstadoPelea.EN_CURSO));
+            var seats = new LugarJuezRepository(db);
+            seats.save(new LugarJuez(P, 1, "Ana", "A37", "fp", EstadoConexion.PENDIENTE, null, null));
+            seats.savePublicKey(P, 1, "MFkw-llave");
+            seats.save(new LugarJuez(P, 1, "Ana", "A37", "fp", EstadoConexion.CONECTADO, "org", 7L));
+
+            assertEquals("MFkw-llave", seats.publicKey(P, 1).orElseThrow());
+            assertEquals(EstadoConexion.CONECTADO, seats.find(P, 1).orElseThrow().conexion());
+            assertThrows(DbException.class, () -> seats.savePublicKey(P, 4, "x"));
+        }
+    }
+
+    @Test
+    void finalCardSignatureIsStored() {
+        try (var db = open()) {
+            new PeleaRepository(db).save(pelea(EstadoPelea.TERMINADA));
+            var finals = new TarjetaFinalRepository(db);
+            finals.save(new TarjetaFinal(P, 1, "ab".repeat(32), 1L), "firma-base64");
+            finals.save(new TarjetaFinal(P, 1, "ab".repeat(32), 2L)); // sin firma: conserva la anterior
+
+            assertEquals("firma-base64", finals.signature(P, 1).orElseThrow());
+            assertEquals(2L, finals.byPelea(P).get(0).horaMs());
+        }
+    }
+
+    @Test
+    void defaultDirIsAbsoluteAndNamedForTheApp() {
+        var d = Database.defaultDir();
+        assertTrue(d.isAbsolute(), d.toString());
+        assertTrue(List.of("SIGEBOX", ".sigebox").contains(d.getFileName().toString()), d.toString());
     }
 
     @Test
@@ -211,7 +247,7 @@ class PersistenceTest {
             assertEquals(EstadoRound.ABIERTO, rec.roundActual().orElseThrow().estado());
             assertEquals(1, rec.tarjetas().size());
             assertEquals(9, rec.tarjetas().get(0).azul());
-            assertTrue(new ProcessedMessages(db).seen("msg-kill"));
+            assertTrue(new ProcessedMessages(db).seen("p-kill", 1, "msg-kill"));
         }
     }
 

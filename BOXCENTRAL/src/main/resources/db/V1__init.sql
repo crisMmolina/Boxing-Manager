@@ -17,6 +17,8 @@ CREATE TABLE judge_seat (
     name            TEXT,
     device          TEXT,
     credential_hash TEXT,
+    -- Llave pública del JOIN (DeviceProof.encodePublicKey): con ella se verifica cada HELLO.
+    public_key      TEXT,
     connection      TEXT NOT NULL,
     approved_by     TEXT,
     approved_ms     INTEGER,
@@ -62,8 +64,10 @@ CREATE TABLE card_version (
 CREATE TABLE final_card (
     fight_id TEXT NOT NULL REFERENCES fight (id),
     judge    INTEGER NOT NULL,
-    hash     TEXT NOT NULL,
-    time_ms  INTEGER NOT NULL,
+    hash      TEXT NOT NULL,
+    -- Firma del juez sobre DeviceProof.finalCardText (no repudio).
+    signature TEXT,
+    time_ms   INTEGER NOT NULL,
     PRIMARY KEY (fight_id, judge)
 );
 
@@ -97,9 +101,12 @@ CREATE TABLE event_log (
 
 CREATE INDEX event_log_fight ON event_log (fight_id, id);
 
--- Idempotencia: cada mensaje WS (por su `id`) se procesa una sola vez.
+-- Idempotencia: un mensaje WS se procesa una sola vez por (pelea, lugar de la sesión, `id`)
+-- (core/schemas/README.md). seat = 0 para mensajes sin lugar.
 CREATE TABLE processed_message (
-    id           TEXT PRIMARY KEY,
-    fight_id     TEXT,
-    processed_ms INTEGER NOT NULL
+    fight_id     TEXT NOT NULL,
+    seat         INTEGER NOT NULL,
+    id           TEXT NOT NULL,
+    processed_ms INTEGER NOT NULL,
+    PRIMARY KEY (fight_id, seat, id)
 );
