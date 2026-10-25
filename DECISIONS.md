@@ -16,3 +16,4 @@ Why: a reversible option after 15 min keeps work moving.
 - 1792914981 | AND-005 | Tarjetas propias desde la bandeja (OwnCards) sin tocar net/; ROUND_CLOSED mustSubmit abre LateScoreActivity por nombre | Why: Paths de AND-005; AND-006 no puede tocar score/
 - 1792916373 | DSK-005 | primero followup de DSK-004 para código manual de 6 dígitos en SeatTokens | Why: contrato AND-004 #37: código manual; SeatTokens fuera de Paths de DSK-005
 - 1792916753 | DSK-006 | Broadcaster interface; UI refresca cada 500 ms | Why: testable sin JudgeHub; criterio <=1 s
+- 1792921252 | DSK-010 | SimJudge sin transporte; --tokens por lugar; catch-up con STATE | Why: probar sin servidor; la central emite los tokens
