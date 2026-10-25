@@ -1,6 +1,7 @@
 package com.sigebox.central.ui.log;
 
 import com.sigebox.central.ui.Screens;
+import com.sigebox.central.ui.theme.Ui;
 import com.sigebox.core.model.EventoBitacora;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -44,7 +45,7 @@ public final class LogScreen {
         table.getColumns().add(column("Detalle", e -> e.detalle() == null ? "" : e.detalle()));
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
         VBox.setVgrow(table, Priority.ALWAYS);
-        var count = new Label();
+        var count = Ui.support("");
 
         Runnable load = () -> {
             var f = fight.getValue();
@@ -68,7 +69,7 @@ public final class LogScreen {
         };
         fight.setOnAction(e -> load.run());
         type.setOnAction(e -> load.run());
-        var refresh = new Button("Actualizar");
+        var refresh = Ui.secondary("Actualizar");
         refresh.setOnAction(e -> {
             reloadFilters.run();
             load.run();
@@ -76,9 +77,11 @@ public final class LogScreen {
         reloadFilters.run();
         load.run();
 
-        var filters = new HBox(12, new Label("Pelea"), fight, new Label("Tipo"), type, refresh, count);
-        var root = new VBox(12, new Label("Bitácora"), filters, table);
-        root.setPadding(new Insets(24));
+        var filters = new HBox(12, Ui.field("Pelea", fight), Ui.field("Tipo", type), refresh, count);
+        filters.setAlignment(javafx.geometry.Pos.BOTTOM_LEFT);
+        var card = Ui.glass(filters, table);
+        VBox.setVgrow(card, Priority.ALWAYS);
+        var root = new VBox(16, Ui.screenTitle("Bitácora"), card);
         return root;
     }
 

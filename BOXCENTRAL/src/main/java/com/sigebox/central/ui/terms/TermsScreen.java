@@ -1,6 +1,7 @@
 package com.sigebox.central.ui.terms;
 
 import com.sigebox.central.ui.Screens;
+import com.sigebox.central.ui.theme.Ui;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
@@ -46,7 +47,7 @@ public final class TermsScreen {
     }
 
     static Node build(TermsGate gate, Runnable onAccepted, Runnable onDeclined) {
-        var text = new Label(TEXT);
+        var text = Ui.body(TEXT);
         text.setWrapText(true);
         text.setMaxWidth(720);
         var scroll = new ScrollPane(text);
@@ -54,21 +55,22 @@ public final class TermsScreen {
         scroll.setPrefViewportHeight(420);
 
         var agree = new CheckBox("Leí y acepto los términos, el aviso de privacidad y la prohibición de apuestas");
-        var accept = new Button("Aceptar y continuar");
+        var accept = Ui.primary("Aceptar y continuar");
         accept.setDefaultButton(true);
         accept.disableProperty().bind(agree.selectedProperty().not());
         accept.setOnAction(e -> {
             gate.accept();
             onAccepted.run();
         });
-        var decline = new Button("No acepto (salir)");
+        var decline = Ui.secondary("No acepto (salir)");
         decline.setOnAction(e -> {
             gate.decline();
             onDeclined.run();
         });
 
-        var root = new VBox(16, new Label("Antes de empezar"), scroll, agree, new HBox(12, accept, decline));
-        root.setPadding(new Insets(24));
+        var card = Ui.glass(scroll, agree, new HBox(12, accept, decline));
+        card.setMaxWidth(800);
+        var root = new VBox(16, Ui.screenTitle("Antes de empezar"), card);
         return root;
     }
 }
