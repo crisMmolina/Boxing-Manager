@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Puntuación y tarjeta final (AND-005). Dueño de los textos de estado de tarjeta (DESIGN.md §5 y §8). -->
+<resources>
+    <string name="status_pending">Pendiente</string>
+    <string name="status_sending">Enviando…</string>
+    <string name="status_sent">Enviado</string>
+    <string name="status_corrected">Corregido</string>
+    <string name="status_late">Tardío</string>
+
+    <string name="score_header">Juez %1$d · %2$s</string>
+    <string name="score_round_of">Round %1$d de %2$d</string>
+    <string name="score_round">Round %1$d</string>
+    <string name="score_red">ROJA</string>
+    <string name="score_blue">AZUL</string>
+    <string name="score_empty">—</string>
+    <string name="score_backspace">Borrar</string>
+    <string name="score_send">Enviar round</string>
+    <string name="score_correct">Corregir</string>
+    <string name="score_waiting_start">Esperando que se abra el round</string>
+    <string name="score_waiting_next">Esperando el round %1$d</string>
+    <string name="score_error_round_not_open">El round ya estaba cerrado: esa calificación no se registró</string>
+    <string name="score_error_generic">La central no aceptó la calificación (%1$s)</string>
+
+    <string name="final_title">Tarjeta final · Juez %1$d</string>
+    <string name="final_col_round">Round</string>
+    <string name="final_col_status">Estado</string>
+    <string name="final_body">Revisa tu tarjeta. Al enviarla ya no podrás corregir.</string>
+    <string name="final_wait_acks">Espera a que la central confirme todos tus rounds.</string>
+    <string name="final_send">Enviar tarjeta final</string>
+    <string name="final_sent">Tarjeta final enviada. Gracias.</string>
+    <string name="final_error">La central no aceptó la tarjeta (%1$s)</string>
+</resources>
