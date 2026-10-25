@@ -15,7 +15,7 @@ Task-Base: 8f1c5a8aa9ea4bf21c21b21726eb3bcad8eea394
 Next: copiar el wrapper de Gradle a `core/` y crear `core/settings.gradle.kts` con `rootProject.name = "core"`
 PR: -
 Evidence: -
-Events: 1
+Events: 2
 Checkpoints: 0
 Sessions: 1
 Last-Checkpoint: 0
