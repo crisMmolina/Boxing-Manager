@@ -1,145 +1,81 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<!-- Round tardío obligatorio (DESIGN.md v2 §6.5): las mismas tarjetas de esquina; no se puede salir sin enviar. -->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/late_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:clipToPadding="false"
+    android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/status_late_bg"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="@dimen/screen_margin">
 
-        <TextView
-            android:id="@+id/late_title"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textColor="@color/status_late_fg"
-            android:textSize="24sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/late_body"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="@string/late_body"
-            android:textColor="@color/status_late_fg"
-            android:textSize="18sp" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:orientation="vertical"
-        android:padding="16dp">
+        <include layout="@layout/view_top_bar" />
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:gravity="center_vertical"
             android:orientation="horizontal">
 
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/late_red_panel"
+            <TextView
+                android:id="@+id/late_title"
+                style="@style/Text.Sigebox.CardTitle"
                 android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_marginEnd="4dp"
-                android:layout_weight="1"
-                android:clickable="true"
-                android:focusable="true"
-                app:cardBackgroundColor="@color/corner_red_container"
-                app:strokeColor="@color/corner_red">
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/score_red"
-                        android:textColor="@color/corner_red"
-                        android:textSize="20sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/late_red_value"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFeatureSettings="tnum"
-                        android:text="@string/score_empty"
-                        android:textColor="@color/corner_red"
-                        android:textSize="64sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/late_blue_panel"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_marginStart="4dp"
-                android:layout_weight="1"
-                android:clickable="true"
-                android:focusable="true"
-                app:cardBackgroundColor="@color/corner_blue_container"
-                app:strokeColor="@color/corner_blue">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/score_blue"
-                        android:textColor="@color/corner_blue"
-                        android:textSize="20sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/late_blue_value"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFeatureSettings="tnum"
-                        android:text="@string/score_empty"
-                        android:textColor="@color/corner_blue"
-                        android:textSize="64sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+            <TextView
+                android:id="@+id/late_status"
+                style="@style/Text.Sigebox.Pill"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
         </LinearLayout>
 
         <TextView
-            android:id="@+id/late_message"
+            style="@style/Text.Sigebox.Support"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="6dp"
+            android:text="@string/late_body" />
+
+        <include
+            android:id="@+id/late_red_card"
+            layout="@layout/view_corner_card"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp" />
+
+        <include
+            android:id="@+id/late_blue_card"
+            layout="@layout/view_corner_card"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp" />
+
+        <TextView
+            android:id="@+id/late_message"
+            style="@style/Text.Sigebox.Support"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
             android:gravity="center"
-            android:textSize="18sp"
             android:visibility="gone" />
 
-        <LinearLayout
-            android:id="@+id/late_keypad"
+        <Space
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:orientation="vertical" />
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:minHeight="16dp" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/late_send"
             android:layout_width="match_parent"
-            android:layout_height="72dp"
-            android:layout_marginTop="8dp"
-            android:text="@string/late_send"
-            android:textSize="20sp" />
+            android:layout_height="wrap_content"
+            android:text="@string/late_send" />
     </LinearLayout>
-</LinearLayout>
+</ScrollView>

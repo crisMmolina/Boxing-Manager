@@ -1,27 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Tema claro ("sol"). Tokens y contrastes en docs/DESIGN.md §2. -->
+<!-- Tokens de docs/DESIGN.md v2 §3.1. Un solo tema claro: fondo blanco, cristal y esquinas. -->
 <resources>
-    <color name="corner_red">#B71C1C</color>
+    <color name="bg">#FFFFFF</color>
+    <color name="ink">#0F172A</color>
+    <color name="ink_secondary">#5B6472</color>
+    <color name="navy">#14284B</color>
+    <color name="red_corner">#C62839</color>
+    <color name="red_numeral">#B5222F</color>
+    <color name="blue_corner">#1F4E9C</color>
+    <color name="blue_numeral">#1B438A</color>
+    <!-- El verde solo es el punto de conexión. -->
+    <color name="connected">#1E8E5A</color>
+    <color name="disconnected">#9AA3B2</color>
+    <color name="line">#1A0F172A</color>
+    <color name="track">#140F172A</color>
+    <color name="pending">#E3E7EE</color>
+    <color name="field_border">#240F172A</color>
+    <color name="stripe">#0B14284B</color>
+    <!-- Cristal en modo sencillo (relleno alto, sin desenfoque). -->
+    <color name="glass">#E0FFFFFF</color>
+    <color name="glass_strong">#F0FFFFFF</color>
+    <color name="glass_pressed">#E6FFFFFF</color>
+    <color name="specular">#F2FFFFFF</color>
+    <color name="contour">#0F0F172A</color>
+
+    <!-- Nombres de la v1 que aún usa el código: en v2 son esquinas o neutros. -->
+    <color name="corner_red">@color/red_corner</color>
     <color name="on_corner_red">#FFFFFF</color>
-    <color name="corner_red_container">#FDECEC</color>
-    <color name="corner_blue">#0D47A1</color>
+    <color name="corner_red_container">@color/glass</color>
+    <color name="corner_blue">@color/blue_corner</color>
     <color name="on_corner_blue">#FFFFFF</color>
-    <color name="corner_blue_container">#E8EEF8</color>
-
-    <color name="background">#FFFFFF</color>
-    <color name="surface">#F5F5F5</color>
-    <color name="on_background">#1A1A1A</color>
-    <color name="text_secondary">#545454</color>
-    <color name="disabled">#6B6B6B</color>
-
-    <color name="status_pending_fg">#8A4B00</color>
-    <color name="status_pending_bg">#FFF4E5</color>
-    <color name="status_sent_fg">#1B5E20</color>
-    <color name="status_sent_bg">#E8F5E9</color>
-    <color name="status_late_fg">#B33C00</color>
-    <color name="status_late_bg">#FBE9E7</color>
-    <color name="status_corrected_fg">#4A148C</color>
-    <color name="status_corrected_bg">#F3E5F5</color>
-    <color name="status_disconnected_fg">#B71C1C</color>
-    <color name="status_disconnected_bg">#FDECEC</color>
+    <color name="corner_blue_container">@color/glass</color>
+    <color name="background">@color/bg</color>
+    <color name="surface">@color/glass_strong</color>
+    <color name="on_background">@color/ink</color>
+    <color name="text_secondary">@color/ink_secondary</color>
+    <color name="disabled">@color/disconnected</color>
+    <color name="status_pending_fg">@color/ink_secondary</color>
+    <color name="status_pending_bg">@color/glass_strong</color>
+    <color name="status_sent_fg">@color/ink_secondary</color>
+    <color name="status_sent_bg">@color/glass_strong</color>
+    <color name="status_late_fg">@color/ink_secondary</color>
+    <color name="status_late_bg">@color/glass_strong</color>
+    <color name="status_corrected_fg">@color/ink_secondary</color>
+    <color name="status_corrected_bg">@color/glass_strong</color>
+    <color name="status_disconnected_fg">@color/ink</color>
+    <color name="status_disconnected_bg">@color/glass_strong</color>
 </resources>

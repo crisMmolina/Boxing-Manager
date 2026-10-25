@@ -1,51 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Esperando aprobación (DESIGN.md v2 §6.3): la huella corta en grande para compararla con la central. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center_horizontal"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="@dimen/screen_margin">
+
+    <include layout="@layout/view_top_bar_brand" />
 
     <Space
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1" />
 
-    <TextView
-        android:id="@+id/waiting_status"
+    <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:text="@string/status_waiting_approval"
-        android:textAppearance="?attr/textAppearanceHeadlineSmall" />
+        android:layout_height="wrap_content">
 
-    <TextView
-        android:id="@+id/waiting_seat"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:gravity="center"
-        android:textSize="20sp" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/waiting_body"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:gravity="center"
-        android:text="@string/waiting_body"
-        android:textColor="@color/text_secondary"
-        android:textSize="18sp" />
+            <TextView
+                android:id="@+id/waiting_status"
+                style="@style/Text.Sigebox.CardTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="@string/status_waiting_approval" />
 
-    <TextView
-        android:id="@+id/waiting_fingerprint"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:fontFamily="monospace"
-        android:gravity="center"
-        android:textColor="@color/text_secondary"
-        android:textSize="16sp" />
+            <TextView
+                android:id="@+id/waiting_seat"
+                style="@style/Text.Sigebox.Body"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center" />
+
+            <TextView
+                style="@style/Text.Sigebox.Support"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:gravity="center"
+                android:text="@string/waiting_fingerprint_label" />
+
+            <TextView
+                android:id="@+id/waiting_fingerprint"
+                style="@style/Text.Sigebox.Number"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textColor="@color/ink"
+                android:textSize="48sp" />
+
+            <TextView
+                android:id="@+id/waiting_body"
+                style="@style/Text.Sigebox.Support"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:gravity="center"
+                android:text="@string/waiting_body" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
 
     <Space
         android:layout_width="match_parent"
@@ -54,9 +74,8 @@
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/waiting_cancel"
-        style="@style/Widget.Material3.Button.OutlinedButton"
+        style="@style/Widget.Sigebox.Button.Secondary"
         android:layout_width="match_parent"
-        android:layout_height="64dp"
-        android:text="@string/waiting_cancel"
-        android:textSize="18sp" />
+        android:layout_height="wrap_content"
+        android:text="@string/waiting_cancel" />
 </LinearLayout>

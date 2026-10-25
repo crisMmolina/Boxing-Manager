@@ -1,32 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Puntuación y tarjeta final (AND-005). Dueño de los textos de estado de tarjeta (DESIGN.md §5 y §8). -->
+<!-- Puntuación, tardío y tarjeta final. Textos de docs/DESIGN.md v2 §8: minúscula con mayúscula inicial. -->
 <resources>
     <string name="status_pending">Pendiente</string>
     <string name="status_sending">Enviando…</string>
     <string name="status_sent">Enviado</string>
     <string name="status_corrected">Corregido</string>
     <string name="status_late">Tardío</string>
+    <string name="status_round_open">Round abierto</string>
+    <string name="status_round_sent">Round enviado</string>
+    <string name="status_waiting_round">Esperando round</string>
 
     <string name="score_header">Juez %1$d · %2$s</string>
+    <string name="score_judge">Juez %1$d</string>
+    <string name="score_title_waiting">Esperando round</string>
     <string name="score_round_of">Round %1$d de %2$d</string>
     <string name="score_round">Round %1$d</string>
-    <string name="score_red">ROJA</string>
-    <string name="score_blue">AZUL</string>
+    <string name="score_red">Roja</string>
+    <string name="score_blue">Azul</string>
+    <string name="corner_red">Roja</string>
+    <string name="corner_blue">Azul</string>
+    <string name="corner_red_lower">roja</string>
+    <string name="corner_blue_lower">azul</string>
     <string name="score_empty">—</string>
+    <string name="score_empty_a11y">sin valor</string>
+    <string name="score_minus_a11y">Restar un punto a la esquina %1$s, valor actual %2$s</string>
+    <string name="score_plus_a11y">Sumar un punto a la esquina %1$s, valor actual %2$s</string>
     <string name="score_backspace">Borrar</string>
     <string name="score_send">Enviar round</string>
+    <string name="score_send_n">Enviar round %1$d</string>
+    <string name="score_sent_n">Round %1$d enviado</string>
     <string name="score_correct">Corregir</string>
-    <string name="score_waiting_start">Esperando que se abra el round</string>
-    <string name="score_waiting_next">Esperando el round %1$d</string>
-    <string name="score_error_round_not_open">El round ya estaba cerrado: esa calificación no se registró</string>
-    <string name="score_error_generic">La central no aceptó la calificación (%1$s)</string>
+    <string name="score_waiting_start">Esperando que abran el primer round.</string>
+    <string name="score_waiting_open">Esperando que abran el round %1$d.</string>
+    <string name="score_waiting_next">Esperando el siguiente round.</string>
+    <string name="score_offline">Sin conexión. Tus puntos se guardan y se envían al reconectar.</string>
+    <string name="score_error_round_not_open">El round ya estaba cerrado: esa calificación no se registró.</string>
+    <string name="score_error_generic">La central no aceptó la calificación (%1$s).</string>
 
-    <string name="final_title">Tarjeta final · Juez %1$d</string>
+    <string name="confirm_title">¿Enviar este round?</string>
+    <string name="confirm_send">Enviar</string>
+    <string name="confirm_review">Revisar</string>
+    <string name="confirm_a11y">Round %1$d: roja %2$d, azul %3$d</string>
+
+    <string name="a11y_connected">conectado</string>
+    <string name="a11y_disconnected">sin conexión</string>
+
+    <string name="final_title">Pelea terminada</string>
     <string name="final_col_round">Round</string>
     <string name="final_col_status">Estado</string>
     <string name="final_body">Revisa tu tarjeta. Al enviarla ya no podrás corregir.</string>
     <string name="final_wait_acks">Espera a que la central confirme todos tus rounds.</string>
     <string name="final_send">Enviar tarjeta final</string>
-    <string name="final_sent">Tarjeta final enviada. Gracias.</string>
-    <string name="final_error">La central no aceptó la tarjeta (%1$s)</string>
+    <string name="final_sent">Tarjeta final enviada.</string>
+    <string name="final_error">La central no aceptó la tarjeta (%1$s).</string>
 </resources>

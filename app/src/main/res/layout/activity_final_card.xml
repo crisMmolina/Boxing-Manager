@@ -1,42 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Pelea terminada (DESIGN.md v2 §6.6): solo los rounds propios del juez, sin sumas, y "Enviar tarjeta final". -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="@dimen/screen_margin">
+
+    <include layout="@layout/view_top_bar_brand" />
 
     <TextView
         android:id="@+id/final_title"
+        style="@style/Text.Sigebox.ScreenTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textAppearance="?attr/textAppearanceHeadlineSmall" />
+        android:layout_marginTop="28dp" />
 
-    <ScrollView
+    <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginTop="16dp"
         android:layout_weight="1">
 
-        <TableLayout
-            android:id="@+id/final_table"
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:stretchColumns="*" />
-    </ScrollView>
+            android:layout_height="match_parent">
+
+            <TableLayout
+                android:id="@+id/final_table"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:stretchColumns="*" />
+        </ScrollView>
+    </com.google.android.material.card.MaterialCardView>
 
     <TextView
         android:id="@+id/final_body"
+        style="@style/Text.Sigebox.Support"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="@string/final_body"
-        android:textSize="18sp" />
+        android:layout_marginTop="12dp"
+        android:gravity="center"
+        android:text="@string/final_body" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/final_send"
         android:layout_width="match_parent"
-        android:layout_height="72dp"
-        android:layout_marginTop="8dp"
-        android:text="@string/final_send"
-        android:textSize="18sp" />
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:text="@string/final_send" />
 </LinearLayout>
