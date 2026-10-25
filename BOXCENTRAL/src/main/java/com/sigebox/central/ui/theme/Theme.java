@@ -17,7 +17,7 @@ public final class Theme {
     /** TTF empaquetados (licencia OFL junto a ellos). */
     public static final List<String> FONTS = List.of(
             "Inter-Regular.ttf", "Inter-Medium.ttf", "Inter-SemiBold.ttf", "Inter-Bold.ttf",
-            "BarlowCondensed-BoldItalic.ttf", "BarlowCondensed-ExtraBoldItalic.ttf");
+            "BarlowCondensed-Bold.ttf", "BarlowCondensed-ExtraBold.ttf");
 
     static final String FONT_DIR = "/com/sigebox/central/fonts/";
 

@@ -74,7 +74,6 @@
 .brand-name {
     -fx-font-family: "Barlow Condensed";
     -fx-font-weight: bold;
-    -fx-font-style: italic;
     -fx-font-size: 24px;
     -fx-text-fill: -sg-ink;
 }
@@ -114,6 +113,15 @@
     -fx-text-fill: -sg-ink;
 }
 
+/* Columna centrada (DESIGN v2 §7): títulos y tarjetas al centro. */
+.screen {
+    -fx-alignment: top-center;
+}
+
+.screen > .screen-title {
+    -fx-text-alignment: center;
+}
+
 .content {
     -fx-padding: 24px 40px 32px 40px;
     -fx-spacing: 24px;
@@ -141,7 +149,6 @@
 .screen-title {
     -fx-font-family: "Barlow Condensed";
     -fx-font-weight: 800;
-    -fx-font-style: italic;
     -fx-font-size: 32px;
     -fx-text-fill: -sg-ink;
 }
@@ -149,7 +156,6 @@
 .card-title {
     -fx-font-family: "Barlow Condensed";
     -fx-font-weight: 800;
-    -fx-font-style: italic;
     -fx-font-size: 26px;
     -fx-text-fill: -sg-ink;
 }
@@ -177,7 +183,6 @@
 .numeral {
     -fx-font-family: "Barlow Condensed";
     -fx-font-weight: 800;
-    -fx-font-style: italic;
     -fx-font-size: 26px;
 }
 
@@ -422,7 +427,6 @@
 .result-winner {
     -fx-font-family: "Barlow Condensed";
     -fx-font-weight: 800;
-    -fx-font-style: italic;
     -fx-font-size: 112px;
 }
 

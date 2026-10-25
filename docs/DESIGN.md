@@ -16,7 +16,7 @@ Guía visual y de experiencia de las dos apps: la del juez (Android, `app/`) y l
 | Chips de estado de colores (ámbar, verde, morado) | Píldoras neutras; el único color de estado es el punto de conexión |
 | Teclado 0–10 y campo vacío "—" | Botones − y + con el valor grande; cada round empieza en 10 y una hoja de confirmación muestra el resultado antes de enviar |
 | Etiquetas ROJA / AZUL en mayúsculas | "Roja" / "Azul" en una píldora del color de la esquina |
-| Roboto y Segoe UI | Inter (texto) y Barlow Condensed cursiva (números y títulos), empaquetadas |
+| Roboto y Segoe UI | Inter (texto) y Barlow Condensed recta (números y títulos), empaquetadas |
 
 Lo que **no** se toma de la propuesta, porque el producto o el protocolo no lo tienen: "Mi total" en el teléfono, "Escribiendo…", "El organizador reabrió el round", "Expulsar" y "puntos por round configurables". El puerto es **8765**, no 8080.
 
@@ -80,7 +80,7 @@ Reglas:
 
 ### 3.2 Tipografía
 
-- **Barlow Condensed**, cursiva:
+- **Barlow Condensed**, recta (sin cursiva, pedido de zoe del 2026-10-25):
   - 800 (ExtraBold) para números de puntos y títulos.
   - 700 (Bold) para la marca.
 - **Inter** 400, 500, 600 y 700 para todo lo demás.
@@ -88,13 +88,14 @@ Reglas:
   - Android: `app/src/main/res/font/`.
   - Central: `BOXCENTRAL/src/main/resources/com/sigebox/central/fonts/`, cargadas con `Font.loadFont` al arrancar.
 - Minúsculas con mayúscula inicial; nada de mayúsculas sostenidas.
+- Ningún texto en cursiva ni inclinado.
 - Cifras tabulares (`tnum`) donde la fuente las tenga, para que los números no bailen.
 
 | Rol | Fuente | Teléfono (sp) | Central (px) |
 |---|---|---|---|
-| Número de puntos | Barlow Condensed 800 cursiva | 120 (148 en pantallas ≥ 400 dp de ancho) | 26 en tabla, 112 en resultado |
-| Título de pantalla | Barlow Condensed 800 cursiva | 40 | 32 |
-| Título de tarjeta | Barlow Condensed 800 cursiva | 26 | 26 |
+| Número de puntos | Barlow Condensed 800 | 120 (148 en pantallas ≥ 400 dp de ancho) | 26 en tabla, 112 en resultado |
+| Título de pantalla | Barlow Condensed 800 | 40 | 32 |
+| Título de tarjeta | Barlow Condensed 800 | 26 | 26 |
 | Cuerpo | Inter 400–500 | 15 | 15 |
 | Apoyo | Inter 400 | 13 | 13 |
 | Botón | Inter 700 | 17 | 16 |
@@ -286,6 +287,7 @@ La misma tarjeta doble, con la píldora "Round 3 cerrado" y el título "Califica
 - **Barra superior de 44 px:** marca a la izquierda y los pasos **Pelea · Jueces · En vivo · Resultado** al centro. El paso actual va en `navy` con texto blanco; los demás en cristal fuerte.
 - **Navegación:** con teclado, foco visible y un orden de tabulación lógico.
 - **Términos:** en el primer uso, la pantalla de términos va antes que todo (`TermsGate`).
+- **Columna centrada:** el contenido de cada pantalla va en una columna de hasta 1100 px centrada en la ventana, con títulos y tarjetas centrados y desplazamiento vertical si no cabe.
 
 ### 7.1 Pelea y jueces (DSK-005)
 
@@ -326,7 +328,7 @@ La misma tarjeta doble, con la píldora "Round 3 cerrado" y el título "Califica
 ```
 
 - **Tabla de tarjetas:**
-  - Celdas `rojo – azul`, con el rojo en `red_numeral` y el azul en `blue_numeral`, en Barlow Condensed cursiva de 26 px.
+  - Celdas `rojo – azul`, con el rojo en `red_numeral` y el azul en `blue_numeral`, en Barlow Condensed de 26 px.
   - Encabezado por juez con su punto de conexión.
 - **Round abierto:**
   - Fila con fondo `rgba(20,40,75,0.05)`.
@@ -356,7 +358,7 @@ La misma tarjeta doble, con la píldora "Round 3 cerrado" y el título "Califica
 - **Pantalla completa, solo en la laptop del operador.**
 - **Tarjeta principal:**
   - "Resultado final".
-  - El ganador en Barlow Condensed cursiva de 112 px, en el color numeral de su esquina.
+  - El ganador en Barlow Condensed de 112 px, en el color numeral de su esquina.
   - La frase de `ResultService.headline` ("Gana Roja por decisión dividida 2–1").
 - **Una tarjeta por juez:** su total en grande ("39 – 37") y una píldora neutra "Roja", "Azul" o "Empate".
 - **Acciones:** "Exportar PDF" (principal), "Exportar CSV" y "Cerrar" (secundarios).

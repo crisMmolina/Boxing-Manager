@@ -19,6 +19,10 @@ allprojects {
     repositories {
         mavenCentral()
     }
+    // `test --tests X` corre en todos los subproyectos: sin esto judge-sim falla con "No tests found".
+    tasks.withType<Test>().configureEach {
+        filter.isFailOnNoMatchingTests = false
+    }
 }
 
 java {
