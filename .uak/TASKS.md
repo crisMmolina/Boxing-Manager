@@ -423,6 +423,23 @@ En Windows (zoe) los comandos `Verify` se corren en Git Bash.
 - **Verify:** `./gradlew :app:testDebugUnitTest`
 - **Next step:** prueba de que `ScoreActivity` aplica los insets del sistema a su raíz
 
+## DSK-013 · Ajustes visuales de zoe: contenido centrado y sin cursivas
+
+- **Type:** feature
+- **Priority:** P0
+- **Estimate:** 2 h
+- **Rubric / Spec:** pedido de zoe 2026-10-25 sobre las capturas de DSK-011 · `docs/DESIGN.md` v2
+- **Depends on:** DSK-011
+- **Paths:** BOXCENTRAL/src/main/resources/com/sigebox/central/, BOXCENTRAL/src/main/java/com/sigebox/central/App.java, BOXCENTRAL/src/main/java/com/sigebox/central/ui/theme/, BOXCENTRAL/src/test/java/com/sigebox/central/ui/theme/, docs/DESIGN.md
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - El contenido de cada pantalla va en una columna centrada (ancho máximo 1100 px), con títulos y tarjetas centrados
+  - Ningún texto en cursiva: Barlow Condensed recta (ExtraBold y Bold, OFL) para números y títulos; se quitan los TTF cursivos
+  - `docs/DESIGN.md` v2 dice "recta" en lugar de "cursiva" y describe la columna centrada (también rige para AND-007)
+  - Evidencia: capturas 1280×800 de la ventana real
+- **Verify:** `BOXCENTRAL/gradlew -p BOXCENTRAL build`
+- **Next step:** prueba de que `app.css` no tiene `-fx-font-style: italic`
+
 ## QA-001 · Integración: corte de 60 s, cierre forzado y latencia ≤ 1 s
 
 - **Type:** integration
