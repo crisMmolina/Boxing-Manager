@@ -44,7 +44,7 @@ Mode: marathon
 Backlog-Proposed-Epoch: 1792906554
 Backlog-Approved: yes
 Autonomy: yes
-Auto-Merge: no
+Auto-Merge: yes
 Review-Mode: claims
 Plan-Channel: main
 Freeze-Epoch: 0
