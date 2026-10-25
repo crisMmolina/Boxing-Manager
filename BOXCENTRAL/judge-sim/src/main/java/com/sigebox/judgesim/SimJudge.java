@@ -85,7 +85,7 @@ public final class SimJudge {
         this.name = name;
         this.deviceId = "judge-sim-" + seat;
         this.keys = newKeys();
-        this.plans = plans;
+        this.plans = new TreeMap<>(plans); // catch-up en orden aunque llegue un Map.of
         this.stats = stats;
         this.clock = clock;
         this.log = log;
