@@ -20,3 +20,4 @@ Why: a reversible option after 15 min keeps work moving.
 - 1792921620 | DSK-007 | reglas de ResultCalculator; TERMINAR como segunda confirmacion | Why: CORE-003 contrato
 - 1792922115 | DSK-008 | guion normal en PDF (WinAnsi sin raya); headline local | Why: texto extraido perdia la raya
 - 1792922340 | DSK-009 | aceptacion como evento global por version | Why: sin tocar db/ (DSK-003)
+- 1792929059 | deadline lease/AND-002/1792925738 | REQUIRES_RECOVERY | Claim kept; read the summary and use release --expired --read-summary. No work is deleted.
