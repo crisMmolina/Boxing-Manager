@@ -442,6 +442,21 @@ En Windows (zoe) los comandos `Verify` se corren en Git Bash.
 - **Verify:** `BOXCENTRAL/gradlew -p BOXCENTRAL build`
 - **Next step:** prueba de que `app.css` no tiene `-fx-font-style: italic`
 
+## DSK-014 · judge-sim: orden estable de rounds (prueba inestable)
+
+- **Type:** fix
+- **Priority:** P1
+- **Estimate:** 30 min
+- **Rubric / Spec:** seguimiento de DSK-010
+- **Depends on:** DSK-010
+- **Paths:** BOXCENTRAL/judge-sim/src/main/java/com/sigebox/judgesim/SimJudge.java
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - `SimJudge` guarda los planes en un `TreeMap`: el catch-up tras reconectar envía los rounds en orden aunque reciba un `Map.of`
+  - `SimJudgeTest.afterReconnectStateCatchesUpMissedRounds` pasa 10 veces seguidas con `--rerun-tasks`
+- **Verify:** `BOXCENTRAL/gradlew -p BOXCENTRAL :judge-sim:test`
+- **Next step:** `this.plans = new TreeMap<>(plans)` en el constructor
+
 ## QA-001 · Integración: corte de 60 s, cierre forzado y latencia ≤ 1 s
 
 - **Type:** integration
