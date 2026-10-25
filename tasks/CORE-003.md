@@ -9,14 +9,14 @@ Priority: P0
 Paths: core/src/main/java/com/sigebox/core/validation/, core/src/main/java/com/sigebox/core/scoring/, core/src/test/java/com/sigebox/core/validation/, core/src/test/java/com/sigebox/core/scoring/
 Depends: CORE-002
 Verify: `core/gradlew -p core test jacocoTestCoverageVerification`
-Lease-Until: 1792997320
-Updated: 1792910920
+Lease-Until: 1792997401
+Updated: 1792911001
 Task-Base: 0cd31291d92d5f77951972d0d2dd2c1e0115834c
-Next: Wait for review of SHA 9123dfd, then uak merge CORE-003
+Next: Another agent reviews https://github.com/crisMmolina/Boxing-Manager/pull/8; run .uak/bin/smoke
 PR: https://github.com/crisMmolina/Boxing-Manager/pull/8
-Evidence: core/gradlew -p core test jacocoTestCoverageVerification exit 0; build --rerun-tasks exit 0; 204 tests; validation+scoring 100% lines; reference fight Roja dividida 2-1; 12x5 hand sums
-Events: 4
+Evidence: core/gradlew -p core test jacocoTestCoverageVerification exit 0; build exit 0
+Events: 5
 Checkpoints: 1
 Sessions: 1
 Last-Checkpoint: 1792910920
-Task-Tip: 9123dfdbf650a4298093065b8e207dd9bc89a7f3
+Task-Tip: f5e618c6ed0a80fcbdade739166250ba3d572831
