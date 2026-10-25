@@ -6,3 +6,4 @@ Why: a reversible option after 15 min keeps work moving.
 - 1792908043 | deadline decision/CORE-001-1792907035/1792907935 | BLOCKED_OTHER_TASK | Option: añadir core/build/ (y BOXCENTRAL/build/) a .gitignore y core/.gitattributes con 'gradlew text eol=lf'; Why: la regla /build de la raíz no cubre core/build; CRLF rompe gradlew en Windows (CI lo mitiga con autocrlf input). Ambos archivos están fuera de los Paths de CORE-001; no money, accounts, publishing or scope expansion.
 - 1792908412 | DSK-002 | No se registra respaldo Java-WebSocket: Javalin funcionó. No se instaló WiX ni se creó la regla netsh (admin/seguridad) | Why: Evitar cambios de sistema sin autorización
 - 1792909957 | DSK-001 | App no extiende Application (Window anidada) para jpackage con classpath | Why: Lanzador Java exige main no-Application con JavaFX en classpath
+- 1792910132 | DSK-001 | App.Window anidada; .msi por defecto, app-image sin WiX | Why: jpackage con JavaFX en classpath
