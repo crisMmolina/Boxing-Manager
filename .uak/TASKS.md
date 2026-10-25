@@ -55,6 +55,21 @@ En Windows (zoe) los comandos `Verify` se corren en Git Bash.
 - **Verify:** `core/gradlew -p core test jacocoTestCoverageVerification`
 - **Next step:** `ResultCalculatorTest.peleaDeReferencia()` leyendo `demo_data/pelea_referencia.json`
 
+## CORE-004 · Entradas de las pruebas de core y plan con CHALLENGE
+
+- **Type:** fix
+- **Priority:** P1
+- **Estimate:** 30 min
+- **Rubric / Spec:** follow-up de CORE-001 y CORE-002 (revisión de seguridad) · `docs/specs/001-sigebox/plan.md`
+- **Depends on:** CORE-001, CORE-002
+- **Paths:** core/build.gradle.kts, docs/specs/001-sigebox/plan.md
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - `tasks.test` declara `core/schemas/` y `demo_data/` como entradas (ruta relativa): cambiar o romper un fixture o un Schema vuelve a correr las pruebas en lugar de quedar UP-TO-DATE o salir de la caché
+  - `plan.md` §Contracts lista los 16 mensajes (con `CHALLENGE`) y la fila Spoofing del STRIDE describe la llave EC P-256 del teléfono, el nonce por conexión y `DeviceProof`
+- **Verify:** `core/gradlew -p core build`
+- **Next step:** romper `demo_data/mensajes/PING.json` y comprobar que `core/gradlew -p core test` ya no queda UP-TO-DATE
+
 ## AND-001 · Setup de la app del juez (Android)
 
 - **Type:** setup
