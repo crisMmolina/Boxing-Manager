@@ -66,6 +66,8 @@ class ScoreValidatorTest {
         assertEquals(Optional.of(Ack.Error.WRONG_SESSION), ScoreValidator.validar(PELEA, tarjeta("f-1", 1, 0, 10, 9)));
         assertEquals(Optional.of(Ack.Error.INVALID_SCORE), ScoreValidator.validar(PELEA, tarjeta("f-1", 1, 1, 10, 11)));
         assertFalse(ScoreValidator.validar(PELEA, tarjeta("f-1", 1, 1, -1, 9)).isEmpty());
+        assertEquals(Optional.of(Ack.Error.INVALID_SCORE), ScoreValidator.validar(PELEA,
+                new TarjetaRound("f-1", 1, 1, 10, 9, null, OrigenTarjeta.JUEZ, 0L)));
     }
 
     @Test

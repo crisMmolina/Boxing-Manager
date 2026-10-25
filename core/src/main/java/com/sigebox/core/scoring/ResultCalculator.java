@@ -30,8 +30,13 @@ import java.util.TreeSet;
  *   <li>Resultado = esquina con más jueces a favor; igual = empate. Tipo: unánime (todos con el ganador, o todos
  *       empate), mayoritaria (los demás dieron empate) o dividida (alguien votó por la otra esquina).
  *   <li>Sin terminación cuentan todos los rounds, que deben estar cerrados. Con terminación cuentan solo los rounds
- *       cerrados: en decisión técnica el resultado sale de esas tarjetas; con otro motivo lo da el motivo.
+ *       cerrados anteriores a {@code terminacion.round()}: en decisión técnica el resultado sale de esas tarjetas;
+ *       con otro motivo lo da el motivo.
  * </ul>
+ *
+ * <p>{@code Terminacion.round} es el round en que se detuvo la pelea; ese round no cuenta aunque esté cerrado. Un
+ * abandono en la esquina entre rounds se registra en el round que iba a empezar, con tiempo {@code 0:00}, así el
+ * round recién terminado sí cuenta.
  */
 public final class ResultCalculator {
 
@@ -77,7 +82,7 @@ public final class ResultCalculator {
                     case CAPTURADA:
                         capturadas++;
                         break;
-                    default:
+                    case CORREGIDA:
                         corregidas++;
                         break;
                 }
@@ -119,6 +124,9 @@ public final class ResultCalculator {
         if (!pelea.id().equals(terminacion.peleaId()) || terminacion.motivo() == null) {
             throw new IllegalArgumentException("terminación de otra pelea o sin motivo");
         }
+        if (terminacion.round() < 1 || terminacion.round() > pelea.rounds()) {
+            throw new IllegalArgumentException("round de la terminación fuera de rango");
+        }
         if (terminacion.motivo() == MotivoTerminacion.OTRO
                 && (terminacion.textoOtro() == null || terminacion.textoOtro().trim().isEmpty())) {
             throw new IllegalArgumentException("el motivo Otro exige una razón escrita");
@@ -139,9 +147,10 @@ public final class ResultCalculator {
     }
 
     private static TreeSet<Integer> roundsContados(Pelea pelea, List<Round> rounds, Terminacion terminacion) {
+        int ultimo = terminacion == null ? pelea.rounds() : terminacion.round() - 1;
         TreeSet<Integer> cerrados = new TreeSet<>();
         for (Round r : rounds) {
-            if (r.estado() == EstadoRound.CERRADO && r.numero() >= 1 && r.numero() <= pelea.rounds()) {
+            if (r.estado() == EstadoRound.CERRADO && r.numero() >= 1 && r.numero() <= ultimo) {
                 cerrados.add(r.numero());
             }
         }

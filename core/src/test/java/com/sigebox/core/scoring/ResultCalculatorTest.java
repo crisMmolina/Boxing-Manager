@@ -329,4 +329,40 @@ class ResultCalculatorTest {
         assertThrows(IllegalArgumentException.class,
                 () -> ResultCalculator.calcular(pelea(4, 1), lugares(1), rounds(4, 0), List.of(), ajena));
     }
+
+    @Test
+    void elRoundDeLaTerminacionNoCuentaAunqueEsteCerrado() {
+        // KO en el round 3: la central cerró ese round y nadie lo calificó.
+        List<TarjetaRound> ts = tarjetas(new int[][][] {{p(10, 9)}, {p(10, 9)}});
+        Resultado r = ResultCalculator.calcular(pelea(6, 1), lugares(1), rounds(6, 3), ts, fin(MotivoTerminacion.KO, Esquina.AZUL));
+        assertEquals(Ganador.AZUL, r.ganador());
+        assertEquals(20, r.totales().get(0).rojo());
+    }
+
+    @Test
+    void abandonoEntreRoundsSeRegistraEnElRoundQueIbaAEmpezar() {
+        // Abandono en la esquina al terminar el round 2: round = 3, tiempo 0:00; los rounds 1 y 2 cuentan.
+        Terminacion abandono = new Terminacion(F, MotivoTerminacion.ABANDONO, null, Esquina.ROJA, 3, "0:00", null);
+        List<TarjetaRound> ts = tarjetas(new int[][][] {{p(10, 9)}, {p(10, 8)}});
+        Resultado r = ResultCalculator.calcular(pelea(6, 1), lugares(1), rounds(6, 2), ts, abandono);
+        assertEquals(20, r.totales().get(0).rojo());
+        assertEquals(17, r.totales().get(0).azul());
+    }
+
+    @Test
+    void roundDeTerminacionFueraDeRangoEsUnError() {
+        Terminacion r0 = new Terminacion(F, MotivoTerminacion.KO, null, Esquina.ROJA, 0, "0:30", null);
+        Terminacion r7 = new Terminacion(F, MotivoTerminacion.KO, null, Esquina.ROJA, 7, "0:30", null);
+        assertThrows(IllegalArgumentException.class,
+                () -> ResultCalculator.calcular(pelea(6, 1), lugares(1), rounds(6, 0), List.of(), r0));
+        assertThrows(IllegalArgumentException.class,
+                () -> ResultCalculator.calcular(pelea(6, 1), lugares(1), rounds(6, 0), List.of(), r7));
+    }
+
+    @Test
+    void tarjetaSinEstadoEsUnError() {
+        List<TarjetaRound> ts = List.of(new TarjetaRound(F, 1, 1, 10, 9, null, OrigenTarjeta.JUEZ, 0));
+        assertThrows(IllegalArgumentException.class,
+                () -> ResultCalculator.calcular(pelea(1, 1), lugares(1), rounds(1, 1), ts, null));
+    }
 }

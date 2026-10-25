@@ -65,11 +65,14 @@ public final class ScoreValidator {
         return validarValores(msg.red(), msg.blue());
     }
 
-    /** Una tarjeta (del juez o capturada por el organizador) de {@code pelea}. */
+    /** Una tarjeta (del juez o capturada por el organizador) de {@code pelea}; sin estado es inválida. */
     public static Optional<Ack.Error> validar(Pelea pelea, TarjetaRound tarjeta) {
         if (!pelea.id().equals(tarjeta.peleaId()) || tarjeta.juez() < 1 || tarjeta.juez() > pelea.jueces()
                 || tarjeta.round() < 1 || tarjeta.round() > pelea.rounds()) {
             return Optional.of(Ack.Error.WRONG_SESSION);
+        }
+        if (tarjeta.estado() == null) {
+            return Optional.of(Ack.Error.INVALID_SCORE);
         }
         return validarValores(tarjeta.rojo(), tarjeta.azul());
     }
