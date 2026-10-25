@@ -1,0 +1,8 @@
+{
+  "v": 1,
+  "id": "0000000a-0000-4000-8000-00000000000a",
+  "type": "ACK",
+  "ackId": "7d444840-9dc0-41a6-9b4e-6e1d7f9a0c3b",
+  "ok": false,
+  "error": "ROUND_NOT_OPEN"
+}

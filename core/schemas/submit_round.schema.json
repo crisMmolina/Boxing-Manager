@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sigebox.local/schemas/submit_round.schema.json",
+  "title": "SUBMIT_ROUND",
+  "description": "Calificación de un round. Reenviar con el round abierto es una corrección; la central decide si es tardía. (juez → central)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "v",
+    "id",
+    "type",
+    "fightId",
+    "seat",
+    "round",
+    "red",
+    "blue"
+  ],
+  "properties": {
+    "v": {
+      "const": 1
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+    },
+    "type": {
+      "const": "SUBMIT_ROUND"
+    },
+    "fightId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[^\\u0000-\\u001F\\u007F-\\u009F\\u00AD\\u200B-\\u200F\\u202A-\\u202E\\u2060-\\u2064\\u2066-\\u206F\\uFEFF]+$"
+    },
+    "seat": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 5
+    },
+    "round": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 12
+    },
+    "red": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 10
+    },
+    "blue": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 10
+    }
+  }
+}

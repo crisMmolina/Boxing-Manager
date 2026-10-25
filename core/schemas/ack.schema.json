@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sigebox.local/schemas/ack.schema.json",
+  "title": "ACK",
+  "description": "Confirma un mensaje después de persistirlo. status cuando ok; error solo cuando ok es falso. (central → juez)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "v",
+    "id",
+    "type",
+    "ackId",
+    "ok"
+  ],
+  "properties": {
+    "v": {
+      "const": 1
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+    },
+    "type": {
+      "const": "ACK"
+    },
+    "ackId": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+    },
+    "ok": {
+      "type": "boolean"
+    },
+    "status": {
+      "enum": [
+        "ENVIADA",
+        "TARDIA",
+        "CAPTURADA",
+        "CORREGIDA"
+      ]
+    },
+    "error": {
+      "enum": [
+        "MALFORMED",
+        "NOT_APPROVED",
+        "BAD_SIGNATURE",
+        "WRONG_SESSION",
+        "INVALID_SCORE",
+        "ROUND_NOT_OPEN",
+        "FIGHT_NOT_ACTIVE",
+        "ALREADY_FINAL"
+      ]
+    }
+  }
+}
