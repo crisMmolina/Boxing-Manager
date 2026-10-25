@@ -1,130 +1,205 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Unirse (DESIGN.md v2 §6.2): escanear el QR del lugar o escribir el código; nombre del juez y "Unirme". -->
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/join_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:clipToPadding="false"
     android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="@dimen/screen_margin">
+
+        <include layout="@layout/view_top_bar" />
 
         <TextView
+            style="@style/Text.Sigebox.ScreenTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/join_title"
-            android:textAppearance="?attr/textAppearanceHeadlineSmall" />
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:hint="@string/join_name_hint">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/join_name"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textPersonName|textCapWords"
-                android:maxLength="80"
-                android:textSize="18sp" />
-        </com.google.android.material.textfield.TextInputLayout>
+            android:layout_marginTop="28dp"
+            android:text="@string/join_title" />
 
         <TextView
-            android:id="@+id/join_seat"
+            style="@style/Text.Sigebox.Support"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:textSize="18sp" />
+            android:layout_marginTop="6dp"
+            android:text="@string/join_subtitle" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/join_scan"
-            style="@style/Widget.Material3.Button.TonalButton"
-            android:layout_width="match_parent"
-            android:layout_height="64dp"
-            android:layout_marginTop="16dp"
-            android:text="@string/join_scan"
-            android:textSize="18sp" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/join_manual"
-            style="@style/Widget.Material3.Button.TextButton"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:text="@string/join_manual"
-            android:textSize="16sp" />
-
-        <LinearLayout
-            android:id="@+id/join_manual_group"
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:visibility="gone">
+            android:layout_marginTop="20dp">
 
-            <EditText
-                android:id="@+id/join_host"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:minHeight="48dp"
-                android:hint="@string/join_manual_host_hint"
-                android:importantForAutofill="no"
-                android:inputType="text"
-                android:textSize="18sp" />
+                android:orientation="vertical">
 
-            <EditText
-                android:id="@+id/join_fight"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:minHeight="48dp"
-                android:hint="@string/join_manual_fight_hint"
-                android:importantForAutofill="no"
-                android:inputType="textCapCharacters"
-                android:textSize="18sp" />
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/join_name_hint">
 
-            <EditText
-                android:id="@+id/join_seat_input"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:minHeight="48dp"
-                android:hint="@string/join_manual_seat_hint"
-                android:importantForAutofill="no"
-                android:inputType="number"
-                android:maxLength="1"
-                android:textSize="18sp" />
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/join_name"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:importantForAutofill="no"
+                        android:inputType="textPersonName|textCapWords"
+                        android:maxLength="80"
+                        android:minHeight="56dp"
+                        android:textSize="17sp" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-            <EditText
-                android:id="@+id/join_code"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:minHeight="48dp"
-                android:hint="@string/join_manual_code_hint"
-                android:importantForAutofill="no"
-                android:inputType="number"
-                android:maxLength="7"
-                android:textSize="24sp" />
-        </LinearLayout>
+                <TextView
+                    android:id="@+id/join_seat"
+                    style="@style/Text.Sigebox.Body"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="@string/join_no_seat" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/join_scan"
+                    style="@style/Widget.Sigebox.Button.Secondary"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/join_scan" />
+
+                <TextView
+                    style="@style/Text.Sigebox.Support"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:gravity="center"
+                    android:text="@string/join_or_code" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/join_manual"
+                    style="@style/Widget.Material3.Button.TextButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="48dp"
+                    android:text="@string/join_manual"
+                    android:textAllCaps="false"
+                    android:textColor="@color/navy" />
+
+                <LinearLayout
+                    android:id="@+id/join_manual_group"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:hint="@string/join_manual_host_hint">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/join_host"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:importantForAutofill="no"
+                            android:inputType="text"
+                            android:minHeight="48dp" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:orientation="horizontal">
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="2"
+                            android:hint="@string/join_manual_fight_hint">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/join_fight"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:importantForAutofill="no"
+                                android:inputType="textCapCharacters"
+                                android:minHeight="48dp" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:layout_weight="1"
+                            android:hint="@string/join_manual_seat_hint">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/join_seat_input"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:importantForAutofill="no"
+                                android:inputType="number"
+                                android:maxLength="1"
+                                android:minHeight="48dp" />
+                        </com.google.android.material.textfield.TextInputLayout>
+                    </LinearLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:hint="@string/join_manual_code_hint">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/join_code"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:importantForAutofill="no"
+                            android:inputType="number"
+                            android:maxLength="7"
+                            android:minHeight="56dp"
+                            android:textSize="24sp" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
         <TextView
             android:id="@+id/join_error"
+            style="@style/Text.Sigebox.Body"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:textColor="@color/status_disconnected_fg"
-            android:textSize="16sp"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/pill"
+            android:padding="12dp"
             android:visibility="gone" />
+
+        <TextView
+            style="@style/Text.Sigebox.Support"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:gravity="center"
+            android:text="@string/join_wifi_note" />
 
         <Space
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            android:minHeight="16dp" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/join_submit"
             android:layout_width="match_parent"
-            android:layout_height="72dp"
+            android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="@string/join_submit"
-            android:textSize="18sp" />
+            android:text="@string/join_submit" />
     </LinearLayout>
 </ScrollView>

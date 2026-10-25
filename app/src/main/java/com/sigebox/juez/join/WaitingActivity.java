@@ -26,6 +26,7 @@ public class WaitingActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_waiting);
+        com.sigebox.juez.ui.Screen.setup(this);
         TextView seat = findViewById(R.id.waiting_seat);
         seat.setText(getString(R.string.waiting_seat,
                 getIntent().getIntExtra(EXTRA_SEAT, 0), getIntent().getStringExtra(EXTRA_NAME)));

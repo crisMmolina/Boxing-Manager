@@ -51,6 +51,7 @@ public class FinalCardActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_final_card);
+        com.sigebox.juez.ui.Screen.setup(this);
         getWindow().addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         JudgeRuntime runtime = JudgeRuntime.get(this);
         connection = runtime.connection();
@@ -92,7 +93,7 @@ public class FinalCardActivity extends AppCompatActivity {
     }
 
     private void render() {
-        ((TextView) findViewById(R.id.final_title)).setText(getString(R.string.final_title, session.seat));
+        ((TextView) findViewById(R.id.final_title)).setText(getString(R.string.final_title));
         TableLayout table = findViewById(R.id.final_table);
         table.removeAllViews();
         table.addView(row(getString(R.string.final_col_round), getString(R.string.score_red),

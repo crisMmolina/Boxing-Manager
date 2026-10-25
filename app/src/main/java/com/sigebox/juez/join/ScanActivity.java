@@ -55,6 +55,7 @@ public class ScanActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scan);
+        com.sigebox.juez.ui.Screen.setup(this);
         scanner = BarcodeScanning.getClient(
                 new BarcodeScannerOptions.Builder().setBarcodeFormats(Barcode.FORMAT_QR_CODE).build());
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)

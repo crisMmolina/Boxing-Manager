@@ -11,5 +11,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        com.sigebox.juez.ui.Screen.setup(this);
+        // Unirse decide: si faltan los términos, los abre primero.
+        startActivity(new android.content.Intent(this, com.sigebox.juez.join.JoinActivity.class));
+        finish();
     }
 }

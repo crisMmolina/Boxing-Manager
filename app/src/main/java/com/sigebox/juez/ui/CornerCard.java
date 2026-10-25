@@ -46,7 +46,7 @@ public final class CornerCard {
     /** Muestra {@code v} ("—" si es null) y habilita − y + según los límites 0–10. */
     public void bind(Integer v, boolean enabled) {
         value.setText(v == null ? root.getContext().getString(R.string.score_empty) : String.valueOf(v));
-        meter.setProgressCompat(v == null ? 0 : v, true);
+        meter.setProgressCompat(v == null ? 0 : v, meter.isLaidOut()); // el primer valor, sin animar
         minus.setEnabled(enabled && v != null && v > 0);
         plus.setEnabled(enabled && (v == null || v < 10));
         minus.setAlpha(minus.isEnabled() ? 1f : 0.35f);

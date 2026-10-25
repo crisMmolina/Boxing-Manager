@@ -49,6 +49,8 @@ public class JoinActivity extends AppCompatActivity {
             return;
         }
         setContentView(R.layout.activity_join);
+        com.sigebox.juez.ui.Screen.setup(this);
+        com.sigebox.juez.ui.TopBar.bind(findViewById(R.id.join_root), false, getString(R.string.status_disconnected));
         name = findViewById(R.id.join_name);
         host = findViewById(R.id.join_host);
         fight = findViewById(R.id.join_fight);

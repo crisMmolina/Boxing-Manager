@@ -11,5 +11,5 @@
     <dimen name="dot">8dp</dimen>
     <dimen name="meter">8dp</dimen>
     <dimen name="segment">6dp</dimen>
-    <dimen name="score_number">112sp</dimen>
+    <dimen name="score_number">96sp</dimen>
 </resources>

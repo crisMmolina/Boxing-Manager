@@ -30,6 +30,10 @@ import com.sigebox.juez.net.JudgeRuntime;
 import com.sigebox.juez.score.ScoreActivity;
 import com.sigebox.juez.score.ScoreUi;
 import com.sigebox.juez.score.ScoreViewModel;
+import com.sigebox.juez.ui.ConfirmSheet;
+import com.sigebox.juez.ui.CornerCard;
+import com.sigebox.juez.ui.Screen;
+import com.sigebox.juez.ui.TopBar;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -40,7 +44,6 @@ import java.util.concurrent.Executors;
  * tardío.
  */
 public class LateScoreActivity extends AppCompatActivity {
-    private static final int[][] KEYS = {{0, 1, 2, 3}, {4, 5, 6, -1}, {7, 8, 9, 10}};
     private static final long VIBRATION_MS = 1_200;
 
     private final ExecutorService io = Executors.newSingleThreadExecutor();
@@ -49,6 +52,9 @@ public class LateScoreActivity extends AppCompatActivity {
     private JudgeConnection connection;
     private SigeboxDatabase database;
     private int round;
+    private CornerCard red;
+    private CornerCard blue;
+    private boolean defaulted;
 
     private final JudgeListener listener = new JudgeListener() {
         @Override
@@ -68,6 +74,7 @@ public class LateScoreActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_late_score);
+        Screen.setup(this);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         getOnBackPressedDispatcher().addCallback(this, blockBack);
         round = getIntent().getIntExtra(ScoreActivity.EXTRA_ROUND, 0);
@@ -90,10 +97,9 @@ public class LateScoreActivity extends AppCompatActivity {
         }).get(ScoreViewModel.class);
 
         ((TextView) findViewById(R.id.late_title)).setText(getString(R.string.late_title, round));
-        buildKeypad();
-        findViewById(R.id.late_red_panel).setOnClickListener(v -> vm.selectCorner(ScoreUi.Corner.RED));
-        findViewById(R.id.late_blue_panel).setOnClickListener(v -> vm.selectCorner(ScoreUi.Corner.BLUE));
-        findViewById(R.id.late_send).setOnClickListener(v -> vm.submit());
+        red = new CornerCard(findViewById(R.id.late_red_card), true, d -> vm.adjust(ScoreUi.Corner.RED, d));
+        blue = new CornerCard(findViewById(R.id.late_blue_card), false, d -> vm.adjust(ScoreUi.Corner.BLUE, d));
+        findViewById(R.id.late_send).setOnClickListener(v -> confirm());
         vm.ui().observe(this, this::render);
         if (savedInstanceState == null && gate.shouldVibrate()) {
             vibrate();
@@ -130,22 +136,22 @@ public class LateScoreActivity extends AppCompatActivity {
     }
 
     private void render(ScoreUi ui) {
-        Integer red = ui.card != null ? ui.card.red : ui.red;
-        Integer blue = ui.card != null ? ui.card.blue : ui.blue;
-        ((TextView) findViewById(R.id.late_red_value)).setText(red == null ? getString(R.string.score_empty) : String.valueOf(red));
-        ((TextView) findViewById(R.id.late_blue_value)).setText(blue == null ? getString(R.string.score_empty) : String.valueOf(blue));
+        boolean online = ui.connection == com.sigebox.juez.net.ConnectionState.Status.CONNECTED;
+        TopBar.bind(findViewById(R.id.late_root), online,
+                ui.seat > 0 ? getString(R.string.score_judge, ui.seat) : getString(R.string.status_disconnected));
         boolean input = ui.inputEnabled();
-        MaterialCardView redPanel = findViewById(R.id.late_red_panel);
-        MaterialCardView bluePanel = findViewById(R.id.late_blue_panel);
-        redPanel.setStrokeWidth(input && ui.selected == ScoreUi.Corner.RED ? dp(4) : 0);
-        bluePanel.setStrokeWidth(input && ui.selected == ScoreUi.Corner.BLUE ? dp(4) : 0);
-        LinearLayout keypad = findViewById(R.id.late_keypad);
-        for (int i = 0; i < keypad.getChildCount(); i++) {
-            LinearLayout line = (LinearLayout) keypad.getChildAt(i);
-            for (int j = 0; j < line.getChildCount(); j++) {
-                line.getChildAt(j).setEnabled(input);
+        if (input && !defaulted) {
+            defaulted = true;
+            if (vm.applyDefault()) {
+                return; // empieza en 10–10; el ViewModel vuelve a publicar
             }
         }
+        Integer r = ui.card != null ? ui.card.red : ui.red;
+        Integer b = ui.card != null ? ui.card.blue : ui.blue;
+        red.bind(r, input);
+        blue.bind(b, input);
+        ((TextView) findViewById(R.id.late_status)).setText(ui.card == null ? R.string.late_status
+                : ui.card.status == ScoreUi.CardStatus.SENDING ? R.string.status_sending : R.string.status_late);
         findViewById(R.id.late_send).setEnabled(ui.sendEnabled);
 
         TextView message = findViewById(R.id.late_message);
@@ -165,34 +171,16 @@ public class LateScoreActivity extends AppCompatActivity {
         }
     }
 
-    private void buildKeypad() {
-        LinearLayout keypad = findViewById(R.id.late_keypad);
-        for (int[] row : KEYS) {
-            LinearLayout line = new LinearLayout(this);
-            line.setOrientation(LinearLayout.HORIZONTAL);
-            for (int value : row) {
-                MaterialButton key = new MaterialButton(this, null,
-                        com.google.android.material.R.attr.materialButtonOutlinedStyle);
-                key.setText(value < 0 ? "⌫" : String.valueOf(value));
-                key.setTextSize(32);
-                key.setMinWidth(dp(64));
-                if (value < 0) {
-                    key.setContentDescription(getString(R.string.score_backspace));
-                }
-                key.setOnClickListener(v -> {
-                    v.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
-                    if (value < 0) {
-                        vm.backspace();
-                    } else {
-                        vm.key(value);
-                    }
-                });
-                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(0, dp(72), 1f);
-                params.setMargins(dp(4), dp(4), dp(4), dp(4));
-                line.addView(key, params);
-            }
-            keypad.addView(line);
+    /** Enviar pasa por la hoja de confirmación (DESIGN.md v2 §5.6). */
+    private void confirm() {
+        ScoreUi ui = vm.ui().getValue();
+        if (ui == null || !ui.sendEnabled || ui.red == null || ui.blue == null) {
+            return;
         }
+        ConfirmSheet.show(this, round, ui.red, ui.blue, () -> {
+            findViewById(R.id.late_send).performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+            vm.submit();
+        });
     }
 
     private void vibrate() {
