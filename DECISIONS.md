@@ -22,3 +22,4 @@ Why: a reversible option after 15 min keeps work moving.
 - 1792922340 | DSK-009 | aceptacion como evento global por version | Why: sin tocar db/ (DSK-003)
 - 1792929059 | deadline lease/AND-002/1792925738 | REQUIRES_RECOVERY | Claim kept; read the summary and use release --expired --read-summary. No work is deleted.
 - 1792929849 | AND-002 | BLOCKED: needs physical devices | Why: spike results require the A37 hotspot and phones; inventing them is forbidden
+- 1792930736 | AND-006 | Reutiliza ScoreViewModel.openLate; se puede salir al enviar (queda en la bandeja); tardío = ACK status TARDIA | Why: SubmitRound no tiene campo late; nada se pierde con la bandeja de salida

@@ -1,7 +1,7 @@
 # STATE
 
 Phase: execution
-Updated: 1792930726
+Updated: 1792930736
 AVAILABLE: CORE-004 QA-001 QA-002 DSK-005 
 CLAIMED: -
 BLOCKED: AND-002 
@@ -11,7 +11,7 @@ CANCELLED: -
 
 Claims (first 24; status --task ID shows detail):
 AND-002 | BLOCKED | cris-1 | until 1792944253
-AND-006 | REVIEW | cris-2 | until 1793003289
+AND-006 | REVIEW | cris-2 | until 1793017136
 DSK-006 | REVIEW | zoe-1 | until 1793016511
 DSK-007 | REVIEW | zoe-1 | until 1793016529
 DSK-008 | REVIEW | zoe-1 | until 1793016564
@@ -20,11 +20,11 @@ DSK-010 | REVIEW | zoe-1 | until 1793016595
 
 Blockers: BLOCKED tasks; use status --task ID --summary.
 Current decisions (last 5):
-- 1792921620 | DSK-007 | reglas de ResultCalculator; TERMINAR como segunda confirmacion | Why: CORE-003 contrato
 - 1792922115 | DSK-008 | guion normal en PDF (WinAnsi sin raya); headline local | Why: texto extraido perdia la raya
 - 1792922340 | DSK-009 | aceptacion como evento global por version | Why: sin tocar db/ (DSK-003)
 - 1792929059 | deadline lease/AND-002/1792925738 | REQUIRES_RECOVERY | Claim kept; read the summary and use release --expired --read-summary. No work is deleted.
 - 1792929849 | AND-002 | BLOCKED: needs physical devices | Why: spike results require the A37 hotspot and phones; inventing them is forbidden
+- 1792930736 | AND-006 | Reutiliza ScoreViewModel.openLate; se puede salir al enviar (queda en la bandeja); tardío = ACK status TARDIA | Why: SubmitRound no tiene campo late; nada
 
 Global next step: available P0; else review PRs, tests, demo, rehearsal.
 Why: bounded snapshot to resume without rereading history.
