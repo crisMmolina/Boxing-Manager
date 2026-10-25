@@ -34,6 +34,9 @@ public final class RoundsScreen {
 
     public static final String ID = "rounds";
 
+    /** Id del botón principal (abrir, cerrar o "Cerrar pelea"), para {@link #firePrimary}. */
+    public static final String PRIMARY_ID = "round-primary";
+
     private static final Duration REFRESH = Duration.millis(500);
 
     /** Con más rounds futuros que estos, se agrupan en una fila "Pendientes". */
@@ -44,12 +47,29 @@ public final class RoundsScreen {
     private RoundsScreen() {
     }
 
-    /** Registra la pantalla; {@code fightId} da la pelea activa (o null si no hay). */
-    public static void register(Screens<Node> screens, RoundService service, Supplier<String> fightId) {
-        screens.register(ID, "En vivo", () -> build(service, fightId));
+    /**
+     * Registra la pantalla; {@code fightId} da la pelea activa (o null si no hay). {@code onCorrect}
+     * lleva a corregir un round y {@code onFinish} a cerrar la pelea tras el último round.
+     */
+    public static void register(Screens<Node> screens, RoundService service, Supplier<String> fightId,
+            Runnable onCorrect, Runnable onFinish) {
+        screens.register(ID, "En vivo", () -> build(service, fightId, onCorrect, onFinish));
+    }
+
+    /** {@code Ctrl+Enter}: pulsa el botón principal del tablero dentro de {@code scope}, si está. */
+    public static boolean firePrimary(Node scope) {
+        if (scope.lookup("#" + PRIMARY_ID) instanceof Button b && !b.isDisabled()) {
+            b.fire();
+            return true;
+        }
+        return false;
     }
 
     static Node build(RoundService service, Supplier<String> fightId) {
+        return build(service, fightId, () -> { }, () -> { });
+    }
+
+    static Node build(RoundService service, Supplier<String> fightId, Runnable onCorrect, Runnable onFinish) {
         var title = Ui.screenTitle("En vivo");
         var grid = new GridPane();
         grid.setHgap(8);
@@ -66,9 +86,13 @@ public final class RoundsScreen {
         var pill = Ui.pill("");
         var sent = Ui.support("");
         var action = Ui.primary("");
+        action.setId(PRIMARY_ID);
         action.setMaxWidth(Double.MAX_VALUE);
+        var correct = Ui.secondary("Corregir un round");
+        correct.setMaxWidth(Double.MAX_VALUE);
+        correct.setOnAction(e -> onCorrect.run());
         var status = Ui.support("");
-        var control = Ui.glass(roundTitle, pill, sent, action, status);
+        var control = Ui.glass(roundTitle, pill, sent, action, correct, status);
 
         var side = new VBox(16, leaderCard, control);
         side.setMinWidth(260);
@@ -96,6 +120,7 @@ public final class RoundsScreen {
             }
             int n = service.currentRound(f);
             if (n == 0) {
+                onFinish.run(); // "Cerrar pelea": el resultado se cierra en su pantalla
                 return;
             }
             var board = service.board(f, n);
@@ -250,8 +275,8 @@ public final class RoundsScreen {
             title.setText("Rounds terminados");
             pill.setText("Todos cerrados");
             sent.setText("");
-            action.setText("Sin round por abrir");
-            action.setDisable(true);
+            action.setText("Cerrar pelea");
+            action.setDisable(false);
             return;
         }
         title.setText("Round " + n + " de " + live.rounds());
