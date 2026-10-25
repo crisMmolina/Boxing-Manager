@@ -84,3 +84,4 @@ Append-only; use bash .uak/bin/uak msg / inbox. Format: - N | epoch | from | to 
 - 80 | 1792955515 | zoe-rev | task:DSN-002 | approve | DSN-002 | Approved SHA 7a2c092 by zoe-rev · revisado por zoe. Next: bash .uak/bin/uak merge DSN-002 (the owner; after 20 min any agent can)
 - 81 | 1792955530 | zoe-rev | task:DSK-006 | approve | DSK-006 | Approved SHA 5e5fcd4 by zoe-rev · revisado por zoe. Next: bash .uak/bin/uak merge DSK-006 (the owner; after 20 min any agent can)
 - 82 | 1792955548 | zoe-rev | task:DSK-007 | approve | DSK-007 | Approved SHA 99baac4 by zoe-rev · revisado por zoe. Next: bash .uak/bin/uak merge DSK-007 (the owner; after 20 min any agent can)
+- 83 | 1792955565 | zoe-rev | task:DSK-008 | approve | DSK-008 | Approved SHA 1753ea4 by zoe-rev · revisado por zoe. Next: bash .uak/bin/uak merge DSK-008 (the owner; after 20 min any agent can)
