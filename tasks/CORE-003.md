@@ -15,7 +15,7 @@ Task-Base: 0cd31291d92d5f77951972d0d2dd2c1e0115834c
 Next: `ResultCalculatorTest.peleaDeReferencia()` leyendo `demo_data/pelea_referencia.json`
 PR: -
 Evidence: -
-Events: 1
+Events: 2
 Checkpoints: 0
 Sessions: 1
 Last-Checkpoint: 0
