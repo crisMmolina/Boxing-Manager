@@ -15,8 +15,8 @@ Task-Base: 782ded9d1d7fb58748b64f91f1c3de079c8cfd80
 Next: Wait for review of SHA 0b669d8, then uak merge CORE-002
 PR: https://github.com/crisMmolina/Boxing-Manager/pull/6
 Evidence: core/gradlew -p core test exit 0; build --rerun-tasks exit 0; 151 tests; jacoco 96% lines; security-reviewer re-review: no HIGH
-Events: 3
+Events: 4
 Checkpoints: 1
-Sessions: 1
+Sessions: 2
 Last-Checkpoint: 1792910205
 Task-Tip: 0b669d887b94f38c2828f330ab20aa4d375f08ea
