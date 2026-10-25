@@ -9,9 +9,9 @@ Priority: P0
 Paths: core/build.gradle.kts, core/settings.gradle.kts, core/gradle.properties, core/gradle/, core/gradlew, core/gradlew.bat, core/src/test/java/com/sigebox/core/SmokeTest.java, .github/workflows/ci.yml
 Depends: None
 Verify: `core/gradlew -p core build`
-Lease-Until: 1792993516
-Updated: 1792907116
+Lease-Until: 1792993522
+Updated: 1792907122
 Task-Base: 8f1c5a8aa9ea4bf21c21b21726eb3bcad8eea394
-Next: Another agent reviews https://github.com/crisMmolina/Boxing-Manager/pull/1; run .uak/bin/smoke
+Next: Wait for review of SHA 85152d1
 PR: https://github.com/crisMmolina/Boxing-Manager/pull/1
 Evidence: -
