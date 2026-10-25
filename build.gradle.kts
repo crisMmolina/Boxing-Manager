@@ -1,4 +1,4 @@
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
+// Build raíz: app del juez (Android). core/ entra como composite build (ver settings.gradle.kts).
 plugins {
-    id("com.android.application") version "8.2.2" apply false
+    alias(libs.plugins.android.application) apply false
 }

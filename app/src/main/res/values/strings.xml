@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">Box</string>
+    <!-- Solo el nombre de la app. Los textos de cada pantalla van en strings_<feature>.xml (DESIGN.md §5 y §8). -->
+    <string name="app_name">SIGEBOX Juez</string>
 </resources>
