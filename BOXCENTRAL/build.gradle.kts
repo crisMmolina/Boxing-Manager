@@ -49,6 +49,7 @@ dependencies {
     implementation("com.github.librepdf:openpdf:$openpdfVersion")
     runtimeOnly("org.slf4j:slf4j-simple:$slf4jVersion")
 
+    testImplementation(project(":judge-sim")) // QA-001: jueces simulados contra el servidor real
     testImplementation(platform("org.junit:junit-bom:$junitVersion"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
