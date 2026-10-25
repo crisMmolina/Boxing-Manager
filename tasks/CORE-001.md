@@ -15,8 +15,8 @@ Task-Base: 8f1c5a8aa9ea4bf21c21b21726eb3bcad8eea394
 Next: Wait for review of SHA 85152d1
 PR: https://github.com/crisMmolina/Boxing-Manager/pull/1
 Evidence: core/gradlew -p core build exit 0; SmokeTest 2/2; jacoco 80% gate verified failing on uncovered class
-Events: 4
+Events: 5
 Checkpoints: 1
-Sessions: 1
+Sessions: 2
 Last-Checkpoint: 1792907122
 Task-Tip: 85152d116b9537b8a2be794972ba3df444df3c98
