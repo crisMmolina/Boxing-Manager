@@ -22,9 +22,9 @@ public record JoinUri(String host, int port, String fightId, int seat, String to
     public static final String ACTION = "join";
 
     public JoinUri {
-        requireText(host, "h");
-        requireText(fightId, "s");
-        requireText(token, "t");
+        Fields.text(host, "h", 1, 253);
+        Fields.text(fightId, "s", 1, 64);
+        Fields.text(token, "t", 1, 128);
         if (port < 1 || port > 65535) {
             throw new IllegalArgumentException("puerto fuera de rango: " + port);
         }
@@ -75,12 +75,6 @@ public record JoinUri(String host, int port, String fightId, int seat, String to
             throw new IllegalArgumentException("falta " + key);
         }
         return Integer.parseInt(value);
-    }
-
-    private static void requireText(String value, String key) {
-        if (value == null || value.trim().isEmpty()) {
-            throw new IllegalArgumentException("falta " + key);
-        }
     }
 
     // Las sobrecargas con Charset no existen en Android 8 (API 26).

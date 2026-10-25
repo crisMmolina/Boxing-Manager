@@ -3,6 +3,7 @@ package com.sigebox.core.protocol;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.security.KeyPair;
@@ -49,6 +50,34 @@ class DeviceProofTest {
         assertFalse(DeviceProof.verify("no-base64!!", text, DeviceProof.sign(ok.getPrivate(), text)));
         assertFalse(DeviceProof.verify(pub, text, "AAAA"));
         assertFalse(DeviceProof.verify(pub, text, "no-base64!!"));
+    }
+
+    @Test
+    void rechazaLlaveSecp256k1() throws Exception {
+        // SubjectPublicKeyInfo de secp256k1 con su punto generador G (el JDK 21 ya no genera llaves de esa curva).
+        String secp256k1 = "MFYwEAYHKoZIzj0CAQYFK4EEAAoDQgAEeb5mfvncu6xVoGKVzocLBwKb/NstzijZWfKBWxb4F5hIOtp3JqPEZV2k+/wOEQio/Re0SKaFVBmcR9CP+xDUuA==";
+        KeyPair ok = keyPair("secp256r1");
+        assertFalse(DeviceProof.verify(secp256k1, "x", DeviceProof.sign(ok.getPrivate(), "x")));
+    }
+
+    @Test
+    void firmaDeJoinNoSirveComoHelloNiConOtroNonce() throws Exception {
+        KeyPair kp = keyPair("secp256r1");
+        String pub = DeviceProof.encodePublicKey(kp.getPublic());
+        String nonce = DeviceProof.newNonce(new SecureRandom());
+        String joinSig = DeviceProof.sign(kp.getPrivate(), DeviceProof.joinText("f", 1, "123456", "dev", nonce));
+        assertFalse(DeviceProof.verify(pub, DeviceProof.helloText("f", 1, "dev", nonce), joinSig));
+        assertFalse(DeviceProof.verify(pub,
+                DeviceProof.joinText("f", 1, "123456", "dev", DeviceProof.newNonce(new SecureRandom())), joinSig));
+    }
+
+    @Test
+    void textosRechazanCamposConSaltoDeLinea() {
+        String nonce = "n".repeat(22);
+        assertThrows(IllegalArgumentException.class, () -> DeviceProof.helloText("f\n1", 1, "dev", nonce));
+        assertThrows(IllegalArgumentException.class, () -> DeviceProof.joinText("f", 1, "123456\n", "dev", nonce));
+        assertThrows(IllegalArgumentException.class, () -> DeviceProof.helloText("f", 1, "dev", "corto"));
+        assertThrows(IllegalArgumentException.class, () -> DeviceProof.helloText("f", 9, "dev", nonce));
     }
 
     @Test

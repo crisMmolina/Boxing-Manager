@@ -15,13 +15,19 @@ import java.math.BigDecimal;
 
 /**
  * Codifica y decodifica mensajes del protocolo v1 en JSON. Los campos {@code null} se omiten. La lectura es
- * estricta: JSON estándar, sin claves repetidas, con profundidad limitada y sin conversión de tipos (ver
+ * estricta: JSON estándar de hasta {@link #MAX_LENGTH} caracteres, sin claves repetidas, con profundidad limitada y sin conversión de tipos (ver
  * {@link StrictAdapters}). Los errores no repiten el contenido recibido.
  */
 public final class Messages {
 
+    /** Longitud máxima de un mensaje en caracteres. */
+    static final int MAX_LENGTH = 16 * 1024;
+
     /** Profundidad máxima de objetos y arreglos anidados. */
     static final int MAX_DEPTH = 8;
+
+    /** Longitud máxima de un número en el JSON. */
+    static final int MAX_NUMBER_LENGTH = 20;
 
     private static final Gson GSON = StrictAdapters.gson();
 
@@ -48,11 +54,25 @@ public final class Messages {
         try {
             return GSON.fromJson(obj, messageType.dtoClass());
         } catch (RuntimeException e) {
-            throw new ProtocolException(messageType + " inválido", e);
+            throw new ProtocolException(messageType + " inválido: " + safeReason(e));
         }
     }
 
+    /** El motivo de {@link Fields} (solo nombres de campo y límites), nunca el contenido recibido. */
+    private static String safeReason(Throwable e) {
+        for (Throwable t = e; t != null; t = t.getCause()) {
+            if (t instanceof IllegalArgumentException && t.getStackTrace().length > 0
+                    && Fields.class.getName().equals(t.getStackTrace()[0].getClassName())) {
+                return t.getMessage();
+            }
+        }
+        return "formato";
+    }
+
     private static JsonObject parseObject(String json) {
+        if (json != null && json.length() > MAX_LENGTH) {
+            throw new ProtocolException("mensaje demasiado grande");
+        }
         JsonElement element;
         try {
             JsonReader reader = new JsonReader(new StringReader(json));
@@ -62,7 +82,7 @@ public final class Messages {
                 throw new ProtocolException("datos después del mensaje");
             }
         } catch (IOException | RuntimeException e) {
-            throw e instanceof ProtocolException ? (ProtocolException) e : new ProtocolException("JSON inválido", e);
+            throw e instanceof ProtocolException ? (ProtocolException) e : new ProtocolException("JSON inválido");
         }
         if (!element.isJsonObject()) {
             throw new ProtocolException("el mensaje no es un objeto JSON");
@@ -97,7 +117,11 @@ public final class Messages {
             case STRING:
                 return new JsonPrimitive(in.nextString());
             case NUMBER:
-                return new JsonPrimitive(new BigDecimal(in.nextString()));
+                String number = in.nextString();
+                if (number.length() > MAX_NUMBER_LENGTH) {
+                    throw new ProtocolException("número demasiado largo");
+                }
+                return new JsonPrimitive(new BigDecimal(number));
             case BOOLEAN:
                 return new JsonPrimitive(in.nextBoolean());
             case NULL:

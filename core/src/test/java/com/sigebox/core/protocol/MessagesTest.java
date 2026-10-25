@@ -98,6 +98,36 @@ class MessagesTest {
     }
 
     @Test
+    void rechazaMensajeDemasiadoGrande() {
+        String big = "{\"v\":1,\"id\":\"" + ID + "\",\"type\":\"PING\",\"ts\":1,\"x\":\"" + "a".repeat(Messages.MAX_LENGTH)
+                + "\"}";
+        assertThrows(ProtocolException.class, () -> Messages.decode(big));
+    }
+
+    @Test
+    void rechazaNumeroDemasiadoLargo() {
+        String json = "{\"v\":1,\"id\":\"" + ID + "\",\"type\":\"PING\",\"ts\":" + "9".repeat(40) + "}";
+        assertThrows(ProtocolException.class, () -> Messages.decode(json));
+    }
+
+    @Test
+    void errorNoRepiteElValorRecibido() {
+        String json = "{\"v\":1,\"id\":\"" + ID + "\",\"type\":\"ACK\",\"ackId\":\"" + ID + "\",\"ok\":false,"
+                + "\"error\":\"SECRETO\"}";
+        ProtocolException e = assertThrows(ProtocolException.class, () -> Messages.decode(json));
+        for (Throwable t = e; t != null; t = t.getCause()) {
+            assertFalse(String.valueOf(t.getMessage()).contains("SECRETO"), t.toString());
+        }
+    }
+
+    @Test
+    void ackExigeStatusOErrorSegunOk() {
+        assertThrows(IllegalArgumentException.class, () -> new Ack(ID, true, null, Ack.Error.MALFORMED));
+        assertThrows(IllegalArgumentException.class,
+                () -> new Ack(ID, false, com.sigebox.core.model.EstadoTarjeta.ENVIADA, Ack.Error.MALFORMED));
+    }
+
+    @Test
     void rechazaNull() {
         assertThrows(ProtocolException.class, () -> Messages.decode(null));
     }

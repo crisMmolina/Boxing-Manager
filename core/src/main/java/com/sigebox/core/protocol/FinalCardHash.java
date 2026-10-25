@@ -27,6 +27,8 @@ public final class FinalCardHash {
     }
 
     static String canonical(String fightId, int seat, List<State.OwnCard> cards) {
+        Fields.text(fightId, "fightId", 1, 64);
+        Fields.range(seat, "seat", 1, 5);
         List<State.OwnCard> sorted = new ArrayList<>(cards);
         sorted.sort(Comparator.comparing(State.OwnCard::round));
         StringBuilder sb = new StringBuilder("SIGEBOX-FINAL-v1\n").append(fightId).append('\n').append(seat).append('\n');

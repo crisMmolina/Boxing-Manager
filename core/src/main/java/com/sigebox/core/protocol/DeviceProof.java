@@ -7,6 +7,7 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Signature;
+import java.math.BigInteger;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
@@ -25,22 +26,38 @@ public final class DeviceProof {
 
     private static final String ALGORITHM = "SHA256withECDSA";
     private static final int NONCE_BYTES = 16;
+    /** Orden del grupo de P-256 (secp256r1); distingue otras curvas de 256 bits como secp256k1. */
+    private static final BigInteger P256_ORDER =
+            new BigInteger("FFFFFFFF00000000FFFFFFFFFFFFFFFFBCE6FAADA7179E84F3B9CAC2FC632551", 16);
 
     private DeviceProof() {}
 
-    /** Texto que firma {@code JOIN}. */
+    /**
+     * Texto que firma {@code JOIN}. Valida cada campo con las reglas del Schema: ningún campo puede traer un salto de
+     * línea que cambie el texto.
+     */
     public static String joinText(String fightId, int seat, String token, String deviceId, String nonce) {
+        common(fightId, seat, deviceId, nonce);
+        Fields.text(token, "token", 6, 128);
         return "SIGEBOX-JOIN-v1\n" + fightId + "\n" + seat + "\n" + token + "\n" + deviceId + "\n" + nonce + "\n";
     }
 
-    /** Texto que firma {@code HELLO}. */
+    /** Texto que firma {@code HELLO}; valida los campos como {@link #joinText}. */
     public static String helloText(String fightId, int seat, String deviceId, String nonce) {
+        common(fightId, seat, deviceId, nonce);
         return "SIGEBOX-HELLO-v1\n" + fightId + "\n" + seat + "\n" + deviceId + "\n" + nonce + "\n";
     }
 
     /** Texto que firma {@code SUBMIT_FINAL_CARD}: el mismo texto canónico de {@link FinalCardHash}. */
     public static String finalCardText(String fightId, int seat, List<State.OwnCard> cards) {
         return FinalCardHash.canonical(fightId, seat, cards);
+    }
+
+    private static void common(String fightId, int seat, String deviceId, String nonce) {
+        Fields.text(fightId, "fightId", 1, 64);
+        Fields.range(seat, "seat", 1, 5);
+        Fields.text(deviceId, "deviceId", 1, 128);
+        Fields.match(nonce, "nonce", Fields.NONCE);
     }
 
     /** Nonce de 128 bits en Base64 URL sin relleno (22 caracteres). */
@@ -71,19 +88,22 @@ public final class DeviceProof {
         }
     }
 
-    /** {@code true} solo si {@code sig} es una firma válida de {@code text} con una llave EC P-256. */
+    /**
+     * {@code true} solo si {@code sig} es una firma válida de {@code text} con una llave EC P-256. La central construye
+     * {@code text} con el nonce que guardó para la conexión, nunca con el que trae el mensaje.
+     */
     public static boolean verify(String publicKey, String text, String sig) {
         try {
             PublicKey key = KeyFactory.getInstance("EC")
                     .generatePublic(new X509EncodedKeySpec(Base64.getDecoder().decode(publicKey)));
-            if (!(key instanceof ECPublicKey) || ((ECPublicKey) key).getParams().getCurve().getField().getFieldSize() != 256) {
+            if (!(key instanceof ECPublicKey) || !P256_ORDER.equals(((ECPublicKey) key).getParams().getOrder())) {
                 return false;
             }
             Signature signature = Signature.getInstance(ALGORITHM);
             signature.initVerify(key);
             signature.update(text.getBytes(StandardCharsets.UTF_8));
             return signature.verify(Base64.getDecoder().decode(sig));
-        } catch (GeneralSecurityException | IllegalArgumentException e) {
+        } catch (GeneralSecurityException | RuntimeException e) {
             return false;
         }
     }

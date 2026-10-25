@@ -30,6 +30,14 @@ Un JSON Schema (draft 2020-12) por mensaje: `<type en minúsculas>.schema.json`.
 5. `SUBMIT_FINAL_CARD` lleva `sig` sobre `DeviceProof.finalCardText(...)`, de modo que el juez no puede negar su tarjeta.
 6. `DeviceProof.sign` funciona con una llave del Keystore y también con una llave en memoria (`judge-sim`).
 
+**Lo que debe hacer la central (DSK):**
+1. Crear un nonce por conexión con `DeviceProof.newNonce(SecureRandom)` y guardarlo en esa conexión. Construir el texto firmado con el nonce guardado, nunca con `msg.nonce()`; si no coinciden, rechazar.
+2. Aceptar un solo `JOIN`/`HELLO` por nonce y cerrar la conexión si falla. También cerrarla si no llega a tiempo. Antes de autenticarse, rechazar cualquier otro tipo de mensaje.
+3. En `HELLO`, tomar fightId, lugar y deviceId del registro aprobado y verificar con su llave guardada. Un `JOIN` nunca reemplaza una llave ya registrada.
+4. En `SUBMIT_FINAL_CARD`, reconstruir el texto con las tarjetas guardadas de esa sesión y verificar la firma. Si no coincide, avisar al organizador y conservar lo guardado. Repetidos por lugar y pelea: `ALREADY_FINAL`. Nunca usar los bytes de la firma como clave, porque ECDSA es maleable.
+5. Limitar los intentos fallidos de token por lugar, no por conexión, y descartar el código al agotarlos. El teléfono muestra su huella para que el organizador la compare con la de la central.
+6. Limitar el tamaño del frame WebSocket. `Messages.decode` rechaza más de 16 KiB, más de 8 niveles de anidamiento y números de más de 20 caracteres.
+
 **Lo que queda abierto (aceptado en v1, red local sin internet):** alguien que intercepte activamente el hotspot (ARP spoofing) podría secuestrar una conexión ya autenticada. La solución es `wss://` con el certificado fijado por `f` en el QR.
 
 **Código de 6 dígitos:** el `token` admite 6 caracteres para el código manual. El token del QR debe tener 22 o más caracteres aleatorios (`SecureRandom`). Con el código manual, la central limita los intentos por conexión.

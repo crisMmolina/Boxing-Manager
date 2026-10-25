@@ -52,6 +52,7 @@ class JoinUriTest {
         "sigebox://join?h=h&p=1&s=%20&seat=1&t=t",
         "sigebox://join?h=h&p=1&s=s&seat=1",
         "sigebox://join?h=h&p=1&s=s&seat=1&t=t&f=XYZ",
+        "sigebox://join?h=h&p=1&s=s%0A1&seat=1&t=t",
         "no es una uri ::"
     })
     void rechazaUrisInvalidas(String uri) {

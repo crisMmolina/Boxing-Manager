@@ -37,6 +37,9 @@ public record Ack(
         Fields.base(v, id, type, TYPE);
         Fields.match(ackId, "ackId", Fields.UUID_PATTERN);
         Fields.require(ok, "ok");
+        if (ok && error != null || !ok && status != null) {
+            throw new IllegalArgumentException("status solo con ok; error solo sin ok");
+        }
     }
 
     /** Mensaje nuevo con {@code v = 1} e {@code id} aleatorio. */

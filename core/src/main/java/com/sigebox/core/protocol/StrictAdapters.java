@@ -123,7 +123,7 @@ final class StrictAdapters {
             try {
                 return Enum.valueOf(type, name);
             } catch (IllegalArgumentException e) {
-                throw new JsonSyntaxException(type.getSimpleName() + " desconocido: " + name, e);
+                throw new JsonSyntaxException(type.getSimpleName() + " desconocido", e);
             }
         }
 
