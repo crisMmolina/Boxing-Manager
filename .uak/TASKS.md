@@ -423,6 +423,25 @@ En Windows (zoe) los comandos `Verify` se corren en Git Bash.
 - **Verify:** `./gradlew :app:testDebugUnitTest`
 - **Next step:** prueba de que `ScoreActivity` aplica los insets del sistema a su raíz
 
+## DSK-013 · Ajustes visuales de zoe: contenido centrado y sin cursivas
+
+- **Type:** feature
+- **Priority:** P0
+- **Estimate:** 2 h
+- **Rubric / Spec:** pedido de zoe 2026-10-25 sobre las capturas de DSK-011 · `docs/DESIGN.md` v2
+- **Depends on:** DSK-011, DSK-005
+- **Paths:** BOXCENTRAL/src/main/resources/com/sigebox/central/, BOXCENTRAL/src/main/java/com/sigebox/central/App.java, BOXCENTRAL/src/main/java/com/sigebox/central/ui/theme/, BOXCENTRAL/src/test/java/com/sigebox/central/ui/theme/, docs/DESIGN.md, BOXCENTRAL/build.gradle.kts
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - El contenido de cada pantalla va en una columna centrada (ancho máximo 1100 px), con títulos y tarjetas centrados
+  - Ningún texto en cursiva: Barlow Condensed recta (ExtraBold y Bold, OFL) para números y títulos; se quitan los TTF cursivos
+  - `docs/DESIGN.md` v2 dice "recta" en lugar de "cursiva" y describe la columna centrada (también rige para AND-007)
+  - `App` registra la pantalla de pelea y jueces de DSK-005 (`SetupScreen`) en los pasos Pelea y Jueces, con un solo `SeatTokens` compartido con `JudgeHub`
+  - `BOXCENTRAL/build.gradle.kts`: `filter.isFailOnNoMatchingTests = false` en todos los `Test`, para que `test --tests X` no falle en `judge-sim` (los Verify de DSK-005 y DSK-012 lo usan)
+  - Evidencia: capturas 1280×800 de la ventana real
+- **Verify:** `BOXCENTRAL/gradlew -p BOXCENTRAL build`
+- **Next step:** prueba de que `app.css` no tiene `-fx-font-style: italic`
+
 ## QA-001 · Integración: corte de 60 s, cierre forzado y latencia ≤ 1 s
 
 - **Type:** integration

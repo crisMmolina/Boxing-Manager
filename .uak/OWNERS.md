@@ -20,11 +20,11 @@ An owner is not a prerequisite for everyone: consumers work on published contrac
 | app/src/main/res/values/strings.xml | AND-007 |
 | app/src/main/res/values/themes.xml | AND-007 |
 | app/src/main/res/values/colors.xml | AND-007 |
-| docs/DESIGN.md | DSN-002 |
-| BOXCENTRAL/build.gradle.kts | DSK-001 |
+| docs/DESIGN.md | DSK-013 |
+| BOXCENTRAL/build.gradle.kts | DSK-013 |
 | BOXCENTRAL/settings.gradle.kts | DSK-001 |
 | BOXCENTRAL/judge-sim/build.gradle.kts | DSK-001 |
-| BOXCENTRAL/src/main/java/com/sigebox/central/App.java | DSK-011 |
+| BOXCENTRAL/src/main/java/com/sigebox/central/App.java | DSK-013 |
 | BOXCENTRAL/src/main/java/com/sigebox/central/ui/Screens.java | DSK-011 |
 | BOXCENTRAL/src/main/java/com/sigebox/central/db/ | DSK-003 |
 | .uak/PROJECT.md | CORE-001 |
