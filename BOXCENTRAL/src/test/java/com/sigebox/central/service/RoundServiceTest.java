@@ -2,6 +2,7 @@ package com.sigebox.central.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -16,10 +17,12 @@ import com.sigebox.core.model.EstadoPelea;
 import com.sigebox.core.model.EstadoRound;
 import com.sigebox.core.model.EstadoTarjeta;
 import com.sigebox.core.model.EventoBitacora;
+import com.sigebox.core.model.Ganador;
 import com.sigebox.core.model.LugarJuez;
 import com.sigebox.core.model.OrigenTarjeta;
 import com.sigebox.core.model.Pelea;
 import com.sigebox.core.model.TarjetaRound;
+import com.sigebox.core.scoring.DecisionRules;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -134,23 +137,71 @@ class RoundServiceTest {
     }
 
     @Test
-    void partialSummaryNeedsConfirmationAndIsLogged() {
+    void liveBoardShowsScoresOfClosedRoundsAndStatusOfTheOpenOne() {
         service.openRound(F, 1);
         card(1, 1, 10, 9, EstadoTarjeta.ENVIADA);
         card(2, 1, 10, 8, EstadoTarjeta.ENVIADA);
         service.closeRound(F, 1, null);
         service.openRound(F, 2);
-        card(1, 2, 9, 10, EstadoTarjeta.ENVIADA); // round abierto: no cuenta
+        card(1, 2, 9, 10, EstadoTarjeta.TARDIA); // round abierto: se ve, pero no suma
 
-        assertThrows(IllegalStateException.class, () -> service.partialSummary(F, false));
-        assertFalse(logTypes().contains("PARTIAL_SUMMARY_VIEWED"));
+        var live = service.live(F);
+        assertEquals(3, live.rounds());
+        assertEquals(2, live.current());
+        assertEquals(List.of(new RoundService.Judge(1, "Ana", true), new RoundService.Judge(2, "María López", true)),
+                live.judges());
+        assertEquals(List.of(new RoundService.Cell(RoundService.Casilla.ENVIADO, 10, 9),
+                new RoundService.Cell(RoundService.Casilla.ENVIADO, 10, 8)), live.row(1).cells());
+        assertEquals(List.of(new RoundService.Cell(RoundService.Casilla.TARDIO, 9, 10),
+                new RoundService.Cell(RoundService.Casilla.PENDIENTE, null, null)), live.row(2).cells());
+        assertTrue(live.row(3).cells().stream().noneMatch(c -> c.casilla() != null || c.hasScore()));
+        assertEquals(1, live.sent(2));
+        assertEquals(List.of(new RoundService.Total(1, 10, 9), new RoundService.Total(2, 10, 8)), live.totals());
+        assertEquals(new RoundService.Leader(Ganador.ROJA, 2, 2), live.leader());
+    }
 
-        var totals = service.partialSummary(F, true);
-        assertEquals(List.of(
-                new RoundService.PartialTotal(1, "Ana", 10, 9),
-                new RoundService.PartialTotal(2, "María López", 10, 8)), totals);
-        assertTrue(logTypes().contains("PARTIAL_SUMMARY_VIEWED"));
-        assertEquals(15, RoundService.SUMMARY_VISIBLE_SECONDS);
+    @Test
+    void liveBoardHasNoLeaderBeforeTheFirstClosedRoundAndTieWhenSplit() {
+        service.openRound(F, 1);
+        assertNull(service.live(F).leader());
+        card(1, 1, 10, 9, EstadoTarjeta.ENVIADA);
+        card(2, 1, 9, 10, EstadoTarjeta.ENVIADA);
+        service.closeRound(F, 1, null);
+        assertEquals(new RoundService.Leader(Ganador.EMPATE, 0, 2), service.live(F).leader());
+    }
+
+    @Test
+    void liveBoardIsLoggedOncePerFightAndNeverBroadcast() {
+        service.openRound(F, 1);
+        var before = List.copyOf(broadcasts);
+        service.live(F);
+        service.live(F);
+        service.live(F);
+        assertEquals(1, logTypes().stream().filter(RoundService.BOARD_VIEWED::equals).count());
+        assertEquals(before, broadcasts);
+    }
+
+    @Test
+    void referenceFightUpToRoundThreeIsLedByRed() throws Exception {
+        var ref = ResultServiceTest.Reference.load();
+        var p = ref.pelea();
+        new PeleaRepository(db).save(new Pelea(p.id(), p.esquinaRoja(), p.esquinaAzul(), p.rounds(), p.jueces(),
+                EstadoPelea.CREADA, p.fecha()));
+        ref.lugares().forEach(new LugarJuezRepository(db)::save);
+        var cards = new TarjetaRoundRepository(db);
+        for (int n = 1; n <= 3; n++) {
+            int round = n;
+            service.openRound(p.id(), n);
+            ref.tarjetas().stream().filter(t -> t.round() == round).forEach(cards::save);
+            service.closeRound(p.id(), n, null);
+        }
+
+        var live = service.live(p.id());
+        assertEquals(List.of(new RoundService.Total(1, 29, 28), new RoundService.Total(2, 28, 29),
+                new RoundService.Total(3, 29, 28)), live.totals());
+        assertEquals(new RoundService.Leader(Ganador.ROJA, 2, 3), live.leader());
+        assertEquals(DecisionRules.fallo(2, 1, 3).ganador(), live.leader().ganador());
+        assertEquals(4, live.current());
     }
 
     @Test
