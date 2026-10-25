@@ -1,15 +1,156 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Material 3 DayNight: los colores cambian solos con values-night/colors.xml. -->
-    <style name="Base.Theme.Sigebox" parent="Theme.Material3.DayNight.NoActionBar">
-        <item name="colorPrimary">@color/corner_blue</item>
-        <item name="colorOnPrimary">@color/on_corner_blue</item>
-        <item name="colorSecondary">@color/corner_red</item>
-        <item name="colorOnSecondary">@color/on_corner_red</item>
-        <item name="android:colorBackground">@color/background</item>
-        <item name="colorSurface">@color/background</item>
-        <item name="colorOnSurface">@color/on_background</item>
-        <item name="colorOnSurfaceVariant">@color/text_secondary</item>
+    <!-- docs/DESIGN.md v2: un solo tema claro (sin modo oscuro), Inter para el texto y Barlow Condensed recta para
+         números y títulos. Nada en cursiva ni en mayúsculas sostenidas. -->
+    <style name="Base.Theme.Sigebox" parent="Theme.Material3.Light.NoActionBar">
+        <item name="colorPrimary">@color/navy</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+        <item name="colorSecondary">@color/ink_secondary</item>
+        <item name="colorOnSecondary">#FFFFFF</item>
+        <item name="android:colorBackground">@color/bg</item>
+        <item name="colorSurface">@color/bg</item>
+        <item name="colorOnSurface">@color/ink</item>
+        <item name="colorOnSurfaceVariant">@color/ink_secondary</item>
+        <item name="colorOutline">@color/field_border</item>
+        <item name="android:fontFamily">@font/inter</item>
+        <item name="fontFamily">@font/inter</item>
+        <item name="android:windowBackground">@color/bg</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
+        <item name="materialButtonStyle">@style/Widget.Sigebox.Button.Primary</item>
+        <item name="materialCardViewStyle">@style/Widget.Sigebox.Card</item>
+        <item name="textInputStyle">@style/Widget.Sigebox.TextInput</item>
+        <item name="bottomSheetDialogTheme">@style/ThemeOverlay.Sigebox.BottomSheet</item>
     </style>
 
     <style name="Theme.Sigebox" parent="Base.Theme.Sigebox" />
+
+    <!-- 5.4 Botones en cápsula -->
+    <style name="Widget.Sigebox.Button.Primary" parent="Widget.Material3.Button">
+        <item name="android:minHeight">@dimen/button_height</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="cornerRadius">32dp</item>
+        <item name="backgroundTint">@color/button_primary_bg</item>
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:textSize">17sp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:fontFamily">@font/inter_bold</item>
+        <item name="android:letterSpacing">0</item>
+    </style>
+
+    <style name="Widget.Sigebox.Button.Secondary" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="android:minHeight">@dimen/button_height</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="cornerRadius">32dp</item>
+        <item name="backgroundTint">@color/glass_strong</item>
+        <item name="strokeColor">@color/field_border</item>
+        <item name="android:textColor">@color/ink</item>
+        <item name="android:textSize">17sp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:fontFamily">@font/inter_bold</item>
+        <item name="android:letterSpacing">0</item>
+    </style>
+
+    <!-- 5.2 Botones − y +: 76 dp, circulares. El + toma el color de su esquina en el layout. -->
+    <style name="Widget.Sigebox.Button.Round" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="android:minWidth">@dimen/round_button</item>
+        <item name="android:minHeight">@dimen/round_button</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:padding">0dp</item>
+        <item name="cornerRadius">38dp</item>
+        <item name="iconGravity">textStart</item>
+        <item name="iconPadding">0dp</item>
+        <item name="iconSize">30dp</item>
+        <item name="backgroundTint">@color/glass_strong</item>
+        <item name="strokeColor">@color/field_border</item>
+        <item name="iconTint">@color/ink</item>
+    </style>
+
+    <style name="Widget.Sigebox.Card" parent="Widget.Material3.CardView.Elevated">
+        <item name="cardCornerRadius">@dimen/card_radius</item>
+        <item name="cardBackgroundColor">@color/glass</item>
+        <item name="cardElevation">6dp</item>
+        <item name="strokeColor">@color/contour</item>
+        <item name="strokeWidth">1dp</item>
+        <item name="contentPadding">20dp</item>
+    </style>
+
+    <style name="Widget.Sigebox.TextInput" parent="Widget.Material3.TextInputLayout.OutlinedBox">
+        <item name="boxCornerRadiusTopStart">@dimen/field_radius</item>
+        <item name="boxCornerRadiusTopEnd">@dimen/field_radius</item>
+        <item name="boxCornerRadiusBottomStart">@dimen/field_radius</item>
+        <item name="boxCornerRadiusBottomEnd">@dimen/field_radius</item>
+        <item name="boxBackgroundColor">@color/glass_strong</item>
+        <item name="boxStrokeColor">@color/navy</item>
+    </style>
+
+    <style name="ThemeOverlay.Sigebox.BottomSheet" parent="ThemeOverlay.Material3.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/Widget.Sigebox.BottomSheet</item>
+    </style>
+
+    <style name="Widget.Sigebox.BottomSheet" parent="Widget.Material3.BottomSheet.Modal">
+        <item name="backgroundTint">@color/glass_strong</item>
+        <item name="shapeAppearance">@style/Shape.Sigebox.Sheet</item>
+    </style>
+
+    <style name="Shape.Sigebox.Sheet" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeTopLeft">@dimen/card_radius</item>
+        <item name="cornerSizeTopRight">@dimen/card_radius</item>
+    </style>
+
+    <!-- 3.2 Tipografía -->
+    <style name="Text.Sigebox.ScreenTitle" parent="">
+        <item name="android:fontFamily">@font/barlow_condensed_extrabold</item>
+        <item name="android:textSize">40sp</item>
+        <item name="android:textColor">@color/ink</item>
+        <item name="android:includeFontPadding">false</item>
+    </style>
+
+    <style name="Text.Sigebox.CardTitle" parent="">
+        <item name="android:fontFamily">@font/barlow_condensed_extrabold</item>
+        <item name="android:textSize">26sp</item>
+        <item name="android:textColor">@color/ink</item>
+    </style>
+
+    <style name="Text.Sigebox.Number" parent="">
+        <item name="android:fontFamily">@font/barlow_condensed_extrabold</item>
+        <item name="android:textSize">@dimen/score_number</item>
+        <item name="android:fontFeatureSettings">"tnum"</item>
+        <item name="android:includeFontPadding">false</item>
+    </style>
+
+    <style name="Text.Sigebox.Body" parent="">
+        <item name="android:fontFamily">@font/inter</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:textColor">@color/ink</item>
+    </style>
+
+    <style name="Text.Sigebox.Support" parent="">
+        <item name="android:fontFamily">@font/inter</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:textColor">@color/ink_secondary</item>
+    </style>
+
+    <style name="Text.Sigebox.Pill" parent="">
+        <item name="android:fontFamily">@font/inter_medium</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:textColor">@color/ink_secondary</item>
+        <item name="android:background">@drawable/pill</item>
+        <item name="android:paddingStart">12dp</item>
+        <item name="android:paddingEnd">12dp</item>
+        <item name="android:paddingTop">5dp</item>
+        <item name="android:paddingBottom">5dp</item>
+    </style>
+
+    <style name="Text.Sigebox.Brand" parent="">
+        <item name="android:fontFamily">@font/barlow_condensed_bold</item>
+        <item name="android:textSize">24sp</item>
+        <item name="android:textColor">@color/ink</item>
+        <item name="android:letterSpacing">0.05</item>
+    </style>
 </resources>

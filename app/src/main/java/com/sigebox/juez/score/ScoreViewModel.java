@@ -171,6 +171,42 @@ public class ScoreViewModel extends ViewModel {
         publish();
     }
 
+    /** Valor con el que empieza cada esquina en los botones − y + (DESIGN.md v2 §6.4). */
+    public static final int DEFAULT_VALUE = 10;
+
+    /**
+     * Botón − o + de una esquina: suma {@code delta} dentro de 0–10. Un valor vacío parte de
+     * {@link #DEFAULT_VALUE}.
+     */
+    public void adjust(ScoreUi.Corner corner, int delta) {
+        if (!current().inputEnabled()) {
+            return;
+        }
+        Integer value = corner == ScoreUi.Corner.RED ? red : blue;
+        int next = Math.max(0, Math.min(DEFAULT_VALUE, (value == null ? DEFAULT_VALUE : value) + delta));
+        if (corner == ScoreUi.Corner.RED) {
+            red = next;
+        } else {
+            blue = next;
+        }
+        selected = corner;
+        publish();
+    }
+
+    /**
+     * Pone 10–10 si se puede calificar y las dos esquinas están vacías. La pantalla de − y + lo
+     * llama al abrirse el round; la hoja de confirmación protege contra un envío por descuido.
+     */
+    public boolean applyDefault() {
+        if (!current().inputEnabled() || red != null || blue != null) {
+            return false;
+        }
+        red = DEFAULT_VALUE;
+        blue = DEFAULT_VALUE;
+        publish();
+        return true;
+    }
+
     public void backspace() {
         if (selected == ScoreUi.Corner.RED) {
             red = null;

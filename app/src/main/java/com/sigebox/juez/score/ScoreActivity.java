@@ -7,15 +7,10 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
-
-import com.google.android.material.button.MaterialButton;
-import com.google.android.material.card.MaterialCardView;
 import com.sigebox.core.protocol.Ack;
 import com.sigebox.core.protocol.Message;
 import com.sigebox.juez.R;
@@ -26,26 +21,33 @@ import com.sigebox.juez.net.ConnectionState;
 import com.sigebox.juez.net.JudgeConnection;
 import com.sigebox.juez.net.JudgeListener;
 import com.sigebox.juez.net.JudgeRuntime;
-
+import com.sigebox.juez.ui.ConfirmSheet;
+import com.sigebox.juez.ui.CornerCard;
+import com.sigebox.juez.ui.RoundProgress;
+import com.sigebox.juez.ui.Screen;
+import com.sigebox.juez.ui.TopBar;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-/** Teclado de puntuación para una mano (DESIGN.md §6.4). Nunca muestra totales ni ganador. */
+/**
+ * Puntuar (DESIGN.md v2 §6.4): una tarjeta por esquina con − y +, el número en grande y una hoja de
+ * confirmación antes de enviar. Nunca muestra totales ni ganador.
+ */
 public class ScoreActivity extends AppCompatActivity {
     /** La captura tardía la crea AND-006; se abre por nombre para no depender de ella. */
     static final String LATE_ACTIVITY = "com.sigebox.juez.late.LateScoreActivity";
     /** Extra con el round que hay que calificar tarde. */
     public static final String EXTRA_ROUND = "round";
 
-    /** Filas del teclado: 10 y 9 abajo, junto al pulgar; -1 = borrar. */
-    private static final int[][] KEYS = {{0, 1, 2, 3}, {4, 5, 6, -1}, {7, 8, 9, 10}};
-
     private final ExecutorService io = Executors.newSingleThreadExecutor();
     private ScoreViewModel vm;
     private JudgeConnection connection;
     private SigeboxDatabase database;
     private boolean finalOpened;
+    private CornerCard red;
+    private CornerCard blue;
+    private boolean wasOpen;
 
     private final JudgeListener listener = new JudgeListener() {
         @Override
@@ -58,6 +60,7 @@ public class ScoreActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_score);
+        Screen.setup(this);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         JudgeRuntime runtime = JudgeRuntime.get(this);
         connection = runtime.connection();
@@ -71,10 +74,9 @@ public class ScoreActivity extends AppCompatActivity {
             }
         }).get(ScoreViewModel.class);
 
-        buildKeypad();
-        findViewById(R.id.score_red_panel).setOnClickListener(v -> vm.selectCorner(ScoreUi.Corner.RED));
-        findViewById(R.id.score_blue_panel).setOnClickListener(v -> vm.selectCorner(ScoreUi.Corner.BLUE));
-        findViewById(R.id.score_send).setOnClickListener(v -> vm.submit());
+        red = new CornerCard(findViewById(R.id.score_red_card), true, d -> vm.adjust(ScoreUi.Corner.RED, d));
+        blue = new CornerCard(findViewById(R.id.score_blue_card), false, d -> vm.adjust(ScoreUi.Corner.BLUE, d));
+        findViewById(R.id.score_send).setOnClickListener(v -> confirm());
         findViewById(R.id.score_correct).setOnClickListener(v -> vm.startCorrection());
         vm.ui().observe(this, this::render);
         connection.state().observe(this, vm::onConnection);
@@ -111,44 +113,22 @@ public class ScoreActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
-    private void buildKeypad() {
-        LinearLayout keypad = findViewById(R.id.score_keypad);
-        int height = dp(72);
-        for (int[] row : KEYS) {
-            LinearLayout line = new LinearLayout(this);
-            line.setOrientation(LinearLayout.HORIZONTAL);
-            for (int value : row) {
-                MaterialButton key = new MaterialButton(this, null,
-                        com.google.android.material.R.attr.materialButtonOutlinedStyle);
-                key.setText(value < 0 ? "⌫" : String.valueOf(value));
-                key.setTextSize(32);
-                key.setMinWidth(dp(64));
-                key.setTag(value);
-                if (value < 0) {
-                    key.setContentDescription(getString(R.string.score_backspace));
-                }
-                key.setOnClickListener(v -> {
-                    v.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
-                    if (value < 0) {
-                        vm.backspace();
-                    } else {
-                        vm.key(value);
-                    }
-                });
-                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(0, height, 1f);
-                params.setMargins(dp(4), dp(4), dp(4), dp(4));
-                line.addView(key, params);
-            }
-            keypad.addView(line);
+    /** Enviar pasa siempre por la hoja de confirmación (DESIGN.md v2 §5.6). */
+    private void confirm() {
+        ScoreUi ui = vm.ui().getValue();
+        if (ui == null || !ui.sendEnabled || ui.red == null || ui.blue == null) {
+            return;
         }
+        ConfirmSheet.show(this, ui.round, ui.red, ui.blue, () -> {
+            findViewById(R.id.score_send).performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+            vm.submit();
+        });
     }
 
     private void render(ScoreUi ui) {
-        ((TextView) findViewById(R.id.score_header)).setText(getString(R.string.score_header, ui.seat, ui.judgeName));
-        TextView conn = findViewById(R.id.score_connection);
         boolean online = ui.connection == ConnectionState.Status.CONNECTED;
-        conn.setText(online ? R.string.status_connected : R.string.status_disconnected);
-        conn.setTextColor(color(online ? R.color.status_sent_fg : R.color.status_disconnected_fg));
+        TopBar.bind(findViewById(R.id.score_root), online,
+                ui.seat > 0 ? getString(R.string.score_judge, ui.seat) : getString(R.string.status_disconnected));
 
         TextView round = findViewById(R.id.score_round);
         if (ui.round > 0 && ui.rounds != null) {
@@ -156,31 +136,37 @@ public class ScoreActivity extends AppCompatActivity {
         } else if (ui.round > 0) {
             round.setText(getString(R.string.score_round, ui.round));
         } else {
-            round.setText("");
+            round.setText(R.string.score_title_waiting);
         }
         renderStatus(ui);
+        RoundProgress.bind(findViewById(R.id.score_progress), ui.rounds, ui.round, ui.card != null);
 
-        ((TextView) findViewById(R.id.score_red_value)).setText(value(ui.card != null && !ui.editing ? ui.card.red : ui.red));
-        ((TextView) findViewById(R.id.score_blue_value)).setText(value(ui.card != null && !ui.editing ? ui.card.blue : ui.blue));
         boolean input = ui.inputEnabled();
-        MaterialCardView redPanel = findViewById(R.id.score_red_panel);
-        MaterialCardView bluePanel = findViewById(R.id.score_blue_panel);
-        redPanel.setStrokeWidth(input && ui.selected == ScoreUi.Corner.RED ? dp(4) : 0);
-        bluePanel.setStrokeWidth(input && ui.selected == ScoreUi.Corner.BLUE ? dp(4) : 0);
-        float alpha = ui.card != null && !ui.editing ? 0.6f : 1f;
-        redPanel.setAlpha(alpha);
-        bluePanel.setAlpha(alpha);
-
-        LinearLayout keypad = findViewById(R.id.score_keypad);
-        for (int i = 0; i < keypad.getChildCount(); i++) {
-            LinearLayout line = (LinearLayout) keypad.getChildAt(i);
-            for (int j = 0; j < line.getChildCount(); j++) {
-                line.getChildAt(j).setEnabled(input);
+        boolean opened = input && !wasOpen;
+        wasOpen = input;
+        if (opened) {
+            findViewById(R.id.score_root).performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+            if (vm.applyDefault()) {
+                return; // cada round empieza en 10–10; el ViewModel vuelve a publicar y se pinta
             }
         }
-        findViewById(R.id.score_send).setEnabled(ui.sendEnabled);
+        boolean showSent = ui.card != null && !ui.editing;
+        red.bind(showSent ? ui.card.red : ui.red, input);
+        blue.bind(showSent ? ui.card.blue : ui.blue, input);
+        red.setDimmed(!input && !showSent);
+        blue.setDimmed(!input && !showSent);
+
+        var send = (com.google.android.material.button.MaterialButton) findViewById(R.id.score_send);
+        send.setEnabled(ui.sendEnabled);
+        if (showSent && ui.card.status != ScoreUi.CardStatus.SENDING) {
+            send.setText(getString(R.string.score_sent_n, ui.round));
+        } else if (ui.round > 0) {
+            send.setText(getString(R.string.score_send_n, ui.round));
+        } else {
+            send.setText(R.string.score_send);
+        }
         findViewById(R.id.score_correct).setVisibility(ui.canCorrect ? View.VISIBLE : View.GONE);
-        renderMessage(ui);
+        renderMessage(ui, online);
 
         if (ui.lateRound != null) {
             vm.lateHandled();
@@ -193,73 +179,51 @@ public class ScoreActivity extends AppCompatActivity {
         }
     }
 
+    /** Píldora neutra: estado del round y de la tarjeta, sin colores (DESIGN.md v2 §5.5). */
     private void renderStatus(ScoreUi ui) {
-        TextView chip = findViewById(R.id.score_status);
+        TextView pill = findViewById(R.id.score_status);
         int text;
-        int fg;
-        int bg;
-        if (ui.card == null) {
-            text = R.string.status_pending;
-            fg = R.color.status_pending_fg;
-            bg = R.color.status_pending_bg;
-        } else {
+        if (ui.card != null) {
             switch (ui.card.status) {
                 case SENDING:
                     text = R.string.status_sending;
-                    fg = R.color.status_pending_fg;
-                    bg = R.color.status_pending_bg;
                     break;
                 case CORRECTED:
                     text = R.string.status_corrected;
-                    fg = R.color.status_corrected_fg;
-                    bg = R.color.status_corrected_bg;
                     break;
                 case LATE:
                     text = R.string.status_late;
-                    fg = R.color.status_late_fg;
-                    bg = R.color.status_late_bg;
                     break;
                 case SENT:
                 default:
-                    text = R.string.status_sent;
-                    fg = R.color.status_sent_fg;
-                    bg = R.color.status_sent_bg;
+                    text = R.string.status_round_sent;
                     break;
             }
+        } else if (ui.roundOpen) {
+            text = R.string.status_round_open;
+        } else {
+            text = R.string.status_waiting_round;
         }
-        chip.setText(text);
-        chip.setTextColor(color(fg));
-        chip.setBackgroundTintList(null);
-        chip.setBackgroundColor(color(bg));
-        chip.setVisibility(ui.round > 0 ? View.VISIBLE : View.INVISIBLE);
+        pill.setText(text);
     }
 
-    private void renderMessage(ScoreUi ui) {
+    private void renderMessage(ScoreUi ui, boolean online) {
         TextView message = findViewById(R.id.score_message);
         String text = null;
         if (ui.lastError == Ack.Error.ROUND_NOT_OPEN) {
             text = getString(R.string.score_error_round_not_open);
         } else if (ui.lastError != null) {
             text = getString(R.string.score_error_generic, ui.lastError.name());
+        } else if (!online && ui.seat > 0) {
+            text = getString(R.string.score_offline);
         } else if (!ui.roundOpen && ui.round == 0) {
             text = getString(R.string.score_waiting_start);
         } else if (!ui.roundOpen && ui.card != null) {
-            text = getString(R.string.score_waiting_next, ui.round + 1);
+            text = getString(R.string.score_waiting_next);
+        } else if (!ui.roundOpen) {
+            text = getString(R.string.score_waiting_open, ui.round);
         }
         message.setVisibility(text == null ? View.GONE : View.VISIBLE);
         message.setText(text);
-        message.setTextColor(color(ui.lastError != null ? R.color.status_disconnected_fg : R.color.text_secondary));
-    }
-
-    private String value(Integer v) {
-        return v == null ? getString(R.string.score_empty) : String.valueOf(v);
-    }
-
-    private int color(int res) {
-        return ContextCompat.getColor(this, res);
-    }
-
-    private int dp(int value) {
-        return Math.round(value * getResources().getDisplayMetrics().density);
     }
 }
