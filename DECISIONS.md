@@ -28,3 +28,4 @@ Why: a reversible option after 15 min keeps work moving.
 - 1792956587 | DSK-011 | modo sencillo siempre; botones sin clase = secundario | Why: JavaFX sin backdrop blur
 - 1792957091 | deadline decision/DSK-011-1792955872/1792956772 | REVERSIBLE_AND_LOG | Option: Empaquetar Inter 4.1 (Regular/Medium/SemiBold/Bold) y Barlow Condensed (ExtraBoldItalic/BoldItalic) como TTF con su licencia OFL en resources/fonts y app/res/font; Why: DESIGN.md v2 §3.2; OFL permite redistribuir; sin descarga en ejecución; ~1.4 MB; no money, accounts, publishing or scope expansion.
 - 1792957778 | DSK-005 | id corto 6 chars; invitaciones en cache por pantalla | Why: dictable; no invalidar QR al navegar
+- 1792958529 | AND-007 | VM conserva semantica (tests); 10-10 lo aplica la pantalla | Why: no editar tests existentes
