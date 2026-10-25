@@ -8,6 +8,7 @@ import com.sigebox.central.server.JudgeServer;
 import com.sigebox.central.server.SeatTokens;
 import com.sigebox.central.server.ServerEvents;
 import com.sigebox.central.service.CorrectionService;
+import com.sigebox.central.service.FightService;
 import com.sigebox.central.service.ResultService;
 import com.sigebox.central.service.RoundService;
 import com.sigebox.central.service.TerminationService;
@@ -17,6 +18,7 @@ import com.sigebox.central.ui.log.LogQuery;
 import com.sigebox.central.ui.log.LogScreen;
 import com.sigebox.central.ui.result.ResultStepScreen;
 import com.sigebox.central.ui.rounds.RoundsScreen;
+import com.sigebox.central.ui.setup.SetupScreen;
 import com.sigebox.central.ui.termination.TerminationScreen;
 import com.sigebox.central.ui.terms.TermsGate;
 import com.sigebox.central.ui.terms.TermsScreen;
@@ -46,10 +48,13 @@ public final class App {
 
     public static final String TITLE = "SIGEBOX · Central";
 
+    /** El paso "Jueces" muestra la misma pantalla de preparar la pelea (DESIGN v2 §7.1). */
+    static final String JUECES = "jueces";
+
     /** Pasos de la barra superior (DESIGN v2 §7), en orden. */
     static final List<StepsBar.Item> STEPS = List.of(
-            new StepsBar.Item(SetupPlaceholder.PELEA, "Pelea"),
-            new StepsBar.Item(SetupPlaceholder.JUECES, "Jueces"),
+            new StepsBar.Item(SetupScreen.ID, "Pelea"),
+            new StepsBar.Item(JUECES, "Jueces"),
             new StepsBar.Item(RoundsScreen.ID, "En vivo"),
             new StepsBar.Item(ResultStepScreen.ID, "Resultado"));
 
@@ -71,21 +76,8 @@ public final class App {
         return gate.firstScreen(RoundsScreen.ID);
     }
 
-    /** Crear pelea y emparejar jueces llegan con DSK-005; hasta entonces, un aviso. */
-    static final class SetupPlaceholder {
-        static final String PELEA = "pelea";
-        static final String JUECES = "jueces";
-
-        private SetupPlaceholder() {
-        }
-
-        static Node build(String title) {
-            var card = Ui.glass(Ui.cardTitle(title),
-                    Ui.support("Crear la pelea, el QR y el código de cada lugar, y aprobar a los jueces."));
-            card.setMaxWidth(520);
-            return new VBox(16, Ui.screenTitle(title), card);
-        }
-    }
+    /** Ancho máximo de la columna centrada (DESIGN v2 §7). */
+    static final double COLUMN_WIDTH = 1100;
 
     /** Ventana principal: barra de pasos arriba y la pantalla activa al centro. */
     public static final class Window extends Application {
@@ -98,7 +90,8 @@ public final class App {
         public void start(Stage stage) {
             Theme.loadFonts();
             db = Database.openDefault();
-            hub = new JudgeHub(db, new SeatTokens(), ServerEvents.NONE);
+            var tokens = new SeatTokens(); // uno solo: lo emite la pantalla de pelea y lo valida el servidor
+            hub = new JudgeHub(db, tokens, ServerEvents.NONE);
             String serverError = null;
             try {
                 server = JudgeServer.start(hub, JudgeServer.DEFAULT_PORT);
@@ -120,8 +113,10 @@ public final class App {
             root.setCenter(content);
 
             TermsScreen.register(screens, gate, () -> show(screens, root, content, RoundsScreen.ID));
-            screens.register(SetupPlaceholder.PELEA, "Pelea", () -> SetupPlaceholder.build("Pelea"));
-            screens.register(SetupPlaceholder.JUECES, "Jueces", () -> SetupPlaceholder.build("Jueces"));
+            var setup = new SetupScreen(new FightService(db, tokens), hub, JudgeServer.DEFAULT_PORT,
+                    () -> show(screens, root, content, RoundsScreen.ID));
+            setup.register(screens, SetupScreen.ID, "Pelea");
+            setup.register(screens, JUECES, "Jueces");
             RoundsScreen.register(screens, RoundService.forHub(db, hub), fightId);
             ResultStepScreen.register(screens, ResultService.forHub(db, hub), new ExportService(), fightId);
             TerminationScreen.register(screens, TerminationService.forHub(db, hub), fightId);
@@ -152,9 +147,18 @@ public final class App {
 
         private static void show(Screens<Node> screens, BorderPane root, StackPane content, String id) {
             var node = screens.show(id);
+            // Columna centrada de hasta 1100 px, alineada arriba y con desplazamiento si no cabe.
+            node.getStyleClass().add("screen");
+            if (node instanceof javafx.scene.layout.Region r) {
+                r.setMaxWidth(COLUMN_WIDTH);
+            }
             var page = new VBox(node);
             page.getStyleClass().add("content");
-            content.getChildren().setAll(page);
+            page.setAlignment(javafx.geometry.Pos.TOP_CENTER);
+            var scroll = new javafx.scene.control.ScrollPane(page);
+            scroll.setFitToWidth(true);
+            scroll.setHbarPolicy(javafx.scene.control.ScrollPane.ScrollBarPolicy.NEVER);
+            content.getChildren().setAll(scroll);
         }
 
         @Override
