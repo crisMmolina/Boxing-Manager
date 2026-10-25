@@ -1,0 +1,25 @@
+/* Estilos base de la central. Los colores finales vienen de docs/DESIGN.md. */
+.root-pane {
+    -fx-font-size: 15px;
+    -fx-background-color: #f5f5f5;
+}
+
+.nav {
+    -fx-background-color: #1f2937;
+    -fx-min-width: 200px;
+}
+
+.nav .button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #f9fafb;
+    -fx-alignment: center-left;
+}
+
+.nav .button:hover {
+    -fx-background-color: #374151;
+}
+
+.placeholder {
+    -fx-text-fill: #6b7280;
+    -fx-font-size: 20px;
+}
