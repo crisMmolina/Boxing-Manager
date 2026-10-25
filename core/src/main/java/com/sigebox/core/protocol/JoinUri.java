@@ -8,13 +8,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * URI del QR de un lugar de juez: {@code sigebox://join?h=<host>&p=<puerto>&s=<fightId>&seat=<n>&t=<token>}.
+ * URI del QR de un lugar de juez: {@code sigebox://join?h=<host>&p=<puerto>&s=<fightId>&seat=<n>&t=<token>[&f=<huella>]}.
  *
  * @param port 1–65535
  * @param seat 1–5
  * @param token token de un solo uso del lugar
+ * @param certFingerprint SHA-256 en hex del certificado TLS de la central para fijarlo; {@code null} mientras la
+ *     conexión sea {@code ws://} (reservado para {@code wss://})
  */
-public record JoinUri(String host, int port, String fightId, int seat, String token) {
+public record JoinUri(String host, int port, String fightId, int seat, String token, String certFingerprint) {
 
     public static final String SCHEME = "sigebox";
     public static final String ACTION = "join";
@@ -29,6 +31,9 @@ public record JoinUri(String host, int port, String fightId, int seat, String to
         if (seat < 1 || seat > 5) {
             throw new IllegalArgumentException("lugar fuera de rango: " + seat);
         }
+        if (certFingerprint != null) {
+            Fields.match(certFingerprint, "f", Fields.HEX64);
+        }
     }
 
     /** @throws ProtocolException si no es una URI de unión válida */
@@ -39,15 +44,15 @@ public record JoinUri(String host, int port, String fightId, int seat, String to
                 throw new IllegalArgumentException("no es " + SCHEME + "://" + ACTION);
             }
             Map<String, String> q = query(parsed.getRawQuery());
-            return new JoinUri(q.get("h"), number(q, "p"), q.get("s"), number(q, "seat"), q.get("t"));
+            return new JoinUri(q.get("h"), number(q, "p"), q.get("s"), number(q, "seat"), q.get("t"), q.get("f"));
         } catch (Exception e) {
-            throw new ProtocolException("URI de unión inválida: " + e.getMessage(), e);
+            throw new ProtocolException("URI de unión inválida", e);
         }
     }
 
     public String toUri() {
         return SCHEME + "://" + ACTION + "?h=" + encode(host) + "&p=" + port + "&s=" + encode(fightId)
-                + "&seat=" + seat + "&t=" + encode(token);
+                + "&seat=" + seat + "&t=" + encode(token) + (certFingerprint == null ? "" : "&f=" + certFingerprint);
     }
 
     private static Map<String, String> query(String raw) {

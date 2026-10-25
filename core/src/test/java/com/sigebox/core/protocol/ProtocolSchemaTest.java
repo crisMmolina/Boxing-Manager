@@ -47,6 +47,9 @@ class ProtocolSchemaTest {
         return JsonParser.parseString(read(FIXTURES.resolve(type.wire() + ".json"))).getAsJsonObject();
     }
 
+    private static final String KEY = fixture(MessageType.JOIN).get("publicKey").getAsString();
+    private static final String SIG = fixture(MessageType.JOIN).get("sig").getAsString();
+
     static boolean valid(MessageType type, String json) {
         return schema(type).validate(json, InputFormat.JSON).isEmpty();
     }
@@ -123,11 +126,12 @@ class ProtocolSchemaTest {
     @Test
     void mensajesConstruidosEnJavaPasanSuSchema() {
         List<Message> samples = List.of(
-                new Join("f-1", 1, "tok", "María López", "dev-1", "huella"),
+                new Challenge("AAAAAAAAAAAAAAAAAAAAAA"),
+                new Join("f-1", 1, "123456", "María López", "dev-1", KEY, "AAAAAAAAAAAAAAAAAAAAAA", SIG),
                 new JoinPending("f-1", 1),
                 new JoinApproved("f-1", 1, "María López", "Roja", "Azul", 4),
                 new JoinRejected("f-1", 1, JoinRejected.Reason.TOKEN_USED),
-                new Hello("f-1", 1, "dev-1", "huella"),
+                new Hello("f-1", 1, "dev-1", "AAAAAAAAAAAAAAAAAAAAAA", SIG),
                 new State("f-1", 1, "María López", "Roja", "Azul", 4,
                         com.sigebox.core.model.EstadoPelea.EN_CURSO, 1,
                         com.sigebox.core.model.EstadoRound.ABIERTO,
@@ -136,12 +140,13 @@ class ProtocolSchemaTest {
                 new RoundClosed("f-1", 1, true, false),
                 new SubmitRound("f-1", 1, 1, 10, 9),
                 new Ack("a3b9c2d4-0000-4000-8000-000000000000", true, com.sigebox.core.model.EstadoTarjeta.TARDIA, null),
-                new SubmitFinalCard("f-1", 1, "0".repeat(64)),
+                new Ack("a3b9c2d4-0000-4000-8000-000000000000", false, null, Ack.Error.BAD_SIGNATURE),
+                new SubmitFinalCard("f-1", 1, "0".repeat(64), SIG),
                 new FightEnded("f-1", com.sigebox.core.model.MotivoTerminacion.KO),
                 new FightClosed("f-1"),
                 new Ping(1L),
                 new Pong(1L));
-        assertEquals(MessageType.values().length, samples.size());
+        assertEquals(MessageType.values().length + 1, samples.size());
         for (Message msg : samples) {
             MessageType type = MessageType.fromWire(msg.type());
             String json = Messages.encode(msg);

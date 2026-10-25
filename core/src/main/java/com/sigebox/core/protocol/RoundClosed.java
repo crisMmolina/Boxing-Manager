@@ -18,8 +18,8 @@ public record RoundClosed(
 
     public RoundClosed {
         Fields.base(v, id, type, TYPE);
-        Fields.require(fightId, "fightId");
-        Fields.require(round, "round");
+        Fields.text(fightId, "fightId", 1, 64);
+        Fields.range(round, "round", 1, 12);
         Fields.require(forced, "forced");
         Fields.require(mustSubmit, "mustSubmit");
     }

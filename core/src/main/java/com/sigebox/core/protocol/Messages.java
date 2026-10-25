@@ -1,20 +1,27 @@
 package com.sigebox.core.protocol;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
 import com.google.gson.Strictness;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import java.io.IOException;
 import java.io.StringReader;
+import java.math.BigDecimal;
 
 /**
  * Codifica y decodifica mensajes del protocolo v1 en JSON. Los campos {@code null} se omiten. La lectura es
- * estricta: JSON estándar y sin conversión de tipos (ver {@link StrictAdapters}).
+ * estricta: JSON estándar, sin claves repetidas, con profundidad limitada y sin conversión de tipos (ver
+ * {@link StrictAdapters}). Los errores no repiten el contenido recibido.
  */
 public final class Messages {
+
+    /** Profundidad máxima de objetos y arreglos anidados. */
+    static final int MAX_DEPTH = 8;
 
     private static final Gson GSON = StrictAdapters.gson();
 
@@ -27,8 +34,9 @@ public final class Messages {
     /**
      * Lee un mensaje. Ignora campos desconocidos (el schema los rechaza).
      *
-     * @throws ProtocolException si no es JSON estándar, no es un objeto, el tipo no existe, {@code v} no es 1,
-     *     el {@code id} no es UUID, un campo tiene otro tipo o falta un campo requerido
+     * @throws ProtocolException si no es JSON estándar, no es un objeto, tiene claves repetidas o demasiado
+     *     anidamiento, el tipo no existe, {@code v} no es 1, el {@code id} no es UUID, un campo tiene otro tipo,
+     *     falta un campo requerido o un valor sale de su rango, longitud o formato
      */
     public static Message decode(String json) {
         JsonObject obj = parseObject(json);
@@ -40,7 +48,7 @@ public final class Messages {
         try {
             return GSON.fromJson(obj, messageType.dtoClass());
         } catch (RuntimeException e) {
-            throw new ProtocolException(messageType + " inválido: " + rootMessage(e), e);
+            throw new ProtocolException(messageType + " inválido", e);
         }
     }
 
@@ -49,12 +57,12 @@ public final class Messages {
         try {
             JsonReader reader = new JsonReader(new StringReader(json));
             reader.setStrictness(Strictness.STRICT);
-            element = JsonParser.parseReader(reader);
+            element = read(reader, 0);
             if (reader.peek() != JsonToken.END_DOCUMENT) {
                 throw new ProtocolException("datos después del mensaje");
             }
         } catch (IOException | RuntimeException e) {
-            throw new ProtocolException("JSON inválido", e);
+            throw e instanceof ProtocolException ? (ProtocolException) e : new ProtocolException("JSON inválido", e);
         }
         if (!element.isJsonObject()) {
             throw new ProtocolException("el mensaje no es un objeto JSON");
@@ -62,11 +70,47 @@ public final class Messages {
         return element.getAsJsonObject();
     }
 
-    private static String rootMessage(Throwable e) {
-        Throwable t = e;
-        while (t.getCause() != null) {
-            t = t.getCause();
+    private static JsonElement read(JsonReader in, int depth) throws IOException {
+        switch (in.peek()) {
+            case BEGIN_OBJECT:
+                checkDepth(depth);
+                JsonObject obj = new JsonObject();
+                in.beginObject();
+                while (in.hasNext()) {
+                    String name = in.nextName();
+                    if (obj.has(name)) {
+                        throw new ProtocolException("clave repetida");
+                    }
+                    obj.add(name, read(in, depth + 1));
+                }
+                in.endObject();
+                return obj;
+            case BEGIN_ARRAY:
+                checkDepth(depth);
+                JsonArray array = new JsonArray();
+                in.beginArray();
+                while (in.hasNext()) {
+                    array.add(read(in, depth + 1));
+                }
+                in.endArray();
+                return array;
+            case STRING:
+                return new JsonPrimitive(in.nextString());
+            case NUMBER:
+                return new JsonPrimitive(new BigDecimal(in.nextString()));
+            case BOOLEAN:
+                return new JsonPrimitive(in.nextBoolean());
+            case NULL:
+                in.nextNull();
+                return JsonNull.INSTANCE;
+            default:
+                throw new ProtocolException("JSON inválido");
         }
-        return t.getMessage();
+    }
+
+    private static void checkDepth(int depth) {
+        if (depth >= MAX_DEPTH) {
+            throw new ProtocolException("demasiado anidamiento");
+        }
     }
 }

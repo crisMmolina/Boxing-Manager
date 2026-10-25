@@ -15,11 +15,25 @@ Un JSON Schema (draft 2020-12) por mensaje: `<type en minúsculas>.schema.json`.
 
   Los campos desconocidos se ignoran, aunque el Schema los rechaza.
 - `Messages.decode` no revisa rangos (0–10, lugar 1–5, round 1–12). Los revisan el Schema y `com.sigebox.core.validation` (CORE-003).
-- La central nunca confía en `seat` ni en `fightId` del mensaje: los compara con la sesión aprobada.
-- `ACK.ackId` es el `id` del mensaje que se confirma. El `ACK` sale después de persistir. Si el servidor recibe dos veces el mismo `id`, responde el mismo `ACK`.
+- Los records validan las mismas reglas que su Schema: requeridos, longitudes, rangos 0–10 / 1–5 / 1–12 y patrones. Los textos no pueden estar vacíos ni traer caracteres de control o de formato (`\n`, U+0000, U+202E…). La central aplica todo esto sin el validador de Schema.
+- La central nunca confía en `seat` ni en `fightId` del mensaje: los compara con la sesión aprobada (CORE-003 `ScoreValidator`, y una prueba en DSK).
+- `ACK.ackId` es el `id` del mensaje que se confirma. El `ACK` sale después de persistir. Un mensaje repetido se reconoce por (lugar de la sesión, `id`), no solo por `id`, y recibe el mismo `ACK`.
+- `ACK.error` es un código del enum `Ack.Error`, nunca texto del mensaje recibido. Los errores de `decode` tampoco repiten el contenido.
 - `STATE` lleva solo las tarjetas del juez que lo recibe y nunca totales ni ganador.
 - `SUBMIT_FINAL_CARD.hash` = `FinalCardHash.of(fightId, seat, cards)`, es decir, SHA-256 hex del texto canónico descrito en esa clase.
-- El QR lleva `sigebox://join?h=&p=&s=&seat=&t=` (`JoinUri`).
+- El QR lleva `sigebox://join?h=&p=&s=&seat=&t=[&f=]` (`JoinUri`). `f` (huella SHA-256 del certificado de la central) queda reservado para cuando la conexión sea `wss://`.
+
+## Identidad del teléfono (amenaza Spoofing)
+1. El teléfono crea una sola vez un par de llaves EC P-256 en el Android Keystore. La llave privada nunca sale del equipo.
+2. En cada conexión, la central manda primero `CHALLENGE{nonce}`: 128 bits aleatorios, que sirven una sola vez.
+3. Para unirse, el teléfono manda `JOIN` con `publicKey` y `sig = sign(DeviceProof.joinText(...))` sobre ese nonce. La central verifica la firma y muestra al organizador la huella (`DeviceProof.fingerprint`) junto al nombre para que apruebe.
+4. Para reconectarse, el teléfono manda `HELLO` con `sig = sign(DeviceProof.helloText(...))`. La central lo verifica con la llave registrada en el `JOIN`. Capturar un `HELLO` no sirve, porque el siguiente nonce es otro.
+5. `SUBMIT_FINAL_CARD` lleva `sig` sobre `DeviceProof.finalCardText(...)`, de modo que el juez no puede negar su tarjeta.
+6. `DeviceProof.sign` funciona con una llave del Keystore y también con una llave en memoria (`judge-sim`).
+
+**Lo que queda abierto (aceptado en v1, red local sin internet):** alguien que intercepte activamente el hotspot (ARP spoofing) podría secuestrar una conexión ya autenticada. La solución es `wss://` con el certificado fijado por `f` en el QR.
+
+**Código de 6 dígitos:** el `token` admite 6 caracteres para el código manual. El token del QR debe tener 22 o más caracteres aleatorios (`SecureRandom`). Con el código manual, la central limita los intentos por conexión.
 
 ## Android
 - `core` corre en Android 8 (API 26). En `src/main` solo se usan APIs de Java disponibles en API 26:

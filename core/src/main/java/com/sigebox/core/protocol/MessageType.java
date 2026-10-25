@@ -4,6 +4,7 @@ import java.util.Locale;
 
 /** Tipos de mensaje del protocolo v1, su DTO y su JSON Schema en {@code core/schemas/}. */
 public enum MessageType {
+    CHALLENGE(Challenge.class),
     JOIN(Join.class),
     JOIN_PENDING(JoinPending.class),
     JOIN_APPROVED(JoinApproved.class),
@@ -47,6 +48,6 @@ public enum MessageType {
                 return t;
             }
         }
-        throw new ProtocolException("type desconocido: " + type);
+        throw new ProtocolException("type desconocido");
     }
 }

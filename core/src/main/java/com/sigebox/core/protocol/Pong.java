@@ -11,7 +11,7 @@ public record Pong(int v, String id, String type, Long ts) implements Message {
 
     public Pong {
         Fields.base(v, id, type, TYPE);
-        Fields.require(ts, "ts");
+        Fields.range(ts, "ts", 0, Long.MAX_VALUE);
     }
 
     /** Mensaje nuevo con {@code v = 1} e {@code id} aleatorio. */

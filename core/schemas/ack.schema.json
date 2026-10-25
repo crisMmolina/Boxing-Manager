@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://sigebox.local/schemas/ack.schema.json",
   "title": "ACK",
-  "description": "Confirma un mensaje después de persistirlo. error solo cuando ok es falso. (central → juez)",
+  "description": "Confirma un mensaje después de persistirlo. status cuando ok; error solo cuando ok es falso. (central → juez)",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -39,9 +39,16 @@
       ]
     },
     "error": {
-      "type": "string",
-      "minLength": 1,
-      "maxLength": 64
+      "enum": [
+        "MALFORMED",
+        "NOT_APPROVED",
+        "BAD_SIGNATURE",
+        "WRONG_SESSION",
+        "INVALID_SCORE",
+        "ROUND_NOT_OPEN",
+        "FIGHT_NOT_ACTIVE",
+        "ALREADY_FINAL"
+      ]
     }
   }
 }

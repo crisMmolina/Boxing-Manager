@@ -19,11 +19,11 @@ public record SubmitRound(
 
     public SubmitRound {
         Fields.base(v, id, type, TYPE);
-        Fields.require(fightId, "fightId");
-        Fields.require(seat, "seat");
-        Fields.require(round, "round");
-        Fields.require(red, "red");
-        Fields.require(blue, "blue");
+        Fields.text(fightId, "fightId", 1, 64);
+        Fields.range(seat, "seat", 1, 5);
+        Fields.range(round, "round", 1, 12);
+        Fields.range(red, "red", 0, 10);
+        Fields.range(blue, "blue", 0, 10);
     }
 
     /** Mensaje nuevo con {@code v = 1} e {@code id} aleatorio. */

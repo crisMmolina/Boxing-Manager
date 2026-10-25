@@ -14,7 +14,7 @@ class FinalCardHashTest {
         return new State.OwnCard(round, red, blue, EstadoTarjeta.ENVIADA);
     }
 
-    private static final List<State.OwnCard> JUEZ_2 =
+    static final List<State.OwnCard> JUEZ_2 =
             List.of(card(1, 9, 10), card(2, 9, 10), card(3, 10, 9), card(4, 9, 10));
 
     @Test

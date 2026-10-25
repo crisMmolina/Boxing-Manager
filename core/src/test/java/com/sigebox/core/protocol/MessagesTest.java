@@ -56,6 +56,47 @@ class MessagesTest {
         assertEquals(new Ack(1, ID, "ACK", ID, true, null, null), Messages.decode(json));
     }
 
+    private static final String SUBMIT = "{\"v\":1,\"id\":\"" + ID + "\",\"type\":\"SUBMIT_ROUND\",\"fightId\":\"f\","
+            + "\"seat\":1,\"round\":1,";
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "\"red\":-1,\"blue\":9}",
+        "\"red\":11,\"blue\":9}",
+        "\"red\":10,\"blue\":9,\"seat\":2}",
+    })
+    void rechazaFueraDeRangoYClavesRepetidas(String tail) {
+        assertThrows(ProtocolException.class, () -> Messages.decode(SUBMIT + tail));
+    }
+
+    @Test
+    void rechazaAnidamientoProfundo() {
+        String deep = "{\"v\":1,\"id\":\"" + ID + "\",\"type\":\"PING\",\"ts\":1,\"x\":" + "[".repeat(10000)
+                + "]".repeat(10000) + "}";
+        assertThrows(ProtocolException.class, () -> Messages.decode(deep));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"", " ", "Ana\u202ELópez", "Ana\nLópez", "Ana\u0000"})
+    void rechazaTextoVacioOConCaracteresDeControl(String name) {
+        assertThrows(IllegalArgumentException.class, () -> new JoinPending(name, 1));
+    }
+
+    @Test
+    void rechazaTarjetaNula() {
+        java.util.List<State.OwnCard> cards = new java.util.ArrayList<>();
+        cards.add(null);
+        assertThrows(IllegalArgumentException.class, () -> new State("f", 1, "A", "R", "B", 4,
+                com.sigebox.core.model.EstadoPelea.EN_CURSO, 1, null, cards, false));
+    }
+
+    @Test
+    void rechazaRangoEnConstructor() {
+        assertThrows(IllegalArgumentException.class, () -> new SubmitRound("f", 1, 1, 11, 9));
+        assertThrows(IllegalArgumentException.class, () -> new SubmitRound("f", 6, 1, 10, 9));
+        assertThrows(IllegalArgumentException.class, () -> new Ping(-1L));
+    }
+
     @Test
     void rechazaNull() {
         assertThrows(ProtocolException.class, () -> Messages.decode(null));
@@ -63,14 +104,14 @@ class MessagesTest {
 
     @Test
     void omiteCamposNulos() {
-        String json = Messages.encode(new Ack(ID, false, null, "ROUND_NOT_OPEN"));
+        String json = Messages.encode(new Ack(ID, false, null, Ack.Error.ROUND_NOT_OPEN));
         assertFalse(json.contains("status"), json);
         assertTrue(json.contains("\"error\":\"ROUND_NOT_OPEN\""), json);
     }
 
     @Test
     void noEscapaHtml() {
-        String json = Messages.encode(new Join("f=1", 1, "a<b", "Ñandú & Co", "d", "h"));
+        String json = Messages.encode(new JoinApproved("f=1", 1, "Ñandú & Co", "a<b", "B", 4));
         assertTrue(json.contains("f=1") && json.contains("a<b") && json.contains("Ñandú & Co"), json);
     }
 

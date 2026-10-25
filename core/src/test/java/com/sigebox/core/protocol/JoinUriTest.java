@@ -12,12 +12,20 @@ class JoinUriTest {
     @Test
     void leeLaUriDelQr() {
         JoinUri uri = JoinUri.parse("sigebox://join?h=192.168.43.10&p=8765&s=pelea-ref-001&seat=2&t=k3J9xQ");
-        assertEquals(new JoinUri("192.168.43.10", 8765, "pelea-ref-001", 2, "k3J9xQ"), uri);
+        assertEquals(new JoinUri("192.168.43.10", 8765, "pelea-ref-001", 2, "k3J9xQ", null), uri);
+    }
+
+    @Test
+    void llevaLaHuellaDelCertificadoSiLaHay() {
+        String f = "a".repeat(64);
+        JoinUri uri = new JoinUri("h", 8765, "s", 1, "t", f);
+        assertEquals("sigebox://join?h=h&p=8765&s=s&seat=1&t=t&f=" + f, uri.toUri());
+        assertEquals(uri, JoinUri.parse(uri.toUri()));
     }
 
     @Test
     void idaYVueltaConCaracteresEspeciales() {
-        JoinUri uri = new JoinUri("central.local", 8765, "pelea 1&2=ñ", 5, "a+b/c?d");
+        JoinUri uri = new JoinUri("central.local", 8765, "pelea 1&2=ñ", 5, "a+b/c?d", null);
         assertEquals("sigebox://join?h=central.local&p=8765&s=pelea+1%262%3D%C3%B1&seat=5&t=a%2Bb%2Fc%3Fd",
                 uri.toUri());
         assertEquals(uri, JoinUri.parse(uri.toUri()));
@@ -43,6 +51,7 @@ class JoinUriTest {
         "sigebox://join?h=h&p=1&s=s&seat=6&t=t",
         "sigebox://join?h=h&p=1&s=%20&seat=1&t=t",
         "sigebox://join?h=h&p=1&s=s&seat=1",
+        "sigebox://join?h=h&p=1&s=s&seat=1&t=t&f=XYZ",
         "no es una uri ::"
     })
     void rechazaUrisInvalidas(String uri) {

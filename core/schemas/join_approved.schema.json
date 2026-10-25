@@ -30,7 +30,8 @@
     "fightId": {
       "type": "string",
       "minLength": 1,
-      "maxLength": 64
+      "maxLength": 64,
+      "pattern": "^[^\\u0000-\\u001F\\u007F-\\u009F\\u00AD\\u200B-\\u200F\\u202A-\\u202E\\u2060-\\u2064\\u2066-\\u206F\\uFEFF]+$"
     },
     "seat": {
       "type": "integer",
@@ -40,17 +41,20 @@
     "judgeName": {
       "type": "string",
       "minLength": 1,
-      "maxLength": 80
+      "maxLength": 80,
+      "pattern": "^[^\\u0000-\\u001F\\u007F-\\u009F\\u00AD\\u200B-\\u200F\\u202A-\\u202E\\u2060-\\u2064\\u2066-\\u206F\\uFEFF]+$"
     },
     "redCorner": {
       "type": "string",
       "minLength": 1,
-      "maxLength": 80
+      "maxLength": 80,
+      "pattern": "^[^\\u0000-\\u001F\\u007F-\\u009F\\u00AD\\u200B-\\u200F\\u202A-\\u202E\\u2060-\\u2064\\u2066-\\u206F\\uFEFF]+$"
     },
     "blueCorner": {
       "type": "string",
       "minLength": 1,
-      "maxLength": 80
+      "maxLength": 80,
+      "pattern": "^[^\\u0000-\\u001F\\u007F-\\u009F\\u00AD\\u200B-\\u200F\\u202A-\\u202E\\u2060-\\u2064\\u2066-\\u206F\\uFEFF]+$"
     },
     "rounds": {
       "type": "integer",

@@ -33,23 +33,23 @@ public record State(
     /** Una tarjeta propia del juez. */
     public record OwnCard(Integer round, Integer red, Integer blue, EstadoTarjeta status) {
         public OwnCard {
-            Fields.require(round, "round");
-            Fields.require(red, "red");
-            Fields.require(blue, "blue");
+            Fields.range(round, "round", 1, 12);
+            Fields.range(red, "red", 0, 10);
+            Fields.range(blue, "blue", 0, 10);
             Fields.require(status, "status");
         }
     }
 
     public State {
         Fields.base(v, id, type, TYPE);
-        Fields.require(fightId, "fightId");
-        Fields.require(seat, "seat");
-        Fields.require(judgeName, "judgeName");
-        Fields.require(redCorner, "redCorner");
-        Fields.require(blueCorner, "blueCorner");
-        Fields.require(rounds, "rounds");
+        Fields.text(fightId, "fightId", 1, 64);
+        Fields.range(seat, "seat", 1, 5);
+        Fields.text(judgeName, "judgeName", 1, 80);
+        Fields.text(redCorner, "redCorner", 1, 80);
+        Fields.text(blueCorner, "blueCorner", 1, 80);
+        Fields.range(rounds, "rounds", 1, 12);
         Fields.require(fightStatus, "fightStatus");
-        Fields.require(currentRound, "currentRound");
+        Fields.range(currentRound, "currentRound", 0, 12);
         cards = Fields.copy(Fields.require(cards, "cards"));
         Fields.require(finalCardSent, "finalCardSent");
     }

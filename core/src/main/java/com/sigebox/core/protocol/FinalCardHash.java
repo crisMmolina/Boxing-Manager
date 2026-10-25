@@ -8,7 +8,7 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * Huella de la tarjeta final de un juez: SHA-256 en hex (minúsculas) de un texto canónico. El teléfono y la
+ * Huella de la tarjeta final de un juez (la firma va aparte, en {@link DeviceProof}): SHA-256 en hex (minúsculas) de un texto canónico. El teléfono y la
  * central la calculan igual.
  *
  * <p>Texto canónico, una línea por elemento terminada en {@code \n}: {@code SIGEBOX-FINAL-v1}, el
@@ -23,7 +23,7 @@ public final class FinalCardHash {
 
     /** @throws IllegalArgumentException si un round aparece dos veces */
     public static String of(String fightId, int seat, List<State.OwnCard> cards) {
-        return sha256(canonical(fightId, seat, cards));
+        return sha256Hex(canonical(fightId, seat, cards).getBytes(StandardCharsets.UTF_8));
     }
 
     static String canonical(String fightId, int seat, List<State.OwnCard> cards) {
@@ -41,11 +41,12 @@ public final class FinalCardHash {
         return sb.toString();
     }
 
-    private static String sha256(String text) {
+    /** SHA-256 en hex (minúsculas). */
+    public static String sha256Hex(byte[] data) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             StringBuilder hex = new StringBuilder();
-            for (byte b : digest.digest(text.getBytes(StandardCharsets.UTF_8))) {
+            for (byte b : digest.digest(data)) {
                 hex.append(Character.forDigit((b >> 4) & 0xf, 16)).append(Character.forDigit(b & 0xf, 16));
             }
             return hex.toString();

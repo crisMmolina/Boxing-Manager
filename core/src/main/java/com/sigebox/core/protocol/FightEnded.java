@@ -20,7 +20,7 @@ public record FightEnded(
 
     public FightEnded {
         Fields.base(v, id, type, TYPE);
-        Fields.require(fightId, "fightId");
+        Fields.text(fightId, "fightId", 1, 64);
     }
 
     /** Mensaje nuevo con {@code v = 1} e {@code id} aleatorio. */

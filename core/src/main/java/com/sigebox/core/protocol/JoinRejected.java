@@ -17,13 +17,13 @@ public record JoinRejected(
 
     /** Motivo del rechazo. */
     public enum Reason {
-        TOKEN_INVALID, TOKEN_USED, SEAT_TAKEN, REJECTED
+        TOKEN_INVALID, TOKEN_USED, SEAT_TAKEN, BAD_SIGNATURE, REJECTED
     }
 
     public JoinRejected {
         Fields.base(v, id, type, TYPE);
-        Fields.require(fightId, "fightId");
-        Fields.require(seat, "seat");
+        Fields.text(fightId, "fightId", 1, 64);
+        Fields.range(seat, "seat", 1, 5);
         Fields.require(reason, "reason");
     }
 

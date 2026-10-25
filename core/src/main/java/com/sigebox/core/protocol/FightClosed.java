@@ -11,7 +11,7 @@ public record FightClosed(int v, String id, String type, String fightId) impleme
 
     public FightClosed {
         Fields.base(v, id, type, TYPE);
-        Fields.require(fightId, "fightId");
+        Fields.text(fightId, "fightId", 1, 64);
     }
 
     /** Mensaje nuevo con {@code v = 1} e {@code id} aleatorio. */

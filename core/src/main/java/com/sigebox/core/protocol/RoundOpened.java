@@ -11,8 +11,8 @@ public record RoundOpened(int v, String id, String type, String fightId, Integer
 
     public RoundOpened {
         Fields.base(v, id, type, TYPE);
-        Fields.require(fightId, "fightId");
-        Fields.require(round, "round");
+        Fields.text(fightId, "fightId", 1, 64);
+        Fields.range(round, "round", 1, 12);
     }
 
     /** Mensaje nuevo con {@code v = 1} e {@code id} aleatorio. */

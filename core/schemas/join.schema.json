@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://sigebox.local/schemas/join.schema.json",
   "title": "JOIN",
-  "description": "El teléfono pide unirse a un lugar con el token del QR. (juez → central)",
+  "description": "El teléfono pide unirse a un lugar con el token del QR (o el código de 6 dígitos) y registra su llave pública; sig firma DeviceProof.joinText. (juez → central)",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -14,7 +14,9 @@
     "token",
     "judgeName",
     "deviceId",
-    "credentialFingerprint"
+    "publicKey",
+    "nonce",
+    "sig"
   ],
   "properties": {
     "v": {
@@ -30,7 +32,8 @@
     "fightId": {
       "type": "string",
       "minLength": 1,
-      "maxLength": 64
+      "maxLength": 64,
+      "pattern": "^[^\\u0000-\\u001F\\u007F-\\u009F\\u00AD\\u200B-\\u200F\\u202A-\\u202E\\u2060-\\u2064\\u2066-\\u206F\\uFEFF]+$"
     },
     "seat": {
       "type": "integer",
@@ -39,23 +42,39 @@
     },
     "token": {
       "type": "string",
-      "minLength": 1,
-      "maxLength": 128
+      "minLength": 6,
+      "maxLength": 128,
+      "pattern": "^[^\\u0000-\\u001F\\u007F-\\u009F\\u00AD\\u200B-\\u200F\\u202A-\\u202E\\u2060-\\u2064\\u2066-\\u206F\\uFEFF]+$"
     },
     "judgeName": {
       "type": "string",
       "minLength": 1,
-      "maxLength": 80
+      "maxLength": 80,
+      "pattern": "^[^\\u0000-\\u001F\\u007F-\\u009F\\u00AD\\u200B-\\u200F\\u202A-\\u202E\\u2060-\\u2064\\u2066-\\u206F\\uFEFF]+$"
     },
     "deviceId": {
       "type": "string",
       "minLength": 1,
-      "maxLength": 128
+      "maxLength": 128,
+      "pattern": "^[^\\u0000-\\u001F\\u007F-\\u009F\\u00AD\\u200B-\\u200F\\u202A-\\u202E\\u2060-\\u2064\\u2066-\\u206F\\uFEFF]+$"
     },
-    "credentialFingerprint": {
+    "publicKey": {
       "type": "string",
-      "minLength": 1,
-      "maxLength": 128
+      "minLength": 60,
+      "maxLength": 400,
+      "pattern": "^[A-Za-z0-9+/]+={0,2}$"
+    },
+    "nonce": {
+      "type": "string",
+      "minLength": 22,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9_-]{22,128}$"
+    },
+    "sig": {
+      "type": "string",
+      "minLength": 40,
+      "maxLength": 200,
+      "pattern": "^[A-Za-z0-9+/]+={0,2}$"
     }
   }
 }
