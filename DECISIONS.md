@@ -31,3 +31,4 @@ Why: a reversible option after 15 min keeps work moving.
 - 1792958529 | AND-007 | VM conserva semantica (tests); 10-10 lo aplica la pantalla | Why: no editar tests existentes
 - 1792962409 | AND-007 | VM semantica intacta; 10-10 en la pantalla; tarjetas opacas | Why: tests existentes; sombra translucida
 - 1792963372 | DSK-013 | columna 1100 centrada via .screen; tokens compartidos | Why: pedido de zoe; codigos no validaban
+- 1792965234 | DSK-012 | board() intacto; registro una vez por pelea en EventLog | Why: contrato y refresco 500 ms
