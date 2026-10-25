@@ -2,6 +2,7 @@ package com.sigebox.central.ui.termination;
 
 import com.sigebox.central.service.TerminationService;
 import com.sigebox.central.ui.Screens;
+import com.sigebox.central.ui.theme.Ui;
 import com.sigebox.core.model.Esquina;
 import com.sigebox.core.model.MotivoTerminacion;
 import java.util.function.Supplier;
@@ -45,15 +46,14 @@ public final class TerminationScreen {
         tiempo.setPromptText("m:ss");
         var obs = new TextArea();
         obs.setPrefRowCount(3);
-        var status = new Label();
+        var status = Ui.support("");
 
         motivo.valueProperty().addListener((o, a, m) -> {
             otro.setDisable(m != MotivoTerminacion.OTRO);
             esquina.setDisable(m != null && !TerminationService.requiresCorner(m) && m != MotivoTerminacion.OTRO);
         });
 
-        var terminar = new Button("Terminar pelea");
-        terminar.getStyleClass().add("danger");
+        var terminar = Ui.primary("Terminar pelea");
         terminar.setOnAction(e -> {
             var f = fightId.get();
             if (f == null || motivo.getValue() == null) {
@@ -82,16 +82,18 @@ public final class TerminationScreen {
         });
 
         var form = new GridPane();
+        form.getStyleClass().add("form");
         form.setHgap(12);
         form.setVgap(10);
-        form.addRow(0, new Label("Motivo"), motivo);
-        form.addRow(1, new Label("Razón"), otro);
-        form.addRow(2, new Label("Esquina ganadora"), esquina);
-        form.addRow(3, new Label("Round"), round);
-        form.addRow(4, new Label("Tiempo"), tiempo);
-        form.addRow(5, new Label("Observaciones"), obs);
-        var root = new VBox(16, new Label("Terminación extraordinaria"), form, terminar, status);
-        root.setPadding(new Insets(24));
+        form.addRow(0, Ui.support("Motivo"), motivo);
+        form.addRow(1, Ui.support("Razón"), otro);
+        form.addRow(2, Ui.support("Esquina ganadora"), esquina);
+        form.addRow(3, Ui.support("Round"), round);
+        form.addRow(4, Ui.support("Tiempo"), tiempo);
+        form.addRow(5, Ui.support("Observaciones"), obs);
+        var card = Ui.glass(Ui.cardTitle("Datos de la terminación"), form, terminar);
+        card.setMaxWidth(720);
+        var root = new VBox(16, Ui.screenTitle("Terminación extraordinaria"), card, status);
         return root;
     }
 
