@@ -41,8 +41,8 @@ CODEOWNERS: `app/` → @crisMmolina · `BOXCENTRAL/` → @zoe718 · `core/` → 
 ## Executable config
 ```text
 Mode: marathon
-Backlog-Proposed-Epoch: 0
-Backlog-Approved: no
+Backlog-Proposed-Epoch: 1792906554
+Backlog-Approved: yes
 Autonomy: yes
 Auto-Merge: no
 Review-Mode: gh
