@@ -457,6 +457,22 @@ En Windows (zoe) los comandos `Verify` se corren en Git Bash.
 - **Verify:** `BOXCENTRAL/gradlew -p BOXCENTRAL :judge-sim:test`
 - **Next step:** `this.plans = new TreeMap<>(plans)` en el constructor
 
+## DSK-015 · Atajos del tablero en vivo: Ctrl+Enter, Corregir y Cerrar pelea
+
+- **Type:** feature
+- **Priority:** P1
+- **Estimate:** 1 h
+- **Rubric / Spec:** `docs/DESIGN.md` v2 §7.2 (control del round), seguimiento de DSK-012
+- **Depends on:** DSK-012
+- **Paths:** BOXCENTRAL/src/main/java/com/sigebox/central/App.java, BOXCENTRAL/src/main/java/com/sigebox/central/ui/rounds/
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - `Ctrl+Enter` en el tablero abre o cierra el round según el estado (con la misma confirmación AVANZAR si faltan jueces)
+  - Botón secundario "Corregir un round" lleva a la pantalla de corrección
+  - Tras el último round, el botón principal es "Cerrar pelea" y lleva a Resultado
+- **Verify:** `BOXCENTRAL/gradlew -p BOXCENTRAL build`
+- **Next step:** `RoundsScreen.register` recibe los callbacks `onCorrect` y `onFinish` desde `App`
+
 ## QA-001 · Integración: corte de 60 s, cierre forzado y latencia ≤ 1 s
 
 - **Type:** integration
