@@ -28,6 +28,11 @@ jobs:
           python3 -c 'import ast, sys; ast.parse(open(sys.argv[1], encoding="utf-8").read())' .uak/bin/uak-mcp
       - name: Backlog graph (no cycles, no unknown deps)
         run: if [ -f .uak/TASKS.md ]; then bash .uak/bin/graph --file .uak/TASKS.md; fi
+      - name: Java 21 (Android/Robolectric necesita 21; core compila con release 17)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
       - name: Product smoke
         run: |
           if [ -f .uak/bin/smoke-project ]; then bash .uak/bin/smoke-project
