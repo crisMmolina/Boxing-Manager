@@ -33,3 +33,4 @@ Why: a reversible option after 15 min keeps work moving.
 - 1792963372 | DSK-013 | columna 1100 centrada via .screen; tokens compartidos | Why: pedido de zoe; codigos no validaban
 - 1792965234 | DSK-012 | board() intacto; registro una vez por pelea en EventLog | Why: contrato y refresco 500 ms
 - 1792966195 | QA-001 | drop antes del round 2; 120 = 60 tarjetas x 2 | Why: carrera con RoundOpened
+- 1792967541 | DSK-015 | pantalla actual rastreada en App (StepsBar fuera de Paths) | Why: StepsBar sin getter
