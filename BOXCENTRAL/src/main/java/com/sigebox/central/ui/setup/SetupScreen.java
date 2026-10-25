@@ -68,6 +68,7 @@ public final class SetupScreen {
         left.setPrefWidth(340);
         left.setMinWidth(340);
         var seats = new FlowPane(16, 16);
+        seats.setPrefWrapLength(780); // sin esto el FlowPane pide una sola columna muy alta
         HBox.setHgrow(seats, Priority.ALWAYS);
         var footer = new HBox(16);
         footer.setAlignment(Pos.CENTER_LEFT);
@@ -179,10 +180,12 @@ public final class SetupScreen {
                 });
                 var reject = Ui.secondary("Rechazar");
                 reject.setOnAction(e -> hub.reject(fightId, s.seat()));
+                approve.setMaxWidth(Double.MAX_VALUE);
+                reject.setMaxWidth(Double.MAX_VALUE);
                 var print = Ui.numeral(s.shortFingerprint() == null ? "—" : s.shortFingerprint(), "neutral");
                 card.getChildren().addAll(Ui.body(s.judgeName() == null ? "Sin nombre" : s.judgeName()),
                         Ui.field("Huella del teléfono", print),
-                        Ui.support("Compárala con la que muestra el teléfono del juez."), new HBox(8, approve, reject));
+                        Ui.support("Compárala con la que muestra el teléfono del juez."), new VBox(8, approve, reject));
             }
             case CONECTADO -> card.getChildren().add(Ui.body(s.judgeName()));
             case SIN_CONEXION -> card.getChildren().addAll(Ui.body(s.judgeName()), Ui.support("Reconectando…"));
