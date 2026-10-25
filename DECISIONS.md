@@ -7,3 +7,4 @@ Why: a reversible option after 15 min keeps work moving.
 - 1792908412 | DSK-002 | No se registra respaldo Java-WebSocket: Javalin funcionó. No se instaló WiX ni se creó la regla netsh (admin/seguridad) | Why: Evitar cambios de sistema sin autorización
 - 1792909957 | DSK-001 | App no extiende Application (Window anidada) para jpackage con classpath | Why: Lanzador Java exige main no-Application con JavaFX en classpath
 - 1792910132 | DSK-001 | App.Window anidada; .msi por defecto, app-image sin WiX | Why: jpackage con JavaFX en classpath
+- 1792910205 | CORE-002 | 16 messages incl CHALLENGE; strict decode; records enforce schema rules | Why: security HIGH on HELLO replay; no-default-value principle
