@@ -51,6 +51,10 @@ public class ScoreViewModel extends ViewModel {
     private boolean editing;
     private Ack.Error lastError;
     private boolean fightEnded;
+    /** Round cerrado que la central pide calificar ya ({@code mustSubmit}); lo atiende AND-006. */
+    private Integer lateRequest;
+    /** Esta instancia captura un round tardío: el round no cambia y se califica aunque esté cerrado. */
+    private boolean lateMode;
 
     public ScoreViewModel(Submitter submitter) {
         this.submitter = submitter;
@@ -70,6 +74,10 @@ public class ScoreViewModel extends ViewModel {
 
     public void onConnection(ConnectionState state) {
         connection = state.status;
+        if (lateMode) {
+            publish();
+            return;
+        }
         if (state.currentRound != null && state.currentRound != round) {
             newRound(state.currentRound);
         }
@@ -93,6 +101,8 @@ public class ScoreViewModel extends ViewModel {
     public void onMessage(Message message) {
         if (message instanceof Ack ack) {
             onAck(ack);
+        } else if (lateMode) {
+            // La pantalla de tardío solo sigue los ACK de su round.
         } else if (message instanceof State state) {
             rounds = state.rounds();
             for (State.OwnCard own : state.cards()) {
@@ -120,9 +130,25 @@ public class ScoreViewModel extends ViewModel {
                 roundStatus = EstadoRound.CERRADO;
                 editing = false;
             }
+            if (closed.mustSubmit()) {
+                lateRequest = closed.round();
+            }
         } else if (message instanceof FightEnded) {
             fightEnded = true;
         }
+        publish();
+    }
+
+    /** La pantalla ya abrió la captura tardía pedida. */
+    public void lateHandled() {
+        lateRequest = null;
+        publish();
+    }
+
+    /** Modo tardío (AND-006): califica {@code lateRound} aunque esté cerrado; sin corrección después. */
+    public void openLate(int lateRound) {
+        lateMode = true;
+        newRound(lateRound);
         publish();
     }
 
@@ -218,7 +244,7 @@ public class ScoreViewModel extends ViewModel {
     }
 
     private boolean isRoundOpen() {
-        return roundStatus == EstadoRound.ABIERTO && round > 0;
+        return round > 0 && (lateMode || roundStatus == EstadoRound.ABIERTO);
     }
 
     private ScoreUi current() {
@@ -226,9 +252,9 @@ public class ScoreViewModel extends ViewModel {
         boolean open = isRoundOpen();
         boolean inputOpen = open && (card == null || editing);
         boolean send = fightId != null && inputOpen && ScoreValidator.validarValores(red, blue).isEmpty();
-        boolean canCorrect = open && card != null && !editing;
+        boolean canCorrect = open && card != null && !editing && !lateMode;
         return new ScoreUi(judgeName, seat, connection, round, rounds, open, selected, red, blue, editing, send,
-                canCorrect, card, lastError, fightEnded);
+                canCorrect, card, lastError, fightEnded, lateRequest, lateMode);
     }
 
     private void publish() {

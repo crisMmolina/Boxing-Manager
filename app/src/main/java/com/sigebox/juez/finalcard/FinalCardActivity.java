@@ -51,6 +51,7 @@ public class FinalCardActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_final_card);
+        getWindow().addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         JudgeRuntime runtime = JudgeRuntime.get(this);
         connection = runtime.connection();
         database = runtime.database();

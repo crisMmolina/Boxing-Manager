@@ -60,10 +60,15 @@ public final class ScoreUi {
     public final Card card;
     public final Ack.Error lastError;
     public final boolean fightEnded;
+    /** Round cerrado sin calificar que la central exige ahora; {@code null} si no hay. */
+    public final Integer lateRound;
+    /** Esta pantalla es la captura tardía (AND-006). */
+    public final boolean late;
 
     ScoreUi(String judgeName, int seat, ConnectionState.Status connection, int round, Integer rounds,
             boolean roundOpen, Corner selected, Integer red, Integer blue, boolean editing, boolean sendEnabled,
-            boolean canCorrect, Card card, Ack.Error lastError, boolean fightEnded) {
+            boolean canCorrect, Card card, Ack.Error lastError, boolean fightEnded, Integer lateRound,
+            boolean late) {
         this.judgeName = judgeName;
         this.seat = seat;
         this.connection = connection;
@@ -79,6 +84,8 @@ public final class ScoreUi {
         this.card = card;
         this.lastError = lastError;
         this.fightEnded = fightEnded;
+        this.lateRound = lateRound;
+        this.late = late;
     }
 
     /** El teclado acepta números: round abierto y sin tarjeta, o corrigiendo. */

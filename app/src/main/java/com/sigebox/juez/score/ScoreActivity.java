@@ -33,6 +33,11 @@ import java.util.concurrent.Executors;
 
 /** Teclado de puntuación para una mano (DESIGN.md §6.4). Nunca muestra totales ni ganador. */
 public class ScoreActivity extends AppCompatActivity {
+    /** La captura tardía la crea AND-006; se abre por nombre para no depender de ella. */
+    static final String LATE_ACTIVITY = "com.sigebox.juez.late.LateScoreActivity";
+    /** Extra con el round que hay que calificar tarde. */
+    public static final String EXTRA_ROUND = "round";
+
     /** Filas del teclado: 10 y 9 abajo, junto al pulgar; -1 = borrar. */
     private static final int[][] KEYS = {{0, 1, 2, 3}, {4, 5, 6, -1}, {7, 8, 9, 10}};
 
@@ -177,6 +182,10 @@ public class ScoreActivity extends AppCompatActivity {
         findViewById(R.id.score_correct).setVisibility(ui.canCorrect ? View.VISIBLE : View.GONE);
         renderMessage(ui);
 
+        if (ui.lateRound != null) {
+            vm.lateHandled();
+            startActivity(new Intent().setClassName(this, LATE_ACTIVITY).putExtra(EXTRA_ROUND, (int) ui.lateRound));
+        }
         if (ui.fightEnded && !finalOpened) {
             finalOpened = true;
             startActivity(new Intent(this, FinalCardActivity.class));

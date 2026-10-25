@@ -167,6 +167,34 @@ public class ScoreViewModelTest {
     }
 
     @Test
+    public void roundCerradoConMustSubmitPideCapturaTardia() {
+        vm.onMessage(new com.sigebox.core.protocol.RoundClosed("F1", 3, true, false));
+        assertNull(ui().lateRound);
+        vm.onMessage(new com.sigebox.core.protocol.RoundClosed("F1", 3, true, true));
+        assertEquals(Integer.valueOf(3), ui().lateRound);
+        vm.lateHandled();
+        assertNull(ui().lateRound);
+    }
+
+    @Test
+    public void modoTardioCalificaElRoundCerradoSinCorreccion() {
+        vm.onConnection(new ConnectionState(ConnectionState.Status.CONNECTED, 4, EstadoRound.ABIERTO, 0, null));
+        ScoreViewModel late = new ScoreViewModel(submitted::add);
+        late.setSession("F1", 2, "María López");
+        late.openLate(3);
+        late.onConnection(new ConnectionState(ConnectionState.Status.CONNECTED, 4, EstadoRound.ABIERTO, 0, null));
+        late.key(10);
+        late.key(9);
+        assertTrue(late.ui().getValue().late);
+        assertTrue(late.ui().getValue().sendEnabled);
+        late.submit();
+        assertEquals(Integer.valueOf(3), ((SubmitRound) submitted.get(0)).round());
+        assertFalse("un tardío no se corrige", late.ui().getValue().canCorrect);
+        late.onMessage(new Ack(submitted.get(0).id(), true, EstadoTarjeta.TARDIA, null));
+        assertEquals(ScoreUi.CardStatus.LATE, late.ui().getValue().card.status);
+    }
+
+    @Test
     public void nuncaHayTotales() {
         // ScoreUi no tiene campos de total ni ganador: esta prueba falla si alguien los agrega.
         for (java.lang.reflect.Field field : ScoreUi.class.getFields()) {
