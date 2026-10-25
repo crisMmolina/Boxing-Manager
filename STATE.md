@@ -1,7 +1,7 @@
 # STATE
 
 Phase: execution
-Updated: 1792955072
+Updated: 1792955149
 AVAILABLE: CORE-004 DSK-011 DSK-012 AND-007 QA-001 QA-002 DSK-005 
 CLAIMED: DSN-002 
 BLOCKED: AND-002 
@@ -17,15 +17,15 @@ DSK-007 | REVIEW | zoe-1 | until 1793040773
 DSK-008 | REVIEW | zoe-1 | until 1793040788
 DSK-009 | REVIEW | zoe-1 | until 1793040803
 DSK-010 | REVIEW | zoe-1 | until 1793040818
-DSN-002 | CLAIMED | zoe-1 | until 1792969472
+DSN-002 | CLAIMED | zoe-1 | until 1792969549
 
 Blockers: BLOCKED tasks; use status --task ID --summary.
 Current decisions (last 5):
-- 1792922340 | DSK-009 | aceptacion como evento global por version | Why: sin tocar db/ (DSK-003)
 - 1792929059 | deadline lease/AND-002/1792925738 | REQUIRES_RECOVERY | Claim kept; read the summary and use release --expired --read-summary. No work is deleted.
 - 1792929849 | AND-002 | BLOCKED: needs physical devices | Why: spike results require the A37 hotspot and phones; inventing them is forbidden
 - 1792930736 | AND-006 | Reutiliza ScoreViewModel.openLate; se puede salir al enviar (queda en la bandeja); tardío = ACK status TARDIA | Why: SubmitRound no tiene campo late; nada
 - 1792948662 | deadline lease/AND-002/1792944253 | REQUIRES_RECOVERY | Claim kept; read the summary and use release --expired --read-summary. No work is deleted.
+- 1792955149 | DSN-002 | modo sencillo como base; sin Mi total; 10-10 + hoja de confirmacion | Why: JavaFX sin backdrop blur, minSdk 26; decisiones de zoe
 
 Global next step: available P0; else review PRs, tests, demo, rehearsal.
 Why: bounded snapshot to resume without rereading history.
