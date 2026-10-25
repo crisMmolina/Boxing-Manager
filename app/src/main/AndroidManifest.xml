@@ -2,15 +2,36 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+
+    <!-- El QR es opcional: también se puede unir con el código de 6 dígitos. -->
+    <uses-feature
+        android:name="android.hardware.camera.any"
+        android:required="false" />
+
+    <!--
+        usesCleartextTraffic: el único servidor es la central en la red local del hotspot
+        (ws://<ip>:8765, tomado del QR); la app no habla con internet.
+        allowBackup=false: los datos se quedan en los equipos del evento (IDEA §9).
+        Las Activities de cada pantalla las crea su tarea dueña (AND-004/005/006).
+    -->
     <application
-        android:allowBackup="true"
+        android:name=".SigeboxApp"
+        android:allowBackup="false"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Box"
+        android:theme="@style/Theme.Sigebox"
+        android:usesCleartextTraffic="true"
+        tools:ignore="MissingClass"
         tools:targetApi="31">
         <activity
             android:name=".MainActivity"
@@ -21,6 +42,33 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".terms.TermsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".join.JoinActivity"
+            android:exported="false" />
+        <activity
+            android:name=".join.ScanActivity"
+            android:exported="false" />
+        <activity
+            android:name=".join.WaitingActivity"
+            android:exported="false" />
+        <activity
+            android:name=".score.ScoreActivity"
+            android:exported="false"
+            android:launchMode="singleTop" />
+        <activity
+            android:name=".late.LateScoreActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:launchMode="singleTop"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true"
+            tools:targetApi="27" />
+        <activity
+            android:name=".finalcard.FinalCardActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

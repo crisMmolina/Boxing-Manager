@@ -13,6 +13,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Box"
+rootProject.name = "SIGEBOX"
 include(":app")
- 
+// Núcleo compartido (ADR 0001): composite build con la coordenada com.sigebox:core.
+includeBuild("core")

@@ -1,9 +1,10 @@
-package com.example.box;
-
-import androidx.appcompat.app.AppCompatActivity;
+package com.sigebox.juez;
 
 import android.os.Bundle;
 
+import androidx.appcompat.app.AppCompatActivity;
+
+/** Punto de entrada. Las tareas de cada pantalla enrutan desde aquí (términos → unión → puntuación). */
 public class MainActivity extends AppCompatActivity {
 
     @Override
