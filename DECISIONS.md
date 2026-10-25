@@ -26,3 +26,4 @@ Why: a reversible option after 15 min keeps work moving.
 - 1792948662 | deadline lease/AND-002/1792944253 | REQUIRES_RECOVERY | Claim kept; read the summary and use release --expired --read-summary. No work is deleted.
 - 1792955149 | DSN-002 | modo sencillo como base; sin Mi total; 10-10 + hoja de confirmacion | Why: JavaFX sin backdrop blur, minSdk 26; decisiones de zoe
 - 1792956587 | DSK-011 | modo sencillo siempre; botones sin clase = secundario | Why: JavaFX sin backdrop blur
+- 1792957091 | deadline decision/DSK-011-1792955872/1792956772 | REVERSIBLE_AND_LOG | Option: Empaquetar Inter 4.1 (Regular/Medium/SemiBold/Bold) y Barlow Condensed (ExtraBoldItalic/BoldItalic) como TTF con su licencia OFL en resources/fonts y app/res/font; Why: DESIGN.md v2 §3.2; OFL permite redistribuir; sin descarga en ejecución; ~1.4 MB; no money, accounts, publishing or scope expansion.
