@@ -5,17 +5,26 @@ An owner is not a prerequisite for everyone: consumers work on published contrac
 
 | Pattern | Owner task |
 |---|---|
-| pyproject.toml | HACK-001 |
-| uv.lock | HACK-001 |
-| package.json | HACK-001 |
-| package-lock.json | HACK-001 |
-| web/package.json | HACK-001 |
-| web/package-lock.json | HACK-001 |
-| app/main.py | HACK-001 |
-| web/src/App.tsx | HACK-001 |
-| app/schemas/ | HACK-002 |
-| web/DESIGN.md | HACK-002 |
-| .github/workflows/ | HACK-001 |
-| .uak/PROJECT.md | HACK-001 |
-
-Delete rows for technologies you don't use. `/uak-plan` creates HACK-001 (setup) and HACK-002 (contract).
+| core/build.gradle.kts | CORE-001 |
+| core/settings.gradle.kts | CORE-001 |
+| .github/workflows/ | CORE-001 |
+| core/schemas/ | CORE-002 |
+| core/src/main/java/com/sigebox/core/protocol/ | CORE-002 |
+| core/src/main/java/com/sigebox/core/model/ | CORE-002 |
+| demo_data/ | CORE-002 |
+| build.gradle.kts | AND-001 |
+| settings.gradle.kts | AND-001 |
+| gradle/ | AND-001 |
+| app/build.gradle.kts | AND-001 |
+| app/src/main/AndroidManifest.xml | AND-001 |
+| app/src/main/res/values/strings.xml | AND-001 |
+| app/src/main/res/values/themes.xml | AND-001 |
+| app/src/main/res/values/colors.xml | AND-001 |
+| docs/DESIGN.md | DSN-001 |
+| BOXCENTRAL/build.gradle.kts | DSK-001 |
+| BOXCENTRAL/settings.gradle.kts | DSK-001 |
+| BOXCENTRAL/judge-sim/build.gradle.kts | DSK-001 |
+| BOXCENTRAL/src/main/java/com/sigebox/central/App.java | DSK-001 |
+| BOXCENTRAL/src/main/java/com/sigebox/central/ui/Screens.java | DSK-001 |
+| BOXCENTRAL/src/main/java/com/sigebox/central/db/ | DSK-003 |
+| .uak/PROJECT.md | CORE-001 |
