@@ -28,6 +28,18 @@ class MessagesTest {
         "{\"id\":\"" + ID + "\",\"type\":\"PING\",\"ts\":1}",
         "{\"v\":1,\"id\":\"" + ID + "\",\"type\":\"SUBMIT_ROUND\",\"fightId\":\"f\",\"seat\":1,\"round\":1,"
                 + "\"red\":\"diez\",\"blue\":9}",
+        "{\"v\":1,\"id\":\"" + ID + "\",\"type\":\"SUBMIT_ROUND\",\"fightId\":\"f\",\"seat\":1,\"round\":1,"
+                + "\"red\":\"10\",\"blue\":9}",
+        "{\"v\":1,\"id\":\"" + ID + "\",\"type\":\"SUBMIT_ROUND\",\"fightId\":\"f\",\"seat\":1,\"round\":1,"
+                + "\"red\":9.5,\"blue\":9}",
+        "{\"v\":1,\"id\":\"" + ID + "\",\"type\":\"SUBMIT_ROUND\",\"fightId\":7,\"seat\":1,\"round\":1,"
+                + "\"red\":10,\"blue\":9}",
+        "{\"v\":1,\"id\":\"" + ID + "\",\"type\":\"ACK\",\"ackId\":\"" + ID + "\",\"ok\":\"yes\"}",
+        "{\"v\":1,\"id\":\"" + ID + "\",\"type\":\"ACK\",\"ackId\":\"" + ID + "\",\"ok\":true,\"status\":\"HACKED\"}",
+        "{\"v\":1,\"id\":\"" + ID + "\",\"type\":\"PING\",\"ts\":\"1\"}",
+        "{\"v\":\"1\",\"id\":\"" + ID + "\",\"type\":\"PING\",\"ts\":1}",
+        "{v:1,\"id\":\"" + ID + "\",\"type\":\"PING\",\"ts\":1}",
+        "{\"v\":1,\"id\":\"" + ID + "\",\"type\":\"PING\",\"ts\":1} {}",
         "{\"v\":1,\"id\":\"" + ID + "\",\"type\":\"JOIN_REJECTED\",\"fightId\":\"f\",\"seat\":1,\"reason\":\"OTRO\"}",
         "{\"v\":1,\"id\":\"" + ID + "\",\"type\":\"STATE\",\"fightId\":\"f\",\"seat\":1,\"judgeName\":\"A\","
                 + "\"redCorner\":\"R\",\"blueCorner\":\"B\",\"rounds\":4,\"fightStatus\":\"EN_CURSO\","
@@ -35,6 +47,13 @@ class MessagesTest {
     })
     void rechazaMensajesInvalidos(String json) {
         assertThrows(ProtocolException.class, () -> Messages.decode(json));
+    }
+
+    @Test
+    void aceptaNullComoAusenteEnOpcionales() {
+        String json = "{\"v\":1,\"id\":\"" + ID + "\",\"type\":\"ACK\",\"ackId\":\"" + ID + "\",\"ok\":true,"
+                + "\"status\":null}";
+        assertEquals(new Ack(1, ID, "ACK", ID, true, null, null), Messages.decode(json));
     }
 
     @Test

@@ -1,15 +1,22 @@
 package com.sigebox.core.protocol;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.Strictness;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+import java.io.IOException;
+import java.io.StringReader;
 
-/** Codifica y decodifica mensajes del protocolo v1 en JSON. Los campos {@code null} se omiten. */
+/**
+ * Codifica y decodifica mensajes del protocolo v1 en JSON. Los campos {@code null} se omiten. La lectura es
+ * estricta: JSON estándar y sin conversión de tipos (ver {@link StrictAdapters}).
+ */
 public final class Messages {
 
-    private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().create();
+    private static final Gson GSON = StrictAdapters.gson();
 
     private Messages() {}
 
@@ -20,8 +27,8 @@ public final class Messages {
     /**
      * Lee un mensaje. Ignora campos desconocidos (el schema los rechaza).
      *
-     * @throws ProtocolException si no es JSON, no es un objeto, el tipo no existe, {@code v} no es 1, el
-     *     {@code id} no es UUID o falta un campo requerido
+     * @throws ProtocolException si no es JSON estándar, no es un objeto, el tipo no existe, {@code v} no es 1,
+     *     el {@code id} no es UUID, un campo tiene otro tipo o falta un campo requerido
      */
     public static Message decode(String json) {
         JsonObject obj = parseObject(json);
@@ -40,8 +47,13 @@ public final class Messages {
     private static JsonObject parseObject(String json) {
         JsonElement element;
         try {
-            element = JsonParser.parseString(json);
-        } catch (RuntimeException e) {
+            JsonReader reader = new JsonReader(new StringReader(json));
+            reader.setStrictness(Strictness.STRICT);
+            element = JsonParser.parseReader(reader);
+            if (reader.peek() != JsonToken.END_DOCUMENT) {
+                throw new ProtocolException("datos después del mensaje");
+            }
+        } catch (IOException | RuntimeException e) {
             throw new ProtocolException("JSON inválido", e);
         }
         if (!element.isJsonObject()) {
