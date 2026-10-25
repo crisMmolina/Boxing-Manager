@@ -10,3 +10,4 @@ Why: a reversible option after 15 min keeps work moving.
 - 1792910205 | CORE-002 | 16 messages incl CHALLENGE; strict decode; records enforce schema rules | Why: security HIGH on HELLO replay; no-default-value principle
 - 1792910920 | CORE-003 | termination round excluded; IDEA §5 majority rule literal | Why: DSK may close the stopping round; spec literal until human answers
 - 1792911338 | AND-002 | BLOCKED: needs physical devices | Why: spike results cannot be produced without the A37 hotspot and phones; inventing them is forbidden
+- 1792911986 | deadline decision/CORE-003-1792910864/1792911764 | BLOCKED_OTHER_TASK | Option: 1 juez para una esquina y el resto empate: hoy 'gana esa esquina por decisión mayoritaria' (IDEA §5 literal). En box profesional suele ser 'empate mayoritario'. ¿Qué dice Requerimientos v1.1?; Why: la comparación con papel del Hito 5 lo detectaría; cambiarlo es 1 línea en ResultCalculator; no money, accounts, publishing or scope expansion.
