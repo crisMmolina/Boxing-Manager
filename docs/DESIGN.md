@@ -81,7 +81,7 @@ Texto mínimo: 16 sp en el teléfono y 14 px en la central. La UI del teléfono 
 - Retroalimentación háptica corta en cada tecla y una vibración larga en `ROUND_CLOSED` sin envío (AND-006).
 
 ## 5. Textos de estado (es-MX)
-Cadenas fijas: las dos apps usan exactamente estas palabras.
+Cadenas fijas: las dos apps usan exactamente estas palabras. El resultado sigue el texto de la spec: "Gana Roja por decisión dividida 2–1" ("Roja"/"Azul" en la frase).
 
 | Clave | Texto | Dónde |
 |---|---|---|
@@ -194,7 +194,7 @@ Medidas de referencia: 360 × 800 dp. Roja siempre a la izquierda.
 └──────────────────────────────┘
 ```
 - Flujo: empieza seleccionada ROJA. Al tocar un número se llena el panel y la selección pasa a AZUL. "⌫" borra el panel seleccionado.
-- Cada tecla escribe el valor completo (no se concatenan dígitos), así que "1" seguido de "0" deja 0, no 10.
+- Cada tecla es un valor completo: "10" tiene su propia tecla y los dígitos nunca se concatenan. Tocar otra tecla con un panel ya lleno reemplaza su valor.
 - Al enviar, el chip pasa a "Enviando…" y, con el `ACK`, a "Enviado". Los valores enviados quedan visibles en gris y aparece el botón "Corregir" mientras el round siga abierto. Después de corregir, el chip dice "Corregido".
 - Entre rounds (round cerrado y el siguiente sin abrir): "Esperando el round 4". Nunca muestra los rounds anteriores sumados.
 - Con "Sin conexión" se puede calificar igual: el envío queda en "Enviando…" hasta recibir el `ACK`.
@@ -317,7 +317,7 @@ Al crearla se abre la pantalla de aprobación.
 ```
 ┌──────────────────────────────────────────────────────────────┐
 │                                                              │
-│        Gana ROJA por decisión dividida 2–1                   │  56 px
+│        Gana Roja por decisión dividida 2–1                   │  56 px
 │                                                              │
 │  Juez          R1     R2     R3       R4     Total   Gana    │
 │  Juan Pérez    10–9   9–10   10–9     10–9   39–37   Roja    │
@@ -329,7 +329,7 @@ Al crearla se abre la pantalla de aprobación.
 └──────────────────────────────────────────────────────────────┘
 ```
 - Valores en formato "Roja–Azul" y totales con nombre de juez. Esta es la única pantalla con totales.
-- Con una terminación extraordinaria, el título dice el motivo: "Gana AZUL por KO técnico · Round 5, 01:47".
+- Con una terminación extraordinaria, el título dice el motivo: "Gana Azul por KO técnico · Round 5, 01:47".
 - El PDF repite esta tabla, con el espacio reservado para el logo en el encabezado.
 
 ### 7.6 Bitácora
@@ -346,6 +346,6 @@ Al crearla se abre la pantalla de aprobación.
 - Solo lectura, en orden cronológico y en monoespaciada (Consolas, 14 px). Nunca muestra valores de calificación antes de `FIGHT_CLOSED`.
 
 ## 8. Implementación
-- **Android:** colores en `values/colors.xml` y `values-night/colors.xml`, con los nombres de token de §2 (`corner_red`, `status_sent`…). Tema Material 3 en `themes.xml`, y los textos de §5 en los `strings_*.xml` de cada tarea.
+- **Android:** colores en `values/colors.xml` y `values-night/colors.xml`, con los nombres de token de §2 (`corner_red`, `status_sent`…). Tema Material 3 en `themes.xml`, y los textos de §5 en los `strings_*.xml` de cada tarea. Cada clave se define **una sola vez** (dos `values/*.xml` con el mismo nombre rompen el build): `status_connected`, `status_disconnected` y `status_waiting_approval` van en `strings_join.xml` (AND-004); `status_pending`, `status_sending`, `status_sent`, `status_corrected` y `status_late` van en `strings_score.xml` (AND-005). AND-006 y las demás pantallas solo las referencian. `status_captured` es solo de la central.
 - **JavaFX:** los mismos tokens como variables CSS en `BOXCENTRAL/.../sigebox.css` (`-corner-red: #B71C1C;` …).
 - Un cambio de color o de texto de estado se hace primero aquí, por PR, y después en las dos apps.
