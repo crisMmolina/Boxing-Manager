@@ -1,0 +1,10 @@
+{
+  "v": 1,
+  "id": "00000008-0000-4000-8000-000000000008",
+  "type": "SUBMIT_ROUND",
+  "fightId": "pelea-ref-001",
+  "seat": 2,
+  "round": 3,
+  "red": 10,
+  "blue": 9
+}

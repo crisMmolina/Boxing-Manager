@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sigebox.local/schemas/submit_final_card.schema.json",
+  "title": "SUBMIT_FINAL_CARD",
+  "description": "El juez firma su tarjeta final; hash sale de FinalCardHash. (juez → central)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "v",
+    "id",
+    "type",
+    "fightId",
+    "seat",
+    "hash"
+  ],
+  "properties": {
+    "v": {
+      "const": 1
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+    },
+    "type": {
+      "const": "SUBMIT_FINAL_CARD"
+    },
+    "fightId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "seat": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 5
+    },
+    "hash": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  }
+}

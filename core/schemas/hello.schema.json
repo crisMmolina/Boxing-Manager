@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sigebox.local/schemas/hello.schema.json",
+  "title": "HELLO",
+  "description": "Un juez ya aprobado se reconecta; la central responde con STATE. (juez → central)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "v",
+    "id",
+    "type",
+    "fightId",
+    "seat",
+    "deviceId",
+    "credentialFingerprint"
+  ],
+  "properties": {
+    "v": {
+      "const": 1
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+    },
+    "type": {
+      "const": "HELLO"
+    },
+    "fightId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "seat": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 5
+    },
+    "deviceId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "credentialFingerprint": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    }
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sigebox.local/schemas/fight_ended.schema.json",
+  "title": "FIGHT_ENDED",
+  "description": "La pelea terminó (último round o terminación); cada juez envía su tarjeta final. (central → juez)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "v",
+    "id",
+    "type",
+    "fightId"
+  ],
+  "properties": {
+    "v": {
+      "const": 1
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+    },
+    "type": {
+      "const": "FIGHT_ENDED"
+    },
+    "fightId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "reason": {
+      "enum": [
+        "KO",
+        "KOT",
+        "MEDICO",
+        "ABANDONO",
+        "DESCALIFICACION",
+        "DECISION_TECNICA",
+        "SIN_DECISION",
+        "OTRO"
+      ]
+    }
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sigebox.local/schemas/join_approved.schema.json",
+  "title": "JOIN_APPROVED",
+  "description": "El organizador aprobó al juez. (central → juez)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "v",
+    "id",
+    "type",
+    "fightId",
+    "seat",
+    "judgeName",
+    "redCorner",
+    "blueCorner",
+    "rounds"
+  ],
+  "properties": {
+    "v": {
+      "const": 1
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+    },
+    "type": {
+      "const": "JOIN_APPROVED"
+    },
+    "fightId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "seat": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 5
+    },
+    "judgeName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80
+    },
+    "redCorner": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80
+    },
+    "blueCorner": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80
+    },
+    "rounds": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 12
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "v": 1,
+  "id": "00000009-0000-4000-8000-000000000009",
+  "type": "ACK",
+  "ackId": "7d444840-9dc0-41a6-9b4e-6e1d7f9a0c3b",
+  "ok": true,
+  "status": "TARDIA",
+  "error": "ROUND_NOT_OPEN"
+}
