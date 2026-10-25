@@ -10,7 +10,6 @@ import com.sigebox.core.model.Resultado;
 import com.sigebox.core.model.Round;
 import com.sigebox.core.model.TarjetaRound;
 import com.sigebox.core.model.Terminacion;
-import com.sigebox.core.model.TipoDecision;
 import com.sigebox.core.validation.ScoreValidator;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -27,8 +26,7 @@ import java.util.TreeSet;
  *   <li>Por juez y round cuenta la última versión de la tarjeta (mayor {@code horaMs}; si empatan, la que viene
  *       después en la lista).
  *   <li>Total por juez = suma de sus rounds contados. Ganador por juez = mayor total; igual = empate.
- *   <li>Resultado = esquina con más jueces a favor; igual = empate. Tipo: unánime (todos con el ganador, o todos
- *       empate), mayoritaria (los demás dieron empate) o dividida (alguien votó por la otra esquina).
+ *   <li>Resultado y tipo: {@link DecisionRules}.
  *   <li>Sin terminación cuentan todos los rounds, que deben estar cerrados. Con terminación cuentan solo los rounds
  *       cerrados anteriores a {@code terminacion.round()}: en decisión técnica el resultado sale de esas tarjetas;
  *       con otro motivo lo da el motivo.
@@ -101,20 +99,9 @@ public final class ResultCalculator {
         if (terminacion != null && terminacion.motivo() != MotivoTerminacion.DECISION_TECNICA) {
             return new Resultado(pelea.id(), lista, porMotivo(terminacion), null, terminacion.motivo(), conteo);
         }
-        Ganador ganador;
-        TipoDecision tipo;
-        if (porRoja != porAzul) {
-            ganador = porRoja > porAzul ? Ganador.ROJA : Ganador.AZUL;
-            int aFavor = Math.max(porRoja, porAzul);
-            int enContra = Math.min(porRoja, porAzul);
-            tipo = aFavor == pelea.jueces() ? TipoDecision.UNANIME
-                    : enContra == 0 ? TipoDecision.MAYORITARIA : TipoDecision.DIVIDIDA;
-        } else {
-            ganador = Ganador.EMPATE;
-            tipo = porRoja == 0 ? TipoDecision.UNANIME : TipoDecision.DIVIDIDA;
-        }
+        DecisionRules.Fallo fallo = DecisionRules.fallo(porRoja, porAzul, pelea.jueces());
         MotivoTerminacion motivo = terminacion == null ? null : terminacion.motivo();
-        return new Resultado(pelea.id(), lista, ganador, tipo, motivo, conteo);
+        return new Resultado(pelea.id(), lista, fallo.ganador(), fallo.tipo(), motivo, conteo);
     }
 
     private static void validarTerminacion(Pelea pelea, Terminacion terminacion) {
