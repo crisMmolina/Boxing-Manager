@@ -12,3 +12,4 @@ Why: a reversible option after 15 min keeps work moving.
 - 1792911338 | AND-002 | BLOCKED: needs physical devices | Why: spike results cannot be produced without the A37 hotspot and phones; inventing them is forbidden
 - 1792911986 | deadline decision/CORE-003-1792910864/1792911764 | BLOCKED_OTHER_TASK | Option: 1 juez para una esquina y el resto empate: hoy 'gana esa esquina por decisión mayoritaria' (IDEA §5 literal). En box profesional suele ser 'empate mayoritario'. ¿Qué dice Requerimientos v1.1?; Why: la comparación con papel del Hito 5 lo detectaría; cambiarlo es 1 línea en ResultCalculator; no money, accounts, publishing or scope expansion.
 - 1792912693 | DSK-003 | processed_message PK (fight,seat,id); public_key y signature como columnas fuera del modelo core | Why: contrato CORE-002 README
+- 1792914901 | DSK-004 | hub transport-agnostic; idempotencia antes de estado; JOIN branches por llave | Why: contrato CORE-002 y AND-003
