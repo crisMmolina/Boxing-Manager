@@ -464,11 +464,12 @@ En Windows (zoe) los comandos `Verify` se corren en Git Bash.
 - **Estimate:** 4 h
 - **Rubric / Spec:** demo paso 5 · criterios "Ninguna calificación se pierde" y "≤ 1 s"
 - **Depends on:** DSK-004, DSK-010
-- **Paths:** BOXCENTRAL/src/test/java/com/sigebox/central/it/
+- **Paths:** BOXCENTRAL/src/test/java/com/sigebox/central/it/, BOXCENTRAL/build.gradle.kts
 - **Freeze-Allowed:** no
 - **Acceptance:**
   - Servidor real + judge-sim con 5 jueces × 12 rounds: corte de 60 s de un juez y reinicio del servidor a mitad de pelea → 120 calificaciones presentes, sin duplicados
   - p95 `SUBMIT_ROUND` → `ACK` ≤ 1 s en localhost
+  - `BOXCENTRAL/build.gradle.kts`: `testImplementation(project(":judge-sim"))` para usar `SimJudge` en la prueba
 - **Verify:** `BOXCENTRAL/gradlew -p BOXCENTRAL test --tests 'com.sigebox.central.it.*'`
 - **Next step:** prueba que arranca el servidor en un puerto libre y une 5 jueces simulados
 
