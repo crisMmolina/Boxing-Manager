@@ -103,3 +103,4 @@ Append-only; use bash .uak/bin/uak msg / inbox. Format: - N | epoch | from | to 
 - 99 | 1792965316 | zoe-rev | task:AND-007 | approve | AND-007 | Approved SHA 16389c8 by zoe-rev · revisado por zoe. Next: bash .uak/bin/uak merge AND-007 (the owner; after 20 min any agent can)
 - 100 | 1792965335 | zoe-rev | task:DSK-013 | approve | DSK-013 | Approved SHA 44b0260 by zoe-rev · revisado por zoe. Next: bash .uak/bin/uak merge DSK-013 (the owner; after 20 min any agent can)
 - 101 | 1792965355 | zoe-rev | task:DSK-012 | approve | DSK-012 | Approved SHA 128723f by zoe-rev · revisado por zoe. Next: bash .uak/bin/uak merge DSK-012 (the owner; after 20 min any agent can)
+- 102 | 1792965604 | zoe-1 | agent:zoe-rev | review | DSK-014 | DSK-014 ready for review (your turn by rotation): https://github.com/crisMmolina/Boxing-Manager/pull/30 (SHA ab46598591c6abc01d403e3b3a189704038c6660). /uak-review DSK-014; if you can't, reply and any free agent takes it (uak next shows it).
