@@ -19,3 +19,4 @@ Why: a reversible option after 15 min keeps work moving.
 - 1792921252 | DSK-010 | SimJudge sin transporte; --tokens por lugar; catch-up con STATE | Why: probar sin servidor; la central emite los tokens
 - 1792921620 | DSK-007 | reglas de ResultCalculator; TERMINAR como segunda confirmacion | Why: CORE-003 contrato
 - 1792922115 | DSK-008 | guion normal en PDF (WinAnsi sin raya); headline local | Why: texto extraido perdia la raya
+- 1792922340 | DSK-009 | aceptacion como evento global por version | Why: sin tocar db/ (DSK-003)
