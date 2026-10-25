@@ -117,12 +117,16 @@ public final class App {
                     () -> show(screens, root, content, RoundsScreen.ID));
             setup.register(screens, SetupScreen.ID, "Pelea");
             setup.register(screens, JUECES, "Jueces");
-            RoundsScreen.register(screens, RoundService.forHub(db, hub), fightId);
+            RoundsScreen.register(screens, RoundService.forHub(db, hub), fightId,
+                    () -> show(screens, root, content, CorrectionScreen.ID),
+                    () -> show(screens, root, content, ResultStepScreen.ID));
             ResultStepScreen.register(screens, ResultService.forHub(db, hub), new ExportService(), fightId);
             TerminationScreen.register(screens, TerminationService.forHub(db, hub), fightId);
             CorrectionScreen.register(screens, new CorrectionService(db, System::currentTimeMillis), fightId);
             LogScreen.register(screens, new LogQuery(db));
+            var current = new String[1];
             screens.onChange(s -> {
+                current[0] = s.id();
                 bar.select(s.id());
                 bar.setDisable(TermsScreen.ID.equals(s.id()));
             });
@@ -131,9 +135,12 @@ public final class App {
 
             var scene = new Scene(root, 1280, 800);
             Theme.apply(scene);
-            // Ctrl+Enter lleva al tablero en vivo (DESIGN v2 §7.2).
-            scene.getAccelerators().put(new KeyCodeCombination(KeyCode.ENTER, KeyCombination.CONTROL_DOWN),
-                    () -> show(screens, root, content, RoundsScreen.ID));
+            // Ctrl+Enter (DESIGN v2 §7.2): en el tablero abre o cierra el round; en otra pantalla lleva al tablero.
+            scene.getAccelerators().put(new KeyCodeCombination(KeyCode.ENTER, KeyCombination.CONTROL_DOWN), () -> {
+                if (!(RoundsScreen.ID.equals(current[0]) && RoundsScreen.firePrimary(content))) {
+                    show(screens, root, content, RoundsScreen.ID);
+                }
+            });
             stage.setTitle(TITLE);
             stage.setMinWidth(1100);
             stage.setMinHeight(700);
