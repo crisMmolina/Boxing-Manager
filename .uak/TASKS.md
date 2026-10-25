@@ -261,14 +261,16 @@ En Windows (zoe) los comandos `Verify` se corren en Git Bash.
 - **Priority:** P0
 - **Estimate:** 4 h
 - **Rubric / Spec:** RO-xx · demo pasos 1–2
-- **Depends on:** DSK-004
-- **Paths:** BOXCENTRAL/src/main/java/com/sigebox/central/ui/setup/, BOXCENTRAL/src/main/java/com/sigebox/central/service/FightService.java, BOXCENTRAL/src/test/java/com/sigebox/central/service/FightServiceTest.java
+- **Depends on:** DSK-004, DSK-011
+- **Paths:** BOXCENTRAL/src/main/java/com/sigebox/central/ui/setup/, BOXCENTRAL/src/main/java/com/sigebox/central/service/FightService.java, BOXCENTRAL/src/test/java/com/sigebox/central/service/FightServiceTest.java, BOXCENTRAL/src/main/java/com/sigebox/central/server/SeatTokens.java, BOXCENTRAL/src/test/java/com/sigebox/central/server/SeatTokensTest.java (ampliado por zoe, 2026-10-25: código manual del contrato AND-004)
 - **Freeze-Allowed:** no
 - **Acceptance:**
   - Formulario: esquina roja, esquina azul, rounds (1–12), jueces (1–5)
   - Un QR (ZXing) + código de 6 dígitos por lugar con la URI `sigebox://join?...` (IP local detectada)
   - Lista de lugares: "Juez 2 · María López · Conectado / Esperando aprobación" con botones Aprobar/Rechazar
-- **Verify:** `BOXCENTRAL/gradlew -p BOXCENTRAL test --tests 'com.sigebox.central.service.FightServiceTest'`
+  - Contrato AND-004: `fightId` corto (≤ 8 caracteres), huella corta del teléfono (8 hex, "AB12 CD34") junto a Aprobar; `SeatTokens` acepta el código de 6 dígitos además del token del QR y limita los intentos con código por conexión
+  - Pantalla según `docs/DESIGN.md` v2 §7.1 (componentes de DSK-011)
+- **Verify:** `BOXCENTRAL/gradlew -p BOXCENTRAL test --tests 'com.sigebox.central.service.FightServiceTest' --tests 'com.sigebox.central.server.*'`
 - **Next step:** prueba de `FightService.create` que rechaza 13 rounds
 
 ## DSK-006 · Control de rounds, faltantes, cierre forzado y resumen parcial
@@ -349,6 +351,77 @@ En Windows (zoe) los comandos `Verify` se corren en Git Bash.
   - Modo `--drop 60s` para simular el corte de Wi‑Fi
 - **Verify:** `BOXCENTRAL/gradlew -p BOXCENTRAL :judge-sim:test`
 - **Next step:** prueba del parser de argumentos con `--judges 6` rechazado
+
+## DSN-002 · Guía visual v2 (cristal, fondo blanco, esquinas)
+
+- **Type:** docs
+- **Priority:** P0
+- **Estimate:** 2 h
+- **Rubric / Spec:** spec 001 enmienda 2026-10-25 · propuesta "Gong: guía de diseño de interfaz (v1)" de zoe
+- **Depends on:** DSN-001
+- **Paths:** docs/DESIGN.md
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - Reescribe `docs/DESIGN.md` como v2 con la propuesta de zoe adaptada a SIGEBOX: nombre SIGEBOX (no "Gong"), Java con vistas XML + Material (juez) y JavaFX + CSS (central), sin Flutter
+  - Tokens (color, tipografía Barlow Condensed + Inter empaquetadas, radios, sombra única gris) y la receta de cristal con su modo sencillo como base (JavaFX no difumina el fondo y Android lo hace solo desde API 31; minSdk 26)
+  - Ajustes al producto: el juez no ve su total ("Mi total" fuera) ni tarjetas ajenas; la central sí ve en vivo los puntos y "Va ganando" (spec enmendado); sin "Escribiendo…", "reabrió el round" ni "Expulsar" (el protocolo no los tiene); puerto 8765; código de 6 dígitos, `fightId` corto y huella de 8 hex (contrato AND-004)
+  - Lista de revisión visual y bocetos de cada pantalla del juez y de la central
+- **Verify:** `test -s docs/DESIGN.md && grep -q "v2" docs/DESIGN.md`
+- **Next step:** tabla de tokens de color con los valores de la propuesta
+
+## DSK-011 · Sistema visual de la central y pantallas conectadas
+
+- **Type:** feature
+- **Priority:** P0
+- **Estimate:** 1 d
+- **Rubric / Spec:** `docs/DESIGN.md` v2 §3–5 y §7.3 · spec 001
+- **Depends on:** DSN-002, DSK-009
+- **Paths:** BOXCENTRAL/src/main/resources/com/sigebox/central/, BOXCENTRAL/src/main/java/com/sigebox/central/App.java, BOXCENTRAL/src/main/java/com/sigebox/central/ui/Screens.java, BOXCENTRAL/src/main/java/com/sigebox/central/ui/theme/, BOXCENTRAL/src/main/java/com/sigebox/central/ui/termination/, BOXCENTRAL/src/main/java/com/sigebox/central/ui/correction/, BOXCENTRAL/src/main/java/com/sigebox/central/ui/log/, BOXCENTRAL/src/main/java/com/sigebox/central/ui/terms/, BOXCENTRAL/src/main/java/com/sigebox/central/ui/result/, BOXCENTRAL/src/test/java/com/sigebox/central/ui/theme/
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - `app.css` con los tokens de DESIGN v2 (sin valores sueltos en las pantallas); Inter y Barlow Condensed empaquetadas con su licencia OFL (sin descarga en ejecución); dependencia registrada con `uak decision`
+  - Componentes en `ui/theme/`: superficie de cristal, píldora, botón principal y secundario, punto de conexión, barra de pasos (Pelea · Jueces · En vivo · Resultado)
+  - `App` arranca con los términos si no están aceptados (`TermsGate.firstScreen`) y registra Términos, Rounds, Terminación, Corrección, Bitácora y Resultado
+  - Terminación, corrección, bitácora, términos y resultado con el estilo v2; foco visible y uso con teclado
+  - Evidencia: captura de la app-image en 1280×800
+- **Verify:** `BOXCENTRAL/gradlew -p BOXCENTRAL build`
+- **Next step:** prueba de que cada color de DESIGN v2 aparece como variable en `app.css`
+
+## DSK-012 · Tablero en vivo del operador: tarjetas por juez y "Va ganando"
+
+- **Type:** feature
+- **Priority:** P0
+- **Estimate:** 5 h
+- **Rubric / Spec:** spec 001 enmienda 2026-10-25 (reemplaza al resumen parcial de 15 s) · `docs/DESIGN.md` v2 §7.2
+- **Depends on:** DSK-006, DSK-011
+- **Paths:** BOXCENTRAL/src/main/java/com/sigebox/central/ui/rounds/, BOXCENTRAL/src/main/java/com/sigebox/central/service/RoundService.java, BOXCENTRAL/src/test/java/com/sigebox/central/service/RoundServiceTest.java
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - Tabla juez × round con `rojo – azul`, estado del round abierto por juez (Pendiente / Enviado / Tardío / Corregido) y fila de totales de los rounds cerrados
+  - "Va ganando" con `DecisionRules.fallo` de `core` sobre los totales de los rounds cerrados (sin reglas nuevas en la central); "Empate" cuando corresponda
+  - Se quita el resumen parcial de 15 s; ver el tablero se registra una vez por pelea en la bitácora
+  - Nada del tablero se envía a los teléfonos (el `STATE` no cambia)
+  - Evidencia: captura del tablero con la pelea de referencia
+- **Verify:** `BOXCENTRAL/gradlew -p BOXCENTRAL test --tests 'com.sigebox.central.service.RoundServiceTest'`
+- **Next step:** prueba: con la pelea de referencia hasta el round 3, "Va ganando" es Roja
+
+## AND-007 · Rediseño de la app del juez y bordes de pantalla
+
+- **Type:** feature
+- **Priority:** P0
+- **Estimate:** 1 d
+- **Rubric / Spec:** `docs/DESIGN.md` v2 §3–6 · humano: cris (revisa)
+- **Depends on:** DSN-002, AND-006
+- **Paths:** app/src/main/res/, app/src/main/java/com/sigebox/juez/, app/src/test/java/com/sigebox/juez/ui/
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - Tema Material con los tokens de DESIGN v2: fondo blanco, tarjetas de cristal (modo sencillo por defecto; desenfoque solo con API 31+), rojo y azul solo para esquinas, punto verde solo para la conexión; Inter y Barlow Condensed en `res/font` con licencia OFL
+  - Puntuación: tarjeta por esquina con botones − y + de 76 dp y el número en grande, progreso de rounds, píldora "Juez N" con punto de conexión, hoja de confirmación antes de enviar; sin "Mi total"
+  - Todas las pantallas respetan los bordes del sistema (edge-to-edge de targetSdk 37: nada queda bajo la barra de estado ni la de navegación)
+  - Textos en minúscula con mayúscula inicial; zonas táctiles ≥ 48 dp
+  - Evidencia: captura de cada pantalla en el emulador (`adb exec-out screencap`)
+- **Verify:** `./gradlew :app:testDebugUnitTest`
+- **Next step:** prueba de que `ScoreActivity` aplica los insets del sistema a su raíz
 
 ## QA-001 · Integración: corte de 60 s, cierre forzado y latencia ≤ 1 s
 
