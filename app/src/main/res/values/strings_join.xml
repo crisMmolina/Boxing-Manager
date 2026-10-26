@@ -5,7 +5,7 @@
     <string name="status_disconnected">Sin conexión</string>
     <string name="status_waiting_approval">Esperando aprobación</string>
 
-    <string name="terms_title">Términos y aviso de privacidad</string>
+    <string name="terms_title">Antes de empezar</string>
     <string name="terms_body">• Tus datos (nombre y calificaciones) se quedan en los equipos del evento.\n\n• No salen de la red local: SIGEBOX no usa internet.\n\n• El organizador conserva las peleas hasta que él mismo las borre.\n\n• Tu teléfono guarda una llave propia para identificarte ante la central; no se comparte.\n\n• Prohibido usar SIGEBOX para apuestas.\n\n• El software es propiedad de sus desarrolladores.</string>
     <string name="terms_check">Leí y acepto</string>
     <string name="terms_accept">Aceptar y continuar</string>
@@ -41,7 +41,7 @@
     <string name="waiting_back">Volver</string>
 
     <string name="join_rejected_generic">No fuiste aprobado: el organizador rechazó la solicitud</string>
-    <string name="join_rejected_token_invalid">No fuiste aprobado: el código no es válido</string>
+    <string name="join_rejected_token_invalid">Código incorrecto. Revisa que sea el de tu lugar.</string>
     <string name="join_rejected_token_used">No fuiste aprobado: ese código ya se usó</string>
     <string name="join_rejected_seat_taken">No fuiste aprobado: ese lugar ya está ocupado</string>
     <string name="join_rejected_bad_signature">No fuiste aprobado: la central no reconoció este teléfono</string>

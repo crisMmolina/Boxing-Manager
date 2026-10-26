@@ -49,9 +49,15 @@ public class ScoreActivity extends AppCompatActivity {
     private CornerCard blue;
     private boolean wasOpen;
 
+    private com.sigebox.juez.ui.CornerNames cornerNames;
+    private volatile String currentFightId;
+
     private final JudgeListener listener = new JudgeListener() {
         @Override
         public void onMessage(Message message) {
+            if (cornerNames.remember(message)) {
+                runOnUiThread(() -> showNames(currentFightId));
+            }
             runOnUiThread(() -> vm.onMessage(message));
         }
     };
@@ -76,6 +82,7 @@ public class ScoreActivity extends AppCompatActivity {
 
         red = new CornerCard(findViewById(R.id.score_red_card), true, d -> vm.adjust(ScoreUi.Corner.RED, d));
         blue = new CornerCard(findViewById(R.id.score_blue_card), false, d -> vm.adjust(ScoreUi.Corner.BLUE, d));
+        cornerNames = new com.sigebox.juez.ui.CornerNames(this);
         findViewById(R.id.score_send).setOnClickListener(v -> confirm());
         findViewById(R.id.score_correct).setOnClickListener(v -> vm.startCorrection());
         vm.ui().observe(this, this::render);
@@ -95,6 +102,8 @@ public class ScoreActivity extends AppCompatActivity {
             Map<Integer, OwnCards.Row> rows = OwnCards.load(database.getOpenHelper().getReadableDatabase(),
                     session.fightId);
             runOnUiThread(() -> {
+                currentFightId = session.fightId;
+                showNames(session.fightId);
                 vm.setSession(session.fightId, session.seat, session.judgeName);
                 vm.onOwnCards(rows);
             });
@@ -180,8 +189,19 @@ public class ScoreActivity extends AppCompatActivity {
     }
 
     /** Píldora neutra: estado del round y de la tarjeta, sin colores (DESIGN.md v2 §5.5). */
+    /** Nombres de los boxeadores en sus tarjetas (DESIGN.md v3 §5.2), si la central ya los mandó. */
+    private void showNames(String fightId) {
+        if (fightId == null) {
+            return;
+        }
+        red.setName(cornerNames.red(fightId));
+        blue.setName(cornerNames.blue(fightId));
+    }
+
     private void renderStatus(ScoreUi ui) {
         TextView pill = findViewById(R.id.score_status);
+        findViewById(R.id.score_sending).setVisibility(
+                ui.card != null && ui.card.status == ScoreUi.CardStatus.SENDING ? View.VISIBLE : View.GONE);
         int text;
         if (ui.card != null) {
             switch (ui.card.status) {

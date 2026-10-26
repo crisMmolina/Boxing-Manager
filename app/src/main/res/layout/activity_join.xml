@@ -87,7 +87,7 @@
                     android:minHeight="48dp"
                     android:text="@string/join_manual"
                     android:textAllCaps="false"
-                    android:textColor="@color/navy" />
+                    android:textColor="@color/primary" />
 
                 <LinearLayout
                     android:id="@+id/join_manual_group"

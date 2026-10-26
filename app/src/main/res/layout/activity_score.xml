@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Puntuar (DESIGN.md v2 §6.4): número grande con − y + por esquina. Nunca totales ni ganador. -->
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/score_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -28,6 +29,16 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1" />
+
+            <!-- "Enviando…" con LoadingIndicator de Material 3 Expressive (DESIGN v3 §5). -->
+            <com.google.android.material.loadingindicator.LoadingIndicator
+                android:id="@+id/score_sending"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_marginEnd="4dp"
+                android:importantForAccessibility="no"
+                android:visibility="gone"
+                app:indicatorColor="@color/ink_2" />
 
             <TextView
                 android:id="@+id/score_status"

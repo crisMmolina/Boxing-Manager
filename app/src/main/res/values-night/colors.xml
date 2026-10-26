@@ -20,5 +20,4 @@
     <color name="connected">#4CC97A</color>
     <color name="disconnected">#B8B1A6</color>
     <color name="line">#3A352E</color>
-    <color name="shadow">#00000000</color>
 </resources>

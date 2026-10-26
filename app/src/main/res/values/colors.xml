@@ -24,41 +24,4 @@
     <color name="connected">#027A35</color>
     <color name="disconnected">#55585A</color>
     <color name="line">#D9D2C7</color>
-    <!-- Sombra neutra de las tarjetas en claro (§3.4); en oscuro no hay sombras. -->
-    <color name="shadow">#141C1A17</color>
-
-    <!-- Nombres de v1/v2 que aún usa el código: apuntan a los tokens v3. -->
-    <color name="ink_secondary">@color/ink_2</color>
-    <color name="navy">@color/primary</color>
-    <color name="red_corner">@color/red</color>
-    <color name="blue_corner">@color/blue</color>
-    <color name="track">@color/line</color>
-    <color name="pending">@color/line</color>
-    <color name="field_border">@color/line</color>
-    <color name="glass">@color/surface</color>
-    <color name="glass_strong">@color/surface_2</color>
-    <color name="glass_pressed">@color/surface_2</color>
-    <color name="specular">@color/surface</color>
-    <color name="contour">@color/line</color>
-    <color name="stripe">@color/bg</color>
-    <color name="corner_red">@color/red</color>
-    <color name="on_corner_red">@color/on_red</color>
-    <color name="corner_red_container">@color/surface</color>
-    <color name="corner_blue">@color/blue</color>
-    <color name="on_corner_blue">@color/on_blue</color>
-    <color name="corner_blue_container">@color/surface</color>
-    <color name="background">@color/bg</color>
-    <color name="on_background">@color/ink</color>
-    <color name="text_secondary">@color/ink_2</color>
-    <color name="disabled">@color/disconnected</color>
-    <color name="status_pending_fg">@color/ink_2</color>
-    <color name="status_pending_bg">@color/surface_2</color>
-    <color name="status_sent_fg">@color/ink_2</color>
-    <color name="status_sent_bg">@color/surface_2</color>
-    <color name="status_late_fg">@color/ink_2</color>
-    <color name="status_late_bg">@color/surface_2</color>
-    <color name="status_corrected_fg">@color/ink_2</color>
-    <color name="status_corrected_bg">@color/surface_2</color>
-    <color name="status_disconnected_fg">@color/ink</color>
-    <color name="status_disconnected_bg">@color/surface_2</color>
 </resources>

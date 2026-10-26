@@ -56,9 +56,15 @@ public class LateScoreActivity extends AppCompatActivity {
     private CornerCard blue;
     private boolean defaulted;
 
+    private com.sigebox.juez.ui.CornerNames cornerNames;
+    private volatile String currentFightId;
+
     private final JudgeListener listener = new JudgeListener() {
         @Override
         public void onMessage(Message message) {
+            if (cornerNames.remember(message)) {
+                runOnUiThread(() -> showNames(currentFightId));
+            }
             runOnUiThread(() -> vm.onMessage(message));
         }
     };
@@ -99,6 +105,7 @@ public class LateScoreActivity extends AppCompatActivity {
         ((TextView) findViewById(R.id.late_title)).setText(getString(R.string.late_title, round));
         red = new CornerCard(findViewById(R.id.late_red_card), true, d -> vm.adjust(ScoreUi.Corner.RED, d));
         blue = new CornerCard(findViewById(R.id.late_blue_card), false, d -> vm.adjust(ScoreUi.Corner.BLUE, d));
+        cornerNames = new com.sigebox.juez.ui.CornerNames(this);
         findViewById(R.id.late_send).setOnClickListener(v -> confirm());
         vm.ui().observe(this, this::render);
         if (savedInstanceState == null && gate.shouldVibrate()) {
@@ -116,7 +123,11 @@ public class LateScoreActivity extends AppCompatActivity {
         io.execute(() -> {
             SessionEntity session = database.sessionDao().load();
             if (session != null) {
-                runOnUiThread(() -> vm.setSession(session.fightId, session.seat, session.judgeName));
+                runOnUiThread(() -> {
+                    currentFightId = session.fightId;
+                    showNames(session.fightId);
+                    vm.setSession(session.fightId, session.seat, session.judgeName);
+                });
             }
         });
     }
@@ -150,8 +161,12 @@ public class LateScoreActivity extends AppCompatActivity {
         Integer b = ui.card != null ? ui.card.blue : ui.blue;
         red.bind(r, input);
         blue.bind(b, input);
-        ((TextView) findViewById(R.id.late_status)).setText(ui.card == null ? R.string.late_status
-                : ui.card.status == ScoreUi.CardStatus.SENDING ? R.string.status_sending : R.string.status_late);
+        TextView latePill = findViewById(R.id.late_status);
+        if (ui.card == null) {
+            latePill.setText(getString(R.string.late_status, round)); // "Round 3 cerrado" (DESIGN v3 §6.5)
+        } else {
+            latePill.setText(ui.card.status == ScoreUi.CardStatus.SENDING ? R.string.status_sending : R.string.status_late);
+        }
         findViewById(R.id.late_send).setEnabled(ui.sendEnabled);
 
         TextView message = findViewById(R.id.late_message);
@@ -194,6 +209,14 @@ public class LateScoreActivity extends AppCompatActivity {
         if (vibrator != null && vibrator.hasVibrator()) {
             vibrator.vibrate(VibrationEffect.createOneShot(VIBRATION_MS, VibrationEffect.DEFAULT_AMPLITUDE));
         }
+    }
+
+    private void showNames(String fightId) {
+        if (fightId == null) {
+            return;
+        }
+        red.setName(cornerNames.red(fightId));
+        blue.setName(cornerNames.blue(fightId));
     }
 
     private int dp(int value) {
