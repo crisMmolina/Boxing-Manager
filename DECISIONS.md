@@ -38,3 +38,4 @@ Why: a reversible option after 15 min keeps work moving.
 - 1792979992 | QA-002 | msi y A37 marcados sin verificar | Why: sin WiX ni A37
 - 1792982194 | DSK-016 | no duplicar el id; solo boton Copiar | Why: el id ya se mostraba
 - 1792985735 | AND-008 | no cambiar JudgeConnectionTest sin evidencia | Why: la hipotesis de carrera no se reprodujo
+- 1792986992 | deadline decision/AND-008-1792985990/1792986890 | BLOCKED_OTHER_TASK | Option: auto-merge de GitHub en los PR del kit: lo activa zoe (humana) en cada PR, no el agente; Why: zoe pidio activar el merge automatico; en marathon el agente no mergea (guard) y la integracion pide aprobacion uak review antes del merge; no money, accounts, publishing or scope expansion.
