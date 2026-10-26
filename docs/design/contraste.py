@@ -1,0 +1,129 @@
+#!/usr/bin/env python3
+"""Mide los tokens de color de DESIGN.md v3 y escribe docs/design/contraste.md.
+
+Métodos:
+- Contraste: luminancia relativa de WCAG 2.x, (L1 + 0.05) / (L2 + 0.05).
+- Daltonismo: matrices de Machado, Oliveira y Fernandes (2009), severidad 1.0, aplicadas en RGB lineal.
+- Diferencia de color: ΔE76 en CIELAB (D65). ≥ 20 se distingue a simple vista; < 10 se confunde.
+
+Uso: python3 docs/design/contraste.py   (solo biblioteca estándar)
+"""
+import math
+from pathlib import Path
+
+TOKENS = {
+    "claro": {
+        "bg": "#F7F4EF", "surface": "#FFFFFF", "surface_2": "#EFEAE2",
+        "ink": "#1C1A17", "ink_2": "#55585A",
+        "primary": "#1C1A17", "on_primary": "#FFFFFF",
+        "accent": "#7A5A2A",
+        "red": "#9F2241", "on_red": "#FFFFFF", "red_numeral": "#9F2241",
+        "blue": "#266CB4", "on_blue": "#FFFFFF", "blue_numeral": "#266CB4",
+        "connected": "#027A35", "disconnected": "#55585A",
+    },
+    "oscuro": {
+        "bg": "#14120F", "surface": "#1F1C18", "surface_2": "#2A2621",
+        "ink": "#F3EFE8", "ink_2": "#B8B1A6",
+        "primary": "#F3EFE8", "on_primary": "#1C1A17",
+        "accent": "#BC955C",
+        "red": "#E58A9D", "on_red": "#1C1A17", "red_numeral": "#E58A9D",
+        "blue": "#8CB8EE", "on_blue": "#1C1A17", "blue_numeral": "#8CB8EE",
+        "connected": "#4CC97A", "disconnected": "#B8B1A6",
+    },
+}
+
+# (primer plano, fondo, tipo): "texto" exige 4.5; "grande" (≥ 24 px o 19 px en negrita) y "ui" exigen 3.0.
+PARES = [
+    ("ink", "bg", "texto"), ("ink", "surface", "texto"), ("ink", "surface_2", "texto"),
+    ("ink_2", "bg", "texto"), ("ink_2", "surface", "texto"), ("ink_2", "surface_2", "texto"),
+    ("on_primary", "primary", "texto"),
+    ("on_red", "red", "texto"), ("on_blue", "blue", "texto"),
+    ("red_numeral", "surface", "texto"), ("blue_numeral", "surface", "texto"),
+    ("red_numeral", "bg", "texto"), ("blue_numeral", "bg", "texto"),
+    ("accent", "bg", "texto"), ("accent", "surface", "texto"),
+    ("primary", "bg", "ui"), ("red", "surface", "ui"), ("blue", "surface", "ui"),
+    ("accent", "surface_2", "ui"), ("connected", "surface", "ui"), ("disconnected", "surface", "ui"),
+]
+
+# Colores que no deben confundirse entre sí.
+DISTINGUIR = [("red_numeral", "blue_numeral"), ("red", "blue"), ("red", "accent"), ("blue", "accent"),
+              ("red", "connected"), ("blue", "connected")]
+
+MACHADO = {
+    "deuteranopía": [[0.367322, 0.860646, -0.227968], [0.280085, 0.672501, 0.047413], [-0.011820, 0.042940, 0.968881]],
+    "protanopía": [[0.152286, 1.052583, -0.204868], [0.114503, 0.786281, 0.099216], [-0.003882, -0.048116, 1.051998]],
+    "tritanopía": [[1.255528, -0.076749, -0.178779], [-0.078411, 0.930809, 0.147602], [0.004733, 0.691367, 0.303900]],
+}
+
+
+def _lin(c):
+    c /= 255
+    return c / 12.92 if c <= 0.04045 else ((c + 0.055) / 1.055) ** 2.4
+
+
+def _srgb(c):
+    c = max(0.0, min(1.0, c))
+    return 255 * (12.92 * c if c <= 0.0031308 else 1.055 * c ** (1 / 2.4) - 0.055)
+
+
+def _rgb(h):
+    h = h.lstrip("#")
+    return [int(h[i:i + 2], 16) for i in (0, 2, 4)]
+
+
+def luminancia(h):
+    r, g, b = (_lin(x) for x in _rgb(h))
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b
+
+
+def contraste(a, b):
+    hi, lo = sorted((luminancia(a), luminancia(b)), reverse=True)
+    return (hi + 0.05) / (lo + 0.05)
+
+
+def simular(h, tipo):
+    lin = [_lin(x) for x in _rgb(h)]
+    m = MACHADO[tipo]
+    return "#" + "".join("%02X" % round(_srgb(sum(m[i][j] * lin[j] for j in range(3)))) for i in range(3))
+
+
+def lab(h):
+    r, g, b = (_lin(x) for x in _rgb(h))
+    x = (0.4124 * r + 0.3576 * g + 0.1805 * b) / 0.95047
+    y = 0.2126 * r + 0.7152 * g + 0.0722 * b
+    z = (0.0193 * r + 0.1192 * g + 0.9505 * b) / 1.08883
+    f = lambda t: t ** (1 / 3) if t > 0.008856 else 7.787 * t + 16 / 116
+    return 116 * f(y) - 16, 500 * (f(x) - f(y)), 200 * (f(y) - f(z))
+
+
+def delta_e(a, b):
+    return math.dist(lab(a), lab(b))
+
+
+def informe():
+    out = ["# Contraste y daltonismo de los tokens v3", "",
+           "Generado por `docs/design/contraste.py`. No editar a mano: cambia un token y vuelve a correr el script.", ""]
+    fallas = 0
+    for tema, t in TOKENS.items():
+        out += [f"## Tema {tema}", "", "| Primer plano | Fondo | Tipo | Contraste | Mínimo | ¿Pasa? |", "|---|---|---|---|---|---|"]
+        for fg, bg, tipo in PARES:
+            c = contraste(t[fg], t[bg])
+            minimo = 4.5 if tipo == "texto" else 3.0
+            ok = c >= minimo
+            fallas += not ok
+            out.append(f"| `{fg}` {t[fg]} | `{bg}` {t[bg]} | {tipo} | {c:.2f} | {minimo} | {'sí' if ok else '**NO**'} |")
+        out += ["", "| Par | ΔE normal | " + " | ".join(f"ΔE {k}" for k in MACHADO) + " |", "|---|---|---|---|---|"]
+        for a, b in DISTINGUIR:
+            fila = [f"{delta_e(t[a], t[b]):.1f}"] + [f"{delta_e(simular(t[a], k), simular(t[b], k)):.1f}" for k in MACHADO]
+            out.append(f"| `{a}` / `{b}` | " + " | ".join(fila) + " |")
+        out.append("")
+    out.append(f"Pares de contraste que no pasan: {fallas}.")
+    return "\n".join(out) + "\n", fallas
+
+
+if __name__ == "__main__":
+    texto, fallas = informe()
+    destino = Path(__file__).with_name("contraste.md")
+    destino.write_text(texto, encoding="utf-8")
+    print(f"{destino}: {fallas} pares sin AA")
+    raise SystemExit(1 if fallas else 0)
