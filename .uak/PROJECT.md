@@ -16,7 +16,7 @@ Dos apps + un núcleo compartido (ADR 0001):
 2. Ningún número del resultado sale de otro lugar que `core` (determinista, sin IA). Se valida en el teléfono y otra vez en el servidor: enteros 0–10, sin valor por defecto.
 3. Un juez nunca ve tarjetas ajenas; nadie ve totales ni ganador durante la pelea (salvo "Ver resumen parcial", registrado en bitácora).
 4. Los datos nunca salen de la red local del evento. Sin internet, sin nube, sin telemetría.
-5. Nothing reaches `main` without green CI and approval of the other human (CODEOWNERS). Every decision costly to reverse has an ADR.
+5. Nothing reaches `main` without green CI and approval of the other human (CODEOWNERS). Every decision costly to reverse has an ADR. Excepción (zoe y cris): los PR de plan (`plan/*`) que abren zoe o cris y solo tocan `.uak/TASKS.md`, `.uak/OWNERS.md`, `docs/specs/` o `docs/adr/` se mergean solos con CI en verde (`.github/workflows/plan-automerge.yml`, squash: el autor sigue siendo quien abrió el PR). Cambios a este archivo, a workflows o a código siguen necesitando a un humano.
 6. Autoría: los commits van solo a nombre del humano; nunca se agregan agentes ni IA como autores o co-autores.
 
 ## Non-functional requirements (measurable)

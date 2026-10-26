@@ -1,0 +1,52 @@
+# Mergea solos los PR de plan (PROJECT.md principio 5, excepción acordada por zoe y cris).
+# Solo si: rama plan/*, autor zoe718 o crisMmolina, solo toca backlog/specs/ADR y todos los checks
+# del commit están en verde. Squash: el autor del commit sigue siendo quien abrió el PR.
+# No hace checkout ni corre código del PR: solo lee la API de GitHub.
+name: plan-automerge
+on:
+  workflow_run:
+    workflows: [ci, uak]
+    types: [completed]
+permissions:
+  contents: write
+  pull-requests: write
+  checks: read
+concurrency:
+  group: plan-automerge-${{ github.event.workflow_run.head_branch }}
+  cancel-in-progress: false
+jobs:
+  merge:
+    if: >-
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      startsWith(github.event.workflow_run.head_branch, 'plan/')
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      REPO: ${{ github.repository }}
+      BRANCH: ${{ github.event.workflow_run.head_branch }}
+      SHA: ${{ github.event.workflow_run.head_sha }}
+    steps:
+      - name: Mergear si cumple todo
+        run: |
+          set -euo pipefail
+          pr=$(gh api "repos/$REPO/pulls?state=open&head=${REPO%%/*}:$BRANCH" --jq '.[0]')
+          [ -n "$pr" ] && [ "$pr" != "null" ] || { echo "sin PR abierto para $BRANCH"; exit 0; }
+          num=$(jq -r .number <<<"$pr")
+          author=$(jq -r .user.login <<<"$pr")
+          head=$(jq -r .head.sha <<<"$pr")
+          draft=$(jq -r .draft <<<"$pr")
+          case "$author" in zoe718|crisMmolina) ;; *) echo "autor $author no es zoe ni cris"; exit 0;; esac
+          [ "$head" = "$SHA" ] || { echo "el PR #$num avanzó a $head; espera su propio CI"; exit 0; }
+          [ "$draft" = "false" ] || { echo "PR #$num en borrador"; exit 0; }
+          # Solo backlog, specs y ADR. PROJECT.md, workflows y código quedan para revisión humana.
+          bad=$(gh api "repos/$REPO/pulls/$num/files" --paginate --jq '.[].filename' \
+            | grep -vE '^(\.uak/TASKS\.md|\.uak/OWNERS\.md|docs/specs/.+|docs/adr/.+)$' || true)
+          [ -z "$bad" ] || { echo "PR #$num toca archivos fuera del plan:"; echo "$bad"; exit 0; }
+          # Todos los checks del commit terminados y en verde (ci y uak corren por separado).
+          pending=$(gh api "repos/$REPO/commits/$SHA/check-runs" --paginate \
+            --jq '[.check_runs[] | select(.status != "completed" or (.conclusion != "success" and .conclusion != "skipped" and .conclusion != "neutral"))] | length')
+          [ "$pending" = "0" ] || { echo "faltan checks en verde ($pending)"; exit 0; }
+          gh api -X PUT "repos/$REPO/pulls/$num/merge" -f merge_method=squash -f sha="$SHA" \
+            -f commit_title="$(jq -r .title <<<"$pr") (#$num)"
+          echo "PR #$num mergeado"
