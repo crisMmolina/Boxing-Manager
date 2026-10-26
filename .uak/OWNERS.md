@@ -20,7 +20,7 @@ An owner is not a prerequisite for everyone: consumers work on published contrac
 | app/src/main/res/values/strings.xml | AND-007 |
 | app/src/main/res/values/themes.xml | AND-007 |
 | app/src/main/res/values/colors.xml | AND-007 |
-| docs/DESIGN.md | DSK-013 |
+| docs/DESIGN.md | DSK-017 |
 | BOXCENTRAL/build.gradle.kts | QA-001 |
 | BOXCENTRAL/settings.gradle.kts | DSK-001 |
 | BOXCENTRAL/judge-sim/build.gradle.kts | DSK-001 |
