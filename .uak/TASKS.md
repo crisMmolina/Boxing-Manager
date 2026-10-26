@@ -478,7 +478,7 @@ En Windows (zoe) los comandos `Verify` se corren en Git Bash.
 - **Type:** fix
 - **Priority:** P1
 - **Estimate:** 1 h
-- **Rubric / Spec:** hallazgo de QA-002: la unión manual de la app y `judge-sim --fight` piden el id de la pelea y la central solo lo pone dentro del QR
+- **Rubric / Spec:** hallazgo de QA-002, que resultó falso: la central ya mostraba el id como "Código de la pelea" en la tarjeta Pelea. DSK-016 agregó el botón Copiar y corrigió los docs
 - **Depends on:** DSK-005, QA-002
 - **Paths:** BOXCENTRAL/src/main/java/com/sigebox/central/ui/setup/SetupScreen.java, docs/runbook.md, docs/demo.md, README.md
 - **Freeze-Allowed:** no
@@ -490,23 +490,38 @@ En Windows (zoe) los comandos `Verify` se corren en Git Bash.
 - **Verify:** `BOXCENTRAL/gradlew -p BOXCENTRAL build`
 - **Next step:** agregar el id al pie de `SetupScreen` (`footer`), junto a "Dirección para los jueces"
 
-## AND-008 · Prueba inestable de la app en CI
+## AND-008 · CI dice qué prueba de la app falla
 
 - **Type:** fix
 - **Priority:** P1
-- **Estimate:** 2 h
-- **Rubric / Spec:** en `uak / gates`, `:app:testDebugUnitTest` falla a veces con "64 tests completed, 1 failed" y pasa al relanzar (main 2026-10-25 22:37; PR #38 intento 1). Localmente pasó 6/6. CI no muestra qué prueba es
+- **Estimate:** 30 min
+- **Rubric / Spec:** en `uak / gates`, `:app:testDebugUnitTest` falla a veces con "64 tests completed, 1 failed" y pasa al relanzar (main 2026-10-25 22:37; PR #38 intento 1). CI no muestra qué prueba es. Dividida el 2026-10-26: el arreglo de la prueba pasa a AND-009
 - **Depends on:** AND-003
-- **Paths:** app/build.gradle.kts, app/src/test/java/com/sigebox/juez/net/JudgeConnectionTest.java, app/src/main/java/com/sigebox/juez/net/JudgeConnection.java
+- **Paths:** app/build.gradle.kts
 - **Freeze-Allowed:** no
 - **Acceptance:**
-  - `app/build.gradle.kts`: las pruebas unitarias imprimen el nombre y la excepción de cada prueba fallida (`testLogging` con `events("failed")` y `exceptionFormat = FULL`), así CI dice cuál falla
-  - Se identifica la prueba inestable con evidencia (log de CI o corridas repetidas) antes de cambiarla
-  - Se corrige la causa: sin esperas fijas (`Thread.sleep`) que dependan de la velocidad de la máquina. Si la causa está en `JudgeConnection`, se arregla el código, no se relaja la prueba
-  - Cambiar una prueba existente se justifica en el PR con la causa encontrada (no para "hacerla pasar")
-  - `:app:testDebugUnitTest --rerun-tasks` pasa 10 veces seguidas localmente y `uak / gates` pasa en el PR
+  - `app/build.gradle.kts`: las pruebas unitarias imprimen el nombre y la excepción de cada prueba fallida (`testLogging` con `events("failed")` y `exceptionFormat = FULL`)
+  - `./gradlew :app:testDebugUnitTest` sigue en verde y `uak / gates` pasa en el PR
+  - El PR documenta lo intentado para reproducir la falla
 - **Verify:** `./gradlew :app:testDebugUnitTest`
-- **Next step:** agregar `testLogging` y relanzar CI hasta ver el nombre de la prueba que falla
+- **Next step:** PR #40
+
+## AND-009 · Arreglar la prueba inestable de la app
+
+- **Type:** fix
+- **Priority:** P2
+- **Estimate:** 2 h
+- **Rubric / Spec:** seguimiento de AND-008. Empieza cuando un log de `uak / gates` (con el `testLogging` de AND-008) nombre la prueba que falla. Sin ese log, la tarea queda BLOCKED
+- **Depends on:** AND-008
+- **Paths:** app/src/test/java/com/sigebox/juez/, app/src/main/java/com/sigebox/juez/net/
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - El PR cita el log de CI con el nombre y la excepción de la prueba que falló
+  - Se corrige la causa sin esperas fijas que dependan de la velocidad de la máquina. Si la causa está en el código de la app, se arregla el código, no se relaja la prueba
+  - Cambiar una prueba existente se justifica con la causa encontrada
+  - La prueba pasa 10 veces seguidas localmente y `uak / gates` pasa en el PR
+- **Verify:** `./gradlew :app:testDebugUnitTest`
+- **Next step:** esperar un fallo de `uak / gates` con nombre (relanzar o revisar corridas de main)
 
 ## QA-001 · Integración: corte de 60 s, cierre forzado y latencia ≤ 1 s
 
