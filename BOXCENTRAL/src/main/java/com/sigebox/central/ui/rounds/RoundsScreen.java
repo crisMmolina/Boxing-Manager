@@ -4,10 +4,10 @@ import com.sigebox.central.service.RoundService;
 import com.sigebox.central.ui.Screens;
 import com.sigebox.central.ui.theme.Ui;
 import com.sigebox.core.model.EstadoRound;
-import com.sigebox.core.model.Ganador;
 import java.util.function.Supplier;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
+import javafx.animation.PauseTransition;
 import javafx.animation.Timeline;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
@@ -22,13 +22,14 @@ import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 
 /**
- * Tablero en vivo del operador (DESIGN v2 §7.2): tarjetas juez × round, fila de totales de los
- * rounds cerrados, "Va ganando" y control del round. Se refresca cada 500 ms, así un envío se ve
- * en ≤ 1 s. Nada de esto llega a los teléfonos.
+ * Tablero en vivo del operador (DESIGN v2 §7.2): estado de cada juez por round, control del round y
+ * "Ver resumen parcial" discreto. Sin puntos, totales ni ganador (PROJECT.md principio 3). Se
+ * refresca cada 500 ms, así un envío se ve en ≤ 1 s.
  */
 public final class RoundsScreen {
 
@@ -77,10 +78,13 @@ public final class RoundsScreen {
         var cards = Ui.glass(Ui.cardTitle("Tarjetas"), grid);
         HBox.setHgrow(cards, Priority.ALWAYS);
 
-        var leader = Ui.numeral("—", "neutral");
-        leader.getStyleClass().add("big");
-        var leaderNote = Ui.support("Sin rounds cerrados");
-        var leaderCard = Ui.glass(Ui.cardTitle("Va ganando"), leader, leaderNote);
+        var summary = Ui.secondary("Ver resumen parcial");
+        summary.setMaxWidth(Double.MAX_VALUE);
+        var summaryBox = new VBox(6);
+        var summaryNote = Ui.support("Totales de los rounds cerrados por " + RoundService.SUMMARY_VISIBLE_SECONDS
+                + " s. Cada vista queda en la bitácora.");
+        summaryNote.setMinHeight(Region.USE_PREF_SIZE);
+        var summaryCard = Ui.glass(Ui.cardTitle("Resumen parcial"), summaryNote, summary, summaryBox);
 
         var roundTitle = Ui.cardTitle("");
         var pill = Ui.pill("");
@@ -94,7 +98,7 @@ public final class RoundsScreen {
         var status = Ui.support("");
         var control = Ui.glass(roundTitle, pill, sent, action, correct, status);
 
-        var side = new VBox(16, leaderCard, control);
+        var side = new VBox(16, control, summaryCard);
         side.setMinWidth(260);
         side.setPrefWidth(280);
 
@@ -108,10 +112,22 @@ public final class RoundsScreen {
             }
             var live = service.live(f);
             fillGrid(grid, live);
-            fillLeader(leader, leaderNote, live.leader());
             fillControl(live, roundTitle, pill, sent, action);
             title.setText("En vivo");
         };
+
+        summary.setOnAction(e -> {
+            var f = fightId.get();
+            if (f == null) {
+                return;
+            }
+            var ask = new Alert(Alert.AlertType.CONFIRMATION, "El resumen parcial queda registrado en la bitácora. "
+                    + "Mostrar " + RoundService.SUMMARY_VISIBLE_SECONDS + " s?", ButtonType.CANCEL, ButtonType.OK);
+            if (ask.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) {
+                return;
+            }
+            showSummary(summaryBox, summary, service.partialSummary(f, true));
+        });
 
         action.setOnAction(e -> {
             var f = fightId.get();
@@ -203,32 +219,33 @@ public final class RoundsScreen {
             grid.add(Ui.support("Pendientes: rounds " + from + "–" + live.rows().size()), 0, line++,
                     live.judges().size() + 1, 1);
         }
-
-        grid.add(Ui.cardTitle("Total"), 0, line);
-        col = 1;
-        for (var t : live.totals()) {
-            grid.add(pair(t.red(), t.blue()), col++, line);
-        }
     }
 
     private static Node score(RoundService.Cell c) {
-        if (c.hasScore()) {
-            var p = pair(c.red(), c.blue());
-            if (c.casilla() == RoundService.Casilla.TARDIO || c.casilla() == RoundService.Casilla.CORREGIDO) {
-                var box = new VBox(0, p, Ui.support(texto(c.casilla())));
-                box.setAlignment(Pos.CENTER);
-                return box;
-            }
-            return p;
-        }
-        return c.casilla() == null ? Ui.support("—") : Ui.support(texto(c.casilla()));
+        return Ui.support(c.casilla() == null ? "—" : texto(c.casilla()));
     }
 
-    private static HBox pair(int red, int blue) {
-        var box = new HBox(4, Ui.numeral(String.valueOf(red), "red"), Ui.numeral("–", "neutral"),
-                Ui.numeral(String.valueOf(blue), "blue"));
-        box.setAlignment(Pos.CENTER);
-        return box;
+    /** Muestra los totales parciales y los oculta pasados {@link RoundService#SUMMARY_VISIBLE_SECONDS}. */
+    static void showSummary(VBox box, Button button, java.util.List<RoundService.PartialTotal> totals) {
+        box.getChildren().setAll(totals.stream().map(t -> {
+            var who = "Juez " + t.seat() + (t.judgeName() == null ? "" : " · " + t.judgeName());
+            var numbers = new HBox(4, Ui.numeral(String.valueOf(t.red()), "red"), Ui.numeral("–", "neutral"),
+                    Ui.numeral(String.valueOf(t.blue()), "blue"));
+            numbers.setMinWidth(Region.USE_PREF_SIZE); // el nombre se recorta, los totales nunca
+            var name = Ui.body(who);
+            name.setWrapText(false);
+            name.setMinWidth(0);
+            var row = new HBox(6, name, Ui.grow(), numbers);
+            row.setAlignment(Pos.CENTER_LEFT);
+            return (Node) row;
+        }).toList());
+        button.setDisable(true);
+        var hide = new PauseTransition(Duration.seconds(RoundService.SUMMARY_VISIBLE_SECONDS));
+        hide.setOnFinished(x -> {
+            box.getChildren().clear();
+            button.setDisable(false);
+        });
+        hide.play();
     }
 
     private static Node cell(Node content, boolean open) {
@@ -240,33 +257,6 @@ public final class RoundsScreen {
             box.setStyle(OPEN_ROW);
         }
         return box;
-    }
-
-    private static void fillLeader(Label leader, Label note, RoundService.Leader l) {
-        leader.getStyleClass().removeAll("red", "blue", "neutral");
-        if (l == null) {
-            leader.setText("—");
-            leader.getStyleClass().add("neutral");
-            note.setText("Sin rounds cerrados");
-            return;
-        }
-        switch (l.ganador()) {
-            case ROJA -> {
-                leader.setText("Roja");
-                leader.getStyleClass().add("red");
-            }
-            case AZUL -> {
-                leader.setText("Azul");
-                leader.getStyleClass().add("blue");
-            }
-            default -> {
-                leader.setText("Empate");
-                leader.getStyleClass().add("neutral");
-            }
-        }
-        note.setText(l.ganador() == Ganador.EMPATE
-                ? "Con los rounds cerrados"
-                : l.aFavor() + " de " + l.jueces() + " jueces a favor");
     }
 
     private static void fillControl(RoundService.Live live, Label title, Label pill, Label sent, Button action) {

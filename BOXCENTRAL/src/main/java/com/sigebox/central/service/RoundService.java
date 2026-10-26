@@ -11,12 +11,10 @@ import com.sigebox.core.model.EstadoConexion;
 import com.sigebox.core.model.EstadoPelea;
 import com.sigebox.core.model.EstadoRound;
 import com.sigebox.core.model.EstadoTarjeta;
-import com.sigebox.core.model.Ganador;
 import com.sigebox.core.model.LugarJuez;
 import com.sigebox.core.model.Pelea;
 import com.sigebox.core.model.Round;
 import com.sigebox.core.model.TarjetaRound;
-import com.sigebox.core.scoring.DecisionRules;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -26,16 +24,16 @@ import java.util.stream.Collectors;
 
 /**
  * Control de rounds de la pelea activa. Persiste cada cambio y solo después lo difunde a los
- * jueces. Los puntos y "Va ganando" ({@link #live}) son solo para la pantalla del operador: nada
- * de eso se difunde a los teléfonos.
+ * jueces. Nunca entrega totales ni ganador, salvo {@link #partialSummary} con confirmación, que
+ * queda en la bitácora (PROJECT.md principio 3, DSK-017).
  */
 public final class RoundService {
 
     /** Palabra que el organizador escribe para cerrar un round con jueces faltantes. */
     public static final String CONFIRM_WORD = "AVANZAR";
 
-    /** Tipo en la bitácora la primera vez que el operador ve el tablero en vivo de una pelea. */
-    public static final String BOARD_VIEWED = "LIVE_BOARD_VIEWED";
+    /** Segundos que la UI muestra el resumen parcial antes de ocultarlo. */
+    public static final int SUMMARY_VISIBLE_SECONDS = 15;
 
     /** Lo que la central difunde a los teléfonos; en la app es {@link JudgeHub}. */
     public interface Broadcaster {
@@ -60,34 +58,23 @@ public final class RoundService {
     public record Judge(int seat, String name, boolean connected) {}
 
     /**
-     * Celda juez × round. Round cerrado: sus puntos (o {@code null} si no envió). Round abierto: su
-     * casilla, y los puntos en cuanto envía. Round futuro: todo {@code null}.
+     * Celda juez × round, sin valores. Round abierto: la casilla de cada juez. Round cerrado: la
+     * casilla de quien envió ({@code null} si no envió). Round futuro: {@code null}.
      */
-    public record Cell(Casilla casilla, Integer red, Integer blue) {
-        static final Cell EMPTY = new Cell(null, null, null);
-
-        public boolean hasScore() {
-            return red != null && blue != null;
-        }
+    public record Cell(Casilla casilla) {
+        static final Cell EMPTY = new Cell(null);
     }
 
     public record Row(int round, EstadoRound estado, List<Cell> cells) {}
 
-    /** Suma de un juez en los rounds cerrados. */
-    public record Total(int seat, int red, int blue) {}
+    /** Total parcial de un juez en los rounds cerrados. */
+    public record PartialTotal(int seat, String judgeName, int red, int blue) {}
 
     /**
-     * "Va ganando" con {@link DecisionRules#fallo} sobre los totales de los rounds cerrados;
-     * {@code aFavor} = jueces con la esquina líder (0 en empate).
+     * Tablero en vivo del operador: estado de cada juez por round, sin puntos, totales ni ganador.
+     * {@code current} como {@link #currentRound}.
      */
-    public record Leader(Ganador ganador, int aFavor, int jueces) {}
-
-    /**
-     * Tablero en vivo del operador: juez × round, totales de los rounds cerrados y líder
-     * ({@code null} si no hay rounds cerrados). {@code current} como {@link #currentRound}.
-     */
-    public record Live(int rounds, int current, List<Judge> judges, List<Row> rows, List<Total> totals,
-            Leader leader) {
+    public record Live(int rounds, int current, List<Judge> judges, List<Row> rows) {
 
         public Row row(int round) {
             return rows.get(round - 1);
@@ -241,10 +228,7 @@ public final class RoundService {
         return lastClosed < pelea.rounds() ? lastClosed + 1 : 0;
     }
 
-    /**
-     * Tablero en vivo de la pelea. La primera consulta por pelea queda en la bitácora
-     * ({@value #BOARD_VIEWED}); las siguientes (el refresco de la pantalla) no.
-     */
+    /** Tablero en vivo de la pelea: solo estados, así que no se registra en la bitácora. */
     public synchronized Live live(String fightId) {
         var pelea = pelea(fightId);
         Map<Integer, EstadoRound> estados = rounds.byPelea(fightId).stream()
@@ -261,52 +245,52 @@ public final class RoundService {
                     l != null && l.conexion() == EstadoConexion.CONECTADO));
         }
         var rows = new ArrayList<Row>();
-        int[] red = new int[pelea.jueces() + 1];
-        int[] blue = new int[pelea.jueces() + 1];
-        boolean anyClosed = false;
         for (int n = 1; n <= pelea.rounds(); n++) {
             var estado = estados.getOrDefault(n, EstadoRound.PENDIENTE);
-            anyClosed |= estado == EstadoRound.CERRADO;
             var cells = new ArrayList<Cell>();
             for (int seat = 1; seat <= pelea.jueces(); seat++) {
                 var card = cards.get(seat + ":" + n);
                 if (estado == EstadoRound.PENDIENTE) {
                     cells.add(Cell.EMPTY);
                 } else if (card == null) {
-                    cells.add(new Cell(estado == EstadoRound.ABIERTO ? Casilla.PENDIENTE : null, null, null));
+                    cells.add(new Cell(estado == EstadoRound.ABIERTO ? Casilla.PENDIENTE : null));
                 } else {
-                    cells.add(new Cell(casilla(card.estado()), card.rojo(), card.azul()));
-                    if (estado == EstadoRound.CERRADO) {
-                        red[seat] += card.rojo();
-                        blue[seat] += card.azul();
-                    }
+                    cells.add(new Cell(casilla(card.estado())));
                 }
             }
             rows.add(new Row(n, estado, List.copyOf(cells)));
         }
-        var totals = new ArrayList<Total>();
-        int porRoja = 0;
-        int porAzul = 0;
+        return new Live(pelea.rounds(), currentRound(fightId), List.copyOf(judges), List.copyOf(rows));
+    }
+
+    /**
+     * Totales parciales por juez de los rounds cerrados. Solo con {@code confirmed}; cada consulta
+     * queda en la bitácora.
+     */
+    public synchronized List<PartialTotal> partialSummary(String fightId, boolean confirmed) {
+        if (!confirmed) {
+            throw new IllegalStateException("el resumen parcial requiere confirmación");
+        }
+        var pelea = pelea(fightId);
+        var closed = rounds.byPelea(fightId).stream()
+                .filter(r -> r.estado() == EstadoRound.CERRADO)
+                .map(Round::numero)
+                .collect(Collectors.toSet());
+        Map<Integer, String> names = lugares.byPelea(fightId).stream()
+                .filter(l -> l.nombre() != null)
+                .collect(Collectors.toMap(LugarJuez::numero, LugarJuez::nombre));
+        var out = new ArrayList<PartialTotal>();
         for (int seat = 1; seat <= pelea.jueces(); seat++) {
-            totals.add(new Total(seat, red[seat], blue[seat]));
-            porRoja += red[seat] > blue[seat] ? 1 : 0;
-            porAzul += blue[seat] > red[seat] ? 1 : 0;
+            int s = seat;
+            var own = tarjetas.byPelea(fightId).stream()
+                    .filter(t -> t.juez() == s && closed.contains(t.round()))
+                    .toList();
+            out.add(new PartialTotal(seat, names.get(seat),
+                    own.stream().mapToInt(TarjetaRound::rojo).sum(),
+                    own.stream().mapToInt(TarjetaRound::azul).sum()));
         }
-        Leader leader = null;
-        if (anyClosed) {
-            var fallo = DecisionRules.fallo(porRoja, porAzul, pelea.jueces());
-            int aFavor = switch (fallo.ganador()) {
-                case ROJA -> porRoja;
-                case AZUL -> porAzul;
-                default -> 0;
-            };
-            leader = new Leader(fallo.ganador(), aFavor, pelea.jueces());
-        }
-        if (log.byPelea(fightId).stream().noneMatch(e -> BOARD_VIEWED.equals(e.tipo()))) {
-            log.append(fightId, BOARD_VIEWED, "tablero en vivo del operador");
-        }
-        return new Live(pelea.rounds(), currentRound(fightId), List.copyOf(judges), List.copyOf(rows),
-                List.copyOf(totals), leader);
+        log.append(fightId, "PARTIAL_SUMMARY_VIEWED", "rounds cerrados " + closed.size());
+        return List.copyOf(out);
     }
 
     private Pelea pelea(String fightId) {
