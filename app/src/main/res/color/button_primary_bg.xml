@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Botón principal: azul marino; deshabilitado al 40 %. -->
+<!-- Botón principal (DESIGN.md v3 §3.1): tinta en claro, crema en oscuro; deshabilitado al 38 %. -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:alpha="0.4" android:color="@color/navy" android:state_enabled="false" />
-    <item android:color="@color/navy" />
+    <item android:alpha="0.38" android:color="@color/primary" android:state_enabled="false" />
+    <item android:color="@color/primary" />
 </selector>

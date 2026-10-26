@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Píldora de esquina: color sólido de la esquina blue, texto blanco. -->
+<!-- Píldora de esquina (DESIGN.md v3 §5): relleno de la esquina; el texto va en on_blue. -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
     <corners android:radius="999dp" />
-    <solid android:color="@color/blue_corner" />
+    <solid android:color="@color/blue" />
 </shape>
