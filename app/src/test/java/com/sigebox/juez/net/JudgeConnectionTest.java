@@ -26,14 +26,17 @@ import java.security.SecureRandom;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
 import okhttp3.WebSocket;
 import okhttp3.WebSocketListener;
+import okhttp3.mockwebserver.Dispatcher;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.RecordedRequest;
 
 import org.junit.After;
 import org.junit.Before;
@@ -52,6 +55,8 @@ public class JudgeConnectionTest {
     private final List<WebSocket> serverSockets = new CopyOnWriteArrayList<>();
     private SigeboxDatabase db;
     private JudgeConnection connection;
+    /** Si no es nulo, la central no acepta conexiones nuevas hasta que se abra (simula que sigue caída). */
+    private volatile CountDownLatch centralDown;
 
     /** Una "central" mínima: CHALLENGE al abrir, STATE al HELLO, ACK a cada SUBMIT_ROUND. */
     private final WebSocketListener central = new WebSocketListener() {
@@ -76,8 +81,16 @@ public class JudgeConnectionTest {
 
     @Before
     public void setUp() throws Exception {
-        server.enqueue(new MockResponse().withWebSocketUpgrade(central));
-        server.enqueue(new MockResponse().withWebSocketUpgrade(central));
+        server.setDispatcher(new Dispatcher() {
+            @Override
+            public MockResponse dispatch(RecordedRequest request) throws InterruptedException {
+                CountDownLatch down = centralDown;
+                if (down != null) {
+                    down.await(10, TimeUnit.SECONDS);
+                }
+                return new MockResponse().withWebSocketUpgrade(central);
+            }
+        });
         server.start();
         db = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext(), SigeboxDatabase.class)
                 .allowMainThreadQueries() // solo para preparar la prueba; la conexión usa su propio hilo
@@ -91,6 +104,10 @@ public class JudgeConnectionTest {
 
     @After
     public void tearDown() throws Exception {
+        CountDownLatch down = centralDown;
+        if (down != null) {
+            down.countDown();
+        }
         connection.stop();
         for (WebSocket ws : serverSockets) {
             ws.close(1000, null);
@@ -116,16 +133,34 @@ public class JudgeConnectionTest {
         assertEquals(expected, connection.current().pendingAcks);
     }
 
+    private void awaitStatus(ConnectionState.Status expected) throws InterruptedException {
+        long deadline = System.currentTimeMillis() + 5_000;
+        while (connection.current().status != expected && System.currentTimeMillis() < deadline) {
+            Thread.sleep(5);
+        }
+        assertEquals(expected, connection.current().status);
+    }
+
     @Test
     public void reconectaSoloYEntregaLoCalificadoDuranteElCorte() throws Exception {
         connection.start();
         assertEquals(Hello.TYPE, next().type());
         assertEquals("/ws", server.takeRequest().getPath());
+        awaitStatus(ConnectionState.Status.CONNECTED);
 
-        // La central se cae; mientras, el juez califica.
+        // La central se cae y sigue caída hasta que la prueba la levanta. Antes se calificaba justo después de
+        // close(): si el cliente aún no procesaba el cierre, el SUBMIT_ROUND salía por el socket viejo, la central
+        // lo recibía sin poder mandar el ACK y la bandeja lo reenviaba al reconectar (SUBMIT_ROUND, HELLO,
+        // SUBMIT_ROUND). Eso es correcto en la app (al menos una vez); lo inestable era la prueba.
+        centralDown = new CountDownLatch(1);
         serverSockets.get(0).close(1001, "central caida");
+        awaitStatus(ConnectionState.Status.DISCONNECTED);
+
+        // Mientras, el juez califica: queda en la bandeja.
         SubmitRound submit = new SubmitRound("F1", 2, 3, 10, 9);
         connection.submit(submit);
+        awaitPending(1);
+        centralDown.countDown();
 
         assertEquals("se reconecta y vuelve a presentarse", Hello.TYPE, next().type());
         Message delivered = next();
