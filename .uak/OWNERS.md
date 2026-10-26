@@ -8,8 +8,8 @@ An owner is not a prerequisite for everyone: consumers work on published contrac
 | core/build.gradle.kts | CORE-004 |
 | core/settings.gradle.kts | CORE-001 |
 | .github/workflows/ | CORE-001 |
-| core/schemas/ | CORE-002 |
-| core/src/main/java/com/sigebox/core/protocol/ | CORE-002 |
+| core/schemas/ | CORE-005 |
+| core/src/main/java/com/sigebox/core/protocol/ | CORE-005 |
 | core/src/main/java/com/sigebox/core/model/ | CORE-002 |
 | demo_data/ | CORE-002 |
 | build.gradle.kts | AND-001 |
@@ -26,5 +26,5 @@ An owner is not a prerequisite for everyone: consumers work on published contrac
 | BOXCENTRAL/judge-sim/build.gradle.kts | DSK-001 |
 | BOXCENTRAL/src/main/java/com/sigebox/central/App.java | DSK-018 |
 | BOXCENTRAL/src/main/java/com/sigebox/central/ui/Screens.java | DSK-018 |
-| BOXCENTRAL/src/main/java/com/sigebox/central/db/ | DSK-003 |
+| BOXCENTRAL/src/main/java/com/sigebox/central/db/ | DSK-019 |
 | .uak/PROJECT.md | CORE-001 |
