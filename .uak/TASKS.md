@@ -506,6 +506,22 @@ En Windows (zoe) los comandos `Verify` se corren en Git Bash.
 - **Verify:** `./gradlew :app:testDebugUnitTest`
 - **Next step:** PR #40
 
+## AND-010 · Seguimiento de AND-008: testLogging también con `gradle -q`
+
+- **Type:** fix
+- **Priority:** P1
+- **Estimate:** 15 min
+- **Rubric / Spec:** seguimiento de AND-008. En `uak / gates`, `tools/smoke.sh` corre `:app:testDebugUnitTest -q`, y el modo silencioso oculta el `testLogging` de AND-008. Prueba: la corrida de main del 2026-10-26 03:46 (run 40265713052) falló otra vez con "64 tests completed, 1 failed" y sin nombre
+- **Depends on:** AND-008
+- **Paths:** app/build.gradle.kts
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - `testLogging.quiet` muestra `failed` con `exceptionFormat = FULL`
+  - Evidencia: con `-q`, una prueba temporal que falla a propósito imprime su nombre y la aserción; sin el cambio no imprime nada. La prueba temporal no se sube
+  - `./gradlew :app:testDebugUnitTest` sigue en verde
+- **Verify:** `./gradlew :app:testDebugUnitTest`
+- **Next step:** bloque `quiet { ... }` dentro de `testLogging`
+
 ## AND-009 · Arreglar la prueba inestable de la app
 
 - **Type:** fix

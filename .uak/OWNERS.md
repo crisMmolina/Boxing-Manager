@@ -15,7 +15,7 @@ An owner is not a prerequisite for everyone: consumers work on published contrac
 | build.gradle.kts | AND-001 |
 | settings.gradle.kts | AND-001 |
 | gradle/ | AND-001 |
-| app/build.gradle.kts | AND-008 |
+| app/build.gradle.kts | AND-010 |
 | app/src/main/AndroidManifest.xml | AND-001 |
 | app/src/main/res/values/strings.xml | AND-007 |
 | app/src/main/res/values/themes.xml | AND-007 |
