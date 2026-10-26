@@ -36,6 +36,7 @@ public class CornerNamesTest {
         CornerNames reopened = new CornerNames(context);
         assertEquals("M. Hernández", reopened.red("F1"));
         assertEquals("J. Ortega", reopened.blue("F1"));
+        assertEquals(Integer.valueOf(4), reopened.rounds("F1"));
         assertNull("otra pelea no hereda nombres", reopened.red("F2"));
     }
 

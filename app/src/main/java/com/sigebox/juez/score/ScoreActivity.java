@@ -140,15 +140,18 @@ public class ScoreActivity extends AppCompatActivity {
                 ui.seat > 0 ? getString(R.string.score_judge, ui.seat) : getString(R.string.status_disconnected));
 
         TextView round = findViewById(R.id.score_round);
-        if (ui.round > 0 && ui.rounds != null) {
-            round.setText(getString(R.string.score_round_of, ui.round, ui.rounds));
+        // Antes del primer STATE, los rounds salen del JOIN_APPROVED guardado.
+        Integer rounds = ui.rounds != null ? ui.rounds
+                : currentFightId == null ? null : cornerNames.rounds(currentFightId);
+        if (ui.round > 0 && rounds != null) {
+            round.setText(getString(R.string.score_round_of, ui.round, rounds));
         } else if (ui.round > 0) {
             round.setText(getString(R.string.score_round, ui.round));
         } else {
             round.setText(R.string.score_title_waiting);
         }
         renderStatus(ui);
-        RoundProgress.bind(findViewById(R.id.score_progress), ui.rounds, ui.round, ui.card != null);
+        RoundProgress.bind(findViewById(R.id.score_progress), rounds, ui.round, ui.card != null);
 
         boolean input = ui.inputEnabled();
         boolean opened = input && !wasOpen;
