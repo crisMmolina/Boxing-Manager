@@ -539,6 +539,25 @@ En Windows (zoe) los comandos `Verify` se corren en Git Bash.
 - **Verify:** `./gradlew :app:testDebugUnitTest`
 - **Next step:** esperar un fallo de `uak / gates` con nombre (relanzar o revisar corridas de main)
 
+## DSK-017 · Principio 3: tablero en vivo sin totales ni "Va ganando"
+
+- **Type:** fix
+- **Priority:** P0
+- **Estimate:** 3 h
+- **Rubric / Spec:** decisión de zoe del 2026-10-26, tras el aviso de cris: manda `PROJECT.md` principio 3 ("nadie ve totales ni ganador durante la pelea, salvo 'Ver resumen parcial', registrado en bitácora"). Se revierte la enmienda del spec 001 que introdujo DSK-012. Regla del empate mayoritario: se queda como está (una esquina con votos y el resto empates = MAYORITARIA, IDEA §5)
+- **Depends on:** DSK-012, DSK-015
+- **Paths:** BOXCENTRAL/src/main/java/com/sigebox/central/service/RoundService.java, BOXCENTRAL/src/test/java/com/sigebox/central/service/RoundServiceTest.java, BOXCENTRAL/src/main/java/com/sigebox/central/ui/rounds/, docs/specs/001-sigebox/spec.md, docs/DESIGN.md, docs/runbook.md, docs/demo.md
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - El tablero en vivo muestra por juez y round solo el estado (Pendiente / Enviado / Tardío / Corregido), sin puntos, sin fila de totales y sin "Va ganando"
+  - Vuelve "Ver resumen parcial": botón discreto, confirmación, se muestra 15 s y cada vista queda en la bitácora (spec 001 original, RO-07)
+  - `RoundService` no expone totales ni líder fuera de `partialSummary` con confirmación; se quitan `Leader`, totales y puntos de `live()`. Las pruebas de DSK-012 que afirmaban totales o líder se cambian a la regla nueva, citando esta decisión
+  - Se conservan los atajos de DSK-015 (Ctrl+Enter, Corregir un round, Cerrar pelea)
+  - `docs/specs/001-sigebox/spec.md` y `docs/DESIGN.md` §7.2 vuelven a decir "sin totales"; `docs/runbook.md` y `docs/demo.md` dejan de mencionar "Va ganando"
+  - Evidencia: captura del tablero con la pelea de referencia y del resumen parcial con su registro en la bitácora
+- **Verify:** `BOXCENTRAL/gradlew -p BOXCENTRAL test --tests 'com.sigebox.central.service.RoundServiceTest'`
+- **Next step:** recuperar `partialSummary` y su prueba de antes de DSK-012 (commit anterior a 128723f)
+
 ## QA-001 · Integración: corte de 60 s, cierre forzado y latencia ≤ 1 s
 
 - **Type:** integration
