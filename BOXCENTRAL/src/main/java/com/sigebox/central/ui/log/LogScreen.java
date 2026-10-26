@@ -79,7 +79,7 @@ public final class LogScreen {
 
         var filters = new HBox(12, Ui.field("Pelea", fight), Ui.field("Tipo", type), refresh, count);
         filters.setAlignment(javafx.geometry.Pos.BOTTOM_LEFT);
-        var card = Ui.glass(filters, table);
+        var card = Ui.card(filters, table);
         VBox.setVgrow(card, Priority.ALWAYS);
         var root = new VBox(16, Ui.screenTitle("Bitácora"), card);
         return root;

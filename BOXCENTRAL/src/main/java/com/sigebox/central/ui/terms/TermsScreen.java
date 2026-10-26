@@ -68,7 +68,7 @@ public final class TermsScreen {
             onDeclined.run();
         });
 
-        var card = Ui.glass(scroll, agree, new HBox(12, accept, decline));
+        var card = Ui.card(scroll, agree, new HBox(12, accept, decline));
         card.setMaxWidth(800);
         var root = new VBox(16, Ui.screenTitle("Antes de empezar"), card);
         return root;

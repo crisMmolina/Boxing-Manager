@@ -32,7 +32,7 @@ import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 
 /**
- * Preparar la pelea y emparejar a los jueces (DESIGN v2 §7.1): formulario de la pelea a la
+ * Preparar la pelea y emparejar a los jueces (DESIGN v3 §7.1): formulario de la pelea a la
  * izquierda, una tarjeta por lugar a la derecha (QR + código, aprobar con la huella corta, estado de
  * conexión) y el pie con la dirección para los jueces e "Iniciar pelea".
  *
@@ -134,7 +134,7 @@ public final class SetupScreen {
         redRow.setAlignment(Pos.CENTER_LEFT);
         var blueRow = new HBox(8, Ui.cornerDot(false), Ui.support("Azul"));
         blueRow.setAlignment(Pos.CENTER_LEFT);
-        return Ui.glass(Ui.cardTitle("Pelea"), new VBox(6, redRow, red), new VBox(6, blueRow, blue),
+        return Ui.card(Ui.cardTitle("Pelea"), new VBox(6, redRow, red), new VBox(6, blueRow, blue),
                 new HBox(12, Ui.field("Rounds", rounds), Ui.field("Jueces", judges)), create);
     }
 
@@ -155,7 +155,7 @@ public final class SetupScreen {
         });
         var idRow = new HBox(12, id, copy);
         idRow.setAlignment(Pos.CENTER_LEFT);
-        return Ui.glass(Ui.cardTitle("Pelea"), Ui.field("Código de la pelea", idRow), red, blue,
+        return Ui.card(Ui.cardTitle("Pelea"), Ui.field("Código de la pelea", idRow), red, blue,
                 Ui.support(p.rounds() + " rounds · " + p.jueces() + (p.jueces() == 1 ? " juez" : " jueces")));
     }
 
@@ -164,7 +164,7 @@ public final class SetupScreen {
         var who = "Juez " + s.seat();
         var head = new HBox(8, Ui.cardTitle(who), Ui.grow(), Ui.dot(connected, who));
         head.setAlignment(Pos.CENTER_LEFT);
-        var card = Ui.glass(head);
+        var card = Ui.card(head);
         card.setPrefWidth(240);
         card.setMinWidth(220);
         switch (s.state()) {
