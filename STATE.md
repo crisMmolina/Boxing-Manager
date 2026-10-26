@@ -1,7 +1,7 @@
 # STATE
 
 Phase: execution
-Updated: 1792993842
+Updated: 1792993848
 AVAILABLE: CORE-005 DSK-020 AND-013 DSK-021 QA-003 
 CLAIMED: AND-012 
 BLOCKED: -
@@ -11,16 +11,16 @@ CANCELLED: -
 
 Claims (first 24; status --task ID shows detail):
 AND-012 | CLAIMED | cris-2 | until 1793006675
-DSK-018 | REVIEW | cris-1 | until 1793080242
+DSK-018 | REVIEW | cris-1 | until 1793080248
 DSK-019 | REVIEW | zoe-1 | until 1793079775
 
 Blockers: BLOCKED tasks; use status --task ID --summary.
 Current decisions (last 5):
-- 1792985735 | AND-008 | no cambiar JudgeConnectionTest sin evidencia | Why: la hipotesis de carrera no se reprodujo
 - 1792986992 | deadline decision/AND-008-1792985990/1792986890 | BLOCKED_OTHER_TASK | Option: auto-merge de GitHub en los PR del kit: lo activa zoe (humana) en cada PR, no el agent
 - 1792988375 | AND-009 | test-only fix: latch holds central down; await CONNECTED/DISCONNECTED | Why: app behavior (at-least-once resend) is correct; test submitted before client n
 - 1792990591 | CORE-004 | inputs.dir with RELATIVE path sensitivity, Gradle 8 compatible | Why: composite builds run core with host Gradle
 - 1792991755 | DSN-003 | guinda only as red corner; neutral primary; dorado only accents; tonal surfaces; light+dark | Why: acceptance: corners distinct vs CDMX palette and nothing
+- 1792993848 | DSK-018 | tokens in light.css/dark.css; bento live board keeps table; neutral primary | Why: DESIGN v3 contract; no behavior change
 
 Global next step: available P0; else review PRs, tests, demo, rehearsal.
 Why: bounded snapshot to resume without rereading history.

@@ -42,3 +42,4 @@ Why: a reversible option after 15 min keeps work moving.
 - 1792988375 | AND-009 | test-only fix: latch holds central down; await CONNECTED/DISCONNECTED | Why: app behavior (at-least-once resend) is correct; test submitted before client noticed the close
 - 1792990591 | CORE-004 | inputs.dir with RELATIVE path sensitivity, Gradle 8 compatible | Why: composite builds run core with host Gradle
 - 1792991755 | DSN-003 | guinda only as red corner; neutral primary; dorado only accents; tonal surfaces; light+dark | Why: acceptance: corners distinct vs CDMX palette and nothing looks official; AA measured
+- 1792993848 | DSK-018 | tokens in light.css/dark.css; bento live board keeps table; neutral primary | Why: DESIGN v3 contract; no behavior change
