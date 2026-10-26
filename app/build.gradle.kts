@@ -33,7 +33,14 @@ android {
         // Robolectric necesita los recursos y el Manifest fusionado.
         unitTests.isIncludeAndroidResources = true
         // Robolectric con SDK 36 toca jdk.internal.access (ApplicationSharedMemory) y JDK 17+ no lo exporta.
-        unitTests.all { it.jvmArgs("--add-exports=java.base/jdk.internal.access=ALL-UNNAMED") }
+        unitTests.all {
+            it.jvmArgs("--add-exports=java.base/jdk.internal.access=ALL-UNNAMED")
+            // En CI solo se veía "1 failed": que diga qué prueba falló y por qué (AND-008).
+            it.testLogging {
+                events("failed")
+                exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+            }
+        }
     }
 }
 
