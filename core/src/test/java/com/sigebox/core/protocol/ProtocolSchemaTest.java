@@ -145,7 +145,8 @@ class ProtocolSchemaTest {
                 new FightEnded("f-1", com.sigebox.core.model.MotivoTerminacion.KO),
                 new FightClosed("f-1"),
                 new Ping(1L),
-                new Pong(1L));
+                new Pong(1L),
+                new NextFight("f-1", "f-2", 2, "Roja", "Azul", 6));
         assertEquals(MessageType.values().length + 1, samples.size());
         for (Message msg : samples) {
             MessageType type = MessageType.fromWire(msg.type());

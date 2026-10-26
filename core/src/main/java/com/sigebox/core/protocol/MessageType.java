@@ -19,7 +19,8 @@ public enum MessageType {
     FIGHT_ENDED(FightEnded.class),
     FIGHT_CLOSED(FightClosed.class),
     PING(Ping.class),
-    PONG(Pong.class);
+    PONG(Pong.class),
+    NEXT_FIGHT(NextFight.class);
 
     private final Class<? extends Message> dtoClass;
 
