@@ -15,8 +15,8 @@ Task-Base: bcae7de41b537f8e0b251f08e80ba7b49c03bc1d
 Next: Wait for review, then uak merge CORE-004
 PR: https://github.com/crisMmolina/Boxing-Manager/pull/50
 Evidence: core/gradlew -p core build exit 0; broken PING fixture now reruns and fails tests (was UP-TO-DATE); plan.md 16 messages + Spoofing row
-Events: 3
+Events: 4
 Checkpoints: 1
-Sessions: 1
+Sessions: 2
 Last-Checkpoint: 1792990591
 Task-Tip: 2b13c34bdb6d5ca02af773021764169dd69b1e59
