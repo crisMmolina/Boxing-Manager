@@ -473,6 +473,23 @@ En Windows (zoe) los comandos `Verify` se corren en Git Bash.
 - **Verify:** `BOXCENTRAL/gradlew -p BOXCENTRAL build`
 - **Next step:** `RoundsScreen.register` recibe los callbacks `onCorrect` y `onFinish` desde `App`
 
+## DSK-016 · Mostrar el id de la pelea en la central
+
+- **Type:** fix
+- **Priority:** P1
+- **Estimate:** 1 h
+- **Rubric / Spec:** hallazgo de QA-002: la unión manual de la app y `judge-sim --fight` piden el id de la pelea y la central solo lo pone dentro del QR
+- **Depends on:** DSK-005, QA-002
+- **Paths:** BOXCENTRAL/src/main/java/com/sigebox/central/ui/setup/SetupScreen.java, docs/runbook.md, docs/demo.md, README.md
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - Las pantallas Pelea y Jueces muestran el id de la pelea junto a la dirección (IP:puerto), en texto que se puede leer y copiar
+  - Con esos datos y el código de 6 dígitos, un juez se une por la entrada manual de la app sin escanear el QR
+  - `docs/runbook.md`, `docs/demo.md` y `README.md` dejan de decir que el id solo va en el QR
+  - Evidencia: captura de la pantalla Jueces y unión manual (teléfono o `judge-sim --fight`)
+- **Verify:** `BOXCENTRAL/gradlew -p BOXCENTRAL build`
+- **Next step:** agregar el id al pie de `SetupScreen` (`footer`), junto a "Dirección para los jueces"
+
 ## QA-001 · Integración: corte de 60 s, cierre forzado y latencia ≤ 1 s
 
 - **Type:** integration
