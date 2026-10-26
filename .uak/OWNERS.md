@@ -5,7 +5,7 @@ An owner is not a prerequisite for everyone: consumers work on published contrac
 
 | Pattern | Owner task |
 |---|---|
-| core/build.gradle.kts | CORE-001 |
+| core/build.gradle.kts | CORE-004 |
 | core/settings.gradle.kts | CORE-001 |
 | .github/workflows/ | CORE-001 |
 | core/schemas/ | CORE-002 |
