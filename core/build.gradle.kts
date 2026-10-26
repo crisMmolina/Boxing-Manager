@@ -36,6 +36,14 @@ tasks.withType<JavaCompile>().configureEach {
 tasks.test {
     useJUnitPlatform()
     finalizedBy(tasks.jacocoTestReport)
+    // Las pruebas leen los Schema y los fixtures desde disco: si cambian, las pruebas deben volver a correr
+    // (sin esto, un fixture roto quedaba UP-TO-DATE o salía de la caché).
+    inputs.dir(layout.projectDirectory.dir("schemas"))
+        .withPropertyName("schemas")
+        .withPathSensitivity(PathSensitivity.RELATIVE)
+    inputs.dir(layout.projectDirectory.dir("../demo_data"))
+        .withPropertyName("demoData")
+        .withPathSensitivity(PathSensitivity.RELATIVE)
 }
 
 jacoco {
