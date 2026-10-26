@@ -199,7 +199,10 @@ class ScreenshotHarness {
         Theme.apply(scene);
         root.applyCss();
         root.layout();
-        return scene.snapshot(null);
+        var img = scene.snapshot(null);
+        // Sacar la pantalla de la escena detiene sus refrescos periódicos antes de cerrar la base.
+        scene.setRoot(new StackPane());
+        return img;
     }
 
     private static void write(Path file, WritableImage img) throws Exception {

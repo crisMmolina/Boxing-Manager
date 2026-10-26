@@ -26,8 +26,8 @@ public final class Theme {
 
     /** Tema claro «cantera» u oscuro «noche de arena» (DESIGN v3 §2). */
     public enum Mode {
-        LIGHT("/com/sigebox/central/theme-light.css", "Tema oscuro"),
-        DARK("/com/sigebox/central/theme-dark.css", "Tema claro");
+        LIGHT("/com/sigebox/central/light.css", "Tema oscuro"),
+        DARK("/com/sigebox/central/dark.css", "Tema claro");
 
         private final String stylesheet;
         private final String toggleLabel;
@@ -107,6 +107,7 @@ public final class Theme {
     public static void apply(Scene scene) {
         scene.getStylesheets().setAll(stylesheets(mode));
         synchronized (SCENES) {
+            SCENES.removeIf(s -> s.getWindow() != null && !s.getWindow().isShowing());
             if (!SCENES.contains(scene)) {
                 SCENES.add(scene);
             }

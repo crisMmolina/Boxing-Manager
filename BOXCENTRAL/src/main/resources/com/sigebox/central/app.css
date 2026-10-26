@@ -1,6 +1,6 @@
 /*
  * SIGEBOX · Central. Componentes de docs/DESIGN.md v3.
- * Solo usa variables -sg-; los colores viven en theme-light.css y theme-dark.css, que se cargan antes.
+ * Solo usa variables -sg-; los colores viven en light.css y dark.css, que se cargan antes.
  * Superficies tonales sólidas (sin cristal), guinda solo en la esquina roja y dorado solo como acento.
  */
 

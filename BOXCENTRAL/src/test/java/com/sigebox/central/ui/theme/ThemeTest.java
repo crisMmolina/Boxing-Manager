@@ -70,6 +70,20 @@ class ThemeTest {
     }
 
     @Test
+    void everyVariableUsedByTheComponentsIsDefinedInBothThemes() throws IOException {
+        // CssParser no avisa de una variable sin definir: JavaFX solo lo reporta al aplicar el estilo.
+        var used = new TreeSet<String>();
+        Pattern.compile("(-sg-[a-z0-9-]+)\\b").matcher(read(Theme.STYLESHEET)).results().forEach(m -> used.add(m.group(1)));
+        assertFalse(used.isEmpty());
+        for (var mode : Theme.Mode.values()) {
+            var defined = definedTokens(read(mode.stylesheet()));
+            for (var v : used) {
+                assertTrue(defined.contains(v), mode + " no define " + v);
+            }
+        }
+    }
+
+    @Test
     void componentStylesheetHasNoLiteralColors() throws IOException {
         var css = read(Theme.STYLESHEET);
         assertFalse(Pattern.compile("#[0-9A-Fa-f]{3,8}\\b|rgba?\\(").matcher(css).find(),
