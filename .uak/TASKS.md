@@ -490,6 +490,24 @@ En Windows (zoe) los comandos `Verify` se corren en Git Bash.
 - **Verify:** `BOXCENTRAL/gradlew -p BOXCENTRAL build`
 - **Next step:** agregar el id al pie de `SetupScreen` (`footer`), junto a "Dirección para los jueces"
 
+## AND-008 · Prueba inestable de la app en CI
+
+- **Type:** fix
+- **Priority:** P1
+- **Estimate:** 2 h
+- **Rubric / Spec:** en `uak / gates`, `:app:testDebugUnitTest` falla a veces con "64 tests completed, 1 failed" y pasa al relanzar (main 2026-10-25 22:37; PR #38 intento 1). Localmente pasó 6/6. CI no muestra qué prueba es
+- **Depends on:** AND-003
+- **Paths:** app/build.gradle.kts, app/src/test/java/com/sigebox/juez/net/JudgeConnectionTest.java, app/src/main/java/com/sigebox/juez/net/JudgeConnection.java
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - `app/build.gradle.kts`: las pruebas unitarias imprimen el nombre y la excepción de cada prueba fallida (`testLogging` con `events("failed")` y `exceptionFormat = FULL`), así CI dice cuál falla
+  - Se identifica la prueba inestable con evidencia (log de CI o corridas repetidas) antes de cambiarla
+  - Se corrige la causa: sin esperas fijas (`Thread.sleep`) que dependan de la velocidad de la máquina. Si la causa está en `JudgeConnection`, se arregla el código, no se relaja la prueba
+  - Cambiar una prueba existente se justifica en el PR con la causa encontrada (no para "hacerla pasar")
+  - `:app:testDebugUnitTest --rerun-tasks` pasa 10 veces seguidas localmente y `uak / gates` pasa en el PR
+- **Verify:** `./gradlew :app:testDebugUnitTest`
+- **Next step:** agregar `testLogging` y relanzar CI hasta ver el nombre de la prueba que falla
+
 ## QA-001 · Integración: corte de 60 s, cierre forzado y latencia ≤ 1 s
 
 - **Type:** integration
