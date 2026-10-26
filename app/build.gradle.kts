@@ -39,6 +39,11 @@ android {
             it.testLogging {
                 events("failed")
                 exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+                // tools/smoke.sh corre con -q y el nivel quiet oculta lo de arriba (AND-010).
+                quiet {
+                    events("failed")
+                    exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+                }
             }
         }
     }
