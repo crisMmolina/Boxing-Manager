@@ -1,7 +1,7 @@
 # STATE
 
 Phase: execution
-Updated: 1792990933
+Updated: 1792990942
 AVAILABLE: -
 CLAIMED: -
 BLOCKED: -
@@ -11,7 +11,7 @@ CANCELLED: -
 
 Claims (first 24; status --task ID shows detail):
 AND-011 | REVIEW | cris-2 | until 1793077209
-CORE-004 | REVIEW | cris-1 | until 1793076991
+CORE-004 | REVIEW | cris-1 | until 1793077342
 
 Blockers: BLOCKED tasks; use status --task ID --summary.
 Current decisions (last 5):
