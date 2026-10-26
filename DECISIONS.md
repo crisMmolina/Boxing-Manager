@@ -35,3 +35,4 @@ Why: a reversible option after 15 min keeps work moving.
 - 1792966195 | QA-001 | drop antes del round 2; 120 = 60 tarjetas x 2 | Why: carrera con RoundOpened
 - 1792967541 | DSK-015 | pantalla actual rastreada en App (StepsBar fuera de Paths) | Why: StepsBar sin getter
 - 1792979204 | AND-002 | sin router de viaje; A37 sin probar | Why: hotspot Honor funciona sin internet
+- 1792979992 | QA-002 | msi y A37 marcados sin verificar | Why: sin WiX ni A37
