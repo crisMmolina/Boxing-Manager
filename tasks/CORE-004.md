@@ -1,6 +1,6 @@
 # CORE-004
 ID: CORE-004
-State: CLAIMED
+State: REVIEW
 Owner: cris-1
 Branch: feat/core-004
 Worktree: /Users/cristophermolina/Desktop/box-wt/core-004
@@ -9,13 +9,14 @@ Priority: P1
 Paths: core/build.gradle.kts, docs/specs/001-sigebox/plan.md
 Depends: CORE-001, CORE-002
 Verify: `core/gradlew -p core build`
-Lease-Until: 1793004898
-Updated: 1792990498
+Lease-Until: 1793076986
+Updated: 1792990586
 Task-Base: bcae7de41b537f8e0b251f08e80ba7b49c03bc1d
-Next: romper `demo_data/mensajes/PING.json` y comprobar que `core/gradlew -p core test` ya no queda UP-TO-DATE
-PR: -
-Evidence: -
-Events: 1
+Next: Another agent reviews https://github.com/crisMmolina/Boxing-Manager/pull/50; run .uak/bin/smoke
+PR: https://github.com/crisMmolina/Boxing-Manager/pull/50
+Evidence: core/gradlew -p core build exit 0; broken PING fixture now reruns and fails tests (was UP-TO-DATE); plan.md 16 messages + Spoofing row
+Events: 2
 Checkpoints: 0
 Sessions: 1
 Last-Checkpoint: 0
+Task-Tip: 2b13c34bdb6d5ca02af773021764169dd69b1e59
