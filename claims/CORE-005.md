@@ -9,9 +9,9 @@ Priority: P0
 Paths: core/src/main/java/com/sigebox/core/protocol/, core/src/test/java/com/sigebox/core/protocol/, core/schemas/, demo_data/mensajes/
 Depends: None
 Verify: `core/gradlew -p core build`
-Lease-Until: 1793080922
-Updated: 1792994522
+Lease-Until: 1793086026
+Updated: 1792999626
 Task-Base: e275383837d7dbfef4ea0fdce63ec2385c9299d4
-Next: Another agent reviews https://github.com/crisMmolina/Boxing-Manager/pull/58; run .uak/bin/smoke
+Next: esperar review de cris + OK al contrato (ADR 0002); luego uak merge CORE-005 y claim DSK-020
 PR: https://github.com/crisMmolina/Boxing-Manager/pull/58
 Evidence: -
