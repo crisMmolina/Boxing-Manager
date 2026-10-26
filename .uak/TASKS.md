@@ -657,3 +657,104 @@ En Windows (zoe) los comandos `Verify` se corren en Git Bash.
   - Evidencia en el PR: capturas de cada pantalla con la pelea de referencia
 - **Verify:** `BOXCENTRAL/gradlew -p BOXCENTRAL build`
 - **Next step:** reemplazar los tokens de `ui/theme/` por los de DESIGN v3
+
+## CORE-005 · Mensaje NEXT_FIGHT (contrato del cambio de pelea)
+
+- **Type:** contract
+- **Priority:** P0
+- **Estimate:** 2 h
+- **Rubric / Spec:** `docs/specs/002-funcion/` · ADR 0002
+- **Depends on:** None
+- **Paths:** core/src/main/java/com/sigebox/core/protocol/, core/src/test/java/com/sigebox/core/protocol/, core/schemas/, demo_data/mensajes/
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - `NextFight` record `{v, id, type, fightId, nextFightId, seat|null, redCorner, blueCorner, rounds}` con validación de `Fields` (seat 1–5 o nulo, rounds 1–12, textos 1–64 sin controles)
+  - `core/schemas/next_fight.schema.json` (`additionalProperties: false`) y fixture `demo_data/mensajes/NEXT_FIGHT.json`; `ProtocolSchemaTest` lo cubre como a los otros 16
+  - `MessageType.NEXT_FIGHT` y `Messages.decode` lo reconocen; mensajes manipulados se rechazan
+  - Visto bueno de cris al contrato antes del merge (ADR 0002)
+- **Verify:** `core/gradlew -p core build`
+- **Next step:** prueba de ida y vuelta del fixture `NEXT_FIGHT.json` que falla porque el tipo no existe
+
+## DSK-019 · Función y cartelera en la central (datos y servicio)
+
+- **Type:** feature
+- **Priority:** P0
+- **Estimate:** 1 d
+- **Rubric / Spec:** `docs/specs/002-funcion/` (cartelera, base, cambios por pelea, saltar)
+- **Depends on:** DSK-017
+- **Paths:** BOXCENTRAL/src/main/java/com/sigebox/central/db/, BOXCENTRAL/src/main/java/com/sigebox/central/service/FuncionService.java, BOXCENTRAL/src/test/java/com/sigebox/central/service/FuncionServiceTest.java, BOXCENTRAL/src/test/java/com/sigebox/central/db/
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - Tablas `funcion` y `cartelera` (solo expand; las peleas sueltas siguen igual) y su repositorio
+  - `FuncionService`: crear función con base (rounds 1–12, jueces 1–5); agregar, quitar, reordenar y saltar peleas no empezadas; cambiar rounds o jueces de una pelea no empezada; cada cambio persiste antes de devolverse y queda en la bitácora
+  - `siguiente(funcionId)` crea la `Pelea` de la siguiente fila PROGRAMADA (base o sus cambios) con `FightService`, la marca EN_CURSO y respeta "una sola pelea activa"
+  - Cerrar a la fuerza la central a mitad de cartelera no pierde la cartelera (prueba reabriendo la base)
+- **Verify:** `BOXCENTRAL/gradlew -p BOXCENTRAL test --tests 'com.sigebox.central.service.FuncionServiceTest'`
+- **Next step:** prueba: función con base 4 rounds × 3 jueces y 3 peleas; la tercera cambia a 6 rounds; `siguiente` crea las peleas en orden con esa configuración
+
+## DSK-020 · Llevar a los jueces a la siguiente pelea (central y judge-sim)
+
+- **Type:** feature
+- **Priority:** P0
+- **Estimate:** 1 d
+- **Rubric / Spec:** `docs/specs/002-funcion/` · ADR 0002
+- **Depends on:** CORE-005, DSK-019
+- **Paths:** BOXCENTRAL/src/main/java/com/sigebox/central/server/, BOXCENTRAL/src/main/java/com/sigebox/central/service/FuncionService.java, BOXCENTRAL/src/test/java/com/sigebox/central/server/, BOXCENTRAL/src/test/java/com/sigebox/central/service/FuncionServiceTest.java, BOXCENTRAL/judge-sim/src/
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - Al iniciar la siguiente pelea se copian en una transacción los lugares aprobados 1..N (nombre, dispositivo, huella) y después se manda `NEXT_FIGHT` a cada teléfono conectado; los lugares sobrantes reciben `seat: null`; los lugares nuevos quedan para QR
+  - Un `HELLO` de la pelea cerrada con una llave que está en la pelea activa de la misma función recibe `NEXT_FIGHT`; con otra llave se rechaza como hoy
+  - `JudgeHub` rechaza un `NEXT_FIGHT` que llegue de un teléfono
+  - `SimJudge` entiende `NEXT_FIGHT`: guarda la pelea nueva y reconecta con `HELLO`
+  - Bitácora `SIGUIENTE_PELEA` en ambas peleas
+- **Verify:** `BOXCENTRAL/gradlew -p BOXCENTRAL test --tests 'com.sigebox.central.server.*'`
+- **Next step:** prueba de `JudgeHub`: dos jueces aprobados en la pelea 1; al iniciar la 2, ambos reciben `NEXT_FIGHT` con su lugar y su `HELLO` a la pelea 2 se acepta sin aprobación
+
+## AND-013 · La app del juez pasa sola a la siguiente pelea
+
+- **Type:** feature
+- **Priority:** P0
+- **Estimate:** 1 d
+- **Rubric / Spec:** `docs/specs/002-funcion/` · ADR 0002
+- **Depends on:** CORE-005, AND-012
+- **Paths:** app/src/main/java/com/sigebox/juez/net/, app/src/main/java/com/sigebox/juez/data/, app/src/main/java/com/sigebox/juez/join/, app/src/main/java/com/sigebox/juez/score/, app/src/test/java/com/sigebox/juez/
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - Al recibir `NEXT_FIGHT` con lugar: guarda la pelea nueva y el lugar en `local_state` (sigue aprobado), reconecta con `HELLO` firmado con la misma llave y abre directo la puntuación de la nueva pelea, sin confirmación
+  - Con `seat: null`: pantalla "No participas en esta pelea" y espera el siguiente `NEXT_FIGHT`
+  - Lo que quedaba en la bandeja de la pelea anterior se entrega a esa pelea antes de cambiar (principio 1)
+  - Pruebas Robolectric con un servidor de prueba
+- **Verify:** `./gradlew :app:testDebugUnitTest`
+- **Next step:** prueba de `JudgeSession`: tras `NEXT_FIGHT` el siguiente `HELLO` lleva `nextFightId` y el mismo `deviceId`
+
+## DSK-021 · Pantalla de función y "Siguiente pelea" en la central
+
+- **Type:** feature
+- **Priority:** P1
+- **Estimate:** 1 d
+- **Rubric / Spec:** `docs/specs/002-funcion/` · DESIGN v3
+- **Depends on:** DSK-018, DSK-020
+- **Paths:** BOXCENTRAL/src/main/java/com/sigebox/central/ui/, BOXCENTRAL/src/main/java/com/sigebox/central/App.java, BOXCENTRAL/src/test/java/com/sigebox/central/ui/
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - Pantalla Función: base, cartelera ordenada con estado (Programada, En curso, Cerrada, Saltada), agregar, quitar, reordenar, saltar y cambiar rounds o jueces de las no empezadas
+  - En Resultado, "Siguiente pelea: Roja vs Azul" inicia la siguiente; los jueces conectados aparecen ya aprobados y solo los lugares nuevos muestran QR
+  - Evidencia: capturas con una función de 3 peleas y judge-sim
+- **Verify:** `BOXCENTRAL/gradlew -p BOXCENTRAL build`
+- **Next step:** registrar la pantalla Función en `App` y mostrar la cartelera de `FuncionService`
+
+## QA-003 · Integración: función de 3 peleas sin volver a emparejar
+
+- **Type:** integration
+- **Priority:** P1
+- **Estimate:** 3 h
+- **Rubric / Spec:** `docs/specs/002-funcion/` (NFR cambio ≤ 5 s, durabilidad)
+- **Depends on:** DSK-020
+- **Paths:** BOXCENTRAL/src/test/java/com/sigebox/central/it/
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - Servidor real + 5 jueces de judge-sim: función de 3 peleas (la segunda con 3 jueces y la tercera con 5); todos califican las 3 sin `JOIN` nuevo salvo los lugares agregados
+  - Cambio de pelea con 5 jueces: todos en la nueva en ≤ 5 s
+  - Reinicio del servidor a mitad de la cartelera: no se pierden cartelera ni tarjetas
+- **Verify:** `BOXCENTRAL/gradlew -p BOXCENTRAL test --tests 'com.sigebox.central.it.*'`
+- **Next step:** prueba con 2 peleas y 2 jueces simulados que pasan de una a otra
