@@ -37,3 +37,4 @@ Why: a reversible option after 15 min keeps work moving.
 - 1792979204 | AND-002 | sin router de viaje; A37 sin probar | Why: hotspot Honor funciona sin internet
 - 1792979992 | QA-002 | msi y A37 marcados sin verificar | Why: sin WiX ni A37
 - 1792982194 | DSK-016 | no duplicar el id; solo boton Copiar | Why: el id ya se mostraba
+- 1792985735 | AND-008 | no cambiar JudgeConnectionTest sin evidencia | Why: la hipotesis de carrera no se reprodujo
