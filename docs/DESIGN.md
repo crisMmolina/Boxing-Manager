@@ -3,7 +3,7 @@
 Guía visual y de experiencia de las dos apps: la del juez (Android, `app/`) y la central (JavaFX, `BOXCENTRAL/`). Es la fuente de verdad visual para AND-007, DSK-005, DSK-011 y DSK-012, y reemplaza a la v1 (DSN-001).
 
 - **Origen:** la propuesta "Gong: guía de diseño de interfaz (v1)" de zoe (2026-10-25), adaptada a SIGEBOX, a su stack y a su protocolo. El nombre del producto sigue siendo **SIGEBOX**.
-- **Spec:** `docs/specs/001-sigebox/spec.md`, enmendado el 2026-10-25: la central muestra los puntos en vivo solo al operador; los jueces nunca ven totales.
+- **Spec:** `docs/specs/001-sigebox/spec.md`. Manda `PROJECT.md` principio 3: nadie ve totales ni ganador durante la pelea, salvo "Ver resumen parcial" (registrado en bitácora). El tablero en vivo con puntos y "Va ganando" de DSK-012 se revirtió en DSK-017 (decisión de zoe, 2026-10-26).
 - **Idioma:** español (México).
 - **Sin internet:** ninguna parte de la UI descarga nada en ejecución. Fuentes e íconos van empaquetados.
 
@@ -11,7 +11,7 @@ Guía visual y de experiencia de las dos apps: la del juez (Android, `app/`) y l
 
 | v1 | v2 |
 |---|---|
-| Sin totales en la central hasta cerrar la pelea; "Ver resumen parcial" 15 s | Tablero en vivo para el operador: puntos por juez y round, totales de rounds cerrados y "Va ganando" (DSK-012) |
+| Sin totales en la central hasta cerrar la pelea; "Ver resumen parcial" 15 s | Igual que v1 (DSK-017): tabla de estados por juez y round, sin puntos; "Ver resumen parcial" 15 s con bitácora |
 | Tema claro y tema oscuro "arena" | Solo fondo blanco, con cristal translúcido sobre una textura tenue |
 | Chips de estado de colores (ámbar, verde, morado) | Píldoras neutras; el único color de estado es el punto de conexión |
 | Teclado 0–10 y campo vacío "—" | Botones − y + con el valor grande; cada round empieza en 10 y una hoja de confirmación muestra el resultado antes de enviar |
@@ -308,43 +308,38 @@ La misma tarjeta doble, con la píldora "Round 3 cerrado" y el título "Califica
   - Botón principal "Iniciar pelea". Se habilita cuando todos los lugares están aprobados; si no, dice "Falta que se conecten 2 jueces."
 - **Error al arrancar el servidor:** "No se pudo iniciar la conexión local. Revisa que la computadora esté en la red de la función."
 
-### 7.2 En vivo (DSK-006 + DSK-012)
+### 7.2 En vivo (DSK-006, DSK-012, DSK-015, DSK-017)
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
 │ [marca] SIGEBOX     Pelea · Jueces · En vivo · Resultado     │
 │ ┌──────────────────────────────────────┐ ┌────────────────┐ │
-│ │ Tarjetas                             │ │ Va ganando     │ │
-│ │ Round  Juez 1 •  Juez 2 •  Juez 3 •  │ │ Roja           │ │
-│ │ 1      10–9      9–10      10–9      │ │ 2 de 3 jueces  │ │
-│ │ 2      10–9      10–9      10–9      │ ├────────────────┤ │
-│ │ 3      Enviado   Pendiente Enviado   │ │ Round 3 de 4   │ │
-│ │ 4      —         —         —         │ │ Round abierto  │ │
-│ │ Total  20–18     19–19     20–18     │ │ Enviaron 2 de 3│ │
-│ └──────────────────────────────────────┘ │ [Cerrar round] │ │
-│                                          │ [Corregir]     │ │
+│ │ Tarjetas                             │ │ Round 3 de 4   │ │
+│ │ Round  Juez 1 •  Juez 2 •  Juez 3 •  │ │ Round abierto  │ │
+│ │ 1      Enviado   Enviado   Enviado   │ │ Enviaron 2 de 3│ │
+│ │ 2      Enviado   Tardío    Enviado   │ │ [Cerrar round] │ │
+│ │ 3      Enviado   Pendiente Enviado   │ │ [Corregir]     │ │
+│ │ 4      —         —         —         │ ├────────────────┤ │
+│ └──────────────────────────────────────┘ │ Resumen parcial│ │
+│                                          │ [Ver resumen]  │ │
 │                                          └────────────────┘ │
 └──────────────────────────────────────────────────────────────┘
 ```
 
-- **Tabla de tarjetas:**
-  - Celdas `rojo – azul`, con el rojo en `red_numeral` y el azul en `blue_numeral`, en Barlow Condensed de 26 px.
+- **Sin puntos, totales ni ganador** durante la pelea (`PROJECT.md` principio 3).
+- **Tabla de estados:**
+  - Por juez y round: "Pendiente", "Enviado", "Tardío" o "Corregido" en gris; "—" si no hay tarjeta o el round no se ha abierto.
   - Encabezado por juez con su punto de conexión.
-- **Round abierto:**
-  - Fila con fondo `rgba(20,40,75,0.05)`.
-  - Cada juez muestra su estado en gris: "Pendiente", "Enviado", "Tardío" o "Corregido". En cuanto envía, se ven sus puntos.
-- **Rounds futuros:** "—". Si hay muchos, se agrupan en una fila "Pendientes".
-- **Fila "Total":** suma de los rounds **cerrados**.
-- **Va ganando:**
-  - Esquina líder en su color numeral y "N de M jueces a favor"; "Empate" cuando corresponde.
-  - Se calcula con `DecisionRules.fallo` de `core` sobre los totales de los rounds cerrados.
+- **Round abierto:** fila con fondo `rgba(20,40,75,0.05)`.
+- **Rounds futuros:** si hay muchos, se agrupan en una fila "Pendientes".
 - **Control del round:**
   - "Round 3 de 4", la píldora y "Enviaron 2 de 3 jueces".
   - Botón principal "Cerrar round 3" o "Abrir round 4", y "Cerrar pelea" después del último.
   - Botón secundario "Corregir un round".
   - Cerrar con faltantes pide confirmación y escribir **AVANZAR**.
+- **Ver resumen parcial:** botón secundario discreto. Pide confirmación, muestra el total de cada juez en los rounds cerrados durante 15 s y cada vista queda en la bitácora.
 - **Atajo:** `Ctrl+Enter` abre o cierra el round según el estado.
-- **Solo en la pantalla del operador:** nada de esto se envía a los teléfonos. Ver el tablero se registra una vez por pelea en la bitácora.
+- **Solo en la pantalla del operador:** nada de esto se envía a los teléfonos.
 
 ### 7.3 Terminación, corrección y bitácora (DSK-007, DSK-009, DSK-011)
 
@@ -373,7 +368,7 @@ Frase en minúscula con mayúscula inicial, verbos claros, sin signos de exclama
 | Estados de tarjeta | Pendiente · Enviando… · Enviado · Tardío · Corregido · Capturado |
 | Conexión | Conectado (solo lectura accesible) · Sin conexión · Reconectando… · Esperando aprobación |
 | Juez | Unirme a la pelea · o escribe el código · Unirme · Round 4 de 10 · Round abierto · Esperando round · Enviar round 4 · ¿Enviar este round? · Enviar · Revisar · Corregir · Round 4 enviado · Esperando el siguiente round. · Califica el round 3 · Pelea terminada · Enviar tarjeta final |
-| Central | Pelea · Jueces · En vivo · Resultado · Aprobar · Rechazar · Nuevo código · Iniciar pelea · Tarjetas · Va ganando · Abrir round 5 · Cerrar round 4 · Cerrar pelea · Corregir un round · Resultado final · Exportar PDF · Exportar CSV |
+| Central | Pelea · Jueces · En vivo · Resultado · Aprobar · Rechazar · Nuevo código · Iniciar pelea · Tarjetas · Ver resumen parcial · Abrir round 5 · Cerrar round 4 · Cerrar pelea · Corregir un round · Resultado final · Exportar PDF · Exportar CSV |
 | Confirmaciones fuertes | Escribe AVANZAR para cerrar el round sin todas las calificaciones. · Escribe TERMINAR para registrar la terminación. |
 | Errores | Código incorrecto. Revisa que sea el de tu lugar. · Sin conexión. Tus puntos se guardan y se envían al reconectar. · No se pudo iniciar la conexión local. Revisa que la computadora esté en la red de la función. · Falta que se conecten 2 jueces. |
 

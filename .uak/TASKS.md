@@ -539,6 +539,23 @@ En Windows (zoe) los comandos `Verify` se corren en Git Bash.
 - **Verify:** `./gradlew :app:testDebugUnitTest`
 - **Next step:** esperar un fallo de `uak / gates` con nombre (relanzar o revisar corridas de main)
 
+## AND-011 · Al abrir la app, reconectar y volver a la pantalla correcta
+
+- **Type:** fix
+- **Priority:** P0
+- **Estimate:** 1 h
+- **Rubric / Spec:** demo paso 5 · criterio "Ninguna calificación enviada se pierde (corte de 60 s, cierre forzado de apps)". Hoy, tras un cierre forzado, `MainActivity` siempre abre `JoinActivity` y nada llama a `JudgeRuntime.get()` hasta tocar "Unirme": el teléfono no se reconecta (`HELLO` → `STATE`), no vacía la bandeja de salida y no vuelve a la puntuación aunque el lugar esté aprobado
+- **Depends on:** None
+- **Paths:** app/src/main/java/com/sigebox/juez/MainActivity.java, app/src/test/java/com/sigebox/juez/MainActivityTest.java
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - `MainActivity` llama a `JudgeRuntime.get(this)` al abrir la app (reconecta al lugar guardado y reenvía la bandeja de salida)
+  - Lee `local_state` fuera del hilo principal: lugar aprobado → `ScoreActivity`; lugar pendiente de aprobación → `WaitingActivity`; sin lugar → `JoinActivity` (que pide términos si faltan)
+  - Prueba Robolectric del enrutamiento para los tres casos
+  - Tras un cierre forzado, lo que quedó en la bandeja de salida se envía al reconectar, sin tocar "Unirme"
+- **Verify:** `./gradlew :app:testDebugUnitTest`
+- **Next step:** `MainActivityTest` con `local_state` aprobado que espera `ScoreActivity`
+
 ## DSK-017 · Principio 3: tablero en vivo sin totales ni "Va ganando"
 
 - **Type:** fix
