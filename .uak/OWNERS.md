@@ -11,7 +11,7 @@ An owner is not a prerequisite for everyone: consumers work on published contrac
 | core/schemas/ | CORE-005 |
 | core/src/main/java/com/sigebox/core/protocol/ | CORE-005 |
 | core/src/main/java/com/sigebox/core/model/ | CORE-002 |
-| demo_data/ | CORE-002 |
+| demo_data/ | CORE-005 |
 | build.gradle.kts | AND-001 |
 | settings.gradle.kts | AND-001 |
 | gradle/ | AND-001 |

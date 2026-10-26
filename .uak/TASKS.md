@@ -682,7 +682,7 @@ En Windows (zoe) los comandos `Verify` se corren en Git Bash.
 - **Estimate:** 1 d
 - **Rubric / Spec:** `docs/specs/002-funcion/` (cartelera, base, cambios por pelea, saltar)
 - **Depends on:** DSK-017
-- **Paths:** BOXCENTRAL/src/main/java/com/sigebox/central/db/, BOXCENTRAL/src/main/java/com/sigebox/central/service/FuncionService.java, BOXCENTRAL/src/test/java/com/sigebox/central/service/FuncionServiceTest.java, BOXCENTRAL/src/test/java/com/sigebox/central/db/
+- **Paths:** BOXCENTRAL/src/main/java/com/sigebox/central/db/, BOXCENTRAL/src/main/resources/db/, BOXCENTRAL/src/main/java/com/sigebox/central/service/FuncionService.java, BOXCENTRAL/src/test/java/com/sigebox/central/service/FuncionServiceTest.java, BOXCENTRAL/src/test/java/com/sigebox/central/db/
 - **Freeze-Allowed:** no
 - **Acceptance:**
   - Tablas `funcion` y `cartelera` (solo expand; las peleas sueltas siguen igual) y su repositorio
