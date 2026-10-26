@@ -12,7 +12,7 @@ import javafx.scene.layout.VBox;
 
 /**
  * Paso "Resultado": terminar la pelea tras el último round, esperar las tarjetas finales, cerrar y
- * abrir el resultado a pantalla completa (DESIGN v2 §7.4).
+ * abrir el resultado a pantalla completa (DESIGN v3 §7.4).
  */
 public final class ResultStepScreen {
 
@@ -28,7 +28,7 @@ public final class ResultStepScreen {
 
     static Node build(ResultService service, ExportService export, Supplier<String> fightId) {
         var status = Ui.support("");
-        var card = Ui.glass();
+        var card = Ui.card();
         card.setMaxWidth(640);
         var root = new VBox(16, Ui.screenTitle("Resultado"), card, status);
 

@@ -1,109 +1,72 @@
 /*
- * SIGEBOX · Central. Tokens y componentes de docs/DESIGN.md v2.
- * Las pantallas solo usan estas clases y variables; nada de valores sueltos.
- * Cristal en "modo sencillo" (JavaFX no difumina el fondo): relleno alto sobre la textura de franjas.
+ * SIGEBOX · Central. Componentes de docs/DESIGN.md v3.
+ * Solo usa variables -sg-; los colores viven en theme-light.css y theme-dark.css, que se cargan antes.
+ * Superficies tonales sólidas (sin cristal), guinda solo en la esquina roja y dorado solo como acento.
  */
 
 .root {
-    /* 3.1 Color */
-    -sg-bg: #FFFFFF;
-    -sg-ink: #0F172A;
-    -sg-ink-secondary: #5B6472;
-    -sg-navy: #14284B;
-    -sg-red-corner: #C62839;
-    -sg-red-numeral: #B5222F;
-    -sg-blue-corner: #1F4E9C;
-    -sg-blue-numeral: #1B438A;
-    -sg-connected: #1E8E5A;
-    -sg-disconnected: #9AA3B2;
-    -sg-line: rgba(15, 23, 42, 0.10);
-    -sg-track: rgba(15, 23, 42, 0.08);
-    -sg-pending: #E3E7EE;
-    -sg-field-border: rgba(15, 23, 42, 0.14);
-    -sg-open-row: rgba(20, 40, 75, 0.05);
-    -sg-stripe: rgba(20, 40, 75, 0.045);
-
-    /* Cristal (modo sencillo) */
-    -sg-glass: rgba(255, 255, 255, 0.88);
-    -sg-glass-strong: rgba(255, 255, 255, 0.94);
-    -sg-glass-pressed: rgba(255, 255, 255, 0.90);
-    -sg-specular: rgba(255, 255, 255, 0.95);
-    -sg-contour: rgba(15, 23, 42, 0.06);
-
     -fx-font-family: "Inter";
     -fx-font-size: 15px;
     -fx-text-fill: -sg-ink;
     -fx-background-color: -sg-bg;
-    -fx-focus-color: -sg-navy;
+    -fx-focus-color: -sg-accent;
     -fx-faint-focus-color: transparent;
-    -fx-accent: -sg-navy;
+    -fx-accent: -sg-accent;
+    -fx-base: -sg-surface;
+    -fx-control-inner-background: -sg-surface-2;
+    -fx-text-base-color: -sg-ink;
 }
 
-/* 4.2 Fondo: franjas diagonales tenues que se desvanecen hacia abajo */
 .app-root {
-    -fx-background-color:
-        -sg-bg,
-        linear-gradient(from 0px 0px to 30px 14px, repeat, -sg-stripe 0%, -sg-stripe 47%, transparent 47%, transparent 100%),
-        linear-gradient(to bottom, transparent 0%, rgba(255, 255, 255, 0.35) 30%, -sg-bg 75%);
+    -fx-background-color: -sg-bg;
 }
 
-/* Barra superior de 44 px: marca + pasos */
+/* §7 Barra superior de 48 px: marca, pasos al centro y enlaces + tema a la derecha */
 .top-bar {
-    -fx-min-height: 44px;
-    -fx-pref-height: 44px;
-    -fx-padding: 8px 40px 8px 40px;
+    -fx-min-height: 48px;
+    -fx-pref-height: 48px;
+    -fx-padding: 8px 32px 8px 32px;
     -fx-spacing: 16px;
     -fx-alignment: center-left;
-}
-
-.brand-mark {
-    -fx-background-color: -sg-navy;
-    -fx-background-radius: 9px;
-    -fx-min-width: 30px;
-    -fx-min-height: 30px;
-    -fx-max-width: 30px;
-    -fx-max-height: 30px;
-}
-
-.brand-mark-glyph {
-    -fx-stroke: white;
-    -fx-stroke-width: 2px;
-    -fx-fill: transparent;
+    -fx-background-color: -sg-bg;
+    -fx-border-color: transparent transparent -sg-line transparent;
 }
 
 .brand-name {
     -fx-font-family: "Barlow Condensed";
     -fx-font-weight: bold;
-    -fx-font-size: 24px;
+    -fx-font-size: 26px;
     -fx-text-fill: -sg-ink;
 }
 
 .steps {
-    -fx-spacing: 8px;
+    -fx-spacing: 4px;
     -fx-alignment: center;
 }
 
 .step {
-    -fx-background-color: -sg-glass-strong;
-    -fx-background-radius: 999px;
-    -fx-border-color: -sg-field-border;
-    -fx-border-radius: 999px;
-    -fx-text-fill: -sg-ink-secondary;
+    -fx-background-color: transparent;
+    -fx-text-fill: -sg-ink-2;
     -fx-font-weight: 600;
-    -fx-padding: 6px 16px 6px 16px;
+    -fx-padding: 8px 14px 6px 14px;
+    -fx-border-color: transparent;
+    -fx-border-width: 0px 0px 2px 0px;
     -fx-cursor: hand;
 }
 
-.step:selected,
+.step:hover {
+    -fx-text-fill: -sg-ink;
+}
+
+/* Paso actual: tinta con una línea dorada de 2 px debajo */
 .step.current {
-    -fx-background-color: -sg-navy;
-    -fx-border-color: -sg-navy;
-    -fx-text-fill: white;
+    -fx-text-fill: -sg-ink;
+    -fx-border-color: transparent transparent -sg-accent transparent;
 }
 
 .link-button {
     -fx-background-color: transparent;
-    -fx-text-fill: -sg-ink-secondary;
+    -fx-text-fill: -sg-ink-2;
     -fx-font-weight: 500;
     -fx-padding: 6px 10px 6px 10px;
     -fx-cursor: hand;
@@ -113,7 +76,14 @@
     -fx-text-fill: -sg-ink;
 }
 
-/* Columna centrada (DESIGN v2 §7): títulos y tarjetas al centro. */
+.link-button:focused,
+.step:focused {
+    -fx-border-color: -sg-accent;
+    -fx-border-width: 2px;
+    -fx-border-radius: 8px;
+}
+
+/* Columna centrada (§7) */
 .screen {
     -fx-alignment: top-center;
 }
@@ -123,40 +93,59 @@
 }
 
 .content {
-    -fx-padding: 24px 40px 32px 40px;
+    -fx-padding: 24px 32px 32px 32px;
     -fx-spacing: 24px;
 }
 
-/* 4.1 Cristal */
-.glass {
-    -fx-background-color: -sg-glass;
-    -fx-background-radius: 24px;
-    -fx-border-color: -sg-contour, -sg-specular;
-    -fx-border-width: 1px, 1px;
-    -fx-border-insets: 0px, 1px;
-    -fx-border-radius: 24px, 23px;
-    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.08), 28, 0, 0, 10);
+/* §5 Tarjeta / bloque bento: superficie sólida, radio 28 */
+.card {
+    -fx-background-color: -sg-surface;
+    -fx-background-radius: 28px;
+    -fx-effect: dropshadow(gaussian, -sg-shadow, 20, 0, 0, 6);
     -fx-padding: 24px;
     -fx-spacing: 16px;
 }
 
-.glass.compact {
+.card.compact {
     -fx-padding: 16px;
     -fx-spacing: 12px;
 }
 
-/* Tipografía (3.2) */
+/* Bloque bento principal del round (§7.2) */
+.card.hero {
+    -fx-background-color: -sg-surface-2;
+    -fx-effect: null;
+}
+
+/* Dentro del bloque principal la píldora va sobre surface para que se vea */
+.card.hero .pill {
+    -fx-background-color: -sg-surface;
+}
+
+.bento {
+    -fx-hgap: 16px;
+    -fx-vgap: 16px;
+}
+
+/* §3.2 Tipografía */
 .screen-title {
     -fx-font-family: "Barlow Condensed";
     -fx-font-weight: 800;
-    -fx-font-size: 32px;
+    -fx-font-size: 34px;
     -fx-text-fill: -sg-ink;
 }
 
 .card-title {
     -fx-font-family: "Barlow Condensed";
     -fx-font-weight: 800;
-    -fx-font-size: 26px;
+    -fx-font-size: 24px;
+    -fx-text-fill: -sg-ink;
+}
+
+.stat-big {
+    -fx-font-family: "Barlow Condensed";
+    -fx-font-weight: 800;
+    -fx-font-size: 56px;
     -fx-text-fill: -sg-ink;
 }
 
@@ -167,7 +156,7 @@
 
 .support {
     -fx-font-size: 13px;
-    -fx-text-fill: -sg-ink-secondary;
+    -fx-text-fill: -sg-ink-2;
 }
 
 .form > .support {
@@ -177,7 +166,7 @@
 
 .field-label {
     -fx-font-size: 13px;
-    -fx-text-fill: -sg-ink-secondary;
+    -fx-text-fill: -sg-ink-2;
 }
 
 .numeral {
@@ -191,7 +180,7 @@
 }
 
 .numeral.huge {
-    -fx-font-size: 112px;
+    -fx-font-size: 120px;
 }
 
 .numeral.red {
@@ -206,7 +195,7 @@
     -fx-text-fill: -sg-ink;
 }
 
-/* 5.4 Botones */
+/* §5 Botones: cápsula; principal neutro (tinta en claro, crema en oscuro) */
 .button {
     -fx-font-family: "Inter";
     -fx-font-weight: bold;
@@ -217,29 +206,29 @@
     -fx-padding: 0px 24px 0px 24px;
     -fx-cursor: hand;
     /* Sin clase, un botón se ve como secundario. */
-    -fx-background-color: -sg-glass-strong;
-    -fx-border-color: -sg-field-border;
+    -fx-background-color: -sg-surface-2;
+    -fx-border-color: -sg-line;
     -fx-text-fill: -sg-ink;
 }
 
 .button.primary {
-    -fx-background-color: -sg-navy;
-    -fx-text-fill: white;
-    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.10), 10, 0, 0, 4);
+    -fx-background-color: -sg-primary;
+    -fx-border-color: -sg-primary;
+    -fx-text-fill: -sg-on-primary;
 }
 
 .button.primary:hover {
-    -fx-background-color: derive(-sg-navy, 12%);
+    -fx-opacity: 0.92;
 }
 
 .button.secondary {
-    -fx-background-color: -sg-glass-strong;
-    -fx-border-color: -sg-field-border;
+    -fx-background-color: -sg-surface-2;
+    -fx-border-color: -sg-line;
     -fx-text-fill: -sg-ink;
 }
 
 .button.secondary:hover {
-    -fx-background-color: -sg-glass-pressed;
+    -fx-border-color: -sg-ink-2;
 }
 
 .button:armed {
@@ -248,67 +237,71 @@
 }
 
 .button:disabled {
-    -fx-opacity: 0.4;
+    -fx-opacity: 0.38;
 }
 
+/* Foco: anillo de 2 px en dorado */
 .button:focused {
-    -fx-border-color: -sg-navy;
+    -fx-border-color: -sg-accent;
     -fx-border-width: 2px;
     -fx-border-insets: -4px;
     -fx-border-radius: 999px;
 }
 
-/* 5.5 Píldora neutra */
+/* §5 Píldora neutra */
 .pill {
-    -fx-background-color: -sg-glass-strong;
+    -fx-background-color: -sg-surface-2;
     -fx-background-radius: 999px;
-    -fx-border-color: -sg-field-border;
-    -fx-border-radius: 999px;
     -fx-padding: 4px 12px 4px 12px;
-    -fx-text-fill: -sg-ink-secondary;
+    -fx-text-fill: -sg-ink-2;
     -fx-font-size: 13px;
-    -fx-font-weight: 500;
+    -fx-font-weight: 600;
 }
 
+/* Píldoras de esquina: el único lugar con guinda o azul de relleno */
 .pill.corner-red {
-    -fx-background-color: -sg-red-corner;
-    -fx-border-color: -sg-red-corner;
-    -fx-text-fill: white;
+    -fx-background-color: -sg-red;
+    -fx-text-fill: -sg-on-red;
 }
 
 .pill.corner-blue {
-    -fx-background-color: -sg-blue-corner;
-    -fx-border-color: -sg-blue-corner;
-    -fx-text-fill: white;
+    -fx-background-color: -sg-blue;
+    -fx-text-fill: -sg-on-blue;
 }
 
-/* 5.1 Punto de conexión */
+/* §5 Punto de conexión: anillo vacío sin conexión, lleno conectado (forma además de color) */
 .dot {
-    -fx-fill: -sg-disconnected;
+    -fx-fill: transparent;
+    -fx-stroke: -sg-disconnected;
+    -fx-stroke-width: 2px;
+    -fx-stroke-type: inside;
 }
 
 .dot.connected {
     -fx-fill: -sg-connected;
+    -fx-stroke: transparent;
 }
 
 .corner-dot-red {
-    -fx-fill: -sg-red-corner;
+    -fx-fill: -sg-red;
 }
 
 .corner-dot-blue {
-    -fx-fill: -sg-blue-corner;
+    -fx-fill: -sg-blue;
 }
 
-/* 5.8 Campos */
+/* Campos: radio 16, 44 px */
 .text-field,
 .text-area,
 .combo-box,
 .spinner,
 .choice-box {
-    -fx-background-color: -sg-glass-strong;
-    -fx-background-radius: 14px;
-    -fx-border-color: -sg-field-border;
-    -fx-border-radius: 14px;
+    -fx-background-color: -sg-surface-2;
+    -fx-background-radius: 16px;
+    -fx-border-color: -sg-line;
+    -fx-border-radius: 16px;
+    -fx-text-fill: -sg-ink;
+    -fx-prompt-text-fill: -sg-ink-2;
     -fx-font-size: 15px;
 }
 
@@ -323,7 +316,7 @@
 .text-area:focused,
 .combo-box:focused,
 .spinner:focused {
-    -fx-border-color: -sg-navy;
+    -fx-border-color: -sg-accent;
     -fx-border-width: 2px;
 }
 
@@ -336,32 +329,36 @@
     -fx-text-fill: -sg-ink;
 }
 
-/* Medidor y progreso de rounds */
+/* Medidor y progreso de rounds: completados en ink-2, actual en dorado, pendientes en line */
 .meter {
-    -fx-background-color: -sg-track;
+    -fx-background-color: -sg-line;
     -fx-background-radius: 999px;
     -fx-min-height: 8px;
     -fx-max-height: 8px;
 }
 
 .round-segment {
-    -fx-background-color: -sg-pending;
+    -fx-background-color: -sg-line;
     -fx-background-radius: 999px;
     -fx-min-height: 6px;
     -fx-max-height: 6px;
 }
 
 .round-segment.done {
-    -fx-background-color: -sg-navy;
+    -fx-background-color: -sg-ink-2;
 }
 
 .round-segment.current {
-    -fx-background-color: rgba(20, 40, 75, 0.45);
-    -fx-border-color: -sg-navy;
-    -fx-border-radius: 999px;
+    -fx-background-color: -sg-accent;
 }
 
-/* Tablas (bitácora, tarjetas) */
+/* Fila del round abierto en el tablero (§7.2) */
+.open-row {
+    -fx-background-color: -sg-surface-2;
+    -fx-background-radius: 10px;
+}
+
+/* Tablas (bitácora) */
 .table-view {
     -fx-background-color: transparent;
     -fx-background-radius: 16px;
@@ -383,7 +380,7 @@
 
 .table-view .column-header .label {
     -fx-font-weight: 600;
-    -fx-text-fill: -sg-ink-secondary;
+    -fx-text-fill: -sg-ink-2;
     -fx-alignment: center-left;
 }
 
@@ -394,7 +391,7 @@
 }
 
 .table-row-cell:selected {
-    -fx-background-color: -sg-open-row;
+    -fx-background-color: -sg-surface-2;
 }
 
 .table-row-cell:selected .text {
@@ -411,32 +408,26 @@
     -fx-background-color: transparent;
 }
 
-/* 5.10 Aviso temporal */
+/* Aviso temporal */
 .toast {
-    -fx-background-color: -sg-glass-strong;
+    -fx-background-color: -sg-surface-2;
     -fx-background-radius: 999px;
-    -fx-border-color: -sg-field-border;
+    -fx-border-color: -sg-line;
     -fx-border-radius: 999px;
     -fx-padding: 10px 20px 10px 20px;
     -fx-font-size: 14px;
     -fx-text-fill: -sg-ink;
-    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.10), 10, 0, 0, 4);
+    -fx-effect: dropshadow(gaussian, -sg-shadow, 10, 0, 0, 4);
 }
 
-/* Resultado (7.4) */
+/* §7.4 Resultado */
 .result-winner {
     -fx-font-family: "Barlow Condensed";
     -fx-font-weight: 800;
-    -fx-font-size: 112px;
-}
-
-.logo-slot {
-    -fx-border-color: -sg-line;
-    -fx-border-style: segments(6, 6);
-    -fx-border-radius: 12px;
+    -fx-font-size: 120px;
 }
 
 .placeholder {
-    -fx-text-fill: -sg-ink-secondary;
+    -fx-text-fill: -sg-ink-2;
     -fx-font-size: 15px;
 }

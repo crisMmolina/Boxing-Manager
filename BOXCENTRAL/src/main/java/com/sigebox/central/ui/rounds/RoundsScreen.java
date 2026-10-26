@@ -27,8 +27,8 @@ import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 
 /**
- * Tablero en vivo del operador (DESIGN v2 §7.2): estado de cada juez por round, control del round y
- * "Ver resumen parcial" discreto. Sin puntos, totales ni ganador (PROJECT.md principio 3). Se
+ * Tablero en vivo del operador (DESIGN v3 §7.2), en rejilla bento: el round actual en grande, las
+ * acciones, el estado de cada juez por round y "Ver resumen parcial" discreto. Sin puntos, totales ni ganador (PROJECT.md principio 3). Se
  * refresca cada 500 ms, así un envío se ve en ≤ 1 s.
  */
 public final class RoundsScreen {
@@ -42,8 +42,6 @@ public final class RoundsScreen {
 
     /** Con más rounds futuros que estos, se agrupan en una fila "Pendientes". */
     private static final int FUTURE_ROWS = 3;
-
-    private static final String OPEN_ROW = "-fx-background-color: rgba(20,40,75,0.05);";
 
     private RoundsScreen() {
     }
@@ -75,8 +73,7 @@ public final class RoundsScreen {
         var grid = new GridPane();
         grid.setHgap(8);
         grid.setVgap(4);
-        var cards = Ui.glass(Ui.cardTitle("Tarjetas"), grid);
-        HBox.setHgrow(cards, Priority.ALWAYS);
+        var cards = Ui.card(Ui.cardTitle("Tarjetas"), grid);
 
         var summary = Ui.secondary("Ver resumen parcial");
         summary.setMaxWidth(Double.MAX_VALUE);
@@ -84,11 +81,11 @@ public final class RoundsScreen {
         var summaryNote = Ui.support("Totales de los rounds cerrados por " + RoundService.SUMMARY_VISIBLE_SECONDS
                 + " s. Cada vista queda en la bitácora.");
         summaryNote.setMinHeight(Region.USE_PREF_SIZE);
-        var summaryCard = Ui.glass(Ui.cardTitle("Resumen parcial"), summaryNote, summary, summaryBox);
+        var summaryCard = Ui.card(Ui.cardTitle("Resumen parcial"), summaryNote, summary, summaryBox);
 
-        var roundTitle = Ui.cardTitle("");
+        var roundTitle = Ui.statBig("");
         var pill = Ui.pill("");
-        var sent = Ui.support("");
+        var sent = Ui.body("");
         var action = Ui.primary("");
         action.setId(PRIMARY_ID);
         action.setMaxWidth(Double.MAX_VALUE);
@@ -96,11 +93,9 @@ public final class RoundsScreen {
         correct.setMaxWidth(Double.MAX_VALUE);
         correct.setOnAction(e -> onCorrect.run());
         var status = Ui.support("");
-        var control = Ui.glass(roundTitle, pill, sent, action, correct, status);
-
-        var side = new VBox(16, control, summaryCard);
-        side.setMinWidth(260);
-        side.setPrefWidth(280);
+        var hero = Ui.card(roundTitle, pill, sent);
+        hero.getStyleClass().add("hero");
+        var actions = Ui.card(Ui.cardTitle("Acciones"), action, correct, status);
 
         Runnable refresh = () -> {
             var f = fightId.get();
@@ -165,8 +160,7 @@ public final class RoundsScreen {
         timer.play();
         refresh.run();
 
-        var body = new HBox(16, cards, side);
-        body.setAlignment(Pos.TOP_CENTER);
+        var body = bento(hero, actions, cards, summaryCard);
         var root = new VBox(20, title, body);
         root.getStyleClass().add("screen");
         root.setPadding(new Insets(24));
@@ -177,6 +171,26 @@ public final class RoundsScreen {
             }
         });
         return root;
+    }
+
+    /** Rejilla bento de 2 × 2: columna ancha (round actual, tarjetas) y columna de 280 px (acciones, resumen). */
+    static GridPane bento(Node hero, Node actions, Node cards, Node summary) {
+        var bento = new GridPane();
+        bento.getStyleClass().add("bento");
+        var wide = new ColumnConstraints();
+        wide.setHgrow(Priority.ALWAYS);
+        var side = new ColumnConstraints(260, 280, 320);
+        bento.getColumnConstraints().addAll(wide, side);
+        bento.add(hero, 0, 0);
+        bento.add(actions, 1, 0);
+        bento.add(cards, 0, 1);
+        bento.add(summary, 1, 1);
+        for (var n : new Node[] {hero, actions, cards, summary}) {
+            GridPane.setFillWidth(n, true);
+            GridPane.setFillHeight(n, true);
+        }
+        bento.setMaxWidth(Double.MAX_VALUE);
+        return bento;
     }
 
     private static void fillGrid(GridPane grid, RoundService.Live live) {
@@ -254,7 +268,7 @@ public final class RoundsScreen {
         box.setPadding(new Insets(6, 8, 6, 8));
         box.setMaxWidth(Double.MAX_VALUE);
         if (open) {
-            box.setStyle(OPEN_ROW);
+            box.getStyleClass().add("open-row");
         }
         return box;
     }

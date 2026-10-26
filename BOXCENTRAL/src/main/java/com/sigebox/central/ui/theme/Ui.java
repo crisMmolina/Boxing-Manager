@@ -14,20 +14,24 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
-import javafx.scene.shape.SVGPath;
 import javafx.util.Duration;
 
-/** Componentes de DESIGN v2 §5 para JavaFX. Solo aplican clases de {@code app.css}. */
+/** Componentes de DESIGN v3 §5 para JavaFX. Solo aplican clases de {@code app.css}. */
 public final class Ui {
 
     private Ui() {
     }
 
-    /** Tarjeta de cristal con sus hijos en columna. */
-    public static VBox glass(Node... children) {
+    /** Tarjeta o bloque bento: superficie sólida con sus hijos en columna. */
+    public static VBox card(Node... children) {
         var box = new VBox(children);
-        box.getStyleClass().add("glass");
+        box.getStyleClass().add("card");
         return box;
+    }
+
+    /** Número grande de estado en Barlow Condensed (bloque bento principal). */
+    public static Label statBig(String text) {
+        return label(text, "stat-big");
     }
 
     public static Label screenTitle(String text) {
@@ -79,7 +83,7 @@ public final class Ui {
         return l;
     }
 
-    /** Punto de conexión de 10 px (5.1), con texto accesible. */
+    /** Punto de conexión de 10 px: lleno conectado, anillo sin conexión; con texto accesible. */
     public static Circle dot(boolean connected, String who) {
         var c = new Circle(5);
         c.getStyleClass().add("dot");
@@ -102,7 +106,7 @@ public final class Ui {
         return c;
     }
 
-    /** Número en Barlow Condensed cursiva; {@code corner} = "red", "blue" o "neutral". */
+    /** Número en Barlow Condensed recta; {@code corner} = "red", "blue" o "neutral". */
     public static Label numeral(String text, String corner) {
         var l = label(text, "numeral");
         l.getStyleClass().add(corner);
@@ -117,17 +121,9 @@ public final class Ui {
         return r;
     }
 
-    /** Marca: cuadrado azul marino con una campana de trazo blanco (5.11). */
+    /** Marca: solo la palabra SIGEBOX en Barlow Condensed (DESIGN v3: nada de logotipos). */
     public static HBox brand() {
-        var bell = new SVGPath();
-        bell.setContent("M7 13 L7 9 Q7 4 12 4 Q17 4 17 9 L17 13 L19 15 L5 15 Z M10 17 Q12 19 14 17");
-        bell.getStyleClass().add("brand-mark-glyph");
-        bell.setScaleX(0.8);
-        bell.setScaleY(0.8);
-        var mark = new StackPane(bell);
-        mark.getStyleClass().add("brand-mark");
-        var name = label("SIGEBOX", "brand-name");
-        var box = new HBox(10, mark, name);
+        var box = new HBox(label("SIGEBOX", "brand-name"));
         box.setAlignment(Pos.CENTER_LEFT);
         return box;
     }

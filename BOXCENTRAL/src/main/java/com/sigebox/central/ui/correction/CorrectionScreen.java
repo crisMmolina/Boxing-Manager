@@ -51,7 +51,7 @@ public final class CorrectionScreen {
         form.addRow(2, Ui.support("Roja"), rojo);
         form.addRow(3, Ui.support("Azul"), azul);
         form.addRow(4, Ui.support("Motivo"), motivo);
-        var card = Ui.glass(Ui.cardTitle("Tarjeta"), form, new HBox(12, corregir, capturar),
+        var card = Ui.card(Ui.cardTitle("Tarjeta"), form, new HBox(12, corregir, capturar),
                 Ui.support("Cada cambio exige motivo y queda en la bitácora con el valor anterior."));
         card.setMaxWidth(640);
         return new VBox(16, Ui.screenTitle("Corrección o captura desde papel"), card, status);

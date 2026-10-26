@@ -16,7 +16,6 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -24,8 +23,8 @@ import javafx.stage.Window;
 
 /**
  * Resultado a pantalla completa, solo en la laptop del operador: la frase del resultado, la
- * tarjeta y el total de cada juez con su nombre, un espacio reservado para el logotipo y los botones
- * de exportar. Esc la cierra.
+ * tarjeta y el total de cada juez con su nombre y los botones de exportar (DESIGN v3 §7.4, sin
+ * logotipos). Esc la cierra.
  */
 public final class ResultScreen {
 
@@ -37,10 +36,6 @@ public final class ResultScreen {
         stage.initOwner(owner);
         stage.setTitle("Resultado · " + sheet.pelea().esquinaRoja() + " vs " + sheet.pelea().esquinaAzul());
 
-        var logo = new Region(); // espacio reservado para el logotipo del evento
-        logo.setPrefSize(160, 80);
-        logo.getStyleClass().add("logo-slot");
-
         var p = sheet.pelea();
         var ganador = sheet.resultado().ganador();
         var winner = new Label(switch (ganador) {
@@ -51,7 +46,12 @@ public final class ResultScreen {
         });
         winner.getStyleClass().addAll("result-winner", "numeral",
                 ganador == Ganador.ROJA ? "red" : ganador == Ganador.AZUL ? "blue" : "neutral");
-        var main = Ui.glass(Ui.support("Resultado final"), winner, Ui.cardTitle(sheet.headline()),
+        var winnerRow = new HBox(16, winner);
+        winnerRow.setAlignment(Pos.CENTER_LEFT);
+        if (ganador == Ganador.ROJA || ganador == Ganador.AZUL) {
+            winnerRow.getChildren().add(Ui.cornerPill(ganador == Ganador.ROJA));
+        }
+        var main = Ui.card(Ui.support("Resultado final"), winnerRow, Ui.cardTitle(sheet.headline()),
                 Ui.support(p.esquinaRoja() + " (roja) vs " + p.esquinaAzul() + " (azul) · " + p.rounds() + " rounds"),
                 rounds(sheet));
         HBox.setHgrow(main, Priority.ALWAYS);
@@ -68,7 +68,7 @@ public final class ResultScreen {
             var top = new HBox(Ui.cardTitle("Juez " + row.seat() + (row.name() == null ? "" : " · " + row.name())),
                     Ui.grow(), Ui.pill(row.winner()));
             top.setAlignment(Pos.CENTER_LEFT);
-            var card = Ui.glass(top, total);
+            var card = Ui.card(top, total);
             card.getStyleClass().add("compact");
             judges.getChildren().add(card);
         }
@@ -86,7 +86,7 @@ public final class ResultScreen {
         var body = new HBox(24, main, judges);
         var root = new BorderPane(body);
         root.getStyleClass().add("app-root");
-        root.setTop(new HBox(16, logo, Ui.grow(), Ui.brand()));
+        root.setTop(new HBox(16, Ui.brand()));
         root.setBottom(actions);
         BorderPane.setMargin(body, new Insets(24, 0, 24, 0));
         root.setPadding(new Insets(40));
