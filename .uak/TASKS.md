@@ -605,3 +605,55 @@ En Windows (zoe) los comandos `Verify` se corren en Git Bash.
   - README con cómo compilar cada app y `core`; `docs/demo.md` con los 6 pasos y el plan B (video + judge-sim)
 - **Verify:** `test -s docs/runbook.md`
 - **Next step:** copiar los resultados de `docs/spikes/AND-002.md` y `DSK-002.md` al runbook
+
+## DSN-003 · Guía visual v3: rediseño total con los colores de la Ciudad de México
+
+- **Type:** contract
+- **Priority:** P0
+- **Estimate:** 3 h
+- **Rubric / Spec:** pedido de cris (2026-10-26): rediseño total que siga las tendencias actuales de diseño de apps, use la paleta de colores de la Ciudad de México y haga que SIGEBOX se sienta distinta. Reemplaza a la v2 (DSN-002)
+- **Depends on:** DSK-017
+- **Paths:** docs/DESIGN.md, docs/design/
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - Paleta basada en los colores de la identidad visual de la Ciudad de México, con la fuente oficial citada en el documento (URL y fecha). Solo se toman los colores: nada de escudo, logotipos, lemas ni tipografías con licencia del gobierno, y nada que haga parecer la app oficial del gobierno
+  - Tokens completos para claro y oscuro (arena con poca luz): color, tipografía empaquetable con licencia libre (OFL), espaciado, radios, elevación y movimiento, con contraste AA medido para cada par texto/fondo. Rojo y azul de esquina siguen distinguibles entre sí y frente a la paleta CDMX (incluido daltonismo)
+  - Tendencias actuales justificadas una por una (por ejemplo: tipografía expresiva y numerales grandes, layouts tipo bento en la central, componentes Material 3 Expressive en Android, microinteracciones con háptica); cada una dice qué se adopta y qué no, y por qué sirve en la arena
+  - Pantallas nuevas descritas para el juez (términos, unión/QR, espera, puntuación, tardío, tarjeta final) y la central (crear pelea, aprobación, tablero en vivo sin totales, terminación, resultado, bitácora), respetando PROJECT.md principio 3 (sin totales ni ganador durante la pelea, salvo "Ver resumen parcial") y que el juez solo ve lo suyo
+  - Sección "0. Qué cambió respecto a la v2" y lista de revisión visual actualizada
+- **Verify:** `test -s docs/DESIGN.md && grep -q "v3" docs/DESIGN.md`
+- **Next step:** investigar y citar la paleta oficial de la CDMX; escribir la tabla de tokens de color con su contraste
+
+## AND-012 · Rediseño v3 de la app del juez
+
+- **Type:** feature
+- **Priority:** P0
+- **Estimate:** 6 h
+- **Rubric / Spec:** `docs/DESIGN.md` v3 (DSN-003) · criterios "Solo enteros 0–10" y "Round sin calificar: vibración y calificación exigida"
+- **Depends on:** DSN-003, AND-011
+- **Paths:** app/src/main/res/, app/src/main/java/com/sigebox/juez/, app/src/test/java/com/sigebox/juez/ui/, app/build.gradle.kts
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - Tema, colores, tipografía (empaquetada, sin descargas) y componentes según DESIGN v3, en claro y oscuro
+  - Todas las pantallas del juez rediseñadas sin cambiar el comportamiento: mismas validaciones, mismo protocolo, misma bandeja de salida
+  - Las pruebas existentes siguen en verde; pruebas Robolectric nuevas de que cada pantalla infla con el tema v3
+  - Evidencia en el PR: capturas del emulador de cada pantalla en claro y oscuro
+- **Verify:** `./gradlew :app:testDebugUnitTest`
+- **Next step:** pasar los tokens de DESIGN v3 a `res/values/colors.xml`, `themes.xml` y `values-night/`
+
+## DSK-018 · Rediseño v3 de la central
+
+- **Type:** feature
+- **Priority:** P0
+- **Estimate:** 6 h
+- **Rubric / Spec:** `docs/DESIGN.md` v3 (DSN-003) · criterios "Sin totales visibles" y "Resultado a pantalla completa"
+- **Depends on:** DSN-003, DSK-017
+- **Paths:** BOXCENTRAL/src/main/resources/com/sigebox/central/, BOXCENTRAL/src/main/java/com/sigebox/central/App.java, BOXCENTRAL/src/main/java/com/sigebox/central/ui/, BOXCENTRAL/src/test/java/com/sigebox/central/ui/, BOXCENTRAL/build.gradle.kts
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - Hoja de estilos JavaFX, tipografía empaquetada y componentes según DESIGN v3, en claro y oscuro
+  - Todas las pantallas de la central rediseñadas sin cambiar servicios ni protocolo; el tablero en vivo sigue sin totales (principio 3)
+  - Las pruebas existentes siguen en verde; prueba de que el tema v3 carga sin errores de CSS
+  - Evidencia en el PR: capturas de cada pantalla con la pelea de referencia
+- **Verify:** `BOXCENTRAL/gradlew -p BOXCENTRAL build`
+- **Next step:** reemplazar los tokens de `ui/theme/` por los de DESIGN v3
