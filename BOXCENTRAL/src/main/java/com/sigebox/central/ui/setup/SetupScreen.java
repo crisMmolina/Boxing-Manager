@@ -22,6 +22,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
@@ -143,7 +145,17 @@ public final class SetupScreen {
         blue.setAlignment(Pos.CENTER_LEFT);
         var id = Ui.numeral(p.id(), "neutral");
         id.setAccessibleText("Pelea " + String.join(" ", p.id().split("")));
-        return Ui.glass(Ui.cardTitle("Pelea"), Ui.field("Código de la pelea", id), red, blue,
+        // Para unirse a mano (campo "Pelea" de la app) o con judge-sim --fight.
+        var copy = Ui.secondary("Copiar");
+        copy.setOnAction(e -> {
+            var content = new ClipboardContent();
+            content.putString(p.id());
+            Clipboard.getSystemClipboard().setContent(content);
+            copy.setText("Copiado");
+        });
+        var idRow = new HBox(12, id, copy);
+        idRow.setAlignment(Pos.CENTER_LEFT);
+        return Ui.glass(Ui.cardTitle("Pelea"), Ui.field("Código de la pelea", idRow), red, blue,
                 Ui.support(p.rounds() + " rounds · " + p.jueces() + (p.jueces() == 1 ? " juez" : " jueces")));
     }
 

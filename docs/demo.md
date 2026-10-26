@@ -41,7 +41,7 @@ BOXCENTRAL/judge-sim/build/install/judge-sim/bin/judge-sim --judges 3 --script d
 ```
 
 - Los códigos son los de 6 dígitos de cada lugar en la central, en orden.
-- El id de la pelea hoy solo va dentro del QR (parámetro `s`); léelo con cualquier lector de QR. Pendiente: mostrarlo en la central.
+- `--fight` es el **Código de la pelea** de la tarjeta Pelea en la central (botón **Copiar**).
 - Los jueces simulados esperan la aprobación: apruébalos en **Jueces** como a un teléfono.
 - Con `--drop 60s` el Juez 1 se cae 60 s tras su primer envío y vuelve solo: cubre el paso 5.
 - Al terminar imprime la latencia envío → ACK (p50/p95/máx).

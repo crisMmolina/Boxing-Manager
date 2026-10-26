@@ -41,7 +41,7 @@ Se instala antes del evento; en el evento no hace falta internet.
 - Pasa la APK (`app-debug.apk` o la de release) al teléfono por cable USB, USB-OTG o Bluetooth, ábrela y permite "Instalar apps desconocidas" para el administrador de archivos.
 - Con depuración USB: `adb install -r app-debug.apk`.
 - La app se llama **SIGEBOX Juez** y pide la cámara para leer el QR.
-- **Únete con el QR.** La entrada manual pide IP, **id de la pelea**, lugar y código, y hoy la central muestra la IP y el código pero **no el id de la pelea** (va solo dentro del QR, parámetro `s`). Si la cámara falla, lee el QR con otro teléfono para sacar el id. Pendiente: mostrar el id en la central.
+- **Lo normal es unirse con el QR.** Si la cámara falla, usa la entrada manual de la app: **IP** (la "Dirección para los jueces" de la central), **Pelea** (el **Código de la pelea** de la tarjeta Pelea, p. ej. `N5JZAN`), **lugar** y el **código de 6 dígitos** de ese lugar. No confundas los dos códigos: el de la pelea tiene letras y es el mismo para todos; el de 6 dígitos es de cada lugar.
 
 ## 4. Antes de la primera pelea (≈ 5 min)
 

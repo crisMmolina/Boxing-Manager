@@ -62,7 +62,7 @@ BOXCENTRAL/judge-sim/build/install/judge-sim/bin/judge-sim --judges 3 --script d
 ```
 
 - `--tokens`: el código de 6 dígitos de cada lugar que muestra la central, en orden de lugar.
-- `--fight`: el id de la pelea creada en la central. Hoy solo va dentro del QR (parámetro `s` de `sigebox://join?...`).
+- `--fight`: el id de la pelea. La central lo muestra como **Código de la pelea** en la tarjeta Pelea (botón **Copiar** al lado).
 - Opcionales: `--port 8765`, `--drop 60s` (corta al juez 1 tras su primer envío), `--timeout 30m`. Al terminar imprime la latencia envío → ACK (p50/p95).
 
 ### Smoke de todo
