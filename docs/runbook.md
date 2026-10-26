@@ -53,7 +53,7 @@ Se instala antes del evento; en el evento no hace falta internet.
 
 ## 5. Durante la pelea
 
-- **En vivo:** `Abrir round N` / `Cerrar round N`, o `Ctrl+Enter`. El tablero muestra cada tarjeta en cuanto llega y "Va ganando" (solo en la laptop; los teléfonos nunca ven totales).
+- **En vivo:** `Abrir round N` / `Cerrar round N`, o `Ctrl+Enter`. El tablero marca a cada juez como Enviado, Pendiente, Tardío o Corregido en cuanto llega su tarjeta, **sin puntos, totales ni ganador**. Si el organizador necesita los totales, usa **Ver resumen parcial**: pide confirmación, se ve 15 s y queda en la bitácora.
 - **Falta un juez al cerrar:** la central pide confirmar y escribir **AVANZAR**. El teléfono de ese juez vibra y le exige calificar; su tarjeta llega marcada **Tardío**.
 - **Corregir o capturar desde papel:** "Corregir un round" → Corrección, con motivo. Queda en la bitácora.
 - **Terminación extraordinaria (KO, descalificación, etc.):** enlace **Terminación**, con doble confirmación y motivo.
