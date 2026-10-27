@@ -37,6 +37,8 @@ public class FinalCardActivity extends AppCompatActivity {
     private SessionEntity session;
     private Map<Integer, OwnCards.Row> rows;
     private volatile String sentId;
+    /** Solo en el hilo principal; se recarga de la bandeja de salida en cada onStart. */
+    private FinalCardStatus.State status = FinalCardStatus.State.NOT_SENT;
 
     private final JudgeListener listener = new JudgeListener() {
         @Override
@@ -72,9 +74,12 @@ public class FinalCardActivity extends AppCompatActivity {
             }
             Map<Integer, OwnCards.Row> loadedRows =
                     OwnCards.load(database.getOpenHelper().getReadableDatabase(), loaded.fightId);
+            FinalCardStatus sent = FinalCardStatus.load(database.getOpenHelper().getReadableDatabase(), loaded.fightId);
             runOnUiThread(() -> {
                 session = loaded;
                 rows = loadedRows;
+                status = sent.state;
+                sentId = sent.messageId;
                 render();
             });
         });
@@ -104,16 +109,25 @@ public class FinalCardActivity extends AppCompatActivity {
                     getString(R.string.final_row_score, card.red, card.blue), getString(statusText(card.status))));
             allConfirmed &= card.status != ScoreUi.CardStatus.SENDING;
         }
-        if (sentId == null) {
-            ((TextView) findViewById(R.id.final_body)).setText(allConfirmed ? R.string.final_body : R.string.final_wait_acks);
-            findViewById(R.id.final_send).setEnabled(allConfirmed);
+        // AND-015: el estado del envío sale de la bandeja de salida, no de memoria.
+        TextView body = findViewById(R.id.final_body);
+        Button sendButton = findViewById(R.id.final_send);
+        if (status == FinalCardStatus.State.SENT) {
+            showSent();
+        } else if (status == FinalCardStatus.State.SENDING) {
+            body.setText(R.string.status_sending);
+            sendButton.setEnabled(false);
+        } else {
+            body.setText(allConfirmed ? R.string.final_body : R.string.final_wait_acks);
+            sendButton.setEnabled(allConfirmed);
         }
     }
 
     private void send() {
-        if (sentId != null || session == null) {
+        if (status != FinalCardStatus.State.NOT_SENT || session == null) {
             return;
         }
+        status = FinalCardStatus.State.SENDING;
         findViewById(R.id.final_send).setEnabled(false);
         String fightId = session.fightId;
         int seat = session.seat;
@@ -129,17 +143,23 @@ public class FinalCardActivity extends AppCompatActivity {
     private void onAck(Ack ack) {
         TextView body = findViewById(R.id.final_body);
         if (ack.ok() || ack.error() == Ack.Error.ALREADY_FINAL) {
-            body.setText(R.string.final_body_sent);
-            // DESIGN.md v3 §6.6: el botón pasa a "Tarjeta final enviada".
-            Button sendButton = findViewById(R.id.final_send);
-            sendButton.setText(R.string.final_sent);
-            sendButton.setEnabled(false);
+            status = FinalCardStatus.State.SENT;
+            showSent();
         } else {
             // DESIGN.md v3 §6.6: el botón vuelve a habilitarse para reintentar.
+            status = FinalCardStatus.State.NOT_SENT;
             body.setText(R.string.final_retry);
             sentId = null;
             findViewById(R.id.final_send).setEnabled(true);
         }
+    }
+
+    /** DESIGN.md v3 §6.6: el botón pasa a "Tarjeta final enviada" y queda deshabilitado. */
+    private void showSent() {
+        ((TextView) findViewById(R.id.final_body)).setText(R.string.final_body_sent);
+        Button sendButton = findViewById(R.id.final_send);
+        sendButton.setText(R.string.final_sent);
+        sendButton.setEnabled(false);
     }
 
     private TableRow row(String... cells) {
