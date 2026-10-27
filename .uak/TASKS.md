@@ -745,6 +745,23 @@ En Windows (zoe) los comandos `Verify` se corren en Git Bash.
 - **Verify:** `./gradlew :app:testDebugUnitTest`
 - **Next step:** prueba de `JudgeConnection`: `FIGHT_ENDED` sin listeners, luego `addListener` recibe el fin de pelea
 
+## AND-015 · La tarjeta final no olvida que ya se envió
+
+- **Type:** fix
+- **Priority:** P1
+- **Estimate:** 2 h
+- **Rubric / Spec:** demo paso 6 · hallazgo de cris-2 en el emulador al cerrar AND-012. `FinalCardActivity` guarda el envío solo en memoria (`sentId`): si la pantalla se recrea (rotación, cambio de tema, proceso muerto) vuelve a mostrar "Enviar tarjeta final" habilitado. No se pierde nada (la central responde `ALREADY_FINAL`), pero el juez ve un estado falso y puede reenviar
+- **Depends on:** None
+- **Paths:** app/src/main/java/com/sigebox/juez/finalcard/, app/src/test/java/com/sigebox/juez/finalcard/
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - Tras enviar, al recrear la pantalla (rotación o proceso muerto) se muestra "Enviando…" mientras la tarjeta siga en la bandeja de salida y "Tarjeta final enviada" con el botón deshabilitado después del `ACK`
+  - El estado sale de lo que ya guarda el teléfono (bandeja de salida o `local_state`), no solo de `onSaveInstanceState`, para sobrevivir al cierre forzado
+  - Un `ACK` con error que no sea `ALREADY_FINAL` sigue habilitando el botón para reintentar
+  - Pruebas Robolectric de recreación antes y después del `ACK`; las pruebas actuales siguen en verde sin editarlas
+- **Verify:** `./gradlew :app:testDebugUnitTest`
+- **Next step:** prueba Robolectric: enviar, `recreate()`, el botón sigue deshabilitado
+
 ## DSK-021 · Pantalla de función y "Siguiente pelea" en la central
 
 - **Type:** feature
