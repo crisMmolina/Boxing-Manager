@@ -108,6 +108,8 @@ public class LateScoreActivity extends AppCompatActivity {
         cornerNames = new com.sigebox.juez.ui.CornerNames(this);
         findViewById(R.id.late_send).setOnClickListener(v -> confirm());
         vm.ui().observe(this, this::render);
+        // El punto de conexión de la barra (DESIGN v3 §5); en modo tardío el round no cambia con esto.
+        connection.state().observe(this, vm::onConnection);
         if (savedInstanceState == null && gate.shouldVibrate()) {
             vibrate();
         }
