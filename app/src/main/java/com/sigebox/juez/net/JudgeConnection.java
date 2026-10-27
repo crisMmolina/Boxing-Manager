@@ -3,8 +3,13 @@ package com.sigebox.juez.net;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.sigebox.core.model.EstadoRound;
+import com.sigebox.core.protocol.FightEnded;
 import com.sigebox.core.protocol.JoinUri;
 import com.sigebox.core.protocol.Message;
+import com.sigebox.core.protocol.RoundClosed;
+import com.sigebox.core.protocol.RoundOpened;
+import com.sigebox.core.protocol.State;
 import com.sigebox.juez.data.Clock;
 import com.sigebox.juez.data.Outbox;
 import com.sigebox.juez.data.SessionEntity;
@@ -43,6 +48,9 @@ public final class JudgeConnection {
     });
     private final MutableLiveData<ConnectionState> liveState = new MutableLiveData<>(ConnectionState.INITIAL);
     private final List<JudgeListener> listeners = new CopyOnWriteArrayList<>();
+    // Lo último que mandó la central, para los listeners que se registran después (bajo el candado de listeners).
+    private State lastState;
+    private FightEnded fightEnded;
 
     // Solo se tocan en el hilo del executor.
     private WebSocket socket;
@@ -68,9 +76,7 @@ public final class JudgeConnection {
 
             @Override
             public void onMessage(Message message) {
-                for (JudgeListener l : listeners) {
-                    l.onMessage(message);
-                }
+                dispatch(message);
             }
         });
     }
@@ -84,8 +90,55 @@ public final class JudgeConnection {
         return session.state();
     }
 
+    /**
+     * Registra {@code listener} y le entrega de inmediato el último {@code STATE} (con el round al día) y el
+     * {@code FIGHT_ENDED} si ya llegaron: una pantalla detenida o que abre tarde no pierde avisos (AND-014). Solo se
+     * repite lo que la central ya mandó a este teléfono.
+     */
     public void addListener(JudgeListener listener) {
-        listeners.add(listener);
+        synchronized (listeners) {
+            listeners.add(listener);
+            if (lastState != null) {
+                listener.onMessage(lastState);
+            }
+            if (fightEnded != null) {
+                listener.onMessage(fightEnded);
+            }
+        }
+    }
+
+    /** Entrega un mensaje de la central a los listeners y actualiza lo que se repite a los que lleguen después. */
+    void dispatch(Message message) {
+        synchronized (listeners) {
+            remember(message);
+            for (JudgeListener l : listeners) {
+                l.onMessage(message);
+            }
+        }
+    }
+
+    private void remember(Message message) {
+        if (message instanceof State state) {
+            lastState = state;
+            if (fightEnded != null && !fightEnded.fightId().equals(state.fightId())) {
+                fightEnded = null;
+            }
+        } else if (message instanceof FightEnded ended) {
+            fightEnded = ended;
+        } else if (message instanceof RoundOpened opened) {
+            lastState = withRound(lastState, opened.fightId(), opened.round(), EstadoRound.ABIERTO);
+        } else if (message instanceof RoundClosed closed) {
+            lastState = withRound(lastState, closed.fightId(), closed.round(), EstadoRound.CERRADO);
+        }
+    }
+
+    /** El último STATE con el round que anunció la central después; null si aún no hay STATE de esa pelea. */
+    private static State withRound(State state, String fightId, int round, EstadoRound status) {
+        if (state == null || !state.fightId().equals(fightId)) {
+            return state;
+        }
+        return new State(state.fightId(), state.seat(), state.judgeName(), state.redCorner(), state.blueCorner(),
+                state.rounds(), state.fightStatus(), round, status, state.cards(), state.finalCardSent());
     }
 
     public void removeListener(JudgeListener listener) {
@@ -110,6 +163,11 @@ public final class JudgeConnection {
             running = true;
             startTicker();
             closeSocket();
+            synchronized (listeners) {
+                // Unirse a otro lugar empieza de cero: nada de la pelea anterior se repite.
+                lastState = null;
+                fightEnded = null;
+            }
             session.join(uri, judgeName);
             open();
         });
