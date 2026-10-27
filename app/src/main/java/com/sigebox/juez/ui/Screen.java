@@ -22,7 +22,8 @@ public final class Screen {
     /** Llamar justo después de {@code setContentView}. */
     public static void setup(Activity activity) {
         WindowCompat.setDecorFitsSystemWindows(activity.getWindow(), false);
-        activity.getWindow().getDecorView().setBackground(new StripesDrawable(activity));
+        // DESIGN.md v3 §2: fondo sólido `bg`, sin rayas ni cristal.
+        activity.getWindow().getDecorView().setBackgroundResource(R.color.bg);
         ViewGroup content = activity.findViewById(android.R.id.content);
         View root = content.getChildCount() > 0 ? content.getChildAt(0) : content;
         applyInsets(root);

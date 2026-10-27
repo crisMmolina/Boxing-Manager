@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Marca (DESIGN v2 §5.11): cuadrado azul marino con una campana de trazo blanco. -->
-<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="32dp" android:height="32dp" android:viewportWidth="32" android:viewportHeight="32">
-    <path android:pathData="M10,0L22,0A10,10 0,0 1,32 10L32,22A10,10 0,0 1,22 32L10,32A10,10 0,0 1,0 22L0,10A10,10 0,0 1,10 0Z" android:fillColor="@color/navy" />
-    <path android:pathData="M11,19L11,14Q11,9 16,9Q21,9 21,14L21,19L23,21L9,21Z M14,23Q16,25 18,23" android:strokeWidth="2" android:strokeColor="#FFFFFFFF" android:strokeLineJoin="round" android:strokeLineCap="round" />
-</vector>

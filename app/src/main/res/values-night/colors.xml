@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Tokens de docs/DESIGN.md v3 §3.1, tema oscuro «noche de arena». Los alias de values/colors.xml apuntan aquí solos. -->
+<resources>
+    <color name="bg">#14120F</color>
+    <color name="surface">#1F1C18</color>
+    <color name="surface_2">#2A2621</color>
+    <color name="ink">#F3EFE8</color>
+    <color name="ink_2">#B8B1A6</color>
+    <color name="primary">#F3EFE8</color>
+    <color name="on_primary">#1C1A17</color>
+    <!-- Dorado CDMX (465 C). -->
+    <color name="accent">#BC955C</color>
+    <!-- Guinda claro y azul claro, derivados para AA sobre fondo oscuro. -->
+    <color name="red">#E58A9D</color>
+    <color name="on_red">#1C1A17</color>
+    <color name="red_numeral">#E58A9D</color>
+    <color name="blue">#8CB8EE</color>
+    <color name="on_blue">#1C1A17</color>
+    <color name="blue_numeral">#8CB8EE</color>
+    <color name="connected">#4CC97A</color>
+    <color name="disconnected">#B8B1A6</color>
+    <color name="line">#3A352E</color>
+</resources>

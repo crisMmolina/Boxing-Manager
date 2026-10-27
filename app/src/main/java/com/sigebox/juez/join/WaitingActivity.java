@@ -22,6 +22,16 @@ public class WaitingActivity extends AppCompatActivity {
     /** La pantalla de puntuación la crea AND-005; se abre por nombre para no depender de ella. */
     static final String SCORE_ACTIVITY = "com.sigebox.juez.score.ScoreActivity";
 
+    private com.sigebox.juez.net.JudgeConnection connection;
+    private com.sigebox.juez.ui.CornerNames cornerNames;
+    /** JOIN_APPROVED trae los nombres de los boxeadores; se guardan para la pantalla de puntuación (DESIGN v3 §5.2). */
+    private final com.sigebox.juez.net.JudgeListener namesListener = new com.sigebox.juez.net.JudgeListener() {
+        @Override
+        public void onMessage(com.sigebox.core.protocol.Message message) {
+            cornerNames.remember(message);
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -34,7 +44,21 @@ public class WaitingActivity extends AppCompatActivity {
         fingerprint.setText(getString(R.string.waiting_fingerprint, shortFingerprint(new KeystoreSigner().deviceId())));
         Button cancel = findViewById(R.id.waiting_cancel);
         cancel.setOnClickListener(v -> finish());
-        JudgeRuntime.get(this).connection().state().observe(this, this::render);
+        connection = JudgeRuntime.get(this).connection();
+        cornerNames = new com.sigebox.juez.ui.CornerNames(this);
+        connection.state().observe(this, this::render);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        connection.addListener(namesListener);
+    }
+
+    @Override
+    protected void onStop() {
+        connection.removeListener(namesListener);
+        super.onStop();
     }
 
     private void render(ConnectionState state) {

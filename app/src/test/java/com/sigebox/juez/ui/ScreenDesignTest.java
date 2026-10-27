@@ -101,16 +101,5 @@ public class ScreenDesignTest {
         vm.adjust(ScoreUi.Corner.RED, -1);
         assertNull(vm.ui().getValue().red);
     }
-
-    @Test
-    public void greenIsOnlyTheConnectionDotAndCornersKeepTheirColors() {
-        var ctx = ApplicationProvider.getApplicationContext();
-        assertEquals(0xFF1E8E5A, ContextCompat.getColor(ctx, R.color.connected));
-        assertEquals(0xFFC62839, ContextCompat.getColor(ctx, R.color.red_corner));
-        assertEquals(0xFF1F4E9C, ContextCompat.getColor(ctx, R.color.blue_corner));
-        assertEquals(0xFF14284B, ContextCompat.getColor(ctx, R.color.navy));
-        // Los estados de la v1 ya no tienen color propio.
-        assertEquals(ContextCompat.getColor(ctx, R.color.ink_secondary),
-                ContextCompat.getColor(ctx, R.color.status_sent_fg));
-    }
+    // Los tokens de color los fija ThemeV3Test (DESIGN.md v3); los de la v2 se quitaron (uak decision AND-012).
 }

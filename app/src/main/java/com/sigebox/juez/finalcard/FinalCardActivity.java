@@ -96,14 +96,12 @@ public class FinalCardActivity extends AppCompatActivity {
         ((TextView) findViewById(R.id.final_title)).setText(getString(R.string.final_title));
         TableLayout table = findViewById(R.id.final_table);
         table.removeAllViews();
-        table.addView(row(getString(R.string.final_col_round), getString(R.string.score_red),
-                getString(R.string.score_blue), getString(R.string.final_col_status)));
         boolean allConfirmed = !rows.isEmpty();
         List<OwnCards.Row> sorted = new ArrayList<>(rows.values());
         sorted.sort((a, b) -> Integer.compare(a.round, b.round));
         for (OwnCards.Row card : sorted) {
-            table.addView(row(String.valueOf(card.round), String.valueOf(card.red), String.valueOf(card.blue),
-                    getString(statusText(card.status))));
+            table.addView(row(getString(R.string.final_row_round, card.round),
+                    getString(R.string.final_row_score, card.red, card.blue), getString(statusText(card.status))));
             allConfirmed &= card.status != ScoreUi.CardStatus.SENDING;
         }
         if (sentId == null) {
@@ -131,10 +129,16 @@ public class FinalCardActivity extends AppCompatActivity {
     private void onAck(Ack ack) {
         TextView body = findViewById(R.id.final_body);
         if (ack.ok() || ack.error() == Ack.Error.ALREADY_FINAL) {
-            body.setText(R.string.final_sent);
-            findViewById(R.id.final_send).setVisibility(View.GONE);
+            body.setText(R.string.final_body_sent);
+            // DESIGN.md v3 §6.6: el botón pasa a "Tarjeta final enviada".
+            Button sendButton = findViewById(R.id.final_send);
+            sendButton.setText(R.string.final_sent);
+            sendButton.setEnabled(false);
         } else {
-            body.setText(getString(R.string.final_error, ack.error().name()));
+            // DESIGN.md v3 §6.6: el botón vuelve a habilitarse para reintentar.
+            body.setText(R.string.final_retry);
+            sentId = null;
+            findViewById(R.id.final_send).setEnabled(true);
         }
     }
 
