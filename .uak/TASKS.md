@@ -716,7 +716,7 @@ En Windows (zoe) los comandos `Verify` se corren en Git Bash.
 - **Priority:** P0
 - **Estimate:** 1 d
 - **Rubric / Spec:** `docs/specs/002-funcion/` · ADR 0002
-- **Depends on:** CORE-005, AND-012
+- **Depends on:** CORE-005, AND-012, AND-014
 - **Paths:** app/src/main/java/com/sigebox/juez/net/, app/src/main/java/com/sigebox/juez/data/, app/src/main/java/com/sigebox/juez/join/, app/src/main/java/com/sigebox/juez/score/, app/src/test/java/com/sigebox/juez/
 - **Freeze-Allowed:** no
 - **Acceptance:**
@@ -726,6 +726,24 @@ En Windows (zoe) los comandos `Verify` se corren en Git Bash.
   - Pruebas Robolectric con un servidor de prueba
 - **Verify:** `./gradlew :app:testDebugUnitTest`
 - **Next step:** prueba de `JudgeSession`: tras `NEXT_FIGHT` el siguiente `HELLO` lleva `nextFightId` y el mismo `deviceId`
+
+## AND-014 · La app del juez no pierde avisos de la central
+
+- **Type:** fix
+- **Priority:** P0
+- **Estimate:** 3 h
+- **Rubric / Spec:** demo pasos 5 y 6 · hallazgo de cris-2 en el emulador al cerrar AND-012. `ScoreActivity` y `LateScoreActivity` solo escuchan entre `onStart` y `onStop` (`connection.addListener`/`removeListener`): un `STATE` o `FIGHT_ENDED` que llega con la captura tardía abierta, o justo al reabrir la app antes de `onStart`, no lo ve nadie y la pantalla queda en un round o pelea que ya cambió
+- **Depends on:** None
+- **Paths:** app/src/main/java/com/sigebox/juez/net/JudgeSession.java, app/src/main/java/com/sigebox/juez/net/JudgeConnection.java, app/src/main/java/com/sigebox/juez/net/ConnectionState.java, app/src/main/java/com/sigebox/juez/score/ScoreActivity.java, app/src/main/java/com/sigebox/juez/score/ScoreViewModel.java, app/src/main/java/com/sigebox/juez/late/LateScoreActivity.java, app/src/test/java/com/sigebox/juez/net/, app/src/test/java/com/sigebox/juez/score/, app/src/test/java/com/sigebox/juez/late/
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - La conexión guarda el último `STATE` y si la pelea terminó (`FIGHT_ENDED`); al registrar un listener se le entrega ese último estado de inmediato
+  - Con la captura tardía abierta llega `FIGHT_ENDED`: al volver, la pantalla de puntuar muestra la pelea terminada sin esperar otro mensaje
+  - Al reabrir la app, un `STATE` que llegó antes de `onStart` se aplica a la pantalla de puntuar
+  - El juez sigue sin ver tarjetas de otros ni totales (principios 2 y 3): solo se guarda lo que ya llega a este teléfono
+  - Pruebas Robolectric de ambos casos; las pruebas actuales siguen en verde sin editarlas
+- **Verify:** `./gradlew :app:testDebugUnitTest`
+- **Next step:** prueba de `JudgeConnection`: `FIGHT_ENDED` sin listeners, luego `addListener` recibe el fin de pelea
 
 ## DSK-021 · Pantalla de función y "Siguiente pelea" en la central
 
