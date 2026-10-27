@@ -48,10 +48,10 @@ public final class App {
 
     public static final String TITLE = "SIGEBOX · Central";
 
-    /** El paso "Jueces" muestra la misma pantalla de preparar la pelea (DESIGN v2 §7.1). */
+    /** El paso "Jueces" muestra la misma pantalla de preparar la pelea (DESIGN v3 §7.1). */
     static final String JUECES = "jueces";
 
-    /** Pasos de la barra superior (DESIGN v2 §7), en orden. */
+    /** Pasos de la barra superior (DESIGN v3 §7), en orden. */
     static final List<StepsBar.Item> STEPS = List.of(
             new StepsBar.Item(SetupScreen.ID, "Pelea"),
             new StepsBar.Item(JUECES, "Jueces"),
@@ -76,7 +76,7 @@ public final class App {
         return gate.firstScreen(RoundsScreen.ID);
     }
 
-    /** Ancho máximo de la columna centrada (DESIGN v2 §7). */
+    /** Ancho máximo de la columna centrada (DESIGN v3 §7). */
     static final double COLUMN_WIDTH = 1100;
 
     /** Ventana principal: barra de pasos arriba y la pantalla activa al centro. */
@@ -89,6 +89,7 @@ public final class App {
         @Override
         public void start(Stage stage) {
             Theme.loadFonts();
+            Theme.followSystem();
             db = Database.openDefault();
             var tokens = new SeatTokens(); // uno solo: lo emite la pantalla de pelea y lo valida el servidor
             hub = new JudgeHub(db, tokens, ServerEvents.NONE);
@@ -135,7 +136,7 @@ public final class App {
 
             var scene = new Scene(root, 1280, 800);
             Theme.apply(scene);
-            // Ctrl+Enter (DESIGN v2 §7.2): en el tablero abre o cierra el round; en otra pantalla lleva al tablero.
+            // Ctrl+Enter (DESIGN v3 §7.2): en el tablero abre o cierra el round; en otra pantalla lleva al tablero.
             scene.getAccelerators().put(new KeyCodeCombination(KeyCode.ENTER, KeyCombination.CONTROL_DOWN), () -> {
                 if (!(RoundsScreen.ID.equals(current[0]) && RoundsScreen.firePrimary(content))) {
                     show(screens, root, content, RoundsScreen.ID);

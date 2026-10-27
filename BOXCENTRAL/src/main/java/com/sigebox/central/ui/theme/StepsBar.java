@@ -9,8 +9,8 @@ import javafx.scene.control.Button;
 import javafx.scene.layout.HBox;
 
 /**
- * Barra superior de 44 px: marca a la izquierda, los pasos al centro (el actual en azul marino) y
- * enlaces secundarios a la derecha (DESIGN v2 §7).
+ * Barra superior de 48 px: marca a la izquierda, los pasos al centro (el actual con una línea dorada) y,
+ * a la derecha, enlaces secundarios y el botón de tema claro u oscuro (DESIGN v3 §7).
  */
 public final class StepsBar extends HBox {
 
@@ -40,6 +40,10 @@ public final class StepsBar extends HBox {
             links.put(item.id(), b);
             linksBox.getChildren().add(b);
         }
+        var theme = new Button(Theme.mode().toggleLabel());
+        theme.getStyleClass().setAll("link-button", "theme-toggle");
+        theme.setOnAction(e -> theme.setText(Theme.toggle().toggleLabel()));
+        linksBox.getChildren().add(theme);
         getChildren().addAll(Ui.brand(), Ui.grow(), stepsBox, Ui.grow(), linksBox);
     }
 

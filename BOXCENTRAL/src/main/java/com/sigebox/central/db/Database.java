@@ -22,7 +22,7 @@ import java.util.List;
 public final class Database implements AutoCloseable {
 
     /** Migraciones en orden; agregar al final, nunca editar una ya publicada. */
-    static final List<String> MIGRATIONS = List.of("V1__init.sql");
+    static final List<String> MIGRATIONS = List.of("V1__init.sql", "V2__funcion.sql");
 
     private final Path file;
     private final Connection connection;

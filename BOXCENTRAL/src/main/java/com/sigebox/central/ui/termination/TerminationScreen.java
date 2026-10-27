@@ -91,7 +91,7 @@ public final class TerminationScreen {
         form.addRow(3, Ui.support("Round"), round);
         form.addRow(4, Ui.support("Tiempo"), tiempo);
         form.addRow(5, Ui.support("Observaciones"), obs);
-        var card = Ui.glass(Ui.cardTitle("Datos de la terminación"), form, terminar);
+        var card = Ui.card(Ui.cardTitle("Datos de la terminación"), form, terminar);
         card.setMaxWidth(720);
         var root = new VBox(16, Ui.screenTitle("Terminación extraordinaria"), card, status);
         return root;

@@ -1,0 +1,21 @@
+/* SIGEBOX · Central. Tokens de color del tema claro «cantera» (docs/DESIGN.md v3 §3.1). Solo colores. */
+.root {
+    -sg-bg: #F7F4EF;
+    -sg-surface: #FFFFFF;
+    -sg-surface-2: #EFEAE2;
+    -sg-ink: #1C1A17;
+    -sg-ink-2: #55585A;
+    -sg-primary: #1C1A17;
+    -sg-on-primary: #FFFFFF;
+    -sg-accent: #7A5A2A;
+    -sg-red: #9F2241;
+    -sg-on-red: #FFFFFF;
+    -sg-red-numeral: #9F2241;
+    -sg-blue: #266CB4;
+    -sg-on-blue: #FFFFFF;
+    -sg-blue-numeral: #266CB4;
+    -sg-connected: #027A35;
+    -sg-disconnected: #55585A;
+    -sg-line: #D9D2C7;
+    -sg-shadow: rgba(28, 26, 23, 0.08);
+}
