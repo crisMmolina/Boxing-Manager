@@ -20,6 +20,8 @@ import com.sigebox.juez.finalcard.FinalCardActivity;
 import com.sigebox.juez.net.ConnectionState;
 import com.sigebox.juez.net.JudgeConnection;
 import com.sigebox.juez.net.JudgeListener;
+import com.sigebox.core.protocol.NextFight;
+import com.sigebox.core.protocol.State;
 import com.sigebox.juez.net.JudgeRuntime;
 import com.sigebox.juez.ui.ConfirmSheet;
 import com.sigebox.juez.ui.CornerCard;
@@ -57,6 +59,16 @@ public class ScoreActivity extends AppCompatActivity {
         public void onMessage(Message message) {
             if (cornerNames.remember(message)) {
                 runOnUiThread(() -> showNames(currentFightId));
+            }
+            if (message instanceof NextFight next) {
+                // Con lugar, el aviso global relanza esta pantalla con la pelea nueva; sin lugar se avisa aquí.
+                if (next.seat() == null) {
+                    runOnUiThread(() -> NotSeatedView.show(ScoreActivity.this));
+                }
+                return;
+            }
+            if (message instanceof State) {
+                runOnUiThread(() -> NotSeatedView.hide(ScoreActivity.this));
             }
             runOnUiThread(() -> vm.onMessage(message));
         }
