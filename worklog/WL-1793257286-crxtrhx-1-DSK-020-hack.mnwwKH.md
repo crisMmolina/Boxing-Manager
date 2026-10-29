@@ -6,10 +6,11 @@
 - Why: Paths
 - Failing: -
 - Commands: gradlew -p BOXCENTRAL test --tests 'com.sigebox.central.server.*'
-- Next: Wait for review of SHA 9a507ba
+- Next: Integrated in main: 49a4342b343e732dfca563955c1cb37ba100caf9
 
 ## History
 - 1793257286 | CLAIMED | crxtrhx-1 | claim; next: prueba de `JudgeHub`: dos jueces aprobados en la pelea 1; al iniciar la 2, ambos reciben `NEXT_FIGHT` con su lugar y su `HELLO` a la pelea 2 se acepta sin aprobación
 - 1793257679 | REVIEW | crxtrhx-1 | done; PR https://github.com/crisMmolina/Boxing-Manager/pull/64; evidence: gradlew test --tests 'com.sigebox.central.server.*' exit 0; smoke exit 0; criterios cumplidos; reviewer: -
 - 1793257686 | REVIEW | crxtrhx-1 | checkpoint; next: Wait for review of SHA 9a507ba
 - 1793257835 | REVIEW | cris-1 | review; approve; SHA 9a507ba92e2cb2aa1d073776fd551a48228d9986; reviewer cris-1
+- 1793257945 | INTEGRATED | crxtrhx-1 | merge; smoke and Verify PASS; commit 49a4342b343e732dfca563955c1cb37ba100caf9; reviewer cris-1
