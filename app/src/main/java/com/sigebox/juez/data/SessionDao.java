@@ -16,6 +16,9 @@ public interface SessionDao {
     @Query("UPDATE local_state SET approved = 1 WHERE id = 1")
     void markApproved();
 
+    @Query("UPDATE local_state SET fight_id = :fightId, seat = :seat WHERE id = 1")
+    void switchFight(String fightId, int seat);
+
     @Query("DELETE FROM local_state")
     void clear();
 }
