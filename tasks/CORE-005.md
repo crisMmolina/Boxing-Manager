@@ -15,8 +15,8 @@ Task-Base: e275383837d7dbfef4ea0fdce63ec2385c9299d4
 Next: esperar review de cris + OK al contrato (ADR 0002); luego uak merge CORE-005 y claim DSK-020
 PR: https://github.com/crisMmolina/Boxing-Manager/pull/58
 Evidence: core build 213/213; central y app compilan con el permit nuevo
-Events: 5
+Events: 6
 Checkpoints: 1
-Sessions: 3
+Sessions: 4
 Last-Checkpoint: 1792999626
 Task-Tip: 4146fcbd46039ec78dcfec45c5bfa5828805f34f

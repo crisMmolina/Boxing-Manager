@@ -1,5 +1,5 @@
 Task: CORE-005
-Events: 5
+Events: 6
 Checkpoints: 1
-Sessions: 3
+Sessions: 4
 Last-Checkpoint: 1792999626
