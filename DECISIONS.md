@@ -53,3 +53,4 @@ Why: a reversible option after 15 min keeps work moving.
 - 1793257766 | AND-013 | relanzo ScoreActivity desde JudgeRuntime; sin lugar no cambia fila | Why: sin migración Room
 - 1793258205 | deadline decision/CORE-005-1793256966/1793257866 | REVERSIBLE_AND_LOG | Option: cris (humano) da el OK al contrato NEXT_FIGHT (ADR 0002); se puede mergear; Why: Criterio de aceptación: visto bueno de cris al contrato antes del merge; zoe ausente, lease vencido; no money, accounts, publishing or scope expansion.
 - 1793258568 | QA-003 | wire alSiguiente en el test | Why: DSK-021 aun no
+- 1793259514 | DSK-021 | FuncionQuery SQL para la función más reciente | Why: FuncionService no la expone
