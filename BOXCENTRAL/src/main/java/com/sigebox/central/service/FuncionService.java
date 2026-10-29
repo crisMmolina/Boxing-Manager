@@ -4,13 +4,17 @@ import com.sigebox.central.db.Database;
 import com.sigebox.central.db.EventLog;
 import com.sigebox.central.db.FuncionRepository;
 import com.sigebox.central.db.FuncionRepository.CardRow;
+import com.sigebox.central.db.LugarJuezRepository;
 import com.sigebox.central.db.PeleaRepository;
+import com.sigebox.core.model.EstadoConexion;
 import com.sigebox.core.model.EstadoPelea;
+import com.sigebox.core.model.LugarJuez;
 import com.sigebox.core.model.Pelea;
 import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiConsumer;
 
 /**
  * Función con cartelera (spec 002): una base de rounds y jueces, la lista ordenada de peleas y los
@@ -37,7 +41,9 @@ public final class FuncionService {
     private final FightService fights;
     private final FuncionRepository repo;
     private final PeleaRepository peleas;
+    private final LugarJuezRepository lugares;
     private final EventLog log;
+    private BiConsumer<String, String> alSiguiente = (anterior, nueva) -> {};
     private final SecureRandom random = new SecureRandom();
 
     public FuncionService(Database db, FightService fights) {
@@ -45,7 +51,16 @@ public final class FuncionService {
         this.fights = fights;
         this.repo = new FuncionRepository(db);
         this.peleas = new PeleaRepository(db);
+        this.lugares = new LugarJuezRepository(db);
         this.log = new EventLog(db);
+    }
+
+    /**
+     * Quién avisa a los teléfonos (p. ej. {@code JudgeHub::nextFight}): recibe la pelea que termina y la
+     * nueva, y se llama solo después de guardar la copia de lugares.
+     */
+    public synchronized void alSiguiente(BiConsumer<String, String> aviso) {
+        this.alSiguiente = aviso == null ? (anterior, nueva) -> {} : aviso;
     }
 
     /** Crea la función con su base y su cartelera inicial (puede ir vacía). */
@@ -155,15 +170,63 @@ public final class FuncionService {
         var r = rows.get(i);
         var fila = fila(f, r);
         int index = i;
-        return db.inTransaction(c -> {
-            var pelea = fights.create(r.roja(), r.azul(), fila.rounds(), fila.jueces());
-            rows.set(index, new CardRow(r.orden(), r.roja(), r.azul(), r.rounds(), r.jueces(), false, pelea.id()));
+        String anterior = null;
+        for (int k = 0; k < index; k++) {
+            if (rows.get(k).peleaId() != null) {
+                anterior = rows.get(k).peleaId();
+            }
+        }
+        String previa = anterior;
+        var pelea = db.inTransaction(c -> {
+            var nueva = fights.create(r.roja(), r.azul(), fila.rounds(), fila.jueces());
+            rows.set(index, new CardRow(r.orden(), r.roja(), r.azul(), r.rounds(), r.jueces(), false, nueva.id()));
             repo.replaceCard(funcionId, rows);
+            var copiados = previa == null ? List.<LugarJuez>of() : copiarLugares(previa, nueva);
             var detalle = "pelea " + r.orden() + " de " + rows.size() + ": " + r.roja() + " vs " + r.azul();
-            repo.log(funcionId, "SIGUIENTE_PELEA", detalle + " (" + pelea.id() + ")");
-            log.append(pelea.id(), "SIGUIENTE_PELEA", "función " + funcionId + ", " + detalle);
-            return pelea;
+            var lugaresTxt = copiados.isEmpty() ? "" : ", lugares copiados: " + describir(copiados);
+            repo.log(funcionId, "SIGUIENTE_PELEA", detalle + " (" + nueva.id() + ")" + lugaresTxt);
+            log.append(nueva.id(), "SIGUIENTE_PELEA", "función " + funcionId + ", " + detalle
+                    + (previa == null ? "" : ", desde " + previa) + lugaresTxt);
+            if (previa != null) {
+                log.append(previa, "SIGUIENTE_PELEA", "función " + funcionId + ", sigue " + nueva.id() + lugaresTxt);
+            }
+            return nueva;
         });
+        if (previa != null) {
+            alSiguiente.accept(previa, pelea.id());
+        }
+        return pelea;
+    }
+
+    /**
+     * Copia a la pelea nueva los lugares aprobados 1..N de la anterior (nombre, dispositivo, huella y
+     * llave pública), desconectados. Los lugares sobrantes no se copian y los nuevos quedan para el QR.
+     */
+    private List<LugarJuez> copiarLugares(String anterior, Pelea nueva) {
+        var copiados = new ArrayList<LugarJuez>();
+        for (var l : lugares.byPelea(anterior)) {
+            if (l.numero() > nueva.jueces() || l.aprobadoEnMs() == null || l.conexion() == EstadoConexion.RECHAZADO) {
+                continue;
+            }
+            var key = lugares.publicKey(anterior, l.numero()).orElse(null);
+            if (key == null) {
+                continue;
+            }
+            lugares.save(new LugarJuez(nueva.id(), l.numero(), l.nombre(), l.dispositivo(), l.huellaCredencial(),
+                    EstadoConexion.DESCONECTADO, l.aprobadoPor(), l.aprobadoEnMs()));
+            lugares.savePublicKey(nueva.id(), l.numero(), key);
+            copiados.add(l);
+        }
+        return copiados;
+    }
+
+    private static String describir(List<LugarJuez> copiados) {
+        var sb = new StringBuilder();
+        for (var l : copiados) {
+            sb.append(sb.length() == 0 ? "" : "; ").append(l.numero()).append('=')
+                    .append(FightService.shortFingerprint(l.huellaCredencial()));
+        }
+        return sb.toString();
     }
 
     private List<CardRow> rows(String funcionId) {

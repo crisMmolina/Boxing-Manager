@@ -17,6 +17,7 @@ import com.sigebox.core.protocol.Join;
 import com.sigebox.core.protocol.JoinApproved;
 import com.sigebox.core.protocol.JoinPending;
 import com.sigebox.core.protocol.Message;
+import com.sigebox.core.protocol.NextFight;
 import com.sigebox.core.protocol.Messages;
 import com.sigebox.core.protocol.Ping;
 import com.sigebox.core.protocol.Pong;
@@ -245,5 +246,48 @@ class SimJudgeTest {
         deliver(j, new Ack(t.of(SubmitRound.class).get(0).id(), false, null, Ack.Error.ROUND_NOT_OPEN));
         assertTrue(j.pendingIds().isEmpty());
         assertTrue(logs.stream().anyMatch(l -> l.contains("ROUND_NOT_OPEN")), logs.toString());
+    }
+
+    @Test
+    void nextFightGuardaLaPeleaNuevaYReconectaConHelloFirmadoConLaMismaLlave() {
+        var j = judge(Map.of(1, new Script.Plan(1, 10, 9, false)));
+        var t = joinAndApprove(j);
+        deliver(j, new RoundOpened(F, 1));
+        assertEquals(1, j.pendingIds().size());
+        deliver(j, new FightClosed(F));
+        var join = t.of(Join.class).get(0);
+
+        deliver(j, new NextFight(F, "pelea-2", 1, "Caro", "Dani", 3));
+
+        assertTrue(t.closed, "cierra el socket para reconectar");
+        assertEquals(SimJudge.Phase.DISCONNECTED, j.phase());
+        assertEquals("pelea-2", j.fightId());
+        assertEquals(1, j.seat());
+        assertTrue(j.pendingIds().isEmpty());
+        assertTrue(j.ownCards().isEmpty());
+
+        var t2 = new FakeTransport();
+        j.connected(t2);
+        var challenge = new Challenge(DeviceProof.newNonce(new java.security.SecureRandom()));
+        deliver(j, challenge);
+        var hello = assertInstanceOf(Hello.class, t2.last());
+        assertEquals("pelea-2", hello.fightId());
+        assertEquals(1, hello.seat());
+        assertTrue(DeviceProof.verify(join.publicKey(),
+                DeviceProof.helloText("pelea-2", 1, hello.deviceId(), challenge.nonce()), hello.sig()));
+    }
+
+    @Test
+    void nextFightSinLugarNoReconectaYUnoDeOtraPeleaSeIgnora() {
+        var j = judge(Map.of());
+        var t = joinAndApprove(j);
+
+        deliver(j, new NextFight("otra", "pelea-9", 1, "R", "A", 3));
+        assertEquals(F, j.fightId());
+        assertEquals(SimJudge.Phase.APPROVED, j.phase());
+
+        deliver(j, new NextFight(F, "pelea-2", null, "R", "A", 3));
+        assertTrue(t.closed);
+        assertEquals(SimJudge.Phase.DONE, j.phase());
     }
 }

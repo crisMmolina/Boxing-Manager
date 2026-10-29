@@ -2,6 +2,7 @@ package com.sigebox.central.server;
 
 import com.sigebox.central.db.Database;
 import com.sigebox.central.db.EventLog;
+import com.sigebox.central.db.FuncionRepository;
 import com.sigebox.central.db.LugarJuezRepository;
 import com.sigebox.central.db.PeleaRepository;
 import com.sigebox.central.db.ProcessedMessages;
@@ -34,6 +35,7 @@ import com.sigebox.core.protocol.JoinPending;
 import com.sigebox.core.protocol.JoinRejected;
 import com.sigebox.core.protocol.Message;
 import com.sigebox.core.protocol.Messages;
+import com.sigebox.core.protocol.NextFight;
 import com.sigebox.core.protocol.Ping;
 import com.sigebox.core.protocol.Pong;
 import com.sigebox.core.protocol.ProtocolException;
@@ -111,6 +113,7 @@ public final class JudgeHub implements AutoCloseable {
 
     private final PeleaRepository peleas;
     private final LugarJuezRepository lugares;
+    private final FuncionRepository funciones;
     private final RoundRepository rounds;
     private final TarjetaRoundRepository tarjetas;
     private final VersionTarjetaRepository versiones;
@@ -133,6 +136,7 @@ public final class JudgeHub implements AutoCloseable {
         this.clock = clock;
         this.peleas = new PeleaRepository(db);
         this.lugares = new LugarJuezRepository(db);
+        this.funciones = new FuncionRepository(db);
         this.rounds = new RoundRepository(db);
         this.tarjetas = new TarjetaRoundRepository(db);
         this.versiones = new VersionTarjetaRepository(db);
@@ -179,6 +183,13 @@ public final class JudgeHub implements AutoCloseable {
                 }
             }
             case Pong m -> requireAuth(s);
+            case NextFight m -> {
+                // NEXT_FIGHT solo va de la central al juez (ADR 0002).
+                if (requireAuth(s)) {
+                    logSeat(s, "NEXT_FIGHT_REJECTED", null);
+                    send(s, new Ack(m.id(), false, null, Ack.Error.MALFORMED));
+                }
+            }
             case SubmitRound m -> {
                 if (requireAuth(s)) {
                     onSubmitRound(s, m);
@@ -286,6 +297,24 @@ public final class JudgeHub implements AutoCloseable {
         }
     }
 
+    /**
+     * Avisa a cada teléfono aprobado de {@code fightId} que la función sigue con {@code nextFightId}:
+     * su lugar en la nueva pelea, o {@code null} si no participa. Los lugares ya se copiaron y
+     * persistieron ({@code FuncionService.siguiente}) antes de llamar a este método.
+     */
+    public synchronized void nextFight(String fightId, String nextFightId) {
+        var next = peleas.find(nextFightId).orElse(null);
+        if (next == null) {
+            return;
+        }
+        for (var s : approvedSessions(fightId)) {
+            var seat = lugares.find(nextFightId, s.seat).filter(l -> l.aprobadoEnMs() != null)
+                    .map(LugarJuez::numero).orElse(null);
+            send(s, new NextFight(fightId, nextFightId, seat, next.esquinaRoja(), next.esquinaAzul(), next.rounds()));
+            logSeat(s, "NEXT_FIGHT_SENT", seat == null ? "sin lugar" : "lugar " + seat);
+        }
+    }
+
     /** Lugares con conexión abierta en este momento. */
     public synchronized List<Integer> connectedSeats(String fightId) {
         return holders.keySet().stream()
@@ -375,9 +404,54 @@ public final class JudgeHub implements AutoCloseable {
             drop(s, Conn.POLICY, "signature");
             return;
         }
+        var next = nextFightFor(lugar, key);
+        if (next != null) {
+            // Pelea cerrada y la función ya sigue: el teléfono se pone al día y reconecta a la nueva.
+            log.append(lugar.peleaId(), "NEXT_FIGHT_SENT", "lugar " + lugar.numero() + " al reconectar");
+            send(s, next);
+            drop(s, 1000, "next fight");
+            return;
+        }
         bind(s, lugar.peleaId(), lugar.numero());
         markApprovedAndConnected(s, lugar);
         send(s, state(s));
+    }
+
+    /**
+     * {@code NEXT_FIGHT} para un {@code HELLO} válido de una pelea cerrada, si la misma llave está en un
+     * lugar aprobado de la pelea activa de la misma función; {@code null} si no aplica (se atiende como hoy).
+     */
+    private NextFight nextFightFor(LugarJuez lugar, String key) {
+        var closed = peleas.find(lugar.peleaId()).orElse(null);
+        if (closed == null || closed.estado() != EstadoPelea.CERRADA) {
+            return null;
+        }
+        var funcionId = db.inTransaction(c -> {
+            try (var ps = c.prepareStatement("SELECT funcion_id FROM funcion_card WHERE fight_id = ?")) {
+                ps.setString(1, closed.id());
+                try (var rs = ps.executeQuery()) {
+                    return rs.next() ? rs.getString(1) : null;
+                }
+            }
+        });
+        if (funcionId == null) {
+            return null;
+        }
+        for (var row : funciones.card(funcionId)) {
+            var active = row.peleaId() == null || row.peleaId().equals(closed.id()) ? null
+                    : peleas.find(row.peleaId()).orElse(null);
+            if (active == null || active.estado() == EstadoPelea.CERRADA) {
+                continue;
+            }
+            for (var candidate : lugares.byPelea(active.id())) {
+                if (candidate.aprobadoEnMs() != null && candidate.conexion() != EstadoConexion.RECHAZADO
+                        && key.equals(lugares.publicKey(active.id(), candidate.numero()).orElse(null))) {
+                    return new NextFight(closed.id(), active.id(), candidate.numero(), active.esquinaRoja(),
+                            active.esquinaAzul(), active.rounds());
+                }
+            }
+        }
+        return null;
     }
 
     private boolean consumeNonce(Session s, String nonce) {
