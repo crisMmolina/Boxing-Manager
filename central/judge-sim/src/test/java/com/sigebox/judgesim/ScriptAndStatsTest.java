@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 
 class ScriptAndStatsTest {
 
-    /** demo_data/ está en la raíz del repo; las pruebas corren desde BOXCENTRAL/judge-sim. */
+    /** demo_data/ está en la raíz del repo; las pruebas corren desde central/judge-sim. */
     static Path referenceFight() {
         var dir = Path.of("").toAbsolutePath();
         while (dir != null) {

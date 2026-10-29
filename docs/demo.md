@@ -37,7 +37,7 @@ Medido para respaldar lo que se dice en la demo: con el hotspot de un Honor 200 
 `judge-sim` (ver `README.md` para compilarlo):
 
 ```bash
-BOXCENTRAL/judge-sim/build/install/judge-sim/bin/judge-sim --judges 3 --script demo_data/pelea_referencia.json --tokens CODIGO1,CODIGO2,CODIGO3 --fight ID_PELEA --host localhost --drop 60s
+central/judge-sim/build/install/judge-sim/bin/judge-sim --judges 3 --script demo_data/pelea_referencia.json --tokens CODIGO1,CODIGO2,CODIGO3 --fight ID_PELEA --host localhost --drop 60s
 ```
 
 - Los códigos son los de 6 dígitos de cada lugar en la central, en orden.
