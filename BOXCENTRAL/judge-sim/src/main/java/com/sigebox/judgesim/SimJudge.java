@@ -14,6 +14,7 @@ import com.sigebox.core.protocol.JoinPending;
 import com.sigebox.core.protocol.JoinRejected;
 import com.sigebox.core.protocol.Message;
 import com.sigebox.core.protocol.Messages;
+import com.sigebox.core.protocol.NextFight;
 import com.sigebox.core.protocol.Ping;
 import com.sigebox.core.protocol.Pong;
 import com.sigebox.core.protocol.ProtocolException;
@@ -55,8 +56,8 @@ public final class SimJudge {
 
     private record Pending(String json, int round, boolean finalCard, int red, int blue) {}
 
-    private final String fightId;
-    private final int seat;
+    private String fightId;
+    private int seat;
     private final String token;
     private final String name;
     private final String deviceId;
@@ -91,8 +92,12 @@ public final class SimJudge {
         this.log = log;
     }
 
-    public int seat() {
+    public synchronized int seat() {
         return seat;
+    }
+
+    public synchronized String fightId() {
+        return fightId;
     }
 
     public synchronized Phase phase() {
@@ -209,12 +214,45 @@ public final class SimJudge {
                 phase = Phase.DONE;
                 log.accept("juez " + seat + ": pelea cerrada");
             }
+            case NextFight n -> nextFight(n);
             case Ping p -> send(new Pong(p.ts()));
             default -> {
                 // PONG y demás: nada que hacer.
             }
         }
         maybeSendFinal();
+    }
+
+    /**
+     * La función sigue con otra pelea (ADR 0002): guarda la pelea y el lugar nuevos, descarta lo de la
+     * anterior, cierra el socket y reconecta con {@code HELLO} firmado con la misma llave. Sin lugar,
+     * no participa y se queda quieto.
+     */
+    private void nextFight(NextFight n) {
+        if (!n.fightId().equals(fightId)) {
+            return; // aviso de una pelea que no es la mía
+        }
+        outbox.clear();
+        lastSent.clear();
+        own.clear();
+        finalWanted = false;
+        finalSent = false;
+        fightId = n.nextFightId();
+        var t = transport;
+        if (n.seat() == null) {
+            log.accept("juez " + seat + ": no participa en la pelea " + fightId);
+            phase = Phase.DONE;
+            transport = null;
+        } else {
+            seat = n.seat();
+            log.accept("juez " + seat + ": pasa a la pelea " + fightId);
+            drop();
+            phase = Phase.DISCONNECTED;
+            return;
+        }
+        if (t != null) {
+            t.close();
+        }
     }
 
     /** Reintentos y PING; llamar cada ~100 ms. */
