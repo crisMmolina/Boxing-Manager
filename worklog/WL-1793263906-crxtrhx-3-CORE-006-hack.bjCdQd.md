@@ -11,3 +11,4 @@
 ## History
 - 1793263906 | CLAIMED | crxtrhx-3 | claim; next: `git mv BOXCENTRAL central` y correr `central/gradlew -p central build`
 - 1793264093 | REVIEW | crxtrhx-3 | done; PR https://github.com/crisMmolina/Boxing-Manager/pull/74; evidence: bash tools/smoke.sh exit 0 SMOKE_PRODUCT_OK; doctor PASS; judge-sim installDist ok; reviewer: -
+- 1793264211 | REVIEW | cris-1 | review; approve; SHA a728a7ac239840e74bd4b85e9befe793141a7a66; reviewer cris-1
