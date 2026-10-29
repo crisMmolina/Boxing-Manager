@@ -826,3 +826,155 @@ En Windows (zoe) los comandos `Verify` se corren en Git Bash.
   - Pruebas Robolectric de ambos puntos; las pruebas actuales siguen en verde sin editarlas
 - **Verify:** `./gradlew :app:testDebugUnitTest`
 - **Next step:** prueba en `CornerNamesTest`: `remember(NextFight)` y luego leer las esquinas
+
+## CORE-006 · Carpetas hermanas android/, central/ y core/
+
+- **Type:** setup
+- **Priority:** P0
+- **Estimate:** 3 h
+- **Rubric / Spec:** ADR 0003 · spec 003
+- **Depends on:** None
+- **Paths:** settings.gradle.kts, build.gradle.kts, gradle.properties, gradlew, gradlew.bat, gradle/, app/, android/, BOXCENTRAL/, central/, tools/smoke.sh, .github/CODEOWNERS, .github/CODEOWNERS.example, .uak/OWNERS.md, .uak/PROJECT.md, .gitignore, README.md, docs/runbook.md, docs/demo.md
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - Con `git mv` (se conserva el historial): el proyecto de Android de la raíz (settings, build, gradle.properties, gradlew*, `gradle/` y `app/`) queda en `android/`, y `BOXCENTRAL/` queda en `central/` con `judge-sim/`; `includeBuild("../core")` en ambos
+  - `rootProject.name` de la central y las rutas que dependen de él (`install/…/lib` del `jpackage`) siguen funcionando; el instalador se sigue llamando "SIGEBOX Central"
+  - `tools/smoke.sh`, `.github/CODEOWNERS` (y `.example`), `.uak/PROJECT.md` (carpetas y CODEOWNERS), `.gitignore`, README (rutas y comandos), `docs/runbook.md` y `docs/demo.md` usan las rutas nuevas; `.idea/` no se mueve
+  - `.uak/OWNERS.md`: cada fila de `app/…`, raíz de Android o `BOXCENTRAL/…` pasa a su ruta nueva; las filas de la central `App.java`, `ui/Screens.java` y `db/` quedan para DSK-027; las demás filas movidas siguen siendo de CORE-006
+  - Antes de empujar: `uak msg all --kind contract` con las rutas nuevas (zoe cambia sus comandos en Windows)
+- **Verify:** `bash tools/smoke.sh`
+- **Next step:** `git mv BOXCENTRAL central` y correr `central/gradlew -p central build`
+
+## DSK-025 · Bitácora y estados en español en la central
+
+- **Type:** feature
+- **Priority:** P1
+- **Estimate:** 3 h
+- **Rubric / Spec:** spec 003 §Español en las interfaces
+- **Depends on:** CORE-006
+- **Paths:** central/src/main/java/com/sigebox/central/ui/log/, central/src/main/java/com/sigebox/central/ui/Labels.java, central/src/main/java/com/sigebox/central/export/, central/src/test/java/com/sigebox/central/ui/log/, central/src/test/java/com/sigebox/central/ui/LabelsTest.java, central/src/test/java/com/sigebox/central/export/
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - `ui/Labels` traduce cada tipo de evento de la bitácora y cada valor de `EstadoPelea`, `EstadoRound`, `EstadoTarjeta`, `EstadoConexion`, `TipoDecision`, `MotivoTerminacion`, `Ganador` y `OrigenTarjeta`; una prueba recorre todos los valores de cada enum y todos los tipos que escribe la central (nada queda sin traducir)
+  - La bitácora muestra el tipo y el mensaje en español (p. ej. `SUBMIT_ROUND` "lugar 2 round 3 TARDIA" → "Tarjeta de round · Juez 2 · round 3 · tardía"); el filtro muestra etiquetas en español y sigue filtrando por el código guardado
+  - PDF y CSV muestran estados y decisiones en español; la base de datos no cambia
+- **Verify:** `central/gradlew -p central test --tests 'com.sigebox.central.ui.*' --tests 'com.sigebox.central.export.*'`
+- **Next step:** `LabelsTest` que recorre `EstadoTarjeta.values()`
+
+## DSK-026 · Saber en qué pestaña estoy
+
+- **Type:** feature
+- **Priority:** P1
+- **Estimate:** 2 h
+- **Rubric / Spec:** spec 003 §Pestaña activa
+- **Depends on:** CORE-006
+- **Paths:** central/src/main/java/com/sigebox/central/ui/theme/, central/src/main/resources/com/sigebox/central/, central/src/test/java/com/sigebox/central/ui/theme/
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - El paso actual (Función · Jueces · En vivo · Resultado) y el enlace actual (Función, Terminación, Corrección, Bitácora) tienen fondo de color además del texto, en claro y oscuro, con contraste AA medido en la prueba de tema
+  - Prueba: al mostrar cada pantalla, exactamente un paso o enlace tiene la clase de activo
+  - Evidencia: capturas antes/después en claro y oscuro (rama `evidence/dsk-026`, enlaces en el PR)
+- **Verify:** `central/gradlew -p central test --tests 'com.sigebox.central.ui.theme.*'`
+- **Next step:** captura de la barra actual con `ScreenshotHarness`
+
+## AND-017 · App del juez en español y sin capacitación
+
+- **Type:** feature
+- **Priority:** P1
+- **Estimate:** 4 h
+- **Rubric / Spec:** spec 003 §Español en las interfaces y §Sin capacitación
+- **Depends on:** CORE-006
+- **Paths:** android/app/src/main/java/com/sigebox/juez/score/, android/app/src/main/java/com/sigebox/juez/late/, android/app/src/main/java/com/sigebox/juez/finalcard/, android/app/src/main/java/com/sigebox/juez/join/WaitingActivity.java, android/app/src/main/java/com/sigebox/juez/join/WaitingText.java, android/app/src/main/java/com/sigebox/juez/ui/ConfirmSheet.java, android/app/src/main/java/com/sigebox/juez/ui/ErrorText.java, android/app/src/main/res/values/strings_score.xml, android/app/src/main/res/values/strings_late.xml, android/app/src/main/res/values/strings_join.xml, android/app/src/main/res/layout/, android/app/src/test/java/com/sigebox/juez/score/, android/app/src/test/java/com/sigebox/juez/late/, android/app/src/test/java/com/sigebox/juez/finalcard/, android/app/src/test/java/com/sigebox/juez/join/, android/app/src/test/java/com/sigebox/juez/ui/
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - `ErrorText` da una frase en español con qué hacer para cada `Ack.Error`; ninguna pantalla usa `.name()` de un error (hoy `ScoreActivity` y `LateScoreActivity`); prueba que recorre todos los valores
+  - Esperando aprobación, No participas, Round tardío y "Esperando round" dicen en una frase qué hacer
+  - Enviar la tarjeta final pide confirmación ("Ya no podrás corregir") con la misma hoja que los rounds
+  - Los puntos se siguen capturando con + y − sin valor por defecto (principio 2)
+  - Evidencia: capturas en un emulador de cada pantalla cambiada (Robolectric no construye `ScoreActivity` por AndroidKeyStore); si no hay emulador, el PR lo dice
+- **Verify:** `android/gradlew -p android :app:testDebugUnitTest`
+- **Next step:** `ErrorTextTest` que recorre `Ack.Error.values()`
+
+## DSK-028 · Riesgos que dejó la revisión de DSK-022
+
+- **Type:** fix
+- **Priority:** P2
+- **Estimate:** 2 h
+- **Rubric / Spec:** revisión de DSK-022 (PR #72, cris-1) · principio 1
+- **Depends on:** CORE-006
+- **Paths:** central/src/main/java/com/sigebox/central/server/JudgeHub.java, central/src/test/java/com/sigebox/central/server/JudgeHubHandoffTest.java
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - Prueba nueva (sin editar `JudgeHubNextFightTest`): la pelea se cierra con `ResultService` (no a mano) y el teléfono que vuelve con pendientes entrega su tarjeta de un round que no contó como `TARDIA`, sin cambiar el resultado guardado
+  - Prueba de `SUBMIT_FINAL_CARD` por la conexión de traspaso tras una terminación
+  - Cuando un juez manda la tarjeta de un round que el organizador ya capturó (`CAPTURADA`), la central responde como hoy y además lo deja en la bitácora con sus puntos, para que el organizador lo vea
+- **Verify:** `central/gradlew -p central test --tests 'com.sigebox.central.server.*'`
+- **Next step:** `JudgeHubHandoffTest` con `ResultService.close`
+
+## DSK-023 · Función primero: crear la función con rounds, jueces y número de peleas
+
+- **Type:** feature
+- **Priority:** P0
+- **Estimate:** 1 d
+- **Rubric / Spec:** spec 003 §Función primero
+- **Depends on:** CORE-006, DSK-026
+- **Paths:** central/src/main/java/com/sigebox/central/App.java, central/src/main/java/com/sigebox/central/ui/Screens.java, central/src/main/java/com/sigebox/central/ui/funcion/, central/src/main/java/com/sigebox/central/ui/setup/, central/src/main/java/com/sigebox/central/service/FuncionService.java, central/src/main/java/com/sigebox/central/service/FightService.java, central/src/main/java/com/sigebox/central/db/FuncionRepository.java, central/src/main/java/com/sigebox/central/db/PeleaRepository.java, central/src/main/resources/com/sigebox/central/, central/src/test/java/com/sigebox/central/ui/funcion/, central/src/test/java/com/sigebox/central/ui/setup/, central/src/test/java/com/sigebox/central/service/FuncionServiceTest.java
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - Sin función activa, la central abre en "Nueva función": rounds (1–12), jueces (1–5), número de peleas (1–20) y nombres opcionales; "Crear función" la guarda en SQLite antes de mostrarla
+  - Nombres vacíos → "Peleador esquina roja N" / "Peleador esquina azul N" (N fijo al crear; reordenar no renumera); los nombres cumplen las reglas de `Fields` (1–64, sin controles)
+  - Los nombres de una pelea que no ha empezado se pueden cambiar (además de rounds y jueces)
+  - Pasos de la barra: Función · Jueces · En vivo · Resultado; "Pelea suelta" queda como acción secundaria
+  - Muestra estados con `ui/Labels` si DSK-025 ya está integrada; si no, en español escrito a mano
+  - Evidencia: capturas de crear una función de 8 peleas sin nombres (rama `evidence/dsk-023`)
+- **Verify:** `central/gradlew -p central test`
+- **Next step:** prueba de `FuncionService.crear` con nombres vacíos
+
+## DSK-024 · Resultado automático con tarjetas finales en vivo
+
+- **Type:** feature
+- **Priority:** P0
+- **Estimate:** 1 d
+- **Rubric / Spec:** spec 003 §Resultado automático · principios 2 y 3
+- **Depends on:** DSK-023, DSK-028
+- **Paths:** central/src/main/java/com/sigebox/central/App.java, central/src/main/java/com/sigebox/central/ui/result/, central/src/main/java/com/sigebox/central/ui/rounds/, central/src/main/java/com/sigebox/central/service/ResultService.java, central/src/main/java/com/sigebox/central/service/RoundService.java, central/src/main/java/com/sigebox/central/server/ServerEvents.java, central/src/main/java/com/sigebox/central/server/JudgeHub.java, central/src/test/java/com/sigebox/central/ui/result/, central/src/test/java/com/sigebox/central/service/ResultServiceTest.java, central/src/test/java/com/sigebox/central/service/RoundServiceTest.java
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - Al cerrar el último round programado la pelea pasa sola a terminada y pide las tarjetas finales; la terminación anticipada sigue igual
+  - Resultado lista cada juez con "Tarjeta final enviada" o "Pendiente" y se actualiza sola ≤ 1 s después del `ACK` (`ServerEvents` conectado en `App`, cambios de UI con `Platform.runLater`)
+  - Con todas las tarjetas (o terminación) muestra ganador, decisión y tarjetas por juez calculados por `ResultService`/`core`, y el botón "Cerrar pelea"; el cierre guarda el mismo resultado (prueba: lo mostrado = lo guardado, también tras una corrección antes de cerrar)
+  - Antes de eso no se muestra ningún total ni ganador (prueba)
+- **Verify:** `central/gradlew -p central test`
+- **Next step:** prueba de `RoundService`: cerrar el último round deja la pelea terminada
+
+## DSK-027 · Central sin capacitación: "Qué sigue" en cada pantalla
+
+- **Type:** feature
+- **Priority:** P1
+- **Estimate:** 4 h
+- **Rubric / Spec:** spec 003 §Sin capacitación
+- **Depends on:** DSK-023, DSK-024, DSK-025, DSK-026, DSK-028, AND-017
+- **Paths:** central/src/main/java/com/sigebox/central/App.java, central/src/main/java/com/sigebox/central/ui/, central/src/main/resources/com/sigebox/central/, central/src/test/java/com/sigebox/central/ui/, docs/DESIGN.md
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - Cada pantalla muestra una línea "Qué sigue" con la siguiente acción; todo botón deshabilitado dice por qué
+  - Ningún código en mayúsculas ni enum visible en la central (prueba que recorre las pantallas con `ScreenshotHarness` o el árbol de nodos)
+  - `docs/DESIGN.md` describe todo lo de spec 003: pasos nuevos, pestaña activa, función primero, resultado automático y los textos nuevos del juez
+  - Evidencia: capturas de un evento completo de 2 peleas con judge-sim (rama `evidence/dsk-027`)
+- **Verify:** `central/gradlew -p central test`
+- **Next step:** lista de pantallas y su "Qué sigue" en DESIGN.md
+
+## DOC-001 · README para usar y construir SIGEBOX
+
+- **Type:** docs
+- **Priority:** P2
+- **Estimate:** 2 h
+- **Rubric / Spec:** spec 003 · pedido de cris ("mejora el MD")
+- **Depends on:** DSK-027
+- **Paths:** README.md
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - README: qué es, las tres carpetas, requisitos (JDK 25, Android SDK), cómo construir, probar y correr cada app, el simulador de jueces, empaquetar la central, y una guía corta del evento (función → jueces → en vivo → resultado) que remite a `docs/runbook.md`
+  - Todo comando del README se corrió en esta máquina y funciona tal cual
+- **Verify:** `test -s README.md && bash tools/smoke.sh`
+- **Next step:** correr cada comando del README actual y anotar los que fallan
