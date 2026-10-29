@@ -124,4 +124,32 @@ class FuncionServiceTest {
         var tipos = new FuncionRepository(db).bitacora(f.id());
         assertTrue(tipos.containsAll(List.of("FUNCION_CREADA", "CARTELERA_CAMBIADA", "SIGUIENTE_PELEA")), tipos.toString());
     }
+
+    @Test
+    void siguienteCopiaSoloLosLugaresAprobadosHastaElNumeroDeJuecesYLoAvisa() {
+        var f = funciones.crear(3, 3, List.of(pelea("Ana", "Bea"), pelea("Caro", "Dani")));
+        funciones.cambiar(f.id(), 2, null, 2);
+        var p1 = funciones.siguiente(f.id());
+        var lugares = new com.sigebox.central.db.LugarJuezRepository(db);
+        for (int n = 1; n <= 3; n++) {
+            lugares.save(new com.sigebox.core.model.LugarJuez(p1.id(), n, "Juez " + n, "dev-" + n, "huella-" + n,
+                    com.sigebox.core.model.EstadoConexion.CONECTADO, "central", n == 2 ? null : 5L));
+            lugares.savePublicKey(p1.id(), n, "key-" + n);
+        }
+        cerrar(p1.id());
+        var avisos = new java.util.ArrayList<String>();
+        funciones.alSiguiente((anterior, nueva) -> avisos.add(anterior + ">" + nueva));
+
+        var p2 = funciones.siguiente(f.id());
+
+        assertEquals(List.of(p1.id() + ">" + p2.id()), avisos);
+        var copiados = lugares.byPelea(p2.id());
+        assertEquals(1, copiados.size(), "el 2 no estaba aprobado y el 3 sobra");
+        assertEquals("Juez 1", copiados.get(0).nombre());
+        assertEquals("huella-1", copiados.get(0).huellaCredencial());
+        assertEquals("key-1", lugares.publicKey(p2.id(), 1).orElseThrow());
+        var log = new com.sigebox.central.db.EventLog(db);
+        assertTrue(log.byPelea(p1.id()).stream().anyMatch(e -> e.tipo().equals("SIGUIENTE_PELEA")));
+        assertTrue(log.byPelea(p2.id()).stream().anyMatch(e -> e.tipo().equals("SIGUIENTE_PELEA")));
+    }
 }
