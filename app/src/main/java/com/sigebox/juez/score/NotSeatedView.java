@@ -16,8 +16,6 @@ import com.sigebox.juez.R;
  */
 final class NotSeatedView {
     static final String TAG = "not_seated";
-    static final String TITLE = "No participas en esta pelea";
-    static final String SUPPORT = "Espera: cuando te toque, esta pantalla pasa sola a la puntuación.";
 
     private NotSeatedView() {
     }
@@ -39,8 +37,8 @@ final class NotSeatedView {
         box.setGravity(Gravity.CENTER);
         int pad = (int) (24 * activity.getResources().getDisplayMetrics().density);
         box.setPadding(pad, pad, pad, pad);
-        box.addView(text(activity, R.style.Text_Sigebox_CardTitle, TITLE));
-        box.addView(text(activity, R.style.Text_Sigebox_Support, SUPPORT));
+        box.addView(text(activity, R.style.Text_Sigebox_CardTitle, activity.getString(R.string.not_seated_title)));
+        box.addView(text(activity, R.style.Text_Sigebox_Support, activity.getString(R.string.not_seated_support)));
         cover.addView(box, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT));
         content.addView(cover, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
