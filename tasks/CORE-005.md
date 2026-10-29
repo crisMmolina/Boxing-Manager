@@ -12,10 +12,10 @@ Verify: `core/gradlew -p core build`
 Lease-Until: 1793343458
 Updated: 1793257058
 Task-Base: e275383837d7dbfef4ea0fdce63ec2385c9299d4
-Next: esperar review de cris + OK al contrato (ADR 0002); luego uak merge CORE-005 y claim DSK-020
+Next: Humano: Base moved; revalidate the candidate
 PR: https://github.com/crisMmolina/Boxing-Manager/pull/58
 Evidence: core build 213/213; central y app compilan con el permit nuevo
-Events: 7
+Events: 8
 Checkpoints: 1
 Sessions: 4
 Last-Checkpoint: 1792999626

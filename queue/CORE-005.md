@@ -1,5 +1,5 @@
 ID: CORE-005
-State: MERGING
+State: HUMAN
 Owner: cris-2
-Queued: 1793257062
-Reason: Waiting for queue
+Updated: 1793257243
+Reason: Base moved; revalidate the candidate
