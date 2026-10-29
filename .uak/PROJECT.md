@@ -7,8 +7,8 @@
 Para el organizador de una función de box profesional: recibir la calificación de cada juez (teléfono Android) en la laptop central (Windows, JavaFX) en 1 s o menos y obtener el resultado calculado al cerrar la pelea, todo en red local sin internet ni router, sin perder ninguna calificación. Resultado medible: 100 % de coincidencia con el cálculo a mano, 0 calificaciones perdidas.
 
 Dos apps + un núcleo compartido (ADR 0001):
-- `app/` → app del juez (Android, Java, minSdk 26, paquete `com.sigebox.juez`) · dueño humano: **cris** (crisMmolina).
-- `BOXCENTRAL/` → app central de escritorio (JDK 25, JavaFX 25, Javalin 7, SQLite) · dueño humano: **zoe** (zoe718).
+- `android/` → app del juez (Android, Java, minSdk 26, paquete `com.sigebox.juez`) · dueño humano: **cris** (crisMmolina).
+- `central/` → app central de escritorio (JDK 25, JavaFX 25, Javalin 7, SQLite) · dueño humano: **zoe** (zoe718).
 - `core/` → Java 17 puro: modelo, protocolo, validación y cálculo del resultado. Lo usan las dos apps.
 
 ## Non-negotiable principles
@@ -36,7 +36,7 @@ Dos apps + un núcleo compartido (ADR 0001):
 | dev | local (laptop + teléfonos, hotspot) | cada humano en su máquina | `.env` local (keystore de firma) |
 | prod | sin web: instalador .msi/.exe + APK firmado | un humano, por release semver | keystore fuera del repo |
 
-CODEOWNERS: `app/` → @crisMmolina · `BOXCENTRAL/` → @zoe718 · `core/` → ambos · On-call: el organizador del evento · Runbook: `docs/runbook.md`.
+CODEOWNERS: `android/` → @crisMmolina · `central/` → @zoe718 · `core/` → ambos · On-call: el organizador del evento · Runbook: `docs/runbook.md`.
 
 ## Executable config
 ```text
