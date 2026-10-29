@@ -49,3 +49,4 @@ Why: a reversible option after 15 min keeps work moving.
 - 1793021192 | deadline lease/AND-012/1793008781 | REQUIRES_RECOVERY | Claim kept; read the summary and use release --expired --read-summary. No work is deleted.
 - 1793070910 | AND-014 | Repetición del último STATE/FIGHT_ENDED en JudgeConnection.addListener | Why: Paths de la tarea; ScoreActivity no cambia
 - 1793072337 | AND-015 | Estado del envío desde la bandeja de salida (FinalCardStatus), no de onSaveInstanceState | Why: Sobrevive al cierre forzado; Paths solo finalcard/
+- 1793257686 | DSK-020 | hub.nextFight + FuncionService.alSiguiente; SQL directo en JudgeHub (db/ fuera de Paths) | Why: Paths
