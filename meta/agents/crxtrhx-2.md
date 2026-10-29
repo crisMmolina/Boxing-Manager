@@ -1,11 +1,11 @@
 # crxtrhx-2
 Agent: crxtrhx-2
 Started: 1793257302
-Events: 8
-Events-Since-Checkpoint: 5
-Checkpoints: 1
+Events: 9
+Events-Since-Checkpoint: 0
+Checkpoints: 2
 Sessions: 3
-Last-Checkpoint: 1793257766
+Last-Checkpoint: 1793258568
 Human: CrXTrhx
 Last-Session: crxtrhx-2-1793258205
-Updated: 1793258561
+Updated: 1793258568
