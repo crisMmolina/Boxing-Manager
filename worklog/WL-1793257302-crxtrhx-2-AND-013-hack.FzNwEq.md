@@ -6,10 +6,11 @@
 - Why: sin migración Room
 - Failing: none
 - Commands: ./gradlew :app:testDebugUnitTest
-- Next: Wait for review of SHA 1bd7e92afc01895da76a4b7218999271e0fb3911
+- Next: Humano: Verify / acceptance red: BUILD FAILED in 587ms (log: /Users/cristophermolina/Documents/Projects/box/.git/worktrees/and-013/uak-out/gate-AND-013-verify-1793257976.log)
 
 ## History
 - 1793257302 | CLAIMED | crxtrhx-2 | claim; next: prueba de `JudgeSession`: tras `NEXT_FIGHT` el siguiente `HELLO` lleva `nextFightId` y el mismo `deviceId`
 - 1793257759 | REVIEW | crxtrhx-2 | done; PR https://github.com/crisMmolina/Boxing-Manager/pull/65; evidence: ./gradlew :app:testDebugUnitTest exit 0; smoke PRODUCT_PASS; 4 criteria met; reviewer: -
 - 1793257766 | REVIEW | crxtrhx-2 | checkpoint; next: Wait for review of SHA 1bd7e92afc01895da76a4b7218999271e0fb3911
 - 1793257852 | REVIEW | cris-2 | review; approve; SHA 1bd7e92afc01895da76a4b7218999271e0fb3911; reviewer cris-2
+- 1793257976 | REVIEW | crxtrhx-2 | merge rechazado; Verify / acceptance red: BUILD FAILED in 587ms (log: /Users/cristophermolina/Documents/Projects/box/.git/worktrees/and-013/uak-out/gate-AND-013-verify-1793257976.log)
