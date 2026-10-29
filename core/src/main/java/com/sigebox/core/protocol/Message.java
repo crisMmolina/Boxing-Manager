@@ -9,7 +9,7 @@ package com.sigebox.core.protocol;
  */
 public sealed interface Message
         permits Challenge, Join, JoinPending, JoinApproved, JoinRejected, Hello, State, RoundOpened, RoundClosed,
-                SubmitRound, Ack, SubmitFinalCard, FightEnded, FightClosed, Ping, Pong {
+                SubmitRound, Ack, SubmitFinalCard, FightEnded, FightClosed, Ping, Pong, NextFight {
 
     /** Versión del protocolo. */
     int VERSION = 1;
