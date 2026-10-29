@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 
 import com.sigebox.core.protocol.JoinApproved;
 import com.sigebox.core.protocol.Message;
+import com.sigebox.core.protocol.NextFight;
 import com.sigebox.core.protocol.State;
 
 /**
@@ -28,6 +29,11 @@ public final class CornerNames {
         }
         if (message instanceof State state) {
             save(state.fightId(), state.redCorner(), state.blueCorner(), state.rounds());
+            return true;
+        }
+        if (message instanceof NextFight next) {
+            // Las esquinas son de la pelea nueva: así salen ya en la puntuación, antes de su primer STATE.
+            save(next.nextFightId(), next.redCorner(), next.blueCorner(), next.rounds());
             return true;
         }
         return false;

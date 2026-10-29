@@ -12,6 +12,7 @@ import androidx.test.core.app.ApplicationProvider;
 import com.sigebox.core.model.EstadoPelea;
 import com.sigebox.core.model.EstadoRound;
 import com.sigebox.core.protocol.JoinApproved;
+import com.sigebox.core.protocol.NextFight;
 import com.sigebox.core.protocol.Ping;
 import com.sigebox.core.protocol.State;
 
@@ -47,5 +48,16 @@ public class CornerNamesTest {
                 EstadoRound.ABIERTO, List.of(), false));
         assertEquals("Roja Uno", names.red("F1"));
         assertFalse("otros mensajes no cambian nada", names.remember(new Ping(1L)));
+    }
+
+    @Test
+    public void recuerdaLasEsquinasDeLaPeleaNuevaAlRecibirNextFight() {
+        CornerNames names = new CornerNames(context);
+        assertTrue(names.remember(new NextFight("F1", "F2", 2, "Roja Dos", "Azul Dos", 6)));
+        CornerNames reopened = new CornerNames(context);
+        assertEquals("Roja Dos", reopened.red("F2"));
+        assertEquals("Azul Dos", reopened.blue("F2"));
+        assertEquals(Integer.valueOf(6), reopened.rounds("F2"));
+        assertNull("la pelea anterior no cambia", reopened.red("F1"));
     }
 }

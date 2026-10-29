@@ -21,6 +21,8 @@
     <string name="corner_blue">Azul</string>
     <string name="corner_red_lower">roja</string>
     <string name="corner_blue_lower">azul</string>
+    <string name="not_seated_title">No participas en esta pelea</string>
+    <string name="not_seated_support">Espera: cuando te toque, esta pantalla pasa sola a la puntuación.</string>
     <string name="score_empty">—</string>
     <string name="score_empty_a11y">sin valor</string>
     <string name="score_minus_a11y">Restar un punto a la esquina %1$s, valor actual %2$s</string>

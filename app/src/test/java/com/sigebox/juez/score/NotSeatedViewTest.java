@@ -40,4 +40,15 @@ public class NotSeatedViewTest {
         NotSeatedView.hide(activity);
         assertEquals(View.GONE, cover(activity).getVisibility());
     }
+
+    @Test
+    public void losTextosVienenDeRecursos() {
+        Activity activity = Robolectric.buildActivity(Activity.class).setup().get();
+        NotSeatedView.show(activity);
+        ViewGroup box = (ViewGroup) ((ViewGroup) cover(activity)).getChildAt(0);
+        assertEquals(activity.getString(com.sigebox.juez.R.string.not_seated_title),
+                ((TextView) box.getChildAt(0)).getText().toString());
+        assertEquals(activity.getString(com.sigebox.juez.R.string.not_seated_support),
+                ((TextView) box.getChildAt(1)).getText().toString());
+    }
 }
