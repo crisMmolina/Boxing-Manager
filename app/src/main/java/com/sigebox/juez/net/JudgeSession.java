@@ -12,6 +12,7 @@ import com.sigebox.core.protocol.JoinRejected;
 import com.sigebox.core.protocol.JoinUri;
 import com.sigebox.core.protocol.Message;
 import com.sigebox.core.protocol.Messages;
+import com.sigebox.core.protocol.NextFight;
 import com.sigebox.core.protocol.Ping;
 import com.sigebox.core.protocol.Pong;
 import com.sigebox.core.protocol.RoundClosed;
@@ -35,6 +36,8 @@ public final class JudgeSession {
     public static final long RESEND_AFTER_MS = 5_000;
     /** Sin ningún mensaje de la central en este tiempo, la conexión se da por caída. */
     public static final long DEAD_AFTER_MS = 15_000;
+    /** Cuánto se espera a que la central confirme la bandeja de la pelea vieja antes de pasar a la nueva. */
+    public static final long SWITCH_WAIT_MS = 10_000;
 
     private final Outbox outbox;
     private final SessionStore store;
@@ -47,6 +50,9 @@ public final class JudgeSession {
     private boolean synced;
     private long lastReceived;
     private ConnectionState state = ConnectionState.INITIAL;
+    /** NEXT_FIGHT con lugar que espera a que la bandeja de la pelea vieja quede entregada. */
+    private NextFight deferred;
+    private long deferredAt;
 
     public JudgeSession(Outbox outbox, SessionStore store, DeviceSigner signer, Clock clock, JudgeListener listener) {
         this.outbox = outbox;
@@ -77,6 +83,7 @@ public final class JudgeSession {
         transport = null;
         nonce = null;
         synced = false;
+        deferred = null; // la central lo repite al reconectar con HELLO de la pelea cerrada
         if (state.status != ConnectionState.Status.REJECTED) {
             publish(state.withStatus(ConnectionState.Status.DISCONNECTED));
         }
@@ -91,6 +98,10 @@ public final class JudgeSession {
             return;
         }
         lastReceived = clock.now();
+        if (message instanceof NextFight next) {
+            onNextFight(next);
+            return;
+        }
         handle(message);
         listener.onMessage(message);
     }
@@ -123,6 +134,10 @@ public final class JudgeSession {
         }
         if (clock.now() - lastReceived > DEAD_AFTER_MS) {
             return false;
+        }
+        if (deferred != null && clock.now() - deferredAt > SWITCH_WAIT_MS) {
+            applyNextFight(deferred); // lo pendiente sigue en la bandeja; no se pierde
+            return true;
         }
         send(Messages.encode(new Ping(clock.now())));
         if (synced) {
@@ -160,8 +175,53 @@ public final class JudgeSession {
         } else if (message instanceof Ack ack) {
             outbox.onAck(ack);
             publish(state.withPendingAcks(outbox.pendingCount()));
+            if (deferred != null && outbox.pendingCount() == 0) {
+                applyNextFight(deferred);
+            }
         } else if (message instanceof Ping ping) {
             send(Messages.encode(new Pong(ping.ts())));
+        }
+    }
+
+    /**
+     * La central pasa a la función a la pelea siguiente. Con lugar: antes de cambiar se entrega la bandeja a la pelea
+     * vieja (principio 1), luego se guarda la pelea nueva (sigue aprobado) y se reconecta con {@code HELLO} a ella. Sin
+     * lugar el teléfono no cambia: la pantalla avisa y la conexión espera el siguiente {@code NEXT_FIGHT}.
+     */
+    private void onNextFight(NextFight next) {
+        SessionEntity current = store.load();
+        if (current == null || !current.approved) {
+            return;
+        }
+        if (next.seat() == null) {
+            listener.onMessage(next);
+            return;
+        }
+        if (current.fightId.equals(next.nextFightId())) {
+            return; // ya estamos en esa pelea (aviso repetido)
+        }
+        if (synced && outbox.pendingCount() > 0) {
+            deferred = next;
+            deferredAt = clock.now();
+            for (OutboxEntity entity : outbox.pending()) {
+                sendStored(entity);
+            }
+            return;
+        }
+        applyNextFight(next);
+    }
+
+    private void applyNextFight(NextFight next) {
+        deferred = null;
+        store.switchFight(next.nextFightId(), next.seat());
+        Transport old = transport;
+        transport = null;
+        nonce = null;
+        synced = false;
+        publish(new ConnectionState(ConnectionState.Status.CONNECTING, null, null, outbox.pendingCount(), null));
+        listener.onMessage(next);
+        if (old != null) {
+            old.close(); // al cerrarse, la conexión reabre y responde el CHALLENGE con HELLO a la pelea nueva
         }
     }
 

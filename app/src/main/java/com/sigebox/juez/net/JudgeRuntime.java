@@ -1,8 +1,11 @@
 package com.sigebox.juez.net;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 
+import com.sigebox.core.protocol.Message;
+import com.sigebox.core.protocol.NextFight;
 import com.sigebox.juez.data.Clock;
 import com.sigebox.juez.data.Outbox;
 import com.sigebox.juez.data.SessionStore;
@@ -19,6 +22,8 @@ import okhttp3.OkHttpClient;
 public final class JudgeRuntime {
     /** Latido: PING y reenvío de lo que no tiene ACK. */
     static final long TICK_MS = 5_000;
+    /** La pantalla de puntuación se abre por nombre, como hace la espera de aprobación. */
+    static final String SCORE_ACTIVITY = "com.sigebox.juez.score.ScoreActivity";
 
     private static volatile JudgeRuntime instance;
 
@@ -36,6 +41,16 @@ public final class JudgeRuntime {
                 new SessionStore(database.sessionDao()), new KeystoreSigner(), Clock.SYSTEM,
                 new Backoff(500, 5_000), TICK_MS);
         networkBinder = new NetworkBinder(app.getSystemService(ConnectivityManager.class));
+        // NEXT_FIGHT lleva al juez a la pantalla de puntuación desde donde esté, sin confirmación (spec 002).
+        connection.addListener(new JudgeListener() {
+            @Override
+            public void onMessage(Message message) {
+                if (message instanceof NextFight) {
+                    app.startActivity(new Intent().setClassName(app, SCORE_ACTIVITY)
+                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
+                }
+            }
+        });
     }
 
     public static JudgeRuntime get(Context context) {

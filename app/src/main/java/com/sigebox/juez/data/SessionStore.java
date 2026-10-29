@@ -41,6 +41,11 @@ public final class SessionStore {
         dao.markApproved();
     }
 
+    /** Pasa el lugar aprobado a otra pelea (NEXT_FIGHT): misma central, mismo token y misma llave; sigue aprobado. */
+    public void switchFight(String fightId, int seat) {
+        dao.switchFight(fightId, seat);
+    }
+
     public void clear() {
         dao.clear();
     }

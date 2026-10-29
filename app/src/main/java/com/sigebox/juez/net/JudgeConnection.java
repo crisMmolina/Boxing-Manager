@@ -7,6 +7,7 @@ import com.sigebox.core.model.EstadoRound;
 import com.sigebox.core.protocol.FightEnded;
 import com.sigebox.core.protocol.JoinUri;
 import com.sigebox.core.protocol.Message;
+import com.sigebox.core.protocol.NextFight;
 import com.sigebox.core.protocol.RoundClosed;
 import com.sigebox.core.protocol.RoundOpened;
 import com.sigebox.core.protocol.State;
@@ -51,6 +52,8 @@ public final class JudgeConnection {
     // Lo último que mandó la central, para los listeners que se registran después (bajo el candado de listeners).
     private State lastState;
     private FightEnded fightEnded;
+    /** Último NEXT_FIGHT sin lugar ("No participas"); se olvida con el siguiente aviso o un STATE. */
+    private NextFight notSeated;
 
     // Solo se tocan en el hilo del executor.
     private WebSocket socket;
@@ -104,6 +107,9 @@ public final class JudgeConnection {
             if (fightEnded != null) {
                 listener.onMessage(fightEnded);
             }
+            if (notSeated != null) {
+                listener.onMessage(notSeated);
+            }
         }
     }
 
@@ -118,7 +124,13 @@ public final class JudgeConnection {
     }
 
     private void remember(Message message) {
-        if (message instanceof State state) {
+        if (message instanceof NextFight next) {
+            // Con lugar empieza otra pelea: nada de la anterior se repite. Sin lugar se recuerda para la pantalla.
+            lastState = null;
+            fightEnded = null;
+            notSeated = next.seat() == null ? next : null;
+        } else if (message instanceof State state) {
+            notSeated = null;
             lastState = state;
             if (fightEnded != null && !fightEnded.fightId().equals(state.fightId())) {
                 fightEnded = null;
@@ -167,6 +179,7 @@ public final class JudgeConnection {
                 // Unirse a otro lugar empieza de cero: nada de la pelea anterior se repite.
                 lastState = null;
                 fightEnded = null;
+                notSeated = null;
             }
             session.join(uri, judgeName);
             open();
@@ -272,7 +285,9 @@ public final class JudgeConnection {
 
                     @Override
                     public void close() {
-                        webSocket.close(1000, null);
+                        // Se corta sin esperar el saludo de cierre: todo está guardado o con ACK, y así la
+                        // reconexión a la pelea nueva es inmediata (onFailure la agenda).
+                        webSocket.cancel();
                     }
                 });
             });
