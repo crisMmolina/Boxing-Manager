@@ -1,6 +1,6 @@
 # CORE-005
 ID: CORE-005
-State: REVIEW
+State: INTEGRATED
 Owner: zoe-2
 Branch: feat/core-005
 Worktree: /c/Users/zm180/OneDrive/Desktop/BoxingJugde/Boxing-Manager-wt/core-005
@@ -9,14 +9,17 @@ Priority: P0
 Paths: core/src/main/java/com/sigebox/core/protocol/, core/src/test/java/com/sigebox/core/protocol/, core/schemas/, demo_data/mensajes/
 Depends: None
 Verify: `core/gradlew -p core build`
-Lease-Until: 1793343458
-Updated: 1793257058
+Lease-Until: 0
+Updated: 1793257269
 Task-Base: e275383837d7dbfef4ea0fdce63ec2385c9299d4
-Next: Humano: Base moved; revalidate the candidate
+Next: Integrated in main: faa7003ef90ebc883a525ac0f1eb3cb92585f18d; claim next P0
 PR: https://github.com/crisMmolina/Boxing-Manager/pull/58
 Evidence: core build 213/213; central y app compilan con el permit nuevo
-Events: 8
+Events: 9
 Checkpoints: 1
 Sessions: 4
 Last-Checkpoint: 1792999626
 Task-Tip: 4146fcbd46039ec78dcfec45c5bfa5828805f34f
+Integration-Proof: ancestry
+Merge-Commit: faa7003ef90ebc883a525ac0f1eb3cb92585f18d
+Reviewer: cris-1

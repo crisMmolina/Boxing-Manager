@@ -1,16 +1,15 @@
 # STATE
 
 Phase: execution
-Updated: 1793257243
+Updated: 1793257269
 AVAILABLE: DSK-020 AND-013 DSK-021 QA-003 
 CLAIMED: -
 BLOCKED: -
-REVIEW: CORE-005 
-INTEGRATED: (42; last 12) ... DSK-013 DSK-014 DSK-015 DSK-016 DSK-017 DSK-018 DSK-019 DSN-001 DSN-002 DSN-003 QA-001 QA-002 
+REVIEW: -
+INTEGRATED: (43; last 12) ... DSK-013 DSK-014 DSK-015 DSK-016 DSK-017 DSK-018 DSK-019 DSN-001 DSN-002 DSN-003 QA-001 QA-002 
 CANCELLED: -
 
 Claims (first 24; status --task ID shows detail):
-CORE-005 | REVIEW | zoe-2 | until 1793343458
 
 Blockers: BLOCKED tasks; use status --task ID --summary.
 Current decisions (last 5):
