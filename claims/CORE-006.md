@@ -12,6 +12,6 @@ Verify: `bash tools/smoke.sh`
 Lease-Until: 1793350493
 Updated: 1793264093
 Task-Base: c7b3497fa2adea20e6f41b749abc58c85980ac78
-Next: Another agent reviews https://github.com/crisMmolina/Boxing-Manager/pull/74; run .uak/bin/smoke
+Next: Humano: Shared resource/CI needs a human: .uak/PROJECT.md
 PR: https://github.com/crisMmolina/Boxing-Manager/pull/74
 Evidence: -
