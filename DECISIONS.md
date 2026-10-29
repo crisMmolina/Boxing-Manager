@@ -51,3 +51,4 @@ Why: a reversible option after 15 min keeps work moving.
 - 1793072337 | AND-015 | Estado del envío desde la bandeja de salida (FinalCardStatus), no de onSaveInstanceState | Why: Sobrevive al cierre forzado; Paths solo finalcard/
 - 1793257686 | DSK-020 | hub.nextFight + FuncionService.alSiguiente; SQL directo en JudgeHub (db/ fuera de Paths) | Why: Paths
 - 1793257766 | AND-013 | relanzo ScoreActivity desde JudgeRuntime; sin lugar no cambia fila | Why: sin migración Room
+- 1793258205 | deadline decision/CORE-005-1793256966/1793257866 | REVERSIBLE_AND_LOG | Option: cris (humano) da el OK al contrato NEXT_FIGHT (ADR 0002); se puede mergear; Why: Criterio de aceptación: visto bueno de cris al contrato antes del merge; zoe ausente, lease vencido; no money, accounts, publishing or scope expansion.
