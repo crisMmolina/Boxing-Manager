@@ -793,3 +793,36 @@ En Windows (zoe) los comandos `Verify` se corren en Git Bash.
   - Reinicio del servidor a mitad de la cartelera: no se pierden cartelera ni tarjetas
 - **Verify:** `BOXCENTRAL/gradlew -p BOXCENTRAL test --tests 'com.sigebox.central.it.*'`
 - **Next step:** prueba con 2 peleas y 2 jueces simulados que pasan de una a otra
+
+## DSK-022 · Tarjetas pendientes de la pelea cerrada no se quedan en el teléfono
+
+- **Type:** fix
+- **Priority:** P1
+- **Estimate:** 3 h
+- **Rubric / Spec:** principio 1 · ADR 0002 · revisión de AND-013 (cris-2). Si un teléfono se reconecta con `HELLO` a la pelea ya cerrada y todavía tiene envíos sin `ACK` de esa pelea, la central (DSK-020) contesta `NEXT_FIGHT` y cierra el socket: el teléfono cambia de pelea y esos envíos se quedan en su bandeja sin llegar nunca a la central
+- **Depends on:** DSK-020, AND-013
+- **Paths:** BOXCENTRAL/src/main/java/com/sigebox/central/server/JudgeHub.java, BOXCENTRAL/src/test/java/com/sigebox/central/server/JudgeHubNextFightTest.java
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - Un `HELLO` válido a la pelea cerrada (misma llave que un lugar aprobado de la pelea activa de la misma función) puede entregar sus envíos pendientes de esa pelea antes de recibir `NEXT_FIGHT`; cada uno recibe su `ACK` y queda guardado en la pelea cerrada con el trato que ya tienen los envíos tardíos
+  - Ningún envío de la pelea cerrada se guarda en la pelea nueva, ni al revés
+  - Sin pendientes, el comportamiento es el de hoy (`NEXT_FIGHT` directo)
+  - Prueba con judge-sim o socket de prueba: juez con un `SUBMIT_ROUND` sin `ACK` de la pelea cerrada se reconecta, la central lo guarda en esa pelea y después el juez pasa a la nueva; las pruebas actuales siguen en verde sin editarlas
+- **Verify:** `BOXCENTRAL/gradlew -p BOXCENTRAL test --tests 'com.sigebox.central.server.*'`
+- **Next step:** prueba en `JudgeHubNextFightTest`: `HELLO` a la pelea cerrada seguido de un `SUBMIT_ROUND` de esa pelea
+
+## AND-016 · Textos y esquinas al cambiar de pelea en la app del juez
+
+- **Type:** fix
+- **Priority:** P2
+- **Estimate:** 1 h
+- **Rubric / Spec:** revisión de AND-013 (deuda en el PR #65). El aviso "No participas en esta pelea" está escrito en Java y no en recursos; `CornerNames` no guarda las esquinas que trae `NEXT_FIGHT`, así que salen en blanco hasta el primer `STATE` de la pelea nueva
+- **Depends on:** AND-013
+- **Paths:** app/src/main/java/com/sigebox/juez/score/NotSeatedView.java, app/src/main/res/values/strings_score.xml, app/src/main/java/com/sigebox/juez/ui/CornerNames.java, app/src/test/java/com/sigebox/juez/score/NotSeatedViewTest.java, app/src/test/java/com/sigebox/juez/ui/CornerNamesTest.java
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - "No participas en esta pelea" sale de `strings_score.xml`
+  - Al recibir `NEXT_FIGHT` con lugar, `CornerNames` recuerda `redCorner` y `blueCorner` de la pelea nueva y la puntuación los muestra antes del primer `STATE`
+  - Pruebas Robolectric de ambos puntos; las pruebas actuales siguen en verde sin editarlas
+- **Verify:** `./gradlew :app:testDebugUnitTest`
+- **Next step:** prueba en `CornerNamesTest`: `remember(NextFight)` y luego leer las esquinas
