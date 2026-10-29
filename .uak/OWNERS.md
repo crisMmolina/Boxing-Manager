@@ -25,6 +25,6 @@ An owner is not a prerequisite for everyone: consumers work on published contrac
 | BOXCENTRAL/settings.gradle.kts | DSK-001 |
 | BOXCENTRAL/judge-sim/build.gradle.kts | DSK-001 |
 | BOXCENTRAL/src/main/java/com/sigebox/central/App.java | DSK-021 |
-| BOXCENTRAL/src/main/java/com/sigebox/central/ui/Screens.java | DSK-018 |
+| BOXCENTRAL/src/main/java/com/sigebox/central/ui/Screens.java | DSK-021 |
 | BOXCENTRAL/src/main/java/com/sigebox/central/db/ | DSK-019 |
 | .uak/PROJECT.md | CORE-001 |
