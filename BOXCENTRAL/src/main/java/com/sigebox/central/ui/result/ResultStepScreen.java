@@ -1,9 +1,12 @@
 package com.sigebox.central.ui.result;
 
 import com.sigebox.central.export.ExportService;
+import com.sigebox.central.service.FuncionService.Fila;
 import com.sigebox.central.service.ResultService;
 import com.sigebox.central.ui.Screens;
+import com.sigebox.central.ui.funcion.FuncionView;
 import com.sigebox.central.ui.theme.Ui;
+import java.util.Optional;
 import java.util.function.Supplier;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -23,10 +26,20 @@ public final class ResultStepScreen {
 
     public static void register(Screens<Node> screens, ResultService service, ExportService export,
             Supplier<String> fightId) {
-        screens.register(ID, "Resultado", () -> build(service, export, fightId));
+        register(screens, service, export, fightId, Optional::empty, () -> { });
     }
 
-    static Node build(ResultService service, ExportService export, Supplier<String> fightId) {
+    /**
+     * Con una función en curso: tras cerrar la pelea ofrece "Siguiente pelea: Roja vs Azul" ({@code next} la
+     * da, {@code startNext} la inicia y lleva a emparejar jueces).
+     */
+    public static void register(Screens<Node> screens, ResultService service, ExportService export,
+            Supplier<String> fightId, Supplier<Optional<Fila>> next, Runnable startNext) {
+        screens.register(ID, "Resultado", () -> build(service, export, fightId, next, startNext));
+    }
+
+    static Node build(ResultService service, ExportService export, Supplier<String> fightId,
+            Supplier<Optional<Fila>> next, Runnable startNext) {
         var status = Ui.support("");
         var card = Ui.card();
         card.setMaxWidth(640);
@@ -37,6 +50,11 @@ public final class ResultStepScreen {
             card.getChildren().clear();
             var f = fightId.get();
             if (f == null) {
+                var following = next.get();
+                if (following.isPresent()) {
+                    card.getChildren().addAll(nextFight(following.get(), startNext, status));
+                    return;
+                }
                 card.getChildren().addAll(Ui.cardTitle("Sin pelea activa"),
                         Ui.support("Cuando cierres una pelea, su resultado aparece aquí."));
                 return;
@@ -77,6 +95,25 @@ public final class ResultStepScreen {
         };
         refresh[0].run();
         return root;
+    }
+
+    /** Tarjeta de la siguiente pelea de la función: esquinas, rounds, jueces y el botón que la inicia. */
+    static java.util.List<Node> nextFight(Fila fila, Runnable startNext, Label status) {
+        var red = new HBox(8, Ui.cornerDot(true), Ui.body(fila.roja()));
+        red.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+        var blue = new HBox(8, Ui.cornerDot(false), Ui.body(fila.azul()));
+        blue.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+        var start = Ui.primary(FuncionView.siguienteTexto(fila));
+        start.setOnAction(e -> {
+            try {
+                startNext.run();
+            } catch (RuntimeException ex) {
+                status.setText(ex.getMessage());
+            }
+        });
+        return java.util.List.of(Ui.cardTitle("Pelea " + fila.orden() + " de la función"), red, blue,
+                Ui.support(FuncionView.detalle(fila.rounds(), fila.jueces())
+                        + ". Los jueces conectados pasan solos; solo los lugares nuevos usan QR."), start);
     }
 
     /** "Juez 1, 2 y 3". */

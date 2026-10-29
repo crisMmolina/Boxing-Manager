@@ -9,11 +9,15 @@ import com.sigebox.central.server.SeatTokens;
 import com.sigebox.central.server.ServerEvents;
 import com.sigebox.central.service.CorrectionService;
 import com.sigebox.central.service.FightService;
+import com.sigebox.central.service.FuncionService;
 import com.sigebox.central.service.ResultService;
 import com.sigebox.central.service.RoundService;
 import com.sigebox.central.service.TerminationService;
 import com.sigebox.central.ui.Screens;
 import com.sigebox.central.ui.correction.CorrectionScreen;
+import com.sigebox.central.ui.funcion.FuncionFlow;
+import com.sigebox.central.ui.funcion.FuncionQuery;
+import com.sigebox.central.ui.funcion.FuncionScreen;
 import com.sigebox.central.ui.log.LogQuery;
 import com.sigebox.central.ui.log.LogScreen;
 import com.sigebox.central.ui.result.ResultStepScreen;
@@ -60,6 +64,7 @@ public final class App {
 
     /** Enlaces secundarios a la derecha de la barra. */
     static final List<StepsBar.Item> LINKS = List.of(
+            new StepsBar.Item(FuncionScreen.ID, "Función"),
             new StepsBar.Item(TerminationScreen.ID, "Terminación"),
             new StepsBar.Item(CorrectionScreen.ID, "Corrección"),
             new StepsBar.Item(LogScreen.ID, "Bitácora"));
@@ -69,6 +74,17 @@ public final class App {
 
     public static void main(String[] args) {
         Application.launch(Window.class, args);
+    }
+
+    /**
+     * Funciones con cartelera. Al iniciar la siguiente pelea, el servicio copia los lugares aprobados y
+     * después {@link JudgeHub#nextFight} avisa a cada teléfono (ADR 0002); sin este enlace los teléfonos
+     * se quedarían en la pelea cerrada.
+     */
+    public static FuncionService funciones(Database db, FightService fights, JudgeHub hub) {
+        var funciones = new FuncionService(db, fights);
+        funciones.alSiguiente(hub::nextFight);
+        return funciones;
     }
 
     /** Pantalla con la que arranca la app: los términos si no están aceptados. */
@@ -114,14 +130,21 @@ public final class App {
             root.setCenter(content);
 
             TermsScreen.register(screens, gate, () -> show(screens, root, content, RoundsScreen.ID));
-            var setup = new SetupScreen(new FightService(db, tokens), hub, JudgeServer.DEFAULT_PORT,
+            var fights = new FightService(db, tokens);
+            var flow = new FuncionFlow(funciones(db, fights, hub), new FuncionQuery(db));
+            var setup = new SetupScreen(fights, hub, JudgeServer.DEFAULT_PORT,
                     () -> show(screens, root, content, RoundsScreen.ID));
             setup.register(screens, SetupScreen.ID, "Pelea");
             setup.register(screens, JUECES, "Jueces");
             RoundsScreen.register(screens, RoundService.forHub(db, hub), fightId,
                     () -> show(screens, root, content, CorrectionScreen.ID),
                     () -> show(screens, root, content, ResultStepScreen.ID));
-            ResultStepScreen.register(screens, ResultService.forHub(db, hub), new ExportService(), fightId);
+            FuncionScreen.register(screens, flow, () -> show(screens, root, content, JUECES));
+            ResultStepScreen.register(screens, ResultService.forHub(db, hub), new ExportService(), fightId,
+                    flow::peek, () -> {
+                        flow.start();
+                        show(screens, root, content, JUECES);
+                    });
             TerminationScreen.register(screens, TerminationService.forHub(db, hub), fightId);
             CorrectionScreen.register(screens, new CorrectionService(db, System::currentTimeMillis), fightId);
             LogScreen.register(screens, new LogQuery(db));
