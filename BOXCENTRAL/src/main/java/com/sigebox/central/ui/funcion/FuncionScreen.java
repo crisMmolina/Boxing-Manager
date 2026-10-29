@@ -94,12 +94,11 @@ public final class FuncionScreen {
 
     private Node show(String id, List<Fila> rows, Label status, Runnable refresh) {
         var f = flow.service().funcion(id);
-        var base = Ui.card(Ui.cardTitle("Base"), Ui.field("Fecha", Ui.body(f.fecha())),
+        var base = Ui.card(Ui.cardTitle("Base"), new HBox(40, Ui.field("Fecha", Ui.body(f.fecha())),
                 Ui.field("Rounds", Ui.numeral(String.valueOf(f.baseRounds()), "neutral")),
-                Ui.field("Jueces", Ui.numeral(String.valueOf(f.baseJueces()), "neutral")),
+                Ui.field("Jueces", Ui.numeral(String.valueOf(f.baseJueces()), "neutral"))),
                 Ui.support("Las peleas heredan esta base salvo que cambies la suya."));
-        base.setPrefWidth(240);
-        base.setMinWidth(220);
+        base.setSpacing(8);
 
         var list = new VBox(8);
         for (var r : rows) {
@@ -111,10 +110,7 @@ public final class FuncionScreen {
         var cartelera = Ui.card(new HBox(12, Ui.cardTitle("Cartelera"), Ui.grow(), Ui.support(FuncionView.resumen(rows))),
                 list, add(id, status, refresh), footer(rows, status, refresh));
         cartelera.setSpacing(12);
-        HBox.setHgrow(cartelera, Priority.ALWAYS);
-        var both = new HBox(24, base, cartelera);
-        both.setAlignment(Pos.TOP_LEFT);
-        return both;
+        return new VBox(16, base, cartelera);
     }
 
     private Node row(String id, Fila r, Label status, Runnable refresh) {
@@ -127,18 +123,18 @@ public final class FuncionScreen {
         blue.setAlignment(Pos.CENTER_LEFT);
         var names = new VBox(2, red, blue);
         names.setMinWidth(200);
-        names.setPrefWidth(240);
+        names.setPrefWidth(200);
 
         var pill = Ui.pill(FuncionView.estado(r.estado()));
-        pill.setMinWidth(90);
+        pill.setMinWidth(javafx.scene.layout.Region.USE_PREF_SIZE);
 
         var row = new HBox(12, number, names);
         row.setAlignment(Pos.CENTER_LEFT);
         if (FuncionView.editable(r)) {
             var rounds = new Spinner<Integer>(1, 12, r.rounds());
             var judges = new Spinner<Integer>(1, 5, r.jueces());
-            rounds.setPrefWidth(84);
-            judges.setPrefWidth(84);
+            rounds.setPrefWidth(110);
+            judges.setPrefWidth(110);
             rounds.setAccessibleText("Rounds de la pelea " + r.orden());
             judges.setAccessibleText("Jueces de la pelea " + r.orden());
             rounds.valueProperty().addListener((o, a, b) -> act(status, refresh, () -> {
@@ -172,6 +168,7 @@ public final class FuncionScreen {
             }));
             for (var b : new Button[] {up, down, skip, remove}) {
                 b.setAccessibleText(b.getText() + " la pelea " + r.orden());
+                b.setMinWidth(javafx.scene.layout.Region.USE_PREF_SIZE); // sin "…" en el texto
             }
             row.getChildren().addAll(Ui.field("Rounds", rounds), Ui.field("Jueces", judges), Ui.grow(), pill, up, down,
                     skip, remove);
@@ -197,7 +194,11 @@ public final class FuncionScreen {
         blue.setOnAction(e -> go.run());
         HBox.setHgrow(red, Priority.ALWAYS);
         HBox.setHgrow(blue, Priority.ALWAYS);
-        var box = new HBox(12, new HBox(8, Ui.cornerDot(true), red), new HBox(8, Ui.cornerDot(false), blue), add);
+        var redBox = new HBox(8, Ui.cornerDot(true), red);
+        redBox.setAlignment(Pos.CENTER_LEFT);
+        var blueBox = new HBox(8, Ui.cornerDot(false), blue);
+        blueBox.setAlignment(Pos.CENTER_LEFT);
+        var box = new HBox(12, redBox, blueBox, add);
         box.setAlignment(Pos.CENTER_LEFT);
         return box;
     }
