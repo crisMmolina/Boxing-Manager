@@ -78,6 +78,8 @@ public final class JudgeHub implements AutoCloseable {
     /** Mismo límite que {@code Messages.decode}. */
     public static final int MAX_MESSAGE_CHARS = 16 * 1024;
 
+    /** Cuánto se espera, tras avisar {@code NEXT_FIGHT}, a que el teléfono entregue su bandeja y cierre. */
+    static final Duration HANDOFF_GRACE = Duration.ofSeconds(15);
     public static final Duration DEFAULT_AUTH_TIMEOUT = Duration.ofSeconds(10);
 
     private static final String APPROVED_BY = "central";
@@ -88,6 +90,8 @@ public final class JudgeHub implements AutoCloseable {
         boolean nonceUsed;
         boolean authenticated;
         boolean approved;
+        /** Conexión a una pelea cerrada solo para entregar lo pendiente antes de pasar a la siguiente. */
+        boolean handoff;
         String fightId;
         int seat;
 
@@ -406,10 +410,19 @@ public final class JudgeHub implements AutoCloseable {
         }
         var next = nextFightFor(lugar, key);
         if (next != null) {
-            // Pelea cerrada y la función ya sigue: el teléfono se pone al día y reconecta a la nueva.
+            // Pelea cerrada y la función ya sigue. El teléfono solo vacía su bandeja mientras está "sincronizado" (tras
+            // un STATE) y difiere NEXT_FIGHT mientras le queden envíos sin ACK. Por eso va primero el STATE de la
+            // pelea cerrada (sin totales ni ganador) y luego NEXT_FIGHT; la conexión sigue abierta, ligada a la pelea
+            // cerrada y sin tomar el lugar, hasta que el teléfono cierre o venza HANDOFF_GRACE.
+            s.authenticated = true;
+            s.approved = true;
+            s.handoff = true;
+            s.fightId = lugar.peleaId();
+            s.seat = lugar.numero();
             log.append(lugar.peleaId(), "NEXT_FIGHT_SENT", "lugar " + lugar.numero() + " al reconectar");
+            send(s, state(s));
             send(s, next);
-            drop(s, 1000, "next fight");
+            timer.schedule(() -> expireHandoff(s.conn.id()), HANDOFF_GRACE.toMillis(), TimeUnit.MILLISECONDS);
             return;
         }
         bind(s, lugar.peleaId(), lugar.numero());
@@ -510,7 +523,9 @@ public final class JudgeHub implements AutoCloseable {
             send(s, new Ack(m.id(), false, null, error.get()));
             return;
         }
-        if (pelea.estado() != EstadoPelea.EN_CURSO) {
+        // Una conexión de traspaso entrega a la pelea cerrada lo que el teléfono no alcanzó a mandar (principio 1).
+        boolean accepts = pelea.estado() == EstadoPelea.EN_CURSO || (s.handoff && pelea.estado() == EstadoPelea.CERRADA);
+        if (!accepts) {
             send(s, new Ack(m.id(), false, null, Ack.Error.FIGHT_NOT_ACTIVE));
             return;
         }
@@ -555,7 +570,7 @@ public final class JudgeHub implements AutoCloseable {
             return;
         }
         var pelea = peleas.find(s.fightId).orElseThrow();
-        if (pelea.estado() != EstadoPelea.TERMINADA) {
+        if (pelea.estado() != EstadoPelea.TERMINADA && !(s.handoff && pelea.estado() == EstadoPelea.CERRADA)) {
             send(s, new Ack(m.id(), false, null, Ack.Error.FIGHT_NOT_ACTIVE));
             return;
         }
@@ -648,6 +663,13 @@ public final class JudgeHub implements AutoCloseable {
         var s = sessions.get(connId);
         if (s != null && !s.authenticated) {
             drop(s, Conn.POLICY, "timeout");
+        }
+    }
+
+    private synchronized void expireHandoff(String connId) {
+        var s = sessions.get(connId);
+        if (s != null && s.handoff) {
+            drop(s, 1000, "next fight");
         }
     }
 

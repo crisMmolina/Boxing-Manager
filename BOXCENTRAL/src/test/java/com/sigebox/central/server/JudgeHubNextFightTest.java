@@ -12,12 +12,17 @@ import com.sigebox.central.db.EventLog;
 import com.sigebox.central.db.FuncionRepository;
 import com.sigebox.central.db.LugarJuezRepository;
 import com.sigebox.central.db.PeleaRepository;
+import com.sigebox.central.db.RoundRepository;
+import com.sigebox.central.db.TarjetaRoundRepository;
 import com.sigebox.central.server.JudgeHubTest.FakeConn;
 import com.sigebox.central.server.JudgeHubTest.Phone;
 import com.sigebox.central.service.FightService;
 import com.sigebox.central.service.FuncionService;
 import com.sigebox.core.model.EstadoConexion;
 import com.sigebox.core.model.EstadoPelea;
+import com.sigebox.core.model.EstadoRound;
+import com.sigebox.core.model.EstadoTarjeta;
+import com.sigebox.core.model.Round;
 import com.sigebox.core.protocol.Ack;
 import com.sigebox.core.protocol.JoinApproved;
 import com.sigebox.core.protocol.JoinPending;
@@ -25,10 +30,12 @@ import com.sigebox.core.protocol.Message;
 import com.sigebox.core.protocol.Messages;
 import com.sigebox.core.protocol.NextFight;
 import com.sigebox.core.protocol.State;
+import com.sigebox.core.protocol.SubmitRound;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -200,5 +207,76 @@ class JudgeHubNextFightTest {
         assertFalse(ack.ok());
         assertEquals(falso.id(), ack.ackId());
         assertEquals(0, c1.sent.stream().filter(m -> m instanceof NextFight).count(), "no hay eco");
+    }
+
+    private static SubmitRound submit(String fightId, int seat, int round, int red, int blue) {
+        return new SubmitRound(1, UUID.randomUUID().toString(), SubmitRound.TYPE, fightId, seat, round, red, blue);
+    }
+
+    private void cerrarRound(String peleaId, int n) {
+        new RoundRepository(db).save(new Round(peleaId, n, EstadoRound.CERRADO, 1L, 2L, false));
+    }
+
+    @Test
+    void helloAPeleaCerradaEntregaLosPendientesAntesDePasarALaNueva() throws Exception {
+        var f = funciones.crear(3, 2, List.of(new FuncionService.Esquinas("Ana", "Bea"),
+                new FuncionService.Esquinas("Caro", "Dani")));
+        var p1 = funciones.siguiente(f.id());
+        var a = new Phone("A-1");
+        var c1 = approvedJudge(p1.id(), a, 1);
+        cerrarRound(p1.id(), 1);
+        hub.onClose(c1.id());
+        cerrar(p1.id());
+        var p2 = funciones.siguiente(f.id());
+
+        var r = open();
+        send(r, a.hello(p1.id(), 1, r.nonce()));
+        // El teléfono solo vacía su bandeja tras un STATE: primero el de la pelea cerrada (sin totales), luego NEXT_FIGHT.
+        var state = assertInstanceOf(State.class, r.sent.get(r.sent.size() - 2));
+        assertEquals(p1.id(), state.fightId());
+        assertInstanceOf(NextFight.class, r.last());
+        assertNull(r.closedWith, "sigue abierta para recibir la bandeja");
+        assertEquals(EstadoConexion.DESCONECTADO, lugares.find(p1.id(), 1).orElseThrow().conexion());
+
+        var envio = submit(p1.id(), 1, 1, 10, 9);
+        send(r, envio);
+        var ack = assertInstanceOf(Ack.class, r.last());
+        assertTrue(ack.ok());
+        assertEquals(EstadoTarjeta.TARDIA, ack.status());
+        var tarjetas = new TarjetaRoundRepository(db);
+        assertEquals(EstadoTarjeta.TARDIA, tarjetas.find(p1.id(), 1, 1).orElseThrow().estado());
+        assertTrue(tarjetas.byPelea(p2.id()).isEmpty(), "nada de la pelea cerrada en la nueva");
+
+        // Reenvío del mismo envío: mismo ACK, sin duplicar.
+        send(r, envio);
+        assertTrue(((Ack) r.last()).ok());
+
+        // Un envío que dice ser de la pelea nueva no se guarda por esta conexión.
+        send(r, submit(p2.id(), 1, 1, 10, 9));
+        assertFalse(((Ack) r.last()).ok());
+        assertEquals(Ack.Error.WRONG_SESSION, ((Ack) r.last()).error());
+        assertTrue(tarjetas.byPelea(p2.id()).isEmpty());
+
+        // Un round que no estaba cerrado no se acepta en la pelea cerrada.
+        send(r, submit(p1.id(), 1, 2, 10, 9));
+        assertEquals(Ack.Error.ROUND_NOT_OPEN, ((Ack) r.last()).error());
+
+        // La conexión de traspaso no toma el lugar ni marca conexión.
+        hub.onClose(r.id());
+        assertEquals(EstadoConexion.DESCONECTADO, lugares.find(p1.id(), 1).orElseThrow().conexion());
+    }
+
+    @Test
+    void unaConexionNormalAUnaPeleaCerradaSigueRechazandoEnvios() throws Exception {
+        var f = funciones.crear(3, 2, List.of(new FuncionService.Esquinas("Ana", "Bea")));
+        var p1 = funciones.siguiente(f.id());
+        var a = new Phone("A-1");
+        var c1 = approvedJudge(p1.id(), a, 1);
+        cerrarRound(p1.id(), 1);
+        cerrar(p1.id());
+
+        send(c1, submit(p1.id(), 1, 1, 10, 9));
+        assertEquals(Ack.Error.FIGHT_NOT_ACTIVE, ((Ack) c1.last()).error());
+        assertTrue(new TarjetaRoundRepository(db).byPelea(p1.id()).isEmpty());
     }
 }
