@@ -186,4 +186,49 @@ class JudgeHubHandoffTest {
         assertEquals(1, bitacora(p1.id(), "SUBMIT_FINAL_CARD").size());
         assertEquals(guardado, resultados.stored(p1.id()).orElseThrow());
     }
+
+    @Test
+    void laTarjetaDelJuezSobreUnaCapturaSeRechazaComoHoyYQuedaEnLaBitacoraConSusPuntos() throws Exception {
+        var p1 = primeraPelea();
+        var c1 = approvedJudge(p1.id(), new Phone("A-1"), 1);
+        rounds.openRound(p1.id(), 1);
+        correcciones.capture(p1.id(), 1, 1, 9, 10, "tarjeta de papel");
+
+        send(c1, submit(p1.id(), 1, 1, 10, 8));
+
+        var ack = assertInstanceOf(Ack.class, c1.last());
+        assertFalse(ack.ok());
+        assertEquals(Ack.Error.ROUND_NOT_OPEN, ack.error());
+        var capturada = tarjetas.find(p1.id(), 1, 1).orElseThrow();
+        assertEquals(EstadoTarjeta.CAPTURADA, capturada.estado());
+        assertEquals(9, capturada.rojo());
+        assertEquals(10, capturada.azul());
+        assertEquals(List.of("lugar 1 round 1 juez 10-8 capturada 9-10"), bitacora(p1.id(), "CARD_OVER_CAPTURE"));
+    }
+
+    @Test
+    void laCapturaConElRoundCerradoTambienDejaLosPuntosDelJuez() throws Exception {
+        var p1 = primeraPelea();
+        var c1 = approvedJudge(p1.id(), new Phone("A-1"), 1);
+        rounds.openRound(p1.id(), 1);
+        rounds.closeRound(p1.id(), 1, RoundService.CONFIRM_WORD);
+        correcciones.capture(p1.id(), 1, 1, 9, 10, "tarjeta de papel");
+
+        send(c1, submit(p1.id(), 1, 1, 10, 8));
+
+        assertEquals(Ack.Error.ROUND_NOT_OPEN, assertInstanceOf(Ack.class, c1.last()).error());
+        assertEquals(List.of("lugar 1 round 1 juez 10-8 capturada 9-10"), bitacora(p1.id(), "CARD_OVER_CAPTURE"));
+    }
+
+    @Test
+    void unRoundSinAbrirNoDejaRastroDeCaptura() throws Exception {
+        var p1 = primeraPelea();
+        var c1 = approvedJudge(p1.id(), new Phone("A-1"), 1);
+        rounds.openRound(p1.id(), 1);
+
+        send(c1, submit(p1.id(), 1, 2, 10, 8));
+
+        assertEquals(Ack.Error.ROUND_NOT_OPEN, assertInstanceOf(Ack.class, c1.last()).error());
+        assertTrue(bitacora(p1.id(), "CARD_OVER_CAPTURE").isEmpty());
+    }
 }
