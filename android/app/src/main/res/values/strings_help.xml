@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ayuda de conexión (AND-020, DESIGN.md v4 §5.8). Copia de docs/design/guia-conexion.md: viaja en la app, sin internet. -->
+<resources>
+    <item name="top_help" type="id" />
+
+    <string name="help_a11y">Ayuda de conexión</string>
+    <string name="help_icon">?</string>
+    <string name="help_title">Recuperar la conexión</string>
+    <string name="help_host">IP de la central: %1$s</string>
+    <string name="help_host_none">IP de la central: todavía no hay. Escanea el QR de tu lugar.</string>
+    <string name="help_state">Estado: %1$s</string>
+    <string name="help_phone_heading">En el teléfono del juez</string>
+    <string name="help_phone_steps">1. <b>Espera unos segundos.</b> La app reconecta sola, por lo general en menos de 6 segundos. Tus puntos están guardados y se envían al reconectar.\n\n2. <b>Revisa el Wi‑Fi.</b> Abre Ajustes → Wi‑Fi y confirma que estás en la red del evento (el hotspot de la mesa), no en otra.\n\n3. <b>Si Android pregunta por internet,</b> pulsa <b>Continuar</b> o <b>Mantener conexión</b>. La red del evento no tiene internet y así debe ser.\n\n4. <b>Revisa la IP.</b> Debe ser la misma que muestra la pantalla de la central en \"Dirección para los jueces\". Si no, vuelve a escanear el QR de tu lugar.\n\n5. <b>Vuelve a abrir la app.</b> Ciérrala y ábrela con la pantalla encendida. Te regresa a donde ibas.\n\n6. <b>¿Sigue sin conectar?</b> Avisa a la mesa y di tu número de juez. No borres la app ni sus datos.</string>
+    <string name="help_central_heading">En la central (laptop)</string>
+    <string name="help_central_steps">1. <b>El hotspot está encendido.</b> Revisa que el teléfono de la mesa tenga la Zona Wi‑Fi prendida y la pantalla sin bloqueo por inactividad.\n\n2. <b>La laptop está en la misma red.</b> Su Wi‑Fi debe estar en el hotspot del evento. Desconecta el cable de red con internet si lo tiene.\n\n3. <b>La IP es la correcta.</b> En <b>Jueces</b>, la dirección elegida debe ser la de la laptop en el hotspot. Si cambiaste de red, elige de nuevo la IP y que los jueces escaneen otra vez.\n\n4. <b>El cortafuegos de Windows deja pasar a SIGEBOX.</b> Debe existir la regla \"BoxCentral WS 8765\" (puerto 8765). Si no, créala como administrador o pide a quien instaló la laptop que lo haga.\n\n5. <b>Vuelve a abrir la central.</b> Ciérrala y ábrela. Los datos del evento están guardados y los teléfonos se reconectan solos.\n\n6. <b>Un solo juez desconectado:</b> pídele que siga los pasos de su teléfono. Sus puntos llegan cuando se reconecte.</string>
+    <string name="help_done">Listo</string>
+</resources>
