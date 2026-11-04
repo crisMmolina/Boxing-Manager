@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.sigebox.central.db.Database;
+import com.sigebox.central.db.LugarJuezRepository;
 import com.sigebox.central.db.PeleaRepository;
 import com.sigebox.central.server.JudgeHubTest.FakeConn;
 import com.sigebox.central.server.JudgeHubTest.Phone;
@@ -26,6 +27,7 @@ import com.sigebox.core.protocol.EventEnded;
 import com.sigebox.core.protocol.FightClosed;
 import com.sigebox.core.protocol.JoinApproved;
 import com.sigebox.core.protocol.JoinPending;
+import com.sigebox.core.protocol.JoinRejected;
 import com.sigebox.core.protocol.Message;
 import com.sigebox.core.protocol.Messages;
 import com.sigebox.core.protocol.State;
@@ -191,6 +193,95 @@ class JudgeHubCodeTest {
         assertEquals(Conn.POLICY, c.closedWith);
         int answers = (int) c.sent.stream().filter(m -> m instanceof CodeUnknown).count();
         assertEquals(5, answers);
+    }
+
+    @Test
+    void elLimiteEsDeTodaLaCentralNoSoloDeCadaConexion() {
+        var code = tokens.issueInvitation(F, 1).code();
+        for (int i = 0; i < JudgeHub.GLOBAL_LOOKUPS_PER_SECOND; i++) {
+            var c = open();
+            send(c, new CodeLookup(i == 0 ? "999999" : "99999" + (i % 9)));
+            assertInstanceOf(CodeUnknown.class, c.last());
+        }
+        var late = open();
+        send(late, new CodeLookup(code)); // mismo segundo: ya no se consulta aunque sea bueno
+        assertInstanceOf(CodeUnknown.class, late.last());
+
+        now.addAndGet(1_000);
+        var next = open();
+        send(next, new CodeLookup(code));
+        assertInstanceOf(CodeInfo.class, next.last());
+    }
+
+    @Test
+    void laBitacoraAnotaElBloqueoUnaVezPorMinutoAunqueCaiganMuchas() {
+        for (int k = 0; k < 3; k++) {
+            var c = open();
+            for (int i = 0; i < JudgeHub.MAX_UNKNOWN_CODES; i++) {
+                send(c, new CodeLookup("123456"));
+            }
+            assertEquals(Conn.POLICY, c.closedWith);
+        }
+        assertEquals(List.of("CODE_LOOKUP_LIMIT"), anonymousLog());
+        now.addAndGet(60_000);
+        var c = open();
+        for (int i = 0; i < JudgeHub.MAX_UNKNOWN_CODES; i++) {
+            send(c, new CodeLookup("123456"));
+        }
+        assertEquals(List.of("CODE_LOOKUP_LIMIT", "CODE_LOOKUP_LIMIT"), anonymousLog());
+    }
+
+    @Test
+    void demasiadasConexionesSinAutenticarSeCierranAlAbrir() {
+        var open = new ArrayList<FakeConn>();
+        for (int i = 0; i < JudgeHub.MAX_UNAUTHENTICATED; i++) {
+            open.add(open());
+        }
+        assertTrue(open.stream().allMatch(c -> c.closedWith == null));
+        var extra = open();
+        assertEquals(Conn.POLICY, extra.closedWith);
+        assertTrue(extra.sent.isEmpty(), "sin CHALLENGE");
+
+        hub.onClose(open.get(0).id());
+        var again = open();
+        assertNull(again.closedWith);
+    }
+
+    @Test
+    void unLugarRechazadoAceptaOtroTelefonoConUnCodigoNuevo() throws Exception {
+        var first = tokens.issueInvitation(F, 1).code();
+        var intruso = open();
+        send(intruso, new Phone("X-1").join(F, 1, first, intruso.nonce()));
+        assertInstanceOf(JoinPending.class, intruso.last());
+        assertTrue(hub.reject(F, 1));
+
+        var code = tokens.issueInvitation(F, 1).code(); // "Nuevo código" del organizador
+        var juez = open();
+        lookup(juez, code);
+        var info = assertInstanceOf(CodeInfo.class, juez.last());
+        var real = new Phone("A-1");
+        send(juez, real.join(F, info.seat(), code, juez.nonce()));
+        assertInstanceOf(JoinPending.class, juez.last());
+        assertTrue(hub.approve(F, 1));
+        assertInstanceOf(JoinApproved.class, juez.last());
+        assertEquals(real.publicKey(), new LugarJuezRepository(db).publicKey(F, 1).orElseThrow());
+
+        var vuelve = open(); // el teléfono rechazado no recupera el lugar
+        send(vuelve, new Phone("X-2").join(F, 1, code, vuelve.nonce()));
+        assertInstanceOf(JoinRejected.class, vuelve.last());
+    }
+
+    @Test
+    void elTelefonoRechazadoNoVuelveNiConCodigoNuevo() throws Exception {
+        var intruso = new Phone("X-1");
+        var c = open();
+        send(c, intruso.join(F, 1, tokens.issueInvitation(F, 1).code(), c.nonce()));
+        assertTrue(hub.reject(F, 1));
+
+        var code = tokens.issueInvitation(F, 1).code();
+        var again = open();
+        send(again, intruso.join(F, 1, code, again.nonce()));
+        assertEquals(JoinRejected.Reason.REJECTED, assertInstanceOf(JoinRejected.class, again.last()).reason());
     }
 
     @Test
