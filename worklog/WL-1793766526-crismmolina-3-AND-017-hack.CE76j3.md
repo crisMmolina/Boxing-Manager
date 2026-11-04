@@ -1,12 +1,12 @@
 # worklog/WL-1793766526-crismmolina-3-AND-017-hack.CE76j3.md · AND-017
 
 ## Live summary
-- Done: android/gradlew -p android :app:testDebugUnitTest exit 0 (113 pruebas) y smoke exit 0 en d063eaa; criterios: ErrorText, esperas y tarjeta final automática listos; 'sin valor por defecto' pendiente de decisión; sin capturas (lección #8)
-- Decision: Registrar en JudgeRuntime; mantener 10–10 inicial
-- Why: Sin pantalla; no editar ScreenDesignTest
+- Done: PR #78 en REVIEW (d063eaa), 113 pruebas en verde
+- Decision: AutoFinalCard.install desde ScoreActivity; reintento con FIGHT_NOT_ACTIVE/NOT_APPROVED; 10–10 sin cambio
+- Why: Paths sin net/; la central solo acepta la tarjeta en TERMINADA; no se edita ScreenDesignTest
 - Failing: ninguna
 - Commands: android/gradlew -p android :app:testDebugUnitTest
-- Next: Another agent reviews https://github.com/crisMmolina/Boxing-Manager/pull/78; run .uak/bin/smoke
+- Next: Wait for review of SHA d063eaa
 
 ## History
 - 1793766526 | CLAIMED | crismmolina-3 | claim; next: `ErrorTextTest` que recorre `Ack.Error.values()`
@@ -16,3 +16,4 @@
 - 1793767379 | CLAIMED | crismmolina-3 | checkpoint; next: ErrorText + textos de espera
 - 1793768084 | CLAIMED | crismmolina-3 | heartbeat; lease until 1793782484
 - 1793768152 | REVIEW | crismmolina-3 | done; PR https://github.com/crisMmolina/Boxing-Manager/pull/78; evidence: android/gradlew -p android :app:testDebugUnitTest exit 0 (113 pruebas) y smoke exit 0 en d063eaa; criterios: ErrorText, esperas y tarjeta final automática listos; 'sin valor por defecto' pendiente de decisión; sin capturas (lección #8); reviewer: -
+- 1793768160 | REVIEW | crismmolina-3 | checkpoint; next: Wait for review of SHA d063eaa
