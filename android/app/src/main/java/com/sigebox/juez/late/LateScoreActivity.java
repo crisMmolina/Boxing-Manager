@@ -32,6 +32,7 @@ import com.sigebox.juez.score.ScoreUi;
 import com.sigebox.juez.score.ScoreViewModel;
 import com.sigebox.juez.ui.ConfirmSheet;
 import com.sigebox.juez.ui.CornerCard;
+import com.sigebox.juez.ui.ErrorText;
 import com.sigebox.juez.ui.Screen;
 import com.sigebox.juez.ui.TopBar;
 
@@ -54,7 +55,6 @@ public class LateScoreActivity extends AppCompatActivity {
     private int round;
     private CornerCard red;
     private CornerCard blue;
-    private boolean defaulted;
 
     private com.sigebox.juez.ui.CornerNames cornerNames;
     private volatile String currentFightId;
@@ -153,12 +153,6 @@ public class LateScoreActivity extends AppCompatActivity {
         TopBar.bind(findViewById(R.id.late_root), online,
                 ui.seat > 0 ? getString(R.string.score_judge, ui.seat) : getString(R.string.status_disconnected));
         boolean input = ui.inputEnabled();
-        if (input && !defaulted) {
-            defaulted = true;
-            if (vm.applyDefault()) {
-                return; // empieza en 10–10; el ViewModel vuelve a publicar
-            }
-        }
         Integer r = ui.card != null ? ui.card.red : ui.red;
         Integer b = ui.card != null ? ui.card.blue : ui.blue;
         red.bind(r, input);
@@ -173,7 +167,7 @@ public class LateScoreActivity extends AppCompatActivity {
 
         TextView message = findViewById(R.id.late_message);
         if (ui.lastError != null) {
-            message.setText(getString(R.string.late_error, ui.lastError.name()));
+            message.setText(ErrorText.of(ui.lastError));
             message.setVisibility(View.VISIBLE);
         } else if (ui.card != null) {
             message.setText(ui.card.status == ScoreUi.CardStatus.SENDING ? R.string.status_sending : R.string.late_sent);

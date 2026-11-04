@@ -28,7 +28,7 @@ import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
-/** DESIGN.md v2 en la app del juez: bordes del sistema, − y +, 10–10 inicial y tokens de color. */
+/** App del juez: bordes del sistema y − y + sin valor por defecto (decisión de cris, uak decision AND-017). */
 @RunWith(RobolectricTestRunner.class)
 @Config(sdk = 36)
 public class ScreenDesignTest {
@@ -60,18 +60,20 @@ public class ScreenDesignTest {
     }
 
     @Test
-    public void roundStartsAtTenTenAndPlusMinusStayInRange() {
+    public void roundStartsEmptyAndPlusMinusStayInRange() {
         ScoreViewModel vm = openRound();
-        assertNull(vm.ui().getValue().red);
-        assertTrue(vm.applyDefault());
-        assertEquals(Integer.valueOf(10), vm.ui().getValue().red);
-        assertEquals(Integer.valueOf(10), vm.ui().getValue().blue);
-        assertFalse("solo una vez", vm.applyDefault());
+        assertNull("sin valor por defecto", vm.ui().getValue().red);
+        assertNull("sin valor por defecto", vm.ui().getValue().blue);
+        assertFalse("no se envía sin tocar las dos esquinas", vm.ui().getValue().sendEnabled);
 
+        vm.adjust(ScoreUi.Corner.RED, 1);
+        assertEquals("el primer + da 10", Integer.valueOf(10), vm.ui().getValue().red);
+        assertFalse("falta la azul", vm.ui().getValue().sendEnabled);
         vm.adjust(ScoreUi.Corner.RED, 1);
         assertEquals("el máximo es 10", Integer.valueOf(10), vm.ui().getValue().red);
         vm.adjust(ScoreUi.Corner.BLUE, -1);
-        assertEquals(Integer.valueOf(9), vm.ui().getValue().blue);
+        assertEquals("el primer − da 9", Integer.valueOf(9), vm.ui().getValue().blue);
+        assertTrue(vm.ui().getValue().sendEnabled);
         for (int i = 0; i < 12; i++) {
             vm.adjust(ScoreUi.Corner.BLUE, -1);
         }
@@ -82,7 +84,7 @@ public class ScreenDesignTest {
     @Test
     public void sentValuesAreWhatThePlusMinusShowed() {
         ScoreViewModel vm = openRound();
-        vm.applyDefault();
+        vm.adjust(ScoreUi.Corner.RED, 1);
         vm.adjust(ScoreUi.Corner.BLUE, -1);
         vm.submit();
         SubmitRound sent = (SubmitRound) submitted.get(0);
@@ -97,7 +99,6 @@ public class ScreenDesignTest {
         ScoreViewModel vm = new ScoreViewModel(submitted::add);
         vm.setSession("F1", 2, "María López");
         vm.onConnection(new ConnectionState(ConnectionState.Status.CONNECTED, 4, EstadoRound.CERRADO, 0, null));
-        assertFalse(vm.applyDefault());
         vm.adjust(ScoreUi.Corner.RED, -1);
         assertNull(vm.ui().getValue().red);
     }
