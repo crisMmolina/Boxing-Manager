@@ -169,10 +169,8 @@ public class ScoreActivity extends AppCompatActivity {
         boolean opened = input && !wasOpen;
         wasOpen = input;
         if (opened) {
+            // Sin valor por defecto: el juez toca + o − en cada esquina antes de enviar.
             findViewById(R.id.score_root).performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
-            if (vm.applyDefault()) {
-                return; // cada round empieza en 10–10; el ViewModel vuelve a publicar y se pinta
-            }
         }
         boolean showSent = ui.card != null && !ui.editing;
         red.bind(showSent ? ui.card.red : ui.red, input);
