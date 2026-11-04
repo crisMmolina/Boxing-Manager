@@ -73,3 +73,4 @@ Why: a reversible option after 15 min keeps work moving.
 - 1793769804 | CORE-007 | 6 argumentos intacto; forma c con constructor de 4 y c manda sobre s, seat, t | Why: central y android siguen compilando sin cambios
 - 1793769965 | DSK-028 | Sin merge ni autorrevisión | Why: Lo pide la tarea
 - 1793770834 | CORE-008 | Firma vieja delega con lista vacia y sin detalle | Why: Conserva el resultado actual sin editar pruebas
+- 1793771001 | AND-020 | ? agregado desde TopBar.java (view_top_bar.xml fuera de Paths) | Why: respetar Paths; AND-021 rediseña la barra
