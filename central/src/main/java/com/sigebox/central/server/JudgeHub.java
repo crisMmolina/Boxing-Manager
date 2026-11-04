@@ -25,6 +25,10 @@ import com.sigebox.core.model.VersionTarjeta;
 import com.sigebox.core.protocol.Ack;
 import com.sigebox.core.protocol.Challenge;
 import com.sigebox.core.protocol.DeviceProof;
+import com.sigebox.core.protocol.CodeInfo;
+import com.sigebox.core.protocol.CodeLookup;
+import com.sigebox.core.protocol.CodeUnknown;
+import com.sigebox.core.protocol.EventEnded;
 import com.sigebox.core.protocol.FightClosed;
 import com.sigebox.core.protocol.FightEnded;
 import com.sigebox.core.protocol.FinalCardHash;
@@ -47,13 +51,16 @@ import com.sigebox.core.protocol.SubmitRound;
 import com.sigebox.core.validation.ScoreValidator;
 import java.security.SecureRandom;
 import java.time.Duration;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -66,6 +73,9 @@ import java.util.function.LongSupplier;
  *   <li>Cada conexión recibe un {@code CHALLENGE} y debe autenticarse con un {@code JOIN} o
  *       {@code HELLO} firmado sobre ese nonce antes de que venza {@code authTimeout}.
  *   <li>{@code fightId} y lugar salen siempre de la sesión, nunca del mensaje.
+ *   <li>Antes del {@code JOIN}, {@code CODE_LOOKUP} dice a qué lugar libre pertenece un código (ADR 0004): a
+ *       lo más una búsqueda por segundo y la conexión se cierra al {@value #MAX_UNKNOWN_CODES}.º
+ *       {@code CODE_UNKNOWN}.
  *   <li>El {@code ACK} sale después de persistir; un repetido (lugar, {@code id}) recibe el mismo.
  *   <li>Solo difunde: quien cambia el estado de rounds o pelea lo persiste antes de llamar a
  *       {@link #roundOpened}, {@link #roundClosed}, {@link #fightEnded} o {@link #fightClosed}.
@@ -82,6 +92,23 @@ public final class JudgeHub implements AutoCloseable {
     static final Duration HANDOFF_GRACE = Duration.ofSeconds(15);
     public static final Duration DEFAULT_AUTH_TIMEOUT = Duration.ofSeconds(10);
 
+    /** Una búsqueda de código por segundo y conexión; la que llega antes no se consulta y cuenta como desconocida. */
+    static final long LOOKUP_INTERVAL_MS = 1_000;
+    /** {@code CODE_UNKNOWN} por conexión antes de cerrarla. */
+    public static final int MAX_UNKNOWN_CODES = 5;
+    /**
+     * Búsquedas que se consultan por segundo en toda la central: abrir muchas conexiones no multiplica los intentos
+     * (revisión de seguridad de DSK-033). Las que sobran no se consultan y cuentan como desconocidas.
+     */
+    static final int GLOBAL_LOOKUPS_PER_SECOND = 5;
+    /**
+     * Conexiones abiertas sin {@code JOIN}/{@code HELLO} válido. Al llegar otra se cierra la más vieja sin autenticar:
+     * quien acapara conexiones no deja fuera el {@code HELLO} de un juez, que se autentica en cuanto abre.
+     */
+    static final int MAX_UNAUTHENTICATED = 16;
+    /** El bloqueo por códigos se anota a lo más una vez por minuto, para no inundar la bitácora. */
+    static final long LIMIT_LOG_INTERVAL_MS = 60_000;
+
     private static final String APPROVED_BY = "central";
 
     private static final class Session {
@@ -92,6 +119,9 @@ public final class JudgeHub implements AutoCloseable {
         boolean approved;
         /** Conexión a una pelea cerrada solo para entregar lo pendiente antes de pasar a la siguiente. */
         boolean handoff;
+        int lookups;
+        long lastLookupMs;
+        int unknownCodes;
         String fightId;
         int seat;
 
@@ -126,6 +156,12 @@ public final class JudgeHub implements AutoCloseable {
     private final EventLog log;
 
     private final Map<String, Session> sessions = new HashMap<>();
+    /** Ids de las sesiones sin autenticar, de la más vieja a la más nueva. */
+    private final Set<String> unauthenticated = new LinkedHashSet<>();
+    /** Momentos de las búsquedas consultadas en el último segundo (toda la central). */
+    private final ArrayDeque<Long> recentLookups = new ArrayDeque<>();
+    private long lastLimitLogMs;
+    private boolean limitLogged;
     private final Map<SeatKey, Session> holders = new HashMap<>();
 
     public JudgeHub(Database db, SeatTokens tokens, ServerEvents events) {
@@ -152,8 +188,15 @@ public final class JudgeHub implements AutoCloseable {
     // ---- transporte ----
 
     public synchronized void onOpen(Conn conn) {
+        if (unauthenticated.size() >= MAX_UNAUTHENTICATED) {
+            var oldest = sessions.get(unauthenticated.iterator().next());
+            if (oldest != null) {
+                drop(oldest, Conn.POLICY, "busy");
+            }
+        }
         var s = new Session(conn, DeviceProof.newNonce(random));
         sessions.put(conn.id(), s);
+        unauthenticated.add(conn.id());
         conn.send(Messages.encode(new Challenge(s.nonce)));
         timer.schedule(() -> expireIfUnauthenticated(conn.id()), authTimeout.toMillis(), TimeUnit.MILLISECONDS);
     }
@@ -181,6 +224,7 @@ public final class JudgeHub implements AutoCloseable {
         switch (msg) {
             case Join m -> onJoin(s, m);
             case Hello m -> onHello(s, m);
+            case CodeLookup m -> onCodeLookup(s, m);
             case Ping m -> {
                 if (requireAuth(s)) {
                     send(s, new Pong(m.ts()));
@@ -216,6 +260,7 @@ public final class JudgeHub implements AutoCloseable {
 
     public synchronized void onClose(String connId) {
         var s = sessions.remove(connId);
+        unauthenticated.remove(connId);
         if (s == null || s.fightId == null) {
             return;
         }
@@ -295,9 +340,18 @@ public final class JudgeHub implements AutoCloseable {
         }
     }
 
+    /**
+     * Difunde {@code FIGHT_CLOSED}, descarta los códigos sin usar de la pelea y, si era la última del evento (no
+     * queda ninguna sin cerrar ni saltar en su función), manda además {@code EVENT_ENDED}.
+     */
     public synchronized void fightClosed(String fightId) {
+        tokens.forget(fightId);
+        boolean lastOfEvent = lastOfEvent(fightId);
         for (var s : approvedSessions(fightId)) {
             send(s, new FightClosed(fightId));
+            if (lastOfEvent) {
+                send(s, new EventEnded(fightId));
+            }
         }
     }
 
@@ -335,6 +389,93 @@ public final class JudgeHub implements AutoCloseable {
 
     // ---- autenticación ----
 
+    private void onCodeLookup(Session s, CodeLookup m) {
+        if (s.authenticated) {
+            // Solo antes del JOIN: un juez ya unido no busca lugares.
+            logSeat(s, "CONTROL_REJECTED", "CodeLookup");
+            send(s, new Ack(m.id(), false, null, Ack.Error.MALFORMED));
+            return;
+        }
+        long now = clock.getAsLong();
+        boolean tooSoon = s.lookups > 0 && now - s.lastLookupMs < LOOKUP_INTERVAL_MS;
+        s.lookups++;
+        s.lastLookupMs = now;
+        boolean overBudget = !tooSoon && !takeGlobalLookup(now);
+        var info = tooSoon || overBudget ? null : codeInfo(m.code());
+        if (info != null) {
+            send(s, info);
+            return;
+        }
+        // No dice si no existe, ya se usó o es de una pelea cerrada. Sin cupo global no se consultó nada, así que no
+        // cuenta para cerrar: un atacante que agota el cupo no hace que la central eche a los jueces legítimos.
+        send(s, new CodeUnknown(m.code()));
+        if (!overBudget && ++s.unknownCodes >= MAX_UNKNOWN_CODES) {
+            if (!limitLogged || now - lastLimitLogMs >= LIMIT_LOG_INTERVAL_MS) {
+                limitLogged = true;
+                lastLimitLogMs = now;
+                // Tipo con etiqueta ya existente; del código solo los 2 últimos dígitos.
+                log.append(null, "JOIN_REJECTED", "búsqueda de código bloqueada tras " + MAX_UNKNOWN_CODES
+                        + " intentos · …" + m.code().substring(m.code().length() - 2));
+            }
+            drop(s, Conn.POLICY, "codes");
+        }
+    }
+
+    private boolean takeGlobalLookup(long now) {
+        while (!recentLookups.isEmpty() && now - recentLookups.peekFirst() >= LOOKUP_INTERVAL_MS) {
+            recentLookups.pollFirst();
+        }
+        if (recentLookups.size() >= GLOBAL_LOOKUPS_PER_SECOND) {
+            return false;
+        }
+        recentLookups.addLast(now);
+        return true;
+    }
+
+    /** {@code CODE_INFO} si el código es de un lugar libre y sin registrar de una pelea abierta. */
+    private CodeInfo codeInfo(String code) {
+        var seat = tokens.lookup(code).orElse(null);
+        if (seat == null) {
+            return null;
+        }
+        var pelea = peleas.find(seat.fightId()).orElse(null);
+        if (pelea == null || pelea.estado() == EstadoPelea.CERRADA || seat.seat() > pelea.jueces()
+                || lugares.find(seat.fightId(), seat.seat()).filter(l -> l.conexion() != EstadoConexion.RECHAZADO)
+                        .isPresent()) {
+            return null;
+        }
+        return new CodeInfo(code, pelea.id(), seat.seat(), pelea.esquinaRoja(), pelea.esquinaAzul());
+    }
+
+    /** Sin función, la pelea es todo el evento; con función, no queda otra sin cerrar ni saltar. */
+    private boolean lastOfEvent(String fightId) {
+        var funcionId = funcionOf(fightId);
+        if (funcionId == null) {
+            return true;
+        }
+        for (var row : funciones.card(funcionId)) {
+            if (row.saltada() || fightId.equals(row.peleaId())) {
+                continue;
+            }
+            if (row.peleaId() == null || peleas.find(row.peleaId()).map(p -> p.estado() != EstadoPelea.CERRADA)
+                    .orElse(false)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private String funcionOf(String fightId) {
+        return db.inTransaction(c -> {
+            try (var ps = c.prepareStatement("SELECT funcion_id FROM funcion_card WHERE fight_id = ?")) {
+                ps.setString(1, fightId);
+                try (var rs = ps.executeQuery()) {
+                    return rs.next() ? rs.getString(1) : null;
+                }
+            }
+        });
+    }
+
     private void onJoin(Session s, Join m) {
         if (s.authenticated || !consumeNonce(s, m.nonce())) {
             drop(s, Conn.POLICY, "nonce");
@@ -354,9 +495,14 @@ public final class JudgeHub implements AutoCloseable {
         }
         var lugar = lugares.find(fightId, seat).orElse(null);
         var storedKey = lugares.publicKey(fightId, seat).orElse(null);
-        if (lugar != null && storedKey != null) {
+        boolean sameDevice = storedKey != null && storedKey.equals(m.publicKey())
+                && lugar != null && Objects.equals(lugar.dispositivo(), m.deviceId());
+        // Un lugar que el organizador rechazó queda libre para otro teléfono con una invitación nueva: se consume el
+        // token como en un lugar vacío y se reemplaza la llave. El teléfono rechazado sigue rechazado.
+        boolean reopened = lugar != null && lugar.conexion() == EstadoConexion.RECHAZADO && !sameDevice;
+        if (lugar != null && storedKey != null && !reopened) {
             // Lugar ya registrado: nunca se reemplaza la llave.
-            if (!storedKey.equals(m.publicKey()) || !Objects.equals(lugar.dispositivo(), m.deviceId())) {
+            if (!sameDevice) {
                 rejectAndDrop(s, fightId, seat, JoinRejected.Reason.SEAT_TAKEN);
             } else if (lugar.conexion() == EstadoConexion.RECHAZADO) {
                 rejectAndDrop(s, fightId, seat, JoinRejected.Reason.REJECTED);
@@ -439,14 +585,7 @@ public final class JudgeHub implements AutoCloseable {
         if (closed == null || closed.estado() != EstadoPelea.CERRADA) {
             return null;
         }
-        var funcionId = db.inTransaction(c -> {
-            try (var ps = c.prepareStatement("SELECT funcion_id FROM funcion_card WHERE fight_id = ?")) {
-                ps.setString(1, closed.id());
-                try (var rs = ps.executeQuery()) {
-                    return rs.next() ? rs.getString(1) : null;
-                }
-            }
-        });
+        var funcionId = funcionOf(closed.id());
         if (funcionId == null) {
             return null;
         }
@@ -486,6 +625,7 @@ public final class JudgeHub implements AutoCloseable {
 
     private void bind(Session s, String fightId, int seat) {
         s.authenticated = true;
+        unauthenticated.remove(s.conn.id());
         s.fightId = fightId;
         s.seat = seat;
         var old = holders.put(new SeatKey(fightId, seat), s);
@@ -658,6 +798,7 @@ public final class JudgeHub implements AutoCloseable {
 
     private void drop(Session s, int code, String reason) {
         sessions.remove(s.conn.id());
+        unauthenticated.remove(s.conn.id());
         if (s.fightId != null) {
             holders.remove(new SeatKey(s.fightId, s.seat), s);
         }

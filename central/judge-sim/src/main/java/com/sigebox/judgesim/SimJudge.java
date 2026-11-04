@@ -3,6 +3,9 @@ package com.sigebox.judgesim;
 import com.sigebox.core.model.EstadoTarjeta;
 import com.sigebox.core.protocol.Ack;
 import com.sigebox.core.protocol.Challenge;
+import com.sigebox.core.protocol.CodeInfo;
+import com.sigebox.core.protocol.CodeLookup;
+import com.sigebox.core.protocol.CodeUnknown;
 import com.sigebox.core.protocol.DeviceProof;
 import com.sigebox.core.protocol.FightClosed;
 import com.sigebox.core.protocol.FightEnded;
@@ -39,6 +42,8 @@ import java.util.function.LongSupplier;
  * tiempo con {@link #tick}. Se comporta como la app (contrato AND-003): espera el
  * {@code CHALLENGE}, se une con {@code JOIN} firmado o vuelve con {@code HELLO}, reenvía cada
  * {@code SUBMIT_*} con el mismo {@code id} hasta su {@code ACK} y manda {@code PING} cada 5 s.
+ * Con {@link #withCode} solo conoce el código de lugar: lo busca con {@code CODE_LOOKUP} y se une al
+ * lugar que dice {@code CODE_INFO} (ADR 0004).
  */
 public final class SimJudge {
 
@@ -58,6 +63,7 @@ public final class SimJudge {
 
     private String fightId;
     private int seat;
+    /** El token del lugar, o el código de 6 dígitos con {@link #withCode} (la central acepta los dos). */
     private final String token;
     private final String name;
     private final String deviceId;
@@ -76,6 +82,8 @@ public final class SimJudge {
     private boolean finalWanted;
     private boolean finalSent;
     private long lastPing;
+    /** Nonce del {@code CHALLENGE} mientras se espera {@code CODE_INFO}. */
+    private String lookupNonce;
     private int acks;
 
     public SimJudge(String fightId, int seat, String token, String name, Map<Integer, Script.Plan> plans,
@@ -90,6 +98,15 @@ public final class SimJudge {
         this.stats = stats;
         this.clock = clock;
         this.log = log;
+    }
+
+    /**
+     * Juez que solo sabe su código de lugar; {@code position} (1..5) elige su nombre y guion hasta que
+     * {@code CODE_INFO} dice su lugar real.
+     */
+    public static SimJudge withCode(String code, int position, String name, Map<Integer, Script.Plan> plans,
+            LatencyStats stats, LongSupplier clock, Consumer<String> log) {
+        return new SimJudge(null, position, code, name, plans, stats, clock, log);
     }
 
     public synchronized int seat() {
@@ -169,12 +186,25 @@ public final class SimJudge {
                     var sig = DeviceProof.sign(keys.getPrivate(),
                             DeviceProof.helloText(fightId, seat, deviceId, c.nonce()));
                     send(new Hello(fightId, seat, deviceId, c.nonce(), sig));
+                } else if (fightId == null) {
+                    lookupNonce = c.nonce();
+                    send(new CodeLookup(token));
                 } else {
-                    var sig = DeviceProof.sign(keys.getPrivate(),
-                            DeviceProof.joinText(fightId, seat, token, deviceId, c.nonce()));
-                    send(new Join(fightId, seat, token, name, deviceId,
-                            DeviceProof.encodePublicKey(keys.getPublic()), c.nonce(), sig));
+                    join(c.nonce());
                 }
+            }
+            case CodeInfo i -> {
+                if (fightId == null && lookupNonce != null && token.equals(i.code())) {
+                    fightId = i.fightId();
+                    seat = i.seat();
+                    log.accept("juez " + seat + ": el código es de la pelea " + fightId);
+                    join(lookupNonce);
+                    lookupNonce = null;
+                }
+            }
+            case CodeUnknown u -> {
+                phase = Phase.DONE;
+                log.accept("juez " + seat + ": la central no reconoce el código");
             }
             case JoinPending p -> {
                 phase = Phase.PENDING;
@@ -221,6 +251,11 @@ public final class SimJudge {
             }
         }
         maybeSendFinal();
+    }
+
+    private void join(String nonce) {
+        var sig = DeviceProof.sign(keys.getPrivate(), DeviceProof.joinText(fightId, seat, token, deviceId, nonce));
+        send(new Join(fightId, seat, token, name, deviceId, DeviceProof.encodePublicKey(keys.getPublic()), nonce, sig));
     }
 
     /**
