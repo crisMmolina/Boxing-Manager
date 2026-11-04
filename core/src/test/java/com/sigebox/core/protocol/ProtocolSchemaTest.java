@@ -146,7 +146,11 @@ class ProtocolSchemaTest {
                 new FightClosed("f-1"),
                 new Ping(1L),
                 new Pong(1L),
-                new NextFight("f-1", "f-2", 2, "Roja", "Azul", 6));
+                new NextFight("f-1", "f-2", 2, "Roja", "Azul", 6),
+                new CodeLookup("482915"),
+                new CodeInfo("482915", "f-1", 2, "Roja", "Azul"),
+                new CodeUnknown("482915"),
+                new EventEnded("f-1"));
         assertEquals(MessageType.values().length + 1, samples.size());
         for (Message msg : samples) {
             MessageType type = MessageType.fromWire(msg.type());
@@ -154,6 +158,49 @@ class ProtocolSchemaTest {
             assertTrue(valid(type, json), json);
             assertEquals(msg, Messages.decode(json));
         }
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = MessageType.class, names = {"CODE_LOOKUP", "CODE_INFO", "CODE_UNKNOWN"})
+    void codeExigeExactamenteSeisDigitos(MessageType type) {
+        for (String code : List.of("12345", "1234567", "12345a", "abcdef", "", "123 56", "123456\n",
+                "١٢٣٤٥٦")) {
+            JsonObject json = fixture(type);
+            json.addProperty("code", code);
+            assertFalse(valid(type, json.toString()), type + " con code inválido");
+            assertThrows(ProtocolException.class, () -> Messages.decode(json.toString()), type + " con code inválido");
+        }
+        JsonObject numero = fixture(type);
+        numero.addProperty("code", 482915);
+        assertFalse(valid(type, numero.toString()));
+        assertThrows(ProtocolException.class, () -> Messages.decode(numero.toString()));
+    }
+
+    @Test
+    void codeConCerosAlInicioEsValido() {
+        CodeLookup msg = new CodeLookup("000042");
+        String json = Messages.encode(msg);
+        assertTrue(valid(MessageType.CODE_LOOKUP, json), json);
+        assertEquals(msg, Messages.decode(json));
+    }
+
+    @Test
+    void codeInfoValidaLugarYEsquinas() {
+        JsonObject lugar = fixture(MessageType.CODE_INFO);
+        lugar.addProperty("seat", 6);
+        assertFalse(valid(MessageType.CODE_INFO, lugar.toString()));
+        assertThrows(ProtocolException.class, () -> Messages.decode(lugar.toString()));
+        JsonObject esquina = fixture(MessageType.CODE_INFO);
+        esquina.addProperty("redCorner", "Ro\u202Eja");
+        assertFalse(valid(MessageType.CODE_INFO, esquina.toString()));
+        assertThrows(ProtocolException.class, () -> Messages.decode(esquina.toString()));
+    }
+
+    @Test
+    void eventEndedExigePelea() {
+        JsonObject json = fixture(MessageType.EVENT_ENDED);
+        json.addProperty("fightId", " ");
+        assertThrows(ProtocolException.class, () -> Messages.decode(json.toString()));
     }
 
     private static List<String> required(MessageType type) {

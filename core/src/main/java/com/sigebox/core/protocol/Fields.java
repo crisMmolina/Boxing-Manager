@@ -17,6 +17,7 @@ final class Fields {
     static final Pattern HEX64 = Pattern.compile("^[0-9a-f]{64}$");
     static final Pattern NONCE = Pattern.compile("^[A-Za-z0-9_-]{22,128}$");
     static final Pattern BASE64 = Pattern.compile("^[A-Za-z0-9+/]+={0,2}$");
+    static final Pattern CODE = Pattern.compile("^[0-9]{6}$");
 
     private Fields() {}
 
