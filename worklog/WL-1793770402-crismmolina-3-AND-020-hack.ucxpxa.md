@@ -10,3 +10,4 @@
 
 ## History
 - 1793770402 | CLAIMED | crismmolina-3 | claim; next: prueba de que `TopBar` muestra "?" sin conexión
+- 1793770534 | CLAIMED | crismmolina-3 | heartbeat; lease until 1793784934
