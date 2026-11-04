@@ -68,3 +68,4 @@ Why: a reversible option after 15 min keeps work moving.
 - 1793768084 | deadline decision/AND-017-1793767073/1793767973 | BLOCKED_OTHER_TASK | Option: Mantener 10–10 inicial con − y + (applyDefault); Why: El criterio dice 'sin valor por defecto' pero ScreenDesignTest y DESIGN.md v2 §6.4 piden 10–10 inicial; no se edita una prueba existente; lo decide cris; no money, accounts, publishing or scope expansion.
 - 1793768160 | AND-017 | AutoFinalCard.install desde ScoreActivity; reintento con FIGHT_NOT_ACTIVE/NOT_APPROVED; 10–10 sin cambio | Why: Paths sin net/; la central solo acepta la tarjeta en TERMINADA; no se edita ScreenDesignTest
 - 1793768168 | DSK-023 | descuento se crea en V3 como pide el plan 004 | Why: expansión sola, sin tocar columnas
+- 1793768473 | AND-017 | Decisiones de cris: sin 10–10; JudgeRuntime en AND-019; FinalCardActivity en AND-021 | Why: Respuestas de cris
