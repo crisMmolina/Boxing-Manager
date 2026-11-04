@@ -56,3 +56,4 @@ Why: a reversible option after 15 min keeps work moving.
 - 1793259514 | DSK-021 | FuncionQuery SQL para la función más reciente | Why: FuncionService no la expone
 - 1793261209 | AND-016 | clave = nextFightId | Why: esquinas antes del primer STATE
 - 1793261499 | DSK-022 | STATE sin totales y NEXT_FIGHT sobre conexión de traspaso | Why: el teléfono solo vacía bandeja tras STATE y difiere NEXT_FIGHT con pendientes
+- 1793767379 | AND-017 | Registrar en JudgeRuntime; mantener 10–10 inicial | Why: Sin pantalla; no editar ScreenDesignTest
