@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sigebox.local/schemas/code_lookup.schema.json",
+  "title": "CODE_LOOKUP",
+  "description": "Pregunta qué lugar corresponde a un código de 6 dígitos. Va después de CHALLENGE y antes de JOIN. (juez → central)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "v",
+    "id",
+    "type",
+    "code"
+  ],
+  "properties": {
+    "v": {
+      "const": 1
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+    },
+    "type": {
+      "const": "CODE_LOOKUP"
+    },
+    "code": {
+      "type": "string",
+      "pattern": "^[0-9]{6}$"
+    }
+  }
+}

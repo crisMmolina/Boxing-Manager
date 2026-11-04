@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sigebox.local/schemas/code_unknown.schema.json",
+  "title": "CODE_UNKNOWN",
+  "description": "El código no existe, ya se usó o la pelea cerró; no dice cuál. (central → juez)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "v",
+    "id",
+    "type",
+    "code"
+  ],
+  "properties": {
+    "v": {
+      "const": 1
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+    },
+    "type": {
+      "const": "CODE_UNKNOWN"
+    },
+    "code": {
+      "type": "string",
+      "pattern": "^[0-9]{6}$"
+    }
+  }
+}

@@ -20,7 +20,7 @@ Un JSON Schema (draft 2020-12) por mensaje: `<type en minúsculas>.schema.json`.
 - `ACK.error` es un código del enum `Ack.Error`, nunca texto del mensaje recibido. Los errores de `decode` tampoco repiten el contenido.
 - `STATE` lleva solo las tarjetas del juez que lo recibe y nunca totales ni ganador.
 - `SUBMIT_FINAL_CARD.hash` = `FinalCardHash.of(fightId, seat, cards)`, es decir, SHA-256 hex del texto canónico descrito en esa clase.
-- El QR lleva `sigebox://join?h=&p=&s=&seat=&t=[&f=]` (`JoinUri`). `f` (huella SHA-256 del certificado de la central) queda reservado para cuando la conexión sea `wss://`.
+- El QR lleva `sigebox://join?h=&p=&c=[&f=]` (`JoinUri`): `c` es el código de 6 dígitos del lugar. `JoinUri.parse` sigue leyendo la forma anterior `sigebox://join?h=&p=&s=&seat=&t=[&f=]`; si llegan las dos, manda `c`. `f` (huella SHA-256 del certificado de la central) queda reservado para cuando la conexión sea `wss://`.
 
 ## Identidad del teléfono (amenaza Spoofing)
 1. El teléfono crea una sola vez un par de llaves EC P-256 en el Android Keystore. La llave privada nunca sale del equipo.
@@ -40,7 +40,20 @@ Un JSON Schema (draft 2020-12) por mensaje: `<type en minúsculas>.schema.json`.
 
 **Lo que queda abierto (aceptado en v1, red local sin internet):** alguien que intercepte activamente el hotspot (ARP spoofing) podría secuestrar una conexión ya autenticada. La solución es `wss://` con el certificado fijado por `f` en el QR.
 
-**Código de 6 dígitos:** el `token` admite 6 caracteres para el código manual. El token del QR debe tener 22 o más caracteres aleatorios (`SecureRandom`). Con el código manual, la central limita los intentos por conexión.
+**Código de 6 dígitos:** el `token` admite 6 caracteres para el código manual. El token del QR debe tener 22 o más caracteres aleatorios (`SecureRandom`). Con el código manual, la central limita los intentos por conexión. El código es el token del lugar: con `c` en el QR o escrito a mano, el teléfono lo manda en `JOIN.token`.
+
+## Código de lugar y fin de evento
+
+`JOIN`, `HELLO` y la prueba de identidad no cambian; estos mensajes se agregan a v1 (ADR 0004) y `v` sigue en 1.
+
+1. El teléfono conecta y recibe `CHALLENGE`.
+2. Manda `CODE_LOOKUP` con `code` (exactamente 6 dígitos, `^[0-9]{6}$`). Va antes de `JOIN`.
+3. La central contesta una de dos:
+   - `CODE_INFO`: el lugar está libre. Trae `code`, `fightId`, `seat`, `redCorner` y `blueCorner`, nunca puntajes. El teléfono sigue con `JOIN`.
+   - `CODE_UNKNOWN`: el código no existe, ya se usó o la pelea cerró. A propósito no dice cuál.
+4. Después de `FIGHT_CLOSED`, si era la última pelea, la central manda `EVENT_ENDED` y el teléfono vuelve al inicio.
+
+`CODE_INFO`, `CODE_UNKNOWN` y `EVENT_ENDED` solo salen de la central. Límites por conexión: 1 `CODE_LOOKUP` por segundo, y la central cierra después de 5 `CODE_UNKNOWN` (lo implementa DSK-033).
 
 ## Android
 - `core` corre en Android 8 (API 26). En `src/main` solo se usan APIs de Java disponibles en API 26:
