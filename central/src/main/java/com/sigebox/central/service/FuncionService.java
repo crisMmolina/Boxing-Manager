@@ -15,6 +15,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.regex.Pattern;
 
 /**
  * Función con cartelera (spec 002): una base de rounds y jueces, la lista ordenada de peleas y los
@@ -40,6 +41,9 @@ public final class FuncionService {
     public static final int MAX_PELEAS = 20;
 
     private static final String ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
+    /** Hasta 6 cifras: un nombre escrito a mano con un número enorme no debe romper la cuenta. */
+    private static final Pattern ESQUINA_VACIA = Pattern.compile("Esquina (?:roja|azul) (\\d{1,6})");
 
     private final Database db;
     private final FightService fights;
@@ -129,12 +133,33 @@ public final class FuncionService {
         return repo.card(funcionId).stream().map(r -> fila(f, r)).toList();
     }
 
-    /** Agrega una pelea al final. */
+    /**
+     * Agrega una pelea al final. Una esquina vacía queda como "Esquina roja N" o "Esquina azul N", con un N
+     * que no repite el de ninguna esquina de la cartelera aunque antes se haya quitado una pelea.
+     */
     public synchronized void agregar(String funcionId, Esquinas e) {
         var rows = new ArrayList<>(rows(funcionId));
-        rows.add(new CardRow(0, nombre(e.roja(), "la esquina roja"), nombre(e.azul(), "la esquina azul"), null, null,
-                false, null));
-        guardar(funcionId, rows, "CARTELERA_CAMBIADA", "agrega " + e.roja() + " vs " + e.azul());
+        if (rows.size() >= MAX_PELEAS) {
+            throw new IllegalArgumentException("un evento lleva hasta " + MAX_PELEAS + " peleas");
+        }
+        int n = siguienteNumero(rows);
+        var roja = esquina(e.roja(), "la esquina roja", "Esquina roja " + n);
+        var azul = esquina(e.azul(), "la esquina azul", "Esquina azul " + n);
+        rows.add(new CardRow(0, roja, azul, null, null, false, null));
+        guardar(funcionId, rows, "CARTELERA_CAMBIADA", "agrega " + roja + " vs " + azul);
+    }
+
+    private static int siguienteNumero(List<CardRow> rows) {
+        int mayor = rows.size();
+        for (var r : rows) {
+            for (var text : List.of(r.roja(), r.azul())) {
+                var m = ESQUINA_VACIA.matcher(text);
+                if (m.matches()) {
+                    mayor = Math.max(mayor, Integer.parseInt(m.group(1)));
+                }
+            }
+        }
+        return mayor + 1;
     }
 
     /** Quita una pelea que no ha empezado. */
@@ -344,7 +369,7 @@ public final class FuncionService {
             throw new IllegalArgumentException(
                     "el nombre de " + what + " admite hasta " + FightService.MAX_NAME + " caracteres");
         }
-        if (t.chars().anyMatch(Character::isISOControl)) {
+        if (t.chars().anyMatch(c -> Character.isISOControl(c) || Character.getType(c) == Character.FORMAT)) {
             throw new IllegalArgumentException("el nombre de " + what + " tiene caracteres no permitidos");
         }
         return t;

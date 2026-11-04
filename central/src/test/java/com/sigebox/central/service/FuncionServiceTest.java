@@ -97,7 +97,7 @@ class FuncionServiceTest {
         assertThrows(IllegalArgumentException.class, () -> funciones.crear(0, 3, List.of()));
         assertThrows(IllegalArgumentException.class, () -> funciones.crear(4, 6, List.of()));
         var f = funciones.crear(4, 3, List.of());
-        assertThrows(IllegalArgumentException.class, () -> funciones.agregar(f.id(), pelea(" ", "Bea")));
+        assertThrows(IllegalArgumentException.class, () -> funciones.agregar(f.id(), pelea("A\nB", "Bea")));
         funciones.agregar(f.id(), pelea("Ana", "Bea"));
         assertThrows(IllegalArgumentException.class, () -> funciones.cambiar(f.id(), 1, 13, null));
         assertThrows(IllegalArgumentException.class, () -> funciones.cambiar(f.id(), 1, null, 0));
@@ -143,6 +143,39 @@ class FuncionServiceTest {
                 filas.stream().map(FuncionService.Fila::roja).toList());
         assertEquals(List.of("Esquina azul 1", "Esquina azul 2", "Bea"),
                 filas.stream().map(FuncionService.Fila::azul).toList());
+    }
+
+    @Test
+    void agregarNombraLasEsquinasVaciasSinRepetirNumero() {
+        var f = funciones.crear(null, LocalDate.of(2026, 12, 5), 6, 3,
+                List.of(pelea("", ""), pelea("", ""), pelea("", "")));
+        funciones.quitar(f.id(), 1); // quedan la 2 y la 3
+        funciones.agregar(f.id(), pelea(" ", null));
+        funciones.agregar(f.id(), pelea("Ana", ""));
+
+        var filas = funciones.cartelera(f.id());
+        assertEquals(List.of("Esquina roja 2", "Esquina roja 3", "Esquina roja 4", "Ana"),
+                filas.stream().map(FuncionService.Fila::roja).toList());
+        assertEquals(List.of("Esquina azul 2", "Esquina azul 3", "Esquina azul 4", "Esquina azul 5"),
+                filas.stream().map(FuncionService.Fila::azul).toList());
+    }
+
+    @Test
+    void agregarNoPasaDelMaximoDePeleas() {
+        var f = funciones.crear("A", LocalDate.of(2026, 12, 5), 6, 3,
+                java.util.Collections.nCopies(FuncionService.MAX_PELEAS, pelea("", "")));
+        assertThrows(IllegalArgumentException.class, () -> funciones.agregar(f.id(), pelea("Ana", "Bea")));
+        assertEquals(FuncionService.MAX_PELEAS, funciones.cartelera(f.id()).size());
+    }
+
+    @Test
+    void unNombreConCaracteresInvisiblesNoSeGuarda() {
+        var f = funciones.crear("A", LocalDate.of(2026, 12, 5), 6, 3, List.of(pelea("", "")));
+        assertThrows(IllegalArgumentException.class, () -> funciones.renombrar(f.id(), 1, "Ana‮", "Bea"));
+        assertThrows(IllegalArgumentException.class, () -> funciones.agregar(f.id(), pelea("Ana", "Bea​")));
+        assertThrows(IllegalArgumentException.class,
+                () -> funciones.crear("A‮", LocalDate.of(2026, 12, 5), 6, 3, List.of()));
+        assertEquals("Esquina roja 1", funciones.cartelera(f.id()).get(0).roja());
     }
 
     @Test

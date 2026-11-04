@@ -11,6 +11,8 @@ import java.util.List;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
@@ -58,6 +60,9 @@ public final class FuncionScreen {
             signature[0] = null;
             draw[0].run();
         };
+        // Un nombre guardado ya está en pantalla: se anota para que el temporizador no redibuje por él.
+        Runnable synced = () -> flow.funcionId()
+                .ifPresent(id -> signature[0] = id + "|" + flow.service().cartelera(id));
         draw[0] = () -> {
             var id = flow.funcionId().orElse(null);
             var rows = id == null ? List.<Fila>of() : flow.service().cartelera(id);
@@ -66,7 +71,7 @@ public final class FuncionScreen {
                 return; // sin cambios: no se redibuja (no se pierde el foco)
             }
             signature[0] = sig;
-            body.getChildren().setAll(id == null ? create(status, refresh) : show(id, rows, status, refresh));
+            body.getChildren().setAll(id == null ? create(status, refresh) : show(id, rows, status, refresh, synced));
         };
 
         var timer = new Timeline(new KeyFrame(Duration.seconds(1), e -> draw[0].run()));
@@ -103,8 +108,15 @@ public final class FuncionScreen {
                 create);
     }
 
-    private Node show(String id, List<Fila> rows, Label status, Runnable refresh) {
+    private Node show(String id, List<Fila> rows, Label status, Runnable refresh, Runnable synced) {
         var f = flow.service().funcion(id);
+        // El botón de iniciar muestra los nombres: se actualiza sin rehacerlo, por si lo están presionando.
+        var nextText = new SimpleStringProperty("");
+        Runnable renamed = () -> {
+            synced.run();
+            FuncionView.siguiente(flow.service().cartelera(id)).map(FuncionView::siguienteTexto)
+                    .ifPresent(nextText::set);
+        };
         var base = Ui.card(Ui.cardTitle("Base"), new HBox(40, Ui.field("Evento", Ui.body(FuncionView.nombre(f))),
                 Ui.field("Fecha", Ui.body(f.fecha())),
                 Ui.field("Rounds", Ui.numeral(String.valueOf(f.baseRounds()), "neutral")),
@@ -114,22 +126,22 @@ public final class FuncionScreen {
 
         var list = new VBox(8);
         for (var r : rows) {
-            list.getChildren().add(row(id, r, status, refresh));
+            list.getChildren().add(row(id, r, status, refresh, renamed));
         }
         if (rows.isEmpty()) {
             list.getChildren().add(Ui.support("Todavía no hay peleas. Agrega la primera abajo."));
         }
         var cartelera = Ui.card(new HBox(12, Ui.cardTitle("Cartelera"), Ui.grow(), Ui.support(FuncionView.resumen(rows))),
-                list, add(id, status, refresh), footer(rows, status, refresh));
+                list, add(id, status, refresh), footer(rows, status, refresh, nextText));
         cartelera.setSpacing(12);
         return new VBox(16, base, cartelera);
     }
 
-    private Node row(String id, Fila r, Label status, Runnable refresh) {
+    private Node row(String id, Fila r, Label status, Runnable refresh, Runnable renamed) {
         var service = flow.service();
         var number = Ui.numeral(String.valueOf(r.orden()), "neutral");
         number.setMinWidth(36);
-        var names = FuncionView.editable(r) ? editableNames(id, r, status, refresh) : fixedNames(r);
+        var names = FuncionView.editable(r) ? editableNames(id, r, status, refresh, renamed) : fixedNames(r);
         names.setMinWidth(200);
         names.setPrefWidth(200);
 
@@ -197,25 +209,38 @@ public final class FuncionScreen {
     }
 
     /** Los nombres de una pelea que no ha empezado: se guardan con Enter o al salir del campo. */
-    private VBox editableNames(String id, Fila r, Label status, Runnable refresh) {
+    private VBox editableNames(String id, Fila r, Label status, Runnable refresh, Runnable renamed) {
         var red = new TextField(r.roja());
         var blue = new TextField(r.azul());
         red.setPromptText("Ej. Ana Pérez");
         blue.setPromptText("Ej. Bea Ruiz");
         red.setAccessibleText("Esquina roja de la pelea " + r.orden());
         blue.setAccessibleText("Esquina azul de la pelea " + r.orden());
+        // Lo último enviado tal como se escribió: un nombre recortado al guardar no se reenvía en cada salida.
+        String[] saved = {r.roja(), r.azul()};
         Runnable save = () -> {
-            if (!red.getText().equals(r.roja()) || !blue.getText().equals(r.azul())) {
-                act(status, refresh, () -> {
-                    flow.service().renombrar(id, r.orden(), red.getText(), blue.getText());
-                    return "";
-                });
+            var roja = red.getText();
+            var azul = blue.getText();
+            if (roja.equals(saved[0]) && azul.equals(saved[1])) {
+                return;
             }
+            try {
+                flow.service().renombrar(id, r.orden(), roja, azul);
+            } catch (RuntimeException ex) {
+                status.setText(ex.getMessage());
+                refresh.run(); // vuelve a lo guardado
+                return;
+            }
+            // Sin redibujar: el clic que quitó el foco debe llegar al botón que lo recibió.
+            saved[0] = roja;
+            saved[1] = azul;
+            status.setText("");
+            renamed.run();
         };
         for (var field : List.of(red, blue)) {
             field.setOnAction(e -> save.run());
             field.focusedProperty().addListener((o, was, now) -> {
-                if (!now) {
+                if (!now && field.getScene() != null) { // al redibujar, el campo ya salió de la pantalla
                     save.run();
                 }
             });
@@ -250,7 +275,7 @@ public final class FuncionScreen {
         return box;
     }
 
-    private Node footer(List<Fila> rows, Label status, Runnable refresh) {
+    private Node footer(List<Fila> rows, Label status, Runnable refresh, StringProperty nextText) {
         var next = FuncionView.siguiente(rows);
         var box = new HBox(12);
         box.setAlignment(Pos.CENTER_LEFT);
@@ -258,7 +283,9 @@ public final class FuncionScreen {
             box.getChildren().add(Ui.support(rows.isEmpty() ? "" : "No quedan peleas por iniciar."));
             return box;
         }
-        var start = Ui.primary(FuncionView.siguienteTexto(next.get()));
+        nextText.set(FuncionView.siguienteTexto(next.get()));
+        var start = Ui.primary(nextText.get());
+        start.textProperty().bind(nextText);
         start.setOnAction(e -> act(status, refresh, () -> {
             flow.start();
             onStarted.run();
