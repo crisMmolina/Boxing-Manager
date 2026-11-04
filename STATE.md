@@ -1,7 +1,7 @@
 # STATE
 
 Phase: execution
-Updated: 1793773728
+Updated: 1793773800
 AVAILABLE: DSK-024 DSK-027 DOC-001 DSK-030 DSK-031 DSK-032 AND-019 AND-021 QA-004 
 CLAIMED: AND-018 DSK-029 DSK-033 
 BLOCKED: -
@@ -10,7 +10,7 @@ INTEGRATED: (59; last 12) ... DSK-022 DSK-023 DSK-025 DSK-026 DSK-028 DSN-001 DS
 CANCELLED: -
 
 Claims (first 24; status --task ID shows detail):
-AND-018 | CLAIMED | zoe-1 | until 1793787550
+AND-018 | CLAIMED | crismmolina-4 | until 1793788200
 DSK-029 | CLAIMED | crismmolina-1 | until 1793787717
 DSK-033 | CLAIMED | crismmolina-3 | until 1793787981
 DSK-034 | REVIEW | crismmolina-2 | until 1793860128
