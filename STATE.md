@@ -1,7 +1,7 @@
 # STATE
 
 Phase: execution
-Updated: 1793766612
+Updated: 1793766869
 AVAILABLE: (19; last 12) ... DSN-004 DSK-029 DSK-030 DSK-031 DSK-032 DSK-033 AND-018 AND-019 AND-020 AND-021 QA-004 DSK-026 
 CLAIMED: AND-017 DSK-025 
 BLOCKED: -
@@ -11,7 +11,7 @@ CANCELLED: -
 
 Claims (first 24; status --task ID shows detail):
 AND-017 | CLAIMED | crismmolina-3 | until 1793780926
-DSK-025 | CLAIMED | crismmolina-1 | until 1793780902
+DSK-025 | CLAIMED | crismmolina-1 | until 1793781269
 
 Blockers: BLOCKED tasks; use status --task ID --summary.
 Current decisions (last 5):
