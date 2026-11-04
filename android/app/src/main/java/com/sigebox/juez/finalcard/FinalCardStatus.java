@@ -27,15 +27,18 @@ public final class FinalCardStatus {
     public final State state;
     /** Id del envío pendiente, para reconocer su {@code ACK}; {@code null} si no hay. */
     public final String messageId;
+    /** Ya hay una tarjeta final de la pelea en la bandeja, aunque la central la haya rechazado. */
+    public final boolean stored;
 
-    private FinalCardStatus(State state, String messageId) {
+    private FinalCardStatus(State state, String messageId, boolean stored) {
         this.state = state;
         this.messageId = messageId;
+        this.stored = stored;
     }
 
     /** Hace I/O: llamar fuera del hilo principal. */
     public static FinalCardStatus load(SupportSQLiteDatabase db, String fightId) {
-        FinalCardStatus status = new FinalCardStatus(State.NOT_SENT, null);
+        FinalCardStatus status = new FinalCardStatus(State.NOT_SENT, null, false);
         try (Cursor cursor = db.query("SELECT message_id, payload, acked, ack_ok, ack_error FROM outbox"
                 + " WHERE type = ? ORDER BY created_at, rowid", new Object[] {SubmitFinalCard.TYPE})) {
             while (cursor.moveToNext()) {
@@ -57,13 +60,13 @@ public final class FinalCardStatus {
     private static FinalCardStatus fromRow(Cursor cursor) {
         String id = cursor.getString(0);
         if (cursor.getInt(2) == 0) {
-            return new FinalCardStatus(State.SENDING, id);
+            return new FinalCardStatus(State.SENDING, id, true);
         }
         boolean ok = !cursor.isNull(3) && cursor.getInt(3) != 0;
         String error = cursor.isNull(4) ? null : cursor.getString(4);
         if (ok || Ack.Error.ALREADY_FINAL.name().equals(error)) {
-            return new FinalCardStatus(State.SENT, null);
+            return new FinalCardStatus(State.SENT, null, true);
         }
-        return new FinalCardStatus(State.NOT_SENT, null);
+        return new FinalCardStatus(State.NOT_SENT, null, true);
     }
 }

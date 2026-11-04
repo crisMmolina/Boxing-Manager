@@ -16,7 +16,6 @@ import com.sigebox.core.protocol.Message;
 import com.sigebox.juez.R;
 import com.sigebox.juez.data.SessionEntity;
 import com.sigebox.juez.data.SigeboxDatabase;
-import com.sigebox.juez.finalcard.FinalCardActivity;
 import com.sigebox.juez.net.ConnectionState;
 import com.sigebox.juez.net.JudgeConnection;
 import com.sigebox.juez.net.JudgeListener;
@@ -46,7 +45,6 @@ public class ScoreActivity extends AppCompatActivity {
     private ScoreViewModel vm;
     private JudgeConnection connection;
     private SigeboxDatabase database;
-    private boolean finalOpened;
     private CornerCard red;
     private CornerCard blue;
     private boolean wasOpen;
@@ -195,11 +193,6 @@ public class ScoreActivity extends AppCompatActivity {
         if (ui.lateRound != null) {
             vm.lateHandled();
             startActivity(new Intent().setClassName(this, LATE_ACTIVITY).putExtra(EXTRA_ROUND, (int) ui.lateRound));
-        }
-        if (ui.fightEnded && !finalOpened) {
-            finalOpened = true;
-            startActivity(new Intent(this, FinalCardActivity.class));
-            finish();
         }
     }
 
