@@ -131,6 +131,15 @@ public class AutoFinalCardTest {
     }
 
     @Test
+    public void unRegistroTardioVeElUltimoRoundCerradoEnElStateRepetido() {
+        send(1, true);
+        send(2, true);
+        send(3, true);
+        auto.onMessage(state(EstadoPelea.EN_CURSO, 3, EstadoRound.CERRADO, false));
+        assertEquals(1, finals().size());
+    }
+
+    @Test
     public void noSeMandaDosVeces() {
         send(1, true);
         send(2, true);

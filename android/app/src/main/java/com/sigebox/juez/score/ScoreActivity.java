@@ -15,6 +15,7 @@ import com.sigebox.core.protocol.Message;
 import com.sigebox.juez.R;
 import com.sigebox.juez.data.SessionEntity;
 import com.sigebox.juez.data.SigeboxDatabase;
+import com.sigebox.juez.finalcard.AutoFinalCard;
 import com.sigebox.juez.net.ConnectionState;
 import com.sigebox.juez.net.JudgeConnection;
 import com.sigebox.juez.net.JudgeListener;
@@ -79,6 +80,7 @@ public class ScoreActivity extends AppCompatActivity {
         Screen.setup(this);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         JudgeRuntime runtime = JudgeRuntime.get(this);
+        AutoFinalCard.install(runtime); // la tarjeta final sale sola al terminar la pelea (spec 004)
         connection = runtime.connection();
         database = runtime.database();
         vm = new ViewModelProvider(this, new ViewModelProvider.Factory() {

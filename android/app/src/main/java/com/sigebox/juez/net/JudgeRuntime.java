@@ -10,9 +10,7 @@ import com.sigebox.juez.data.Clock;
 import com.sigebox.juez.data.Outbox;
 import com.sigebox.juez.data.SessionStore;
 import com.sigebox.juez.data.SigeboxDatabase;
-import com.sigebox.juez.finalcard.AutoFinalCard;
 
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
@@ -39,9 +37,8 @@ public final class JudgeRuntime {
                 .connectTimeout(5, TimeUnit.SECONDS)
                 .readTimeout(0, TimeUnit.MILLISECONDS)
                 .build();
-        KeystoreSigner signer = new KeystoreSigner();
         connection = new JudgeConnection(client, new Outbox(database.outboxDao(), Clock.SYSTEM),
-                new SessionStore(database.sessionDao()), signer, Clock.SYSTEM,
+                new SessionStore(database.sessionDao()), new KeystoreSigner(), Clock.SYSTEM,
                 new Backoff(500, 5_000), TICK_MS);
         networkBinder = new NetworkBinder(app.getSystemService(ConnectivityManager.class));
         // NEXT_FIGHT lleva al juez a la pantalla de puntuación desde donde esté, sin confirmación (spec 002).
@@ -54,9 +51,6 @@ public final class JudgeRuntime {
                 }
             }
         });
-        // La tarjeta final sale sola al terminar la pelea, con o sin pantalla abierta (spec 004, AND-017).
-        connection.addListener(new AutoFinalCard(() -> database.getOpenHelper().getReadableDatabase(),
-                signer::sign, connection::submit, Executors.newSingleThreadExecutor()));
     }
 
     public static JudgeRuntime get(Context context) {

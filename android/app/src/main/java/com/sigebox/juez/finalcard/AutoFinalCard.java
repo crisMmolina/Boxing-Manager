@@ -3,6 +3,7 @@ package com.sigebox.juez.finalcard;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
 import com.sigebox.core.model.EstadoPelea;
+import com.sigebox.core.model.EstadoRound;
 import com.sigebox.core.protocol.Ack;
 import com.sigebox.core.protocol.Message;
 import com.sigebox.core.protocol.NextFight;
@@ -10,6 +11,8 @@ import com.sigebox.core.protocol.RoundClosed;
 import com.sigebox.core.protocol.State;
 import com.sigebox.core.protocol.SubmitFinalCard;
 import com.sigebox.juez.net.JudgeListener;
+import com.sigebox.juez.net.JudgeRuntime;
+import com.sigebox.juez.net.KeystoreSigner;
 import com.sigebox.juez.score.OwnCards;
 import com.sigebox.juez.score.ScoreUi;
 
@@ -17,6 +20,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
 /**
@@ -32,6 +37,8 @@ public final class AutoFinalCard implements JudgeListener {
     public interface Submitter {
         void submit(Message message);
     }
+
+    private static final AtomicBoolean installed = new AtomicBoolean();
 
     private final Supplier<SupportSQLiteDatabase> db;
     private final FinalCard.Signer signer;
@@ -56,6 +63,28 @@ public final class AutoFinalCard implements JudgeListener {
         this.io = io;
     }
 
+    /**
+     * Lo registra una sola vez en la conexión del proceso y no lo quita nunca: sigue escuchando con la pantalla
+     * apagada o en otra pantalla. Lo llama la pantalla de puntuación, a la que vuelve la app tras un cierre forzado;
+     * {@code addListener} le repite el último {@code STATE}, así que un registro tardío no pierde el cierre.
+     */
+    public static void install(JudgeRuntime runtime) {
+        if (!installed.compareAndSet(false, true)) {
+            return;
+        }
+        KeystoreSigner[] signer = new KeystoreSigner[1];
+        // La llave se abre en el hilo de I/O, no en el principal.
+        FinalCard.Signer lazy = text -> {
+            if (signer[0] == null) {
+                signer[0] = new KeystoreSigner();
+            }
+            return signer[0].sign(text);
+        };
+        runtime.connection().addListener(new AutoFinalCard(
+                () -> runtime.database().getOpenHelper().getReadableDatabase(), lazy, runtime.connection()::submit,
+                Executors.newSingleThreadExecutor()));
+    }
+
     @Override
     public void onMessage(Message message) {
         if (message instanceof State state) {
@@ -67,7 +96,11 @@ public final class AutoFinalCard implements JudgeListener {
             rounds = state.rounds();
             boolean over = state.fightStatus() == EstadoPelea.TERMINADA
                     || state.fightStatus() == EstadoPelea.CERRADA;
-            ended = ended || (over && !state.finalCardSent());
+            // El STATE que repite la conexión trae el último ROUND_CLOSED ya aplicado (round = rounds, cerrado).
+            boolean lastClosed = rounds != null && state.currentRound() != null
+                    && state.currentRound().intValue() == rounds.intValue()
+                    && state.roundStatus() == EstadoRound.CERRADO;
+            ended = ended || ((over || lastClosed) && !state.finalCardSent());
         } else if (message instanceof RoundClosed closed) {
             if (closed.fightId().equals(fightId) && rounds != null && closed.round() == (int) rounds) {
                 ended = true;

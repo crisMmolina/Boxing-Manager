@@ -55,8 +55,9 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 /**
- * El teléfono estaba desconectado cuando terminó la pelea: al reconectar, el {@code STATE} terminado con
- * {@code finalCardSent = false} hace que mande su tarjeta final sola; si la central se cae antes del {@code ACK},
+ * El teléfono estaba desconectado cuando terminó la pelea, con el round 3 sin {@code ACK}: al reconectar, la bandeja
+ * reenvía el round 3 y, con su {@code ACK} y el {@code STATE} terminado con {@code finalCardSent = false}, el
+ * teléfono manda su tarjeta final sola; si la central se cae antes del {@code ACK},
  * la bandeja la reenvía (la misma, no otra) al volver.
  */
 @RunWith(RobolectricTestRunner.class)
@@ -86,6 +87,8 @@ public class AutoFinalCardReconnectTest {
             if (message instanceof Hello) {
                 ws.send(Messages.encode(new State("F1", 2, "María López", "Roja", "Azul", 3,
                         EstadoPelea.TERMINADA, 3, EstadoRound.CERRADO, List.of(), finalAcked)));
+            } else if (message instanceof SubmitRound) {
+                ws.send(Messages.encode(new Ack(message.id(), true, EstadoTarjeta.ENVIADA, null)));
             } else if (message instanceof SubmitFinalCard card) {
                 finals.add(card);
                 if (dropFirst.getAndSet(false)) {
@@ -111,7 +114,10 @@ public class AutoFinalCardReconnectTest {
         for (int round = 1; round <= 3; round++) {
             SubmitRound submit = new SubmitRound("F1", 2, round, 10, 9);
             outbox.enqueue(submit);
-            outbox.onAck(new Ack(submit.id(), true, EstadoTarjeta.ENVIADA, null));
+            if (round < 3) {
+                // El round 3 se calificó sin conexión: queda en la bandeja sin ACK.
+                outbox.onAck(new Ack(submit.id(), true, EstadoTarjeta.ENVIADA, null));
+            }
         }
         SessionStore store = new SessionStore(db.sessionDao());
         store.saveJoin(server.getHostName(), server.getPort(), "F1", 2, "tok123", "María López");
@@ -143,7 +149,7 @@ public class AutoFinalCardReconnectTest {
     }
 
     @Test
-    public void alReconectarMandaLaTarjetaFinalFirmadaUnaSolaVez() throws Exception {
+    public void alReconectarMandaElUltimoRoundYLuegoLaTarjetaFinalFirmadaUnaSolaVez() throws Exception {
         connection.start();
 
         SubmitFinalCard first = next();
