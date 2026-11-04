@@ -1,12 +1,12 @@
 # crismmolina-1
 Agent: crismmolina-1
 Started: 1793766502
-Events: 21
-Events-Since-Checkpoint: 4
-Checkpoints: 5
+Events: 22
+Events-Since-Checkpoint: 0
+Checkpoints: 6
 Sessions: 4
-Last-Checkpoint: 1793774168
+Last-Checkpoint: 1793776015
 Human: crisMmolina
 Last-Session: crismmolina-1-1793775763
-Updated: 1793775763
+Updated: 1793776015
 Session-Ended: 1793770729
