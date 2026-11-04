@@ -1,5 +1,5 @@
 ID: CORE-008
-State: MERGING
+State: HUMAN
 Owner: crismmolina-4
-Queued: 1793772640
-Reason: Waiting for queue
+Updated: 1793772839
+Reason: Base moved; revalidate the candidate

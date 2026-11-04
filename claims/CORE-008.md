@@ -12,6 +12,6 @@ Verify: `core/gradlew -p core build`
 Lease-Until: 1793857234
 Updated: 1793770834
 Task-Base: 48c7ee02ac8c47aae289f8b4e3393a00bac5555b
-Next: Wait for review of SHA b35f215
+Next: Humano: Base moved; revalidate the candidate
 PR: https://github.com/crisMmolina/Boxing-Manager/pull/82
 Evidence: -
