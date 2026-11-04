@@ -6,7 +6,7 @@
 - Why: respetar Paths; AND-021 rediseña la barra
 - Failing: ninguno
 - Commands: bash .uak/bin/q android/gradlew -p android :app:testDebugUnitTest --tests 'com.sigebox.juez.help.*'
-- Next: Humano: Verify / acceptance red: BUILD FAILED in 724ms (log: /Users/cristophermolina/Documents/Projects/box/.git/worktrees/and-020/uak-out/gate-AND-020-verify-1793771200.log)
+- Next: Humano: Base moved; revalidate the candidate
 
 ## History
 - 1793770402 | CLAIMED | crismmolina-3 | claim; next: prueba de que `TopBar` muestra "?" sin conexión
@@ -15,3 +15,4 @@
 - 1793771001 | REVIEW | crismmolina-3 | checkpoint; next: Wait for review of SHA 6d06186
 - 1793771156 | REVIEW | crismmolina-4 | review; approve; SHA 6d06186b3bf1343f2bd931b1b89509d44c0205c1; reviewer crismmolina-4
 - 1793771200 | REVIEW | crismmolina-3 | merge rechazado; Verify / acceptance red: BUILD FAILED in 724ms (log: /Users/cristophermolina/Documents/Projects/box/.git/worktrees/and-020/uak-out/gate-AND-020-verify-1793771200.log)
+- 1793771923 | REVIEW | crismmolina-3 | merge rechazado; Base moved; revalidate the candidate
