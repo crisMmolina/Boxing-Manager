@@ -63,3 +63,4 @@ Why: a reversible option after 15 min keeps work moving.
 - 1793767813 | DSK-028 | La firma cubre r1 ENVIADA y r2 TARDIA | Why: Es lo que la central reconstruye de sus tarjetas
 - 1793767888 | DSN-004 | Logo: no se descarga hasta que cris elija (msg #189) | Why: Regla de la tarea
 - 1793767877 | DSK-028 | Solo se registra si la tarjeta existente es CAPTURADA | Why: Otros rechazos no tienen captura que comparar
+- 1793768077 | DSN-004 | Logo sin descargar hasta que cris elija | Why: Regla de la tarea
