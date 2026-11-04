@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Esperando aprobación (DESIGN.md v2 §6.3): la huella corta en grande para compararla con la central. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="@dimen/screen_margin">
+
+    <include layout="@layout/view_top_bar_brand" />
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
+
+            <com.google.android.material.loadingindicator.LoadingIndicator
+                android:id="@+id/waiting_loading"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="12dp"
+                android:importantForAccessibility="no"
+                app:indicatorColor="@color/accent" />
+
+            <TextView
+                android:id="@+id/waiting_status"
+                style="@style/Text.Sigebox.CardTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="@string/status_waiting_approval" />
+
+            <TextView
+                android:id="@+id/waiting_seat"
+                style="@style/Text.Sigebox.Body"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center" />
+
+            <TextView
+                style="@style/Text.Sigebox.Support"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:gravity="center"
+                android:text="@string/waiting_fingerprint_label" />
+
+            <TextView
+                android:id="@+id/waiting_fingerprint"
+                style="@style/Text.Sigebox.Number"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textColor="@color/ink"
+                android:textSize="@dimen/fingerprint" />
+
+            <TextView
+                android:id="@+id/waiting_body"
+                style="@style/Text.Sigebox.Support"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:gravity="center"
+                android:text="@string/waiting_body" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/waiting_cancel"
+        style="@style/Widget.Sigebox.Button.Secondary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/waiting_cancel" />
+</LinearLayout>

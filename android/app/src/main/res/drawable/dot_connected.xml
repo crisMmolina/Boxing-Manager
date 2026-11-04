@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Conectado: punto lleno (DESIGN.md v3 §5). Se distingue del anillo por la forma, no solo por el color. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="oval">
+    <solid android:color="@color/connected" />
+    <size android:width="@dimen/dot" android:height="@dimen/dot" />
+</shape>

@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maqueta v4</title>
+<!-- Maqueta estática de DESIGN.md v4 para revisión visual. Solo usa tokens de §3.1 y fuentes empaquetadas. El logo es un marcador: la ilustración aún no se elige. -->
+<style>
+@font-face { font-family: "Barlow Condensed"; font-weight: 700; src: url("../../central/src/main/resources/com/sigebox/central/fonts/BarlowCondensed-Bold.ttf"); }
+@font-face { font-family: "Barlow Condensed"; font-weight: 800; src: url("../../android/app/src/main/res/font/barlow_condensed_extrabold.ttf"); }
+@font-face { font-family: "Inter"; font-weight: 400; src: url("../../central/src/main/resources/com/sigebox/central/fonts/Inter-Regular.ttf"); }
+@font-face { font-family: "Inter"; font-weight: 500; src: url("../../central/src/main/resources/com/sigebox/central/fonts/Inter-Medium.ttf"); }
+@font-face { font-family: "Inter"; font-weight: 600; src: url("../../android/app/src/main/res/font/inter_semibold.ttf"); }
+@font-face { font-family: "Inter"; font-weight: 700; src: url("../../central/src/main/resources/com/sigebox/central/fonts/Inter-Bold.ttf"); }
+.claro { --bg:#FAF9F6; --surface:#FFFFFF; --surface-2:#F2F0EB; --line:#E3DFD7; --ink:#111110; --ink-2:#57534C; --field-border:#8C877D;
+  --primary:#111110; --on-primary:#FFFFFF; --accent:#7A5A2A; --accent-soft:#F3E7CF; --bar:#111110; --on-bar:#F7F5F0; --on-bar-2:#B9B3A8; --bar-accent:#C9A35E;
+  --red:#9F2241; --on-red:#FFFFFF; --blue:#266CB4; --on-blue:#FFFFFF; --connected:#027A35; --disconnected:#57534C; --skeleton:#E9E6DF; --shadow:0 4px 16px rgba(17,17,16,.08); }
+.oscuro { --bg:#0E0E0C; --surface:#1A1917; --surface-2:#24221F; --line:#34312C; --ink:#F5F3EE; --ink-2:#B9B3A8; --field-border:#7D776D;
+  --primary:#D4AF5A; --on-primary:#111110; --accent:#D4AF5A; --accent-soft:#3A3020; --bar:#0E0E0C; --on-bar:#F5F3EE; --on-bar-2:#B9B3A8; --bar-accent:#D4AF5A;
+  --red:#E58A9D; --on-red:#111110; --blue:#8CB8EE; --on-blue:#111110; --connected:#4CC97A; --disconnected:#B9B3A8; --skeleton:#36332E; --shadow:none; }
+* { box-sizing: border-box; }
+body { margin: 0; background: #777; font-family: Inter, sans-serif; display: grid; gap: 24px; padding: 24px; justify-content: start; }
+.tema { background: var(--bg); color: var(--ink); width: 760px; border-radius: 8px; overflow: hidden; }
+.bar { background: var(--bar); color: var(--on-bar); height: 52px; display: flex; align-items: center; gap: 20px; padding: 0 20px; border-bottom: 1px solid var(--bar-accent); }
+.marca { display: flex; align-items: center; gap: 8px; font: 700 22px "Barlow Condensed"; letter-spacing: .02em; color: var(--bar-accent); }
+.logo { width: 28px; height: 28px; border-radius: 50%; border: 1px dashed var(--on-bar-2); font: 500 8px Inter; color: var(--on-bar-2); display: grid; place-items: center; }
+.pasos { display: flex; gap: 18px; font: 600 15px Inter; color: var(--on-bar-2); margin-left: 12px; }
+.pasos .activo { color: var(--on-bar); box-shadow: inset 0 -3px var(--bar-accent); padding-bottom: 14px; margin-bottom: -17px; }
+.der { margin-left: auto; display: flex; gap: 14px; align-items: center; font: 500 14px Inter; color: var(--on-bar-2); }
+.ayuda { width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--on-bar); color: var(--on-bar); display: grid; place-items: center; font: 700 16px Inter; }
+main { padding: 28px 32px; display: grid; gap: 16px; }
+h1 { font: 800 34px "Barlow Condensed"; margin: 0; }
+.fila-titulo { display: flex; align-items: center; justify-content: space-between; }
+.btn { height: 44px; padding: 0 20px; border-radius: 14px; font: 700 16px Inter; border: 0; }
+.btn.primary { background: var(--primary); color: var(--on-primary); }
+.btn.secondary { background: var(--surface-2); color: var(--ink); border: 1px solid var(--field-border); }
+.card { background: var(--surface); border-radius: 24px; padding: 8px 0; box-shadow: var(--shadow); }
+.evento { display: flex; justify-content: space-between; padding: 14px 24px; border-bottom: 1px solid var(--line); }
+.evento:last-child { border-bottom: 0; }
+.evento.sel { background: var(--accent-soft); box-shadow: inset 3px 0 var(--accent); }
+.evento b { font: 600 16px Inter; display: block; }
+.evento small { color: var(--ink-2); font-size: 13px; }
+.sk { background: var(--skeleton); border-radius: 6px; height: 12px; margin: 6px 0; }
+.bloques { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.campo { display: grid; gap: 6px; margin-bottom: 14px; }
+.campo label { font: 600 13px Inter; }
+.campo .input { background: var(--surface); border: 1px solid var(--field-border); border-radius: 12px; height: 44px; padding: 0 14px; display: flex; align-items: center; font: 400 15px Inter; color: var(--ink-2); }
+.campo .input.foco { border: 2px solid var(--accent); outline: 2px solid var(--accent); outline-offset: 2px; color: var(--ink); }
+.campo .input.error { border: 2px solid var(--ink); color: var(--ink); justify-content: space-between; }
+.btn.mini { height: 36px; padding: 0 12px; font: 600 14px Inter; }
+.campo .msg { font: 500 13px Inter; display: flex; gap: 6px; }
+.pad { padding: 20px 24px; }
+.pill { border-radius: 999px; padding: 3px 12px; font: 700 13px Inter; }
+.pill.red { background: var(--red); color: var(--on-red); }
+.pill.blue { background: var(--blue); color: var(--on-blue); }
+.pelea { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 8px 0; color: var(--ink-2); font-size: 14px; }
+.ring { width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--disconnected); display: inline-block; }
+.dot { width: 10px; height: 10px; border-radius: 50%; background: var(--connected); display: inline-block; }
+.link { color: var(--accent); font: 600 14px Inter; }
+</style>
+</head>
+<body>
+<section class="tema claro" aria-label="Tema claro"></section>
+<section class="tema oscuro" aria-label="Tema oscuro"></section>
+<template id="t">
+  <header class="bar">
+    <span class="marca"><span class="logo">logo</span>SIGEBOX</span><span style="font:600 15px Inter;color:var(--on-bar)">⌂ Inicio</span>
+    <nav class="pasos"><span>Evento</span><span class="activo">Jueces</span><span>En vivo</span><span>Resultado</span></nav>
+    <span class="der"><span>Terminación</span><span>Bitácora</span> <span class="ayuda" aria-label="Ayuda de conexión">?</span></span>
+  </header>
+  <main>
+    <div class="fila-titulo"><h1>Eventos</h1><button class="btn primary">Nuevo evento</button></div>
+    <div class="card">
+      <div class="evento sel"><div><b>Noche de box Iztapalapa</b><small>8 peleas · 5 cerradas</small></div><small>3 nov 2026</small></div>
+      <div class="evento"><div><b>Evento 27 oct 2026</b><small>6 peleas · 6 cerradas</small></div><small>27 oct 2026</small></div>
+          </div>
+    <div class="card pad" aria-label="Cargando"><div class="sk" style="width:80%"></div><div class="sk" style="width:60%"></div><div class="sk" style="width:100%"></div></div>
+    <div class="bloques">
+      <div class="card pad">
+        <div class="campo"><label>Nombre (opcional)</label><div class="input">Evento 3 nov 2026</div></div>
+        <div class="campo"><label>Código</label><div class="input foco">12345</div></div>
+        <div class="campo"><label>IP de la central</label><div class="input error">192.168.43 <span aria-hidden="true">⚠</span></div>
+          <span class="msg">⚠ Revisa la IP: le falta un número.</span></div>
+        <button class="btn secondary">Cancelar</button>
+      </div>
+      <div class="card pad">
+        <b style="font:800 24px 'Barlow Condensed'">Pelea 3</b>
+        <div class="pelea"><span class="pill red">Roja</span> Esquina roja 3</div>
+        <div class="pelea"><span class="pill blue">Azul</span> Esquina azul 3</div>
+        <div class="pelea"><span class="dot"></span> Juez 1 · María López</div>
+        <div class="pelea"><span class="ring"></span> Juez 2 · Sin conexión</div>
+        <button class="btn secondary mini">? Cómo reconectar</button>
+      </div>
+    </div>
+  </main>
+</template>
+<script>
+for (const s of document.querySelectorAll(".tema")) s.append(document.getElementById("t").content.cloneNode(true));
+</script>
+</body>
+</html>

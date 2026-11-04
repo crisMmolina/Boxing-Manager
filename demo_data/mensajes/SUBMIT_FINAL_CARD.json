@@ -1,0 +1,9 @@
+{
+  "v": 1,
+  "id": "0000000b-0000-4000-8000-00000000000b",
+  "type": "SUBMIT_FINAL_CARD",
+  "fightId": "pelea-ref-001",
+  "seat": 2,
+  "hash": "65e19d060c0755be1c9b72cf19f772c9230f905fd5d0d02588a6653a467feb4c",
+  "sig": "MEYCIQC4uyau2OmHkxcJi/EtuhEH5dqJqa+kjcINWC9Q7lL5WQIhAIhck6z00qU+sa3l8E93yV0pKzcMT7u5e5pJht9+ZFRn"
+}

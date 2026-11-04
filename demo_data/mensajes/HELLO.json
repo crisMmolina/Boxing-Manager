@@ -1,0 +1,10 @@
+{
+  "v": 1,
+  "id": "00000005-0000-4000-8000-000000000005",
+  "type": "HELLO",
+  "fightId": "pelea-ref-001",
+  "seat": 2,
+  "deviceId": "android-5f2c",
+  "nonce": "IhOx6h86szQuQB14_VKn-A",
+  "sig": "MEQCIG3tzThtSiQp1B9u3FRSBQB/Lffs9wryeyjmsF91MCY1AiByy94sP2fT+5SYD4hXtZYRjtTC/t/RhS7/T9GVpZ2bNw=="
+}

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Cuatro esquinas de 5 dp en dorado (acento) que enmarcan el área de lectura. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="240dp"
+    android:height="240dp"
+    android:viewportWidth="240"
+    android:viewportHeight="240">
+    <path
+        android:pathData="M3,40L3,3L40,3 M200,3L237,3L237,40 M237,200L237,237L200,237 M40,237L3,237L3,200"
+        android:strokeWidth="5"
+        android:strokeColor="@color/accent"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+</vector>

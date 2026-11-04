@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Términos, unión y espera (AND-004). Los textos de estado de conexión son dueños de este archivo (DESIGN.md §8). -->
+<resources>
+    <string name="status_connected">Conectado</string>
+    <string name="status_disconnected">Sin conexión</string>
+    <string name="status_waiting_approval">Esperando aprobación</string>
+
+    <string name="terms_title">Antes de empezar</string>
+    <string name="terms_body">• Tus datos (nombre y calificaciones) se quedan en los equipos del evento.\n\n• No salen de la red local: SIGEBOX no usa internet.\n\n• El organizador conserva las peleas hasta que él mismo las borre.\n\n• Tu teléfono guarda una llave propia para identificarte ante la central; no se comparte.\n\n• Prohibido usar SIGEBOX para apuestas.\n\n• El software es propiedad de sus desarrolladores.</string>
+    <string name="terms_check">Leí y acepto</string>
+    <string name="terms_accept">Aceptar y continuar</string>
+
+    <string name="join_title">Unirme a la pelea</string>
+    <string name="join_name_hint">Tu nombre</string>
+    <string name="join_seat">Lugar: Juez %1$d · Pelea %2$s</string>
+    <string name="join_no_seat">Escanea el QR de tu lugar o escribe el código.</string>
+    <string name="join_scan">Escanear QR</string>
+    <string name="join_manual">Escribir código</string>
+    <string name="join_manual_host_hint">IP de la central (ej. 192.168.43.10)</string>
+    <string name="join_manual_fight_hint">Pelea</string>
+    <string name="join_manual_seat_hint">Lugar</string>
+    <string name="join_manual_code_hint">Código de 6 dígitos</string>
+    <string name="join_submit">Unirme</string>
+    <string name="join_not_sigebox">Este código no es de SIGEBOX</string>
+
+    <string name="join_error_name_empty">Escribe tu nombre</string>
+    <string name="join_error_name_too_long">El nombre es demasiado largo</string>
+    <string name="join_error_host">Revisa la IP de la central</string>
+    <string name="join_error_fight">Escribe la pelea que muestra la central</string>
+    <string name="join_error_seat">El lugar va de 1 a 5</string>
+    <string name="join_error_code">El código tiene 6 dígitos</string>
+
+    <string name="scan_hint">Apunta al QR de tu lugar</string>
+    <string name="scan_permission">Para leer el QR se necesita la cámara. También puedes escribir el código.</string>
+
+    <string name="waiting_seat">Juez %1$d · %2$s</string>
+    <string name="waiting_body">El organizador debe aprobarte en la central.</string>
+    <string name="waiting_fingerprint">%1$s</string>
+    <string name="waiting_fingerprint_label">Huella de este teléfono</string>
+    <string name="waiting_cancel">Cancelar</string>
+    <string name="waiting_back">Volver</string>
+
+    <string name="join_rejected_generic">No fuiste aprobado: el organizador rechazó la solicitud</string>
+    <string name="join_rejected_token_invalid">Código incorrecto. Revisa que sea el de tu lugar.</string>
+    <string name="join_rejected_token_used">No fuiste aprobado: ese código ya se usó</string>
+    <string name="join_rejected_seat_taken">No fuiste aprobado: ese lugar ya está ocupado</string>
+    <string name="join_rejected_bad_signature">No fuiste aprobado: la central no reconoció este teléfono</string>
+    <string name="join_subtitle">Escanea el código de tu lugar en la pantalla del organizador.</string>
+    <string name="join_or_code">o escribe el código</string>
+    <string name="join_wifi_note">Primero conéctate al Wi‑Fi de la función.</string>
+</resources>

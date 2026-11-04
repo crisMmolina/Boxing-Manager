@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- DESIGN.md v3 §3.2: número de 160 sp en pantallas de 400 dp o más. -->
+<resources>
+    <dimen name="score_number">160sp</dimen>
+</resources>

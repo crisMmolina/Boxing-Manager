@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Puntuación, tardío y tarjeta final. Textos de docs/DESIGN.md v2 §8: minúscula con mayúscula inicial. -->
+<resources>
+    <string name="status_pending">Pendiente</string>
+    <string name="status_sending">Enviando…</string>
+    <string name="status_sent">Enviado</string>
+    <string name="status_corrected">Corregido</string>
+    <string name="status_late">Tardío</string>
+    <string name="status_round_open">Round abierto</string>
+    <string name="status_round_sent">Round enviado</string>
+    <string name="status_waiting_round">Esperando round</string>
+
+    <string name="score_header">Juez %1$d · %2$s</string>
+    <string name="score_judge">Juez %1$d</string>
+    <string name="score_title_waiting">Esperando round</string>
+    <string name="score_round_of">Round %1$d de %2$d</string>
+    <string name="score_round">Round %1$d</string>
+    <string name="score_red">Roja</string>
+    <string name="score_blue">Azul</string>
+    <string name="corner_red">Roja</string>
+    <string name="corner_blue">Azul</string>
+    <string name="corner_red_lower">roja</string>
+    <string name="corner_blue_lower">azul</string>
+    <string name="not_seated_title">No participas en esta pelea</string>
+    <string name="not_seated_support">Espera: cuando te toque, esta pantalla pasa sola a la puntuación.</string>
+    <string name="score_empty">—</string>
+    <string name="score_empty_a11y">sin valor</string>
+    <string name="score_minus_a11y">Restar un punto a la esquina %1$s, valor actual %2$s</string>
+    <string name="score_plus_a11y">Sumar un punto a la esquina %1$s, valor actual %2$s</string>
+    <string name="score_backspace">Borrar</string>
+    <string name="score_send">Enviar round</string>
+    <string name="score_send_n">Enviar round %1$d</string>
+    <string name="score_sent_n">Round %1$d enviado</string>
+    <string name="score_correct">Corregir</string>
+    <string name="score_waiting_start">Espera con la app abierta: podrás calificar cuando abran el primer round.</string>
+    <string name="score_waiting_open">Espera con la app abierta: podrás calificar cuando abran el round %1$d.</string>
+    <string name="score_waiting_next">Espera con la app abierta a que abran el siguiente round.</string>
+    <string name="score_offline">Sin conexión. Tus puntos se guardan y se envían al reconectar.</string>
+
+    <string name="confirm_title">¿Enviar este round?</string>
+    <string name="confirm_send">Enviar</string>
+    <string name="confirm_review">Revisar</string>
+    <string name="confirm_a11y">Round %1$d: roja %2$d, azul %3$d</string>
+
+    <string name="a11y_connected">conectado</string>
+    <string name="a11y_disconnected">sin conexión</string>
+
+    <string name="final_title">Pelea terminada</string>
+    <string name="final_col_round">Round</string>
+    <string name="final_col_status">Estado</string>
+    <string name="final_body">Revisa tu tarjeta. Al enviarla ya no podrás corregir.</string>
+    <string name="final_wait_acks">Espera a que la central confirme todos tus rounds.</string>
+    <string name="final_send">Enviar tarjeta final</string>
+    <string name="final_sent">Tarjeta final enviada</string>
+    <string name="final_body_sent">La central recibió tu tarjeta.</string>
+    <string name="final_retry">No se pudo enviar. Intenta de nuevo.</string>
+    <string name="final_row_round">R%1$d</string>
+    <string name="final_row_score">%1$d – %2$d</string>
+    <string name="final_error">La central no aceptó la tarjeta (%1$s).</string>
+
+    <!-- Espera de aprobación (join/WaitingActivity): una frase con qué hacer (spec 003). -->
+    <string name="waiting_approval_todo">Pide a la mesa que te apruebe en la central: esta pantalla avanza sola.</string>
+
+    <!-- ui/ErrorText: una frase con qué hacer por cada Ack.Error; nunca el código (spec 003). -->
+    <string name="error_malformed">La central no entendió el envío: vuelve a enviarlo y, si se repite, avisa a la mesa.</string>
+    <string name="error_not_approved">Pide a la mesa que apruebe este teléfono en la central y vuelve a enviar.</string>
+    <string name="error_bad_signature">La central no reconoció este teléfono: avisa a la mesa para que te vuelva a unir.</string>
+    <string name="error_wrong_session">Este teléfono no está en esta pelea: avisa a la mesa para que te una de nuevo.</string>
+    <string name="error_invalid_score">Los puntos no son válidos: revisa las dos esquinas y vuelve a enviar.</string>
+    <string name="error_round_not_open">El round ya estaba cerrado y no se registró: si la mesa la necesita, te la pedirá como round tardío.</string>
+    <string name="error_fight_not_active">La pelea ya no está en curso: espera las indicaciones de la mesa.</string>
+    <string name="error_already_final">Tu tarjeta final ya se envió: ya no se puede corregir.</string>
+</resources>
