@@ -164,4 +164,26 @@ class JudgeHubHandoffTest {
         assertEquals(guardado, resultados.stored(p1.id()).orElseThrow());
         assertEquals(EstadoPelea.CERRADA, new PeleaRepository(db).find(p1.id()).orElseThrow().estado());
     }
+
+    @Test
+    void laTarjetaFinalLlegaPorElTraspasoTrasUnaTerminacion() throws Exception {
+        var p1 = primeraPelea();
+        var a = new Phone("A-1");
+        var guardado = cerradaPorTerminacion(p1.id(), a, new Phone("B-2"));
+
+        var c = vuelve(p1.id(), a, 1);
+        send(c, submit(p1.id(), 1, 2, 7, 10));
+        var own = List.of(new State.OwnCard(1, 10, 9, EstadoTarjeta.ENVIADA),
+                new State.OwnCard(2, 7, 10, EstadoTarjeta.TARDIA));
+        var hash = FinalCardHash.of(p1.id(), 1, own);
+        var sig = DeviceProof.sign(a.keys.getPrivate(), DeviceProof.finalCardText(p1.id(), 1, own));
+        send(c, new SubmitFinalCard(p1.id(), 1, hash, sig));
+
+        var ack = assertInstanceOf(Ack.class, c.last());
+        assertTrue(ack.ok(), String.valueOf(ack.error()));
+        assertEquals(1, new TarjetaFinalRepository(db).byPelea(p1.id()).size());
+        assertEquals(sig, new TarjetaFinalRepository(db).signature(p1.id(), 1).orElseThrow());
+        assertEquals(1, bitacora(p1.id(), "SUBMIT_FINAL_CARD").size());
+        assertEquals(guardado, resultados.stored(p1.id()).orElseThrow());
+    }
 }
