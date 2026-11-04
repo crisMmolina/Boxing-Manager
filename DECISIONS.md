@@ -58,3 +58,4 @@ Why: a reversible option after 15 min keeps work moving.
 - 1793261499 | DSK-022 | STATE sin totales y NEXT_FIGHT sobre conexión de traspaso | Why: el teléfono solo vacía bandeja tras STATE y difiere NEXT_FIGHT con pendientes
 - 1793767379 | AND-017 | Registrar en JudgeRuntime; mantener 10–10 inicial | Why: Sin pantalla; no editar ScreenDesignTest
 - 1793767493 | DSK-025 | Traducir solo al mostrar; LabelsTest escanea src/main/java | Why: spec 003: la BD sigue con códigos; nada queda sin traducir
+- 1793767705 | CORE-007 | Solo se agregan 4 samples a la lista de mensajesConstruidosEnJavaPasanSuSchema | Why: El guard values().length+1 obliga; CORE-005 hizo igual

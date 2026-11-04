@@ -9,13 +9,13 @@ Priority: P0
 Paths: core/schemas/, core/src/main/java/com/sigebox/core/protocol/, core/src/test/java/com/sigebox/core/protocol/, demo_data/mensajes/
 Depends: CORE-006, CORE-002, CORE-005
 Verify: `core/gradlew -p core build`
-Lease-Until: 1793781788
-Updated: 1793767388
+Lease-Until: 1793782105
+Updated: 1793767705
 Task-Base: 48c7ee02ac8c47aae289f8b4e3393a00bac5555b
-Next: fixture `CODE_LOOKUP.json` y caso en `ProtocolSchemaTest` que falla
+Next: JoinUri forma c con prueba primero
 PR: -
 Evidence: -
-Events: 1
-Checkpoints: 0
+Events: 2
+Checkpoints: 1
 Sessions: 1
-Last-Checkpoint: 0
+Last-Checkpoint: 1793767705
