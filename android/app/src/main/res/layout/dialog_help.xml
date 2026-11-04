@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Hoja "Recuperar la conexión" (DESIGN.md v4 §5.8): IP y estado actuales, pasos del teléfono y después de la central. -->
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <TextView
+            android:id="@+id/help_title"
+            style="@style/Text.Sigebox.CardTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/help_title" />
+
+        <TextView
+            android:id="@+id/help_state"
+            style="@style/Text.Sigebox.Body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp" />
+
+        <TextView
+            android:id="@+id/help_host"
+            style="@style/Text.Sigebox.Body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textIsSelectable="true" />
+
+        <TextView
+            style="@style/Text.Sigebox.CardTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="@string/help_phone_heading"
+            android:textColor="@color/accent" />
+
+        <TextView
+            android:id="@+id/help_phone_steps"
+            style="@style/Text.Sigebox.Body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/help_phone_steps" />
+
+        <TextView
+            style="@style/Text.Sigebox.CardTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="@string/help_central_heading"
+            android:textColor="@color/accent" />
+
+        <TextView
+            android:id="@+id/help_central_steps"
+            style="@style/Text.Sigebox.Body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/help_central_steps" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/help_done"
+            style="@style/Widget.Sigebox.Button.Primary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="@string/help_done" />
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>
