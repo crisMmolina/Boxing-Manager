@@ -1,0 +1,72 @@
+{
+  "demo_data": true,
+  "descripcion": "demo_data/pelea_referencia.json con 4 descuentos, resultado calculado a mano. Tarjetas originales (rojo-azul): J1 10-9, 9-10, 10-9, 10-9; J2 9-10, 9-10, 10-9, 9-10; J3 10-9, 10-9, 9-10, 10-9. Vigentes: dos a la roja en el round 1 y uno a la azul en el round 3. El de la roja en el round 2 está anulado; si contara, J1 y J3 empatarían 36-36 y ganaría la azul.",
+  "descuentos": [
+    { "id": 1, "fightId": "pelea-ref-001", "round": 1, "esquina": "ROJA", "puntos": 1, "anulado": false },
+    { "id": 2, "fightId": "pelea-ref-001", "round": 1, "esquina": "ROJA", "puntos": 1, "anulado": false },
+    { "id": 3, "fightId": "pelea-ref-001", "round": 3, "esquina": "AZUL", "puntos": 1, "anulado": false },
+    { "id": 4, "fightId": "pelea-ref-001", "round": 2, "esquina": "ROJA", "puntos": 1, "anulado": true, "motivoAnulacion": "Aplicado a la esquina equivocada" }
+  ],
+  "esperado": {
+    "peleaId": "pelea-ref-001",
+    "totales": [
+      {
+        "juez": 1,
+        "nombre": "Ana Torres",
+        "rojo": 37,
+        "azul": 36,
+        "ganador": "ROJA",
+        "rounds": [
+          { "round": 1, "rojo": 8, "azul": 9 },
+          { "round": 2, "rojo": 9, "azul": 10 },
+          { "round": 3, "rojo": 10, "azul": 8 },
+          { "round": 4, "rojo": 10, "azul": 9 }
+        ],
+        "descuentos": [
+          { "id": 1, "fightId": "pelea-ref-001", "round": 1, "esquina": "ROJA", "puntos": 1, "anulado": false },
+          { "id": 2, "fightId": "pelea-ref-001", "round": 1, "esquina": "ROJA", "puntos": 1, "anulado": false },
+          { "id": 3, "fightId": "pelea-ref-001", "round": 3, "esquina": "AZUL", "puntos": 1, "anulado": false }
+        ]
+      },
+      {
+        "juez": 2,
+        "nombre": "María López",
+        "rojo": 35,
+        "azul": 38,
+        "ganador": "AZUL",
+        "rounds": [
+          { "round": 1, "rojo": 7, "azul": 10 },
+          { "round": 2, "rojo": 9, "azul": 10 },
+          { "round": 3, "rojo": 10, "azul": 8 },
+          { "round": 4, "rojo": 9, "azul": 10 }
+        ],
+        "descuentos": [
+          { "id": 1, "fightId": "pelea-ref-001", "round": 1, "esquina": "ROJA", "puntos": 1, "anulado": false },
+          { "id": 2, "fightId": "pelea-ref-001", "round": 1, "esquina": "ROJA", "puntos": 1, "anulado": false },
+          { "id": 3, "fightId": "pelea-ref-001", "round": 3, "esquina": "AZUL", "puntos": 1, "anulado": false }
+        ]
+      },
+      {
+        "juez": 3,
+        "nombre": "Luis Ramírez",
+        "rojo": 37,
+        "azul": 36,
+        "ganador": "ROJA",
+        "rounds": [
+          { "round": 1, "rojo": 8, "azul": 9 },
+          { "round": 2, "rojo": 10, "azul": 9 },
+          { "round": 3, "rojo": 9, "azul": 9 },
+          { "round": 4, "rojo": 10, "azul": 9 }
+        ],
+        "descuentos": [
+          { "id": 1, "fightId": "pelea-ref-001", "round": 1, "esquina": "ROJA", "puntos": 1, "anulado": false },
+          { "id": 2, "fightId": "pelea-ref-001", "round": 1, "esquina": "ROJA", "puntos": 1, "anulado": false },
+          { "id": 3, "fightId": "pelea-ref-001", "round": 3, "esquina": "AZUL", "puntos": 1, "anulado": false }
+        ]
+      }
+    ],
+    "ganador": "ROJA",
+    "tipo": "DIVIDIDA",
+    "conteo": { "enviadas": 11, "tardias": 1, "capturadas": 0, "corregidas": 0 }
+  }
+}

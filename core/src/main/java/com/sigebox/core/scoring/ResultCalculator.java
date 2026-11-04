@@ -1,5 +1,6 @@
 package com.sigebox.core.scoring;
 
+import com.sigebox.core.model.Descuento;
 import com.sigebox.core.model.Esquina;
 import com.sigebox.core.model.EstadoRound;
 import com.sigebox.core.model.Ganador;
@@ -30,6 +31,9 @@ import java.util.TreeSet;
  *   <li>Sin terminación cuentan todos los rounds, que deben estar cerrados. Con terminación cuentan solo los rounds
  *       cerrados anteriores a {@code terminacion.round()}: en decisión técnica el resultado sale de esas tarjetas;
  *       con otro motivo lo da el motivo.
+ *   <li>Cada descuento vigente resta 1 a su esquina en su round, en la tarjeta de cada juez y sin bajar de 0 (ADR 0005).
+ *       Los anulados y los de rounds que no cuentan no restan. Las firmas y las tarjetas guardadas no cambian: el
+ *       descuento solo existe en este cálculo.
  * </ul>
  *
  * <p>{@code Terminacion.round} es el round en que se detuvo la pelea; ese round no cuenta aunque esté cerrado. Un
@@ -48,8 +52,30 @@ public final class ResultCalculator {
      */
     public static Resultado calcular(Pelea pelea, List<LugarJuez> lugares, List<Round> rounds,
             List<TarjetaRound> tarjetas, Terminacion terminacion) {
+        return calcular(pelea, lugares, rounds, tarjetas, terminacion, Collections.emptyList(), false);
+    }
+
+    /**
+     * Como {@link #calcular(Pelea, List, List, List, Terminacion)}, con descuentos. Los totales, el fallo de cada juez,
+     * el ganador y el tipo salen de los puntos ya descontados, y cada {@link Resultado.TotalJuez} trae además el
+     * desglose por round y sus descuentos aplicados, aunque la lista venga vacía. La firma sin descuentos da los mismos
+     * totales y decisión que una lista vacía, pero sin desglose.
+     *
+     * @param descuentos todos los de la pelea, anulados incluidos
+     * @throws IllegalArgumentException además, si un descuento es de otra pelea, no tiene esquina, su round está fuera
+     *     de rango o no vale {@link Descuento#PUNTOS}
+     */
+    public static Resultado calcular(Pelea pelea, List<LugarJuez> lugares, List<Round> rounds,
+            List<TarjetaRound> tarjetas, Terminacion terminacion, List<Descuento> descuentos) {
+        Objects.requireNonNull(descuentos, "descuentos");
+        return calcular(pelea, lugares, rounds, tarjetas, terminacion, descuentos, true);
+    }
+
+    private static Resultado calcular(Pelea pelea, List<LugarJuez> lugares, List<Round> rounds,
+            List<TarjetaRound> tarjetas, Terminacion terminacion, List<Descuento> descuentos, boolean desglose) {
         Objects.requireNonNull(pelea, "pelea");
         validarTerminacion(pelea, terminacion);
+        List<Descuento> aRestar = descuentosVigentes(pelea, descuentos);
         TreeSet<Integer> contados = roundsContados(pelea, rounds, terminacion);
         Map<Integer, TarjetaRound> vigentes = vigentes(pelea, tarjetas);
 
@@ -63,13 +89,30 @@ public final class ResultCalculator {
         for (int juez = 1; juez <= pelea.jueces(); juez++) {
             int rojo = 0;
             int azul = 0;
+            List<Resultado.RoundJuez> porRound = new ArrayList<>();
+            List<Descuento> aplicados = new ArrayList<>();
             for (int round : contados) {
                 TarjetaRound t = vigentes.get(clave(juez, round));
                 if (t == null) {
                     throw new IllegalArgumentException("falta la tarjeta del juez " + juez + " en el round " + round);
                 }
-                rojo += t.rojo();
-                azul += t.azul();
+                int puntosRojo = t.rojo();
+                int puntosAzul = t.azul();
+                for (Descuento d : aRestar) {
+                    if (d.round() != round) {
+                        continue;
+                    }
+                    if (d.esquina() == Esquina.ROJA && puntosRojo > 0) {
+                        puntosRojo -= d.puntos();
+                        aplicados.add(d);
+                    } else if (d.esquina() == Esquina.AZUL && puntosAzul > 0) {
+                        puntosAzul -= d.puntos();
+                        aplicados.add(d);
+                    }
+                }
+                rojo += puntosRojo;
+                azul += puntosAzul;
+                porRound.add(new Resultado.RoundJuez(round, puntosRojo, puntosAzul));
                 switch (t.estado()) {
                     case ENVIADA:
                         enviadas++;
@@ -91,7 +134,9 @@ public final class ResultCalculator {
             } else if (fallo == Ganador.AZUL) {
                 porAzul++;
             }
-            totales.add(new Resultado.TotalJuez(juez, nombre(lugares, juez), rojo, azul, fallo));
+            totales.add(desglose
+                    ? new Resultado.TotalJuez(juez, nombre(lugares, juez), rojo, azul, fallo, porRound, aplicados)
+                    : new Resultado.TotalJuez(juez, nombre(lugares, juez), rojo, azul, fallo));
         }
         Resultado.Conteo conteo = new Resultado.Conteo(enviadas, tardias, capturadas, corregidas);
         List<Resultado.TotalJuez> lista = Collections.unmodifiableList(totales);
@@ -118,6 +163,22 @@ public final class ResultCalculator {
                 && (terminacion.textoOtro() == null || terminacion.textoOtro().trim().isEmpty())) {
             throw new IllegalArgumentException("el motivo Otro exige una razón escrita");
         }
+    }
+
+    private static List<Descuento> descuentosVigentes(Pelea pelea, List<Descuento> descuentos) {
+        List<Descuento> out = new ArrayList<>();
+        for (Descuento d : descuentos) {
+            if (!pelea.id().equals(d.fightId()) || d.esquina() == null) {
+                throw new IllegalArgumentException("descuento " + d.id() + " de otra pelea o sin esquina");
+            }
+            if (d.round() < 1 || d.round() > pelea.rounds() || d.puntos() != Descuento.PUNTOS) {
+                throw new IllegalArgumentException("descuento " + d.id() + " con round o puntos fuera de rango");
+            }
+            if (!d.anulado()) {
+                out.add(d);
+            }
+        }
+        return out;
     }
 
     private static Ganador porMotivo(Terminacion terminacion) {
