@@ -960,6 +960,7 @@ En Windows (zoe) los comandos `Verify` se corren en Git Bash.
   - Todo campo de formulario de la central usa el campo de DSK-026 (etiqueta arriba, ejemplo dentro); prueba que recorre las pantallas y no encuentra un `TextField`/`Spinner`/`DatePicker` sin `Label` asociado
   - Cada pantalla muestra una línea "Qué sigue"; todo botón deshabilitado dice por qué
   - `HelpButton.connection(...)` (DSK-026) junto a cada juez desconectado en Jueces (`SetupScreen`) y En vivo (`RoundsScreen`); prueba
+  - Jueces (`SetupScreen`) muestra el QR con `QrCode` e `Invitation.qrUri()` (forma `c=código`, ADR 0004) de DSK-033; prueba: el QR mostrado se decodifica al URI nuevo
   - Ningún código en mayúsculas ni enum visible (prueba con `ScreenshotHarness` o el árbol de nodos); "Función" no aparece en ninguna pantalla
   - Evidencia: capturas de un evento completo de 2 peleas con judge-sim (rama `evidence/dsk-027`), revisadas con `design-critic`
 - **Verify:** `central/gradlew -p central test`
