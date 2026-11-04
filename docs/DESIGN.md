@@ -24,6 +24,7 @@ Guía visual y de experiencia de las dos apps: la del juez (Android, `android/`)
 | "Ver resumen parcial" en En vivo | Se quita (principio 3) |
 | Unirse: IP, pelea, lugar y código | Nombre, Código (6 dígitos) e IP, con "Escanear QR" como acción principal (§6.2) |
 | Tarjeta final con botón "Enviar tarjeta final" | Se envía sola; el teléfono muestra "Espera la siguiente pelea" o "El evento terminó" (§6.5) |
+| Cada round empezaba en 10–10 | **Sin valor por defecto** (decisión de cris, 2026-11-03; principio 2): al abrir un round el número muestra «—» y el juez toca + o − en cada esquina antes de enviar (§5.9) |
 | Errores con texto | Errores neutros: ícono de alerta + texto + borde de 2 px en `ink`. **Nunca rojo**, porque el rojo es de la esquina roja (§5.4) |
 
 Se conserva de la v3: Barlow Condensed recta e Inter; guinda y azul de la CDMX solo para las esquinas (mismos valores y misma medición de daltonismo); superficies sólidas tonales, sin cristal; el punto de conexión que cambia de forma; los botones − y + de 76 dp con háptica; Material 3 Expressive en Android; la rejilla bento de la central.
@@ -183,10 +184,10 @@ Rejilla de 4: 4, 8, 12, 16, 20, 24, 32, 40 y 56. Margen de 20 dp en el teléfono
 ### 3.6 Logo
 
 - **Qué es:** una ilustración de guantes de box rojos, estilo caricatura, con licencia CC0 (dominio público). Fuente, autor, URL y licencia verificada en `docs/design/CREDITOS.md`. El archivo elegido vive en `docs/design/logo/` (SVG, o PNG ≥ 1024 px) y se copia a cada app; nada se descarga en ejecución.
-- **Estado:** cris elige entre las opciones de `CREDITOS.md`. Hasta entonces las apps no cambian de marca.
+- **Elegido (cris, 2026-11-03):** opción B, par de guantes rojos colgando de sus cordones, `docs/design/logo/guantes-colgando.svg`. En la pantalla de carga el «medio animado» es un balanceo leve desde los cordones (§3.7).
 - **Composición (lockup):** guantes a la izquierda + SIGEBOX en Barlow Condensed 700 `bar_accent`, separados 8 px. Altura del logo = 1.4 × la altura de la «S».
 - **Versión chica (≤ 32 px):** para la barra y los íconos pequeños se prepara una versión simplificada (un solo guante o la silueta del par, sin brillos ni trazos finos). Se prueba sobre la barra negra a 28 px antes de darla por buena.
-- **Limpieza:** si la ilustración trae texto (p. ej., «BOXE»), se quita en el SVG antes de usarla. Se permite simplificar trazos para tamaños chicos; no se cambia el rojo por otro color de la interfaz.
+- **Limpieza:** si la ilustración trae texto, se quita en el SVG antes de usarla. Se permite simplificar trazos para tamaños chicos; no se cambia el rojo por otro color de la interfaz.
 - **Usos:**
 
 | Lugar | Tamaño | Fondo |
@@ -203,7 +204,7 @@ Rejilla de 4: 4, 8, 12, 16, 20, 24, 32, 40 y 56. Margen de 20 dp en el teléfono
 
 - **Android:** resortes Material 3 (`Motion.Material3.Spring.Standard.Fast.Spatial` para posición y tamaño, `...Fast.Effects` para color y opacidad). Rebote Expressive solo en − y +.
 - **Central:** transiciones de 150 a 200 ms con salida suave (`Interpolator.EASE_OUT`).
-- **Logo «medio animado»** (solo en la pantalla de carga): los guantes entran con un *jab*: escala de 0.92 a 1.0 y giro de −6° a 0° en 420 ms con resorte, y después una «respiración» de escala 1.0 ↔ 1.03 cada 1.6 s mientras carga. En la barra superior el logo **no** se mueve.
+- **Logo «medio animado»** (solo en la pantalla de carga): los guantes entran con un balanceo desde los cordones: giro de −8° a 0° en 420 ms con resorte (eje en el punto donde cuelgan), y después un vaivén de ±2° cada 1.6 s mientras carga. En la barra superior el logo **no** se mueve.
 - **Skeleton:** un brillo que recorre el bloque de izquierda a derecha cada 1.4 s (opacidad 0.6 ↔ 1.0).
 - **Movimiento reducido** (`ANIMATOR_DURATION_SCALE` = 0 en Android; ajuste "Reducir movimiento" en la central): el logo aparece quieto con un fundido de 150 ms; el skeleton queda fijo, sin brillo; solo cambian opacidades.
 - **Háptica:** vibración corta al tocar − o +, al enviar y al abrirse un round (`HapticFeedbackConstants`); nada de sonidos.
@@ -243,7 +244,7 @@ Rejilla de 4: 4, 8, 12, 16, 20, 24, 32, 40 y 56. Margen de 20 dp en el teléfono
 ```
 ┌──────────────────────────────┐
 │                              │
-│           (guantes)          │  logo 160 dp, jab + respiración (§3.7)
+│           (guantes)          │  logo 160 dp, balanceo (§3.7)        
 │           SIGEBOX            │  Barlow 700, 32, ink
 │    ────────────────────      │  barra de progreso indeterminada, 2 dp, accent
 │    Abriendo la base…         │  Inter 13, ink_2 (central) · "Preparando…" (juez)
@@ -326,7 +327,12 @@ Código                         ← etiqueta: Inter 600, ink, siempre visible
 
 ### 5.9 Botones − y +
 
-Sin cambios de la v3: 76 dp (mínimo 64), − en `surface_2` con ícono `ink`, + con relleno de la esquina; se aplanan con resorte y vibración; deshabilitados al 0.38; mantener presionado no repite; descripción "Restar un punto a la esquina roja, valor actual 10".
+76 dp (mínimo 64), − en `surface_2` con ícono `ink`, + con relleno de la esquina; se aplanan con resorte y vibración; deshabilitados al 0.38; mantener presionado no repite.
+
+- **Sin valor por defecto** (decisión de cris, 2026-11-03; `PROJECT.md` principio 2). Al abrir un round **no** se pone 10–10: cada esquina muestra «—» en `ink_2` (mismo tamaño que el número) y el apoyo "Toca + o − en cada esquina." El juez tiene que tocar + o − en **las dos** esquinas antes de enviar. El valor que da el primer toque lo fija la app según la spec 003; la guía no lo define.
+- "Enviar round N" queda deshabilitado mientras alguna esquina siga en «—», con la línea de apoyo "Falta puntuar la esquina azul." (o roja).
+- Rango 0–10: − se deshabilita en 0 y + en 10. Con «—», los dos están habilitados.
+- Descripción accesible: "Sumar un punto a la esquina roja, sin valor" o "…, valor actual 9".
 
 ### 5.10 Avisos
 
@@ -369,7 +375,7 @@ Pantalla de carga (§5.1) → Términos en el primer uso (texto en tarjeta con d
 Tarjeta con `LoadingIndicator`, "Esperando aprobación" y la huella corta en Barlow 800 40 sp.
 
 ### 6.4 Puntuar y round tardío
-Como en la v3 (tarjeta doble, hoja "¿Enviar este round?", "Round 4 enviado", "Califica el round 3"), con la barra negra y el progreso de rounds de §5.7. Mientras espera el primer `STATE`: skeleton de dos tarjetas de esquina.
+Como en la v3 (tarjeta doble, hoja "¿Enviar este round?", "Round 4 enviado", "Califica el round 3"), con la barra negra y el progreso de rounds de §5.7, **pero cada round abre sin valor** («—» en las dos esquinas, §5.9); también el round tardío. Mientras espera el primer `STATE`: skeleton de dos tarjetas de esquina.
 
 ### 6.5 Al terminar una pelea
 - **Hay siguiente pelea:** pantalla "Espera la siguiente pelea" con un `LoadingIndicator`, y, si se conocen, las píldoras "Roja" / "Azul" con los nombres de la siguiente. Sin botones.
@@ -462,5 +468,6 @@ Guinda `#9F2241` (Pantone 7420 C), azul `#266CB4` (285 C), verde `#027A35` (356 
 - [ ] El "?" está en la barra y junto a cada "Sin conexión", y abre la guía sin internet.
 - [ ] Inicio lista los eventos con fecha, peleas y cerradas, y tiene "Nuevo evento".
 - [ ] La barra de pasos dice Evento · Jueces · En vivo · Resultado, con el paso activo marcado en dorado.
+- [ ] Al abrir un round el teléfono muestra «—», no 10–10, y no deja enviar hasta tocar + o − en las dos esquinas.
 - [ ] Un juez nunca ve tarjetas de otro ni su total; la central no muestra totales ni ganador durante la pelea.
 - [ ] La central se opera con teclado y el foco es visible en los dos temas.

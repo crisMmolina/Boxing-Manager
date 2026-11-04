@@ -11,7 +11,7 @@ Todo recurso de terceros que usen las apps queda aquí con su origen y su licenc
 
 ## Logo: guantes de box rojos (DSN-004)
 
-**Estado: pendiente de elección de cris.** No se ha descargado ninguna imagen. Se preguntó con `uak msg human` (#189) el 2026-11-03.
+**Estado: elegida la opción B** (ver «Elegida»). Se preguntó con `uak msg human` (#189) el 2026-11-03 y no se descargó nada antes de la respuesta.
 
 ### Licencia de la fuente
 
@@ -32,4 +32,14 @@ Formatos que ofrece cada página: SVG y PNG de 400, 800 y 2000 px. Se usará el 
 
 ### Elegida
 
-_Pendiente._ Cuando cris elija: descargar el SVG de esa página a `docs/design/logo/guantes.svg`, anotar aquí la fecha de descarga, el autor, la URL y «CC0 1.0 (Openclipart)», y describir cualquier cambio hecho (por ejemplo, quitar el texto «BOXE»).
+**B · «Burning boxing gloves»**, de ksrujana96 en Openclipart. Elegida por cris el 2026-11-03 (respuesta textual: «B · Par colgando»).
+
+| Campo | Valor |
+|---|---|
+| Archivo | `docs/design/logo/guantes-colgando.svg` (SVG original, sin cambios) |
+| URL de origen | https://openclipart.org/detail/171575/burning-boxing-gloves |
+| Descarga | https://openclipart.org/download/171575, el 2026-11-03 (30 859 bytes, `image/svg+xml`) |
+| Autor | ksrujana96 (Openclipart), subido el 2012-08-09 |
+| Licencia | CC0 1.0 / dominio público (https://openclipart.org/share). Los metadatos del SVG apuntan a http://creativecommons.org/licenses/publicdomain/ y permiten reproducción, distribución y obras derivadas |
+| Atribución | No obligatoria; se deja aquí como registro |
+| Cambios | Ninguno todavía. Las versiones para la barra (≤ 32 px) y el ícono (DESIGN.md §3.6) serán derivadas y se anotarán aquí |
