@@ -76,3 +76,4 @@ Why: a reversible option after 15 min keeps work moving.
 - 1793771001 | AND-020 | ? agregado desde TopBar.java (view_top_bar.xml fuera de Paths) | Why: respetar Paths; AND-021 rediseña la barra
 - 1793771169 | DSK-026 | logo y guía en resources/com/sigebox/central/ui/theme y ui/help (img/ es de DSK-029), comparados byte a byte con docs/design | Why: Paths no listan carpeta de recursos y JavaFX no carga SVG
 - 1793771544 | DSK-023 | App.java:67 queda para DSK-029 por estar fuera de Paths | Why: Paths de DSK-023 no incluye App.java
+- 1793771757 | DSK-026 | recursos en resources/.../ui/theme y ui/help | Why: JavaFX no carga SVG; img/ es de DSK-029
