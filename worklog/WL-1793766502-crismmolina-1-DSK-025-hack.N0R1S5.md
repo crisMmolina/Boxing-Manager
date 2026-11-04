@@ -6,7 +6,7 @@
 - Why: spec 003: la BD sigue con códigos; nada queda sin traducir
 - Failing: none
 - Commands: central/gradlew -p central test --tests 'com.sigebox.central.ui.*' --tests 'com.sigebox.central.export.*'
-- Next: Wait for review of SHA acebeed
+- Next: Integrated in main: 839a37937c02a019da125d1498a9122092dca7c8
 
 ## History
 - 1793766502 | CLAIMED | crismmolina-1 | claim; next: `LabelsTest` que recorre `EstadoTarjeta.values()`
@@ -15,3 +15,4 @@
 - 1793767493 | REVIEW | crismmolina-1 | checkpoint; next: Wait for review of SHA acebeed
 - 1793769157 | REVIEW | crismmolina-4 | review; approve; SHA acebeedee829eca00e3dfe0b2e842a99b50957fe; reviewer crismmolina-4
 - 1793769511 | REVIEW | crismmolina-1 | heartbeat; lease until 1793855911
+- 1793769834 | INTEGRATED | crismmolina-1 | merge; smoke and Verify PASS; commit 839a37937c02a019da125d1498a9122092dca7c8; reviewer crismmolina-4
