@@ -1,7 +1,7 @@
 # STATE
 
 Phase: execution
-Updated: 1793770421
+Updated: 1793770472
 AVAILABLE: DSK-024 DSK-027 DOC-001 DSK-029 DSK-030 DSK-031 DSK-032 DSK-033 AND-018 AND-019 AND-021 QA-004 
 CLAIMED: AND-020 CORE-008 DSK-023 DSK-026 
 BLOCKED: -
@@ -14,7 +14,7 @@ AND-020 | CLAIMED | crismmolina-3 | until 1793784802
 CORE-007 | REVIEW | zoe-2 | until 1793856204
 CORE-008 | CLAIMED | zoe-3 | until 1793781795
 DSK-023 | CLAIMED | zoe-1 | until 1793782568
-DSK-026 | CLAIMED | crismmolina-1 | until 1793784821
+DSK-026 | CLAIMED | crismmolina-1 | until 1793784872
 DSK-028 | REVIEW | zoe-4 | until 1793856166
 
 Blockers: BLOCKED tasks; use status --task ID --summary.
