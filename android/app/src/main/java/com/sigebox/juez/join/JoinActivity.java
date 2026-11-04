@@ -3,6 +3,8 @@ package com.sigebox.juez.join;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextWatcher;
@@ -49,6 +51,13 @@ public class JoinActivity extends AppCompatActivity {
     /** El QR está llenando los campos: no cuenta como escritura a mano. */
     private boolean filling;
     private JudgeConnection listening;
+    /** Sin respuesta en este tiempo se avisa; está muy por arriba de los reintentos de la conexión. */
+    static final long LOOKUP_TIMEOUT_MS = 10_000;
+    /** Huella de la central que traía el QR nuevo; escribir otra IP u otro código la deja de lado. */
+    private String scannedPin;
+    private boolean lookupFailed;
+    private final Handler timeouts = new Handler(Looper.getMainLooper());
+    private final Runnable lookupTimeout = this::onLookupTimeout;
 
     private final ActivityResultLauncher<Intent> scanLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(), result -> {
@@ -112,8 +121,10 @@ public class JoinActivity extends AppCompatActivity {
             public void afterTextChanged(Editable s) {
                 if (!filling && s != name.getText()) {
                     legacy = null; // escribir IP o código a mano deja de lado el QR viejo
+                    scannedPin = null;
                 }
                 codeRejected = false;
+                lookupFailed = false;
                 render();
             }
         };
@@ -127,8 +138,12 @@ public class JoinActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
+        timeouts.removeCallbacks(lookupTimeout);
         if (listening != null) {
             listening.removeListener(codeListener);
+            if (looking != null) {
+                listening.stop(); // nadie va a leer la respuesta: no sigue reintentando
+            }
         }
         super.onDestroy();
     }
@@ -146,14 +161,15 @@ public class JoinActivity extends AppCompatActivity {
         code.setText(uri.code() == null ? "" : uri.code());
         filling = false;
         legacy = uri.code() == null ? uri : null;
+        scannedPin = uri.code() != null ? uri.certFingerprint() : null;
         render();
     }
 
-    private JoinRequest.Result current() {
+    JoinRequest.Result current() {
         if (legacy != null) {
             return JoinRequest.fromQr(legacy, text(name));
         }
-        return JoinRequest.withCode(text(host), text(code), text(name));
+        return JoinRequest.withCode(text(host), text(code), text(name), scannedPin);
     }
 
     private void render() {
@@ -166,8 +182,9 @@ public class JoinActivity extends AppCompatActivity {
         JoinRequest.Result result = current();
         submit.setEnabled(result.error == null && looking == null);
         int message = codeRejected ? R.string.join_code_unknown
+                : lookupFailed ? R.string.join_lookup_timeout
                 : looking != null ? R.string.join_looking : messageFor(result.error);
-        boolean show = message != 0 && (codeRejected || looking != null || !text(name).isEmpty());
+        boolean show = message != 0 && (codeRejected || lookupFailed || looking != null || !text(name).isEmpty());
         error.setVisibility(show ? View.VISIBLE : View.GONE);
         if (show) {
             error.setText(message);
@@ -193,6 +210,8 @@ public class JoinActivity extends AppCompatActivity {
         // Con el código, la pelea y el lugar los dice la central; se espera aquí para avisar si no es válido.
         looking = request;
         codeRejected = false;
+        lookupFailed = false;
+        timeouts.postDelayed(lookupTimeout, LOOKUP_TIMEOUT_MS);
         render();
     }
 
@@ -202,10 +221,21 @@ public class JoinActivity extends AppCompatActivity {
             return;
         }
         looking = null;
+        timeouts.removeCallbacks(lookupTimeout);
         if (message instanceof CodeInfo info) {
             openWaiting(info.seat(), request.judgeName);
         } else {
             codeRejected = true;
+        }
+        render();
+    }
+
+    /** Nadie contestó: se deja de buscar y se puede reintentar; una respuesta tardía ya no cuenta. */
+    private void onLookupTimeout() {
+        looking = null;
+        lookupFailed = true;
+        if (listening != null) {
+            listening.stop();
         }
         render();
     }

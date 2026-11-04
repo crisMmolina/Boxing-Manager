@@ -27,6 +27,7 @@
     <string name="join_code_hint">Código de tu lugar (6 dígitos)</string>
     <string name="join_code_unknown">Ese código no es válido. Pídele a la mesa el código de tu lugar.</string>
     <string name="join_looking">Buscando tu lugar…</string>
+    <string name="join_lookup_timeout">No encontramos la central. Revisa la IP y que estés en el mismo Wi‑Fi.</string>
 
     <string name="scan_hint">Apunta al QR de tu lugar</string>
     <string name="scan_permission">Para leer el QR se necesita la cámara. También puedes escribir el código.</string>
