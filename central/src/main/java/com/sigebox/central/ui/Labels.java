@@ -24,6 +24,7 @@ public final class Labels {
     public static final Map<String, String> EVENTOS = Map.ofEntries(
             Map.entry("CARD_CAPTURED", "Tarjeta capturada desde papel"),
             Map.entry("CARD_CORRECTED", "Tarjeta corregida"),
+            Map.entry("CARD_OVER_CAPTURE", "Tarjeta del juez sobre una captura"),
             Map.entry("CARTELERA_CAMBIADA", "Cartelera cambiada"),
             Map.entry("CONTROL_REJECTED", "Mensaje de control rechazado"),
             Map.entry("FIGHT_CLOSED", "Pelea cerrada"),

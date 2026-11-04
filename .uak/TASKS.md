@@ -960,6 +960,7 @@ En Windows (zoe) los comandos `Verify` se corren en Git Bash.
   - Todo campo de formulario de la central usa el campo de DSK-026 (etiqueta arriba, ejemplo dentro); prueba que recorre las pantallas y no encuentra un `TextField`/`Spinner`/`DatePicker` sin `Label` asociado
   - Cada pantalla muestra una línea "Qué sigue"; todo botón deshabilitado dice por qué
   - `HelpButton.connection(...)` (DSK-026) junto a cada juez desconectado en Jueces (`SetupScreen`) y En vivo (`RoundsScreen`); prueba
+  - Jueces (`SetupScreen`) muestra el QR con `QrCode` e `Invitation.qrUri()` (forma `c=código`, ADR 0004) de DSK-033; prueba: el QR mostrado se decodifica al URI nuevo
   - Ningún código en mayúsculas ni enum visible (prueba con `ScreenshotHarness` o el árbol de nodos); "Función" no aparece en ninguna pantalla
   - Evidencia: capturas de un evento completo de 2 peleas con judge-sim (rama `evidence/dsk-027`), revisadas con `design-critic`
 - **Verify:** `central/gradlew -p central test`
@@ -1205,3 +1206,18 @@ En Windows (zoe) los comandos `Verify` se corren en Git Bash.
   - Corte de 60 s de un juez durante la pelea 2: 0 calificaciones perdidas; último `ACK` → Resultado listo ≤ 1 s (p95)
 - **Verify:** `central/gradlew -p central test --tests 'com.sigebox.central.it.EventoTest'`
 - **Next step:** esqueleto de `EventoTest` a partir de `FuncionFlowTest`
+
+## DSK-034 · Etiqueta en español para `CARD_OVER_CAPTURE` (followup de DSK-028)
+
+- **Type:** fix
+- **Priority:** P0
+- **Estimate:** 30 min
+- **Rubric / Spec:** spec 003 §Español en las interfaces · `main` en rojo tras DSK-028 + DSK-025
+- **Depends on:** DSK-028, DSK-025
+- **Paths:** central/src/main/java/com/sigebox/central/ui/Labels.java
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - `LabelsTest.cadaTipoDeEventoQueEscribeLaCentralTieneEtiqueta` pasa sin editarla: `CARD_OVER_CAPTURE` tiene etiqueta en español
+  - La suite completa de la central pasa
+- **Verify:** `central/gradlew -p central test`
+- **Next step:** agregar la entrada a `Labels.EVENTOS`
