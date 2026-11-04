@@ -11,7 +11,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
-import com.sigebox.core.protocol.Ack;
 import com.sigebox.core.protocol.Message;
 import com.sigebox.juez.R;
 import com.sigebox.juez.data.SessionEntity;
@@ -24,6 +23,7 @@ import com.sigebox.core.protocol.State;
 import com.sigebox.juez.net.JudgeRuntime;
 import com.sigebox.juez.ui.ConfirmSheet;
 import com.sigebox.juez.ui.CornerCard;
+import com.sigebox.juez.ui.ErrorText;
 import com.sigebox.juez.ui.RoundProgress;
 import com.sigebox.juez.ui.Screen;
 import com.sigebox.juez.ui.TopBar;
@@ -238,10 +238,8 @@ public class ScoreActivity extends AppCompatActivity {
     private void renderMessage(ScoreUi ui, boolean online) {
         TextView message = findViewById(R.id.score_message);
         String text = null;
-        if (ui.lastError == Ack.Error.ROUND_NOT_OPEN) {
-            text = getString(R.string.score_error_round_not_open);
-        } else if (ui.lastError != null) {
-            text = getString(R.string.score_error_generic, ui.lastError.name());
+        if (ui.lastError != null) {
+            text = getString(ErrorText.of(ui.lastError));
         } else if (!online && ui.seat > 0) {
             text = getString(R.string.score_offline);
         } else if (!ui.roundOpen && ui.round == 0) {

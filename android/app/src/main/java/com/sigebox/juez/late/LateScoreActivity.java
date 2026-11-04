@@ -32,6 +32,7 @@ import com.sigebox.juez.score.ScoreUi;
 import com.sigebox.juez.score.ScoreViewModel;
 import com.sigebox.juez.ui.ConfirmSheet;
 import com.sigebox.juez.ui.CornerCard;
+import com.sigebox.juez.ui.ErrorText;
 import com.sigebox.juez.ui.Screen;
 import com.sigebox.juez.ui.TopBar;
 
@@ -173,7 +174,7 @@ public class LateScoreActivity extends AppCompatActivity {
 
         TextView message = findViewById(R.id.late_message);
         if (ui.lastError != null) {
-            message.setText(getString(R.string.late_error, ui.lastError.name()));
+            message.setText(ErrorText.of(ui.lastError));
             message.setVisibility(View.VISIBLE);
         } else if (ui.card != null) {
             message.setText(ui.card.status == ScoreUi.CardStatus.SENDING ? R.string.status_sending : R.string.late_sent);

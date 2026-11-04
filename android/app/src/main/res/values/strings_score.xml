@@ -32,12 +32,10 @@
     <string name="score_send_n">Enviar round %1$d</string>
     <string name="score_sent_n">Round %1$d enviado</string>
     <string name="score_correct">Corregir</string>
-    <string name="score_waiting_start">Esperando que abran el primer round.</string>
-    <string name="score_waiting_open">Esperando que abran el round %1$d.</string>
-    <string name="score_waiting_next">Esperando el siguiente round.</string>
+    <string name="score_waiting_start">Espera con la app abierta: podrás calificar cuando abran el primer round.</string>
+    <string name="score_waiting_open">Espera con la app abierta: podrás calificar cuando abran el round %1$d.</string>
+    <string name="score_waiting_next">Espera con la app abierta a que abran el siguiente round.</string>
     <string name="score_offline">Sin conexión. Tus puntos se guardan y se envían al reconectar.</string>
-    <string name="score_error_round_not_open">El round ya estaba cerrado: esa calificación no se registró.</string>
-    <string name="score_error_generic">La central no aceptó la calificación (%1$s).</string>
 
     <string name="confirm_title">¿Enviar este round?</string>
     <string name="confirm_send">Enviar</string>
@@ -59,4 +57,17 @@
     <string name="final_row_round">R%1$d</string>
     <string name="final_row_score">%1$d – %2$d</string>
     <string name="final_error">La central no aceptó la tarjeta (%1$s).</string>
+
+    <!-- Espera de aprobación (join/WaitingActivity): una frase con qué hacer (spec 003). -->
+    <string name="waiting_approval_todo">Pide a la mesa que te apruebe en la central: esta pantalla avanza sola.</string>
+
+    <!-- ui/ErrorText: una frase con qué hacer por cada Ack.Error; nunca el código (spec 003). -->
+    <string name="error_malformed">La central no entendió el envío: vuelve a enviarlo y, si se repite, avisa a la mesa.</string>
+    <string name="error_not_approved">Pide a la mesa que apruebe este teléfono en la central y vuelve a enviar.</string>
+    <string name="error_bad_signature">La central no reconoció este teléfono: avisa a la mesa para que te vuelva a unir.</string>
+    <string name="error_wrong_session">Este teléfono no está en esta pelea: avisa a la mesa para que te una de nuevo.</string>
+    <string name="error_invalid_score">Los puntos no son válidos: revisa las dos esquinas y vuelve a enviar.</string>
+    <string name="error_round_not_open">El round ya estaba cerrado y no se registró: si la mesa la necesita, te la pedirá como round tardío.</string>
+    <string name="error_fight_not_active">La pelea ya no está en curso: espera las indicaciones de la mesa.</string>
+    <string name="error_already_final">Tu tarjeta final ya se envió: ya no se puede corregir.</string>
 </resources>

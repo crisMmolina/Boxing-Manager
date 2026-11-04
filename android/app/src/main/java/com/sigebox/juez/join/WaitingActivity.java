@@ -65,7 +65,9 @@ public class WaitingActivity extends AppCompatActivity {
         TextView status = findViewById(R.id.waiting_status);
         status.setText(WaitingText.forState(state));
         boolean rejected = state.status == ConnectionState.Status.REJECTED;
-        findViewById(R.id.waiting_body).setVisibility(rejected ? View.GONE : View.VISIBLE);
+        TextView body = findViewById(R.id.waiting_body);
+        body.setText(R.string.waiting_approval_todo); // qué hacer, en una frase (spec 003)
+        body.setVisibility(rejected ? View.GONE : View.VISIBLE);
         Button cancel = findViewById(R.id.waiting_cancel);
         cancel.setText(rejected ? R.string.waiting_back : R.string.waiting_cancel);
         if (state.status == ConnectionState.Status.CONNECTED) {

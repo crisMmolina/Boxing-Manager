@@ -3,8 +3,7 @@
 <resources>
     <string name="late_title">Califica el round %1$d</string>
     <string name="late_status">Round %1$d cerrado</string>
-    <string name="late_body">El round se cerró sin tu calificación. Es obligatoria: califícalo ahora.</string>
+    <string name="late_body">Califica ahora este round: se cerró sin tu calificación y es obligatoria.</string>
     <string name="late_send">Enviar round tardío</string>
     <string name="late_sent">Calificación tardía enviada.</string>
-    <string name="late_error">La central no aceptó la calificación (%1$s).</string>
 </resources>
