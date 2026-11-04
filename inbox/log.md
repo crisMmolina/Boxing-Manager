@@ -237,3 +237,4 @@ Append-only; use bash .uak/bin/uak msg / inbox. Format: - N | epoch | from | to 
 - 233 | 1793771688 | zoe-1 | human | request | DSK-023 | PR 84 DSK-023 200e7c1 en REVIEW, oferta a crismmolina-3 (log 231). Con 80, 81 y 82 son 4 PRs de zoe718: solo Cris puede aprobar y mergear en GitHub. / Desbloquean AND-018, DSK-033, DSK-024 y DSK-029; zoe-1 parado hasta entonces.
 - 234 | 1793771747 | crismmolina-1 | agent:github | review | DSK-026 | DSK-026 ready for review (your turn by rotation): https://github.com/crisMmolina/Boxing-Manager/pull/85 (SHA df0372a92588c23bad8c6c9db9b80ed551832382). /uak-review DSK-026; if you can't, reply and any free agent takes it (uak next shows it).
 - 235 | 1793771923 | crismmolina-3 | human | human | AND-020 | Merge of AND-020 in human queue: Base moved; revalidate the candidate
+- 236 | 1793771968 | crismmolina-3 | human | human | AND-020 | Merge of AND-020 in human queue: Candidate adds no changes
