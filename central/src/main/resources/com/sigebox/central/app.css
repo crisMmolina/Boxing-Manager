@@ -86,15 +86,14 @@
 }
 
 .link-button:focused,
-.step:focused,
-.help-button:focused {
+.step:focused {
     -fx-border-color: -sg-bar-accent;
     -fx-border-width: 2px;
     -fx-border-radius: 8px;
 }
 
-/* §5.8 "?" fijo en la barra: círculo de 36 px */
-.help-button {
+/* §5.8 "?" fijo en la barra: círculo de 36 px (.button.help-button para ganarle al botón genérico) */
+.button.help-button {
     -fx-font-family: "Inter";
     -fx-font-weight: bold;
     -fx-font-size: 16px;
@@ -112,7 +111,10 @@
     -fx-cursor: hand;
 }
 
-.help-button:focused {
+.button.help-button:focused {
+    -fx-border-color: -sg-bar-accent;
+    -fx-border-width: 2px;
+    -fx-border-insets: 0px;
     -fx-border-radius: 999px;
 }
 
