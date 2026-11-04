@@ -25,6 +25,10 @@ import com.sigebox.core.model.VersionTarjeta;
 import com.sigebox.core.protocol.Ack;
 import com.sigebox.core.protocol.Challenge;
 import com.sigebox.core.protocol.DeviceProof;
+import com.sigebox.core.protocol.CodeInfo;
+import com.sigebox.core.protocol.CodeLookup;
+import com.sigebox.core.protocol.CodeUnknown;
+import com.sigebox.core.protocol.EventEnded;
 import com.sigebox.core.protocol.FightClosed;
 import com.sigebox.core.protocol.FightEnded;
 import com.sigebox.core.protocol.FinalCardHash;
@@ -66,6 +70,9 @@ import java.util.function.LongSupplier;
  *   <li>Cada conexión recibe un {@code CHALLENGE} y debe autenticarse con un {@code JOIN} o
  *       {@code HELLO} firmado sobre ese nonce antes de que venza {@code authTimeout}.
  *   <li>{@code fightId} y lugar salen siempre de la sesión, nunca del mensaje.
+ *   <li>Antes del {@code JOIN}, {@code CODE_LOOKUP} dice a qué lugar libre pertenece un código (ADR 0004): a
+ *       lo más una búsqueda por segundo y la conexión se cierra al {@value #MAX_UNKNOWN_CODES}.º
+ *       {@code CODE_UNKNOWN}.
  *   <li>El {@code ACK} sale después de persistir; un repetido (lugar, {@code id}) recibe el mismo.
  *   <li>Solo difunde: quien cambia el estado de rounds o pelea lo persiste antes de llamar a
  *       {@link #roundOpened}, {@link #roundClosed}, {@link #fightEnded} o {@link #fightClosed}.
@@ -82,6 +89,11 @@ public final class JudgeHub implements AutoCloseable {
     static final Duration HANDOFF_GRACE = Duration.ofSeconds(15);
     public static final Duration DEFAULT_AUTH_TIMEOUT = Duration.ofSeconds(10);
 
+    /** Una búsqueda de código por segundo y conexión; la que llega antes no se consulta y cuenta como desconocida. */
+    static final long LOOKUP_INTERVAL_MS = 1_000;
+    /** {@code CODE_UNKNOWN} por conexión antes de cerrarla. */
+    public static final int MAX_UNKNOWN_CODES = 5;
+
     private static final String APPROVED_BY = "central";
 
     private static final class Session {
@@ -92,6 +104,9 @@ public final class JudgeHub implements AutoCloseable {
         boolean approved;
         /** Conexión a una pelea cerrada solo para entregar lo pendiente antes de pasar a la siguiente. */
         boolean handoff;
+        int lookups;
+        long lastLookupMs;
+        int unknownCodes;
         String fightId;
         int seat;
 
@@ -181,6 +196,7 @@ public final class JudgeHub implements AutoCloseable {
         switch (msg) {
             case Join m -> onJoin(s, m);
             case Hello m -> onHello(s, m);
+            case CodeLookup m -> onCodeLookup(s, m);
             case Ping m -> {
                 if (requireAuth(s)) {
                     send(s, new Pong(m.ts()));
@@ -295,9 +311,18 @@ public final class JudgeHub implements AutoCloseable {
         }
     }
 
+    /**
+     * Difunde {@code FIGHT_CLOSED}, descarta los códigos sin usar de la pelea y, si era la última del evento (no
+     * queda ninguna sin cerrar ni saltar en su función), manda además {@code EVENT_ENDED}.
+     */
     public synchronized void fightClosed(String fightId) {
+        tokens.forget(fightId);
+        boolean lastOfEvent = lastOfEvent(fightId);
         for (var s : approvedSessions(fightId)) {
             send(s, new FightClosed(fightId));
+            if (lastOfEvent) {
+                send(s, new EventEnded(fightId));
+            }
         }
     }
 
@@ -334,6 +359,73 @@ public final class JudgeHub implements AutoCloseable {
     }
 
     // ---- autenticación ----
+
+    private void onCodeLookup(Session s, CodeLookup m) {
+        if (s.authenticated) {
+            // Solo antes del JOIN: un juez ya unido no busca lugares.
+            logSeat(s, "CONTROL_REJECTED", "CodeLookup");
+            send(s, new Ack(m.id(), false, null, Ack.Error.MALFORMED));
+            return;
+        }
+        long now = clock.getAsLong();
+        boolean tooSoon = s.lookups > 0 && now - s.lastLookupMs < LOOKUP_INTERVAL_MS;
+        s.lookups++;
+        s.lastLookupMs = now;
+        var info = tooSoon ? null : codeInfo(m.code());
+        if (info != null) {
+            send(s, info);
+            return;
+        }
+        // No dice si no existe, ya se usó o es de una pelea cerrada.
+        send(s, new CodeUnknown(m.code()));
+        if (++s.unknownCodes >= MAX_UNKNOWN_CODES) {
+            log.append(null, "CODE_LOOKUP_LIMIT", MAX_UNKNOWN_CODES + " códigos desconocidos"); // nunca los códigos
+            drop(s, Conn.POLICY, "codes");
+        }
+    }
+
+    /** {@code CODE_INFO} si el código es de un lugar libre y sin registrar de una pelea abierta. */
+    private CodeInfo codeInfo(String code) {
+        var seat = tokens.lookup(code).orElse(null);
+        if (seat == null) {
+            return null;
+        }
+        var pelea = peleas.find(seat.fightId()).orElse(null);
+        if (pelea == null || pelea.estado() == EstadoPelea.CERRADA || seat.seat() > pelea.jueces()
+                || lugares.find(seat.fightId(), seat.seat()).isPresent()) {
+            return null;
+        }
+        return new CodeInfo(code, pelea.id(), seat.seat(), pelea.esquinaRoja(), pelea.esquinaAzul());
+    }
+
+    /** Sin función, la pelea es todo el evento; con función, no queda otra sin cerrar ni saltar. */
+    private boolean lastOfEvent(String fightId) {
+        var funcionId = funcionOf(fightId);
+        if (funcionId == null) {
+            return true;
+        }
+        for (var row : funciones.card(funcionId)) {
+            if (row.saltada() || fightId.equals(row.peleaId())) {
+                continue;
+            }
+            if (row.peleaId() == null || peleas.find(row.peleaId()).map(p -> p.estado() != EstadoPelea.CERRADA)
+                    .orElse(false)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private String funcionOf(String fightId) {
+        return db.inTransaction(c -> {
+            try (var ps = c.prepareStatement("SELECT funcion_id FROM funcion_card WHERE fight_id = ?")) {
+                ps.setString(1, fightId);
+                try (var rs = ps.executeQuery()) {
+                    return rs.next() ? rs.getString(1) : null;
+                }
+            }
+        });
+    }
 
     private void onJoin(Session s, Join m) {
         if (s.authenticated || !consumeNonce(s, m.nonce())) {
@@ -439,14 +531,7 @@ public final class JudgeHub implements AutoCloseable {
         if (closed == null || closed.estado() != EstadoPelea.CERRADA) {
             return null;
         }
-        var funcionId = db.inTransaction(c -> {
-            try (var ps = c.prepareStatement("SELECT funcion_id FROM funcion_card WHERE fight_id = ?")) {
-                ps.setString(1, closed.id());
-                try (var rs = ps.executeQuery()) {
-                    return rs.next() ? rs.getString(1) : null;
-                }
-            }
-        });
+        var funcionId = funcionOf(closed.id());
         if (funcionId == null) {
             return null;
         }

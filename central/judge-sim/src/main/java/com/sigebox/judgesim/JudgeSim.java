@@ -36,16 +36,21 @@ public final class JudgeSim {
     /** Corre la simulación; {@code true} si todos los jueces terminaron con la pelea cerrada. */
     static boolean run(Args args) throws InterruptedException {
         var script = Script.load(args.script());
-        var fightId = args.fightId() != null ? args.fightId() : script.pelea().id();
+        boolean byCode = !args.codes().isEmpty();
+        // Con códigos la pelea sale de CODE_INFO; nunca se cae a la del guion.
+        var fightId = byCode ? null : args.fightId() != null ? args.fightId() : script.pelea().id();
         var stats = new LatencyStats();
         var uri = URI.create("ws://" + args.host() + ":" + args.port() + "/ws");
         var client = HttpClient.newHttpClient();
         var judges = new ArrayList<SimJudge>();
         for (int seat = 1; seat <= args.judges(); seat++) {
-            judges.add(new SimJudge(fightId, seat, args.tokens().get(seat - 1), script.nameFor(seat),
-                    script.plansFor(seat), stats, System::currentTimeMillis, JudgeSim::log));
+            judges.add(byCode
+                    ? SimJudge.withCode(args.codes().get(seat - 1), seat, script.nameFor(seat), script.plansFor(seat),
+                            stats, System::currentTimeMillis, JudgeSim::log)
+                    : new SimJudge(fightId, seat, args.tokens().get(seat - 1), script.nameFor(seat),
+                            script.plansFor(seat), stats, System::currentTimeMillis, JudgeSim::log));
         }
-        log("pelea " + fightId + " · " + args.judges() + " jueces · " + uri);
+        log((byCode ? "por código" : "pelea " + fightId) + " · " + args.judges() + " jueces · " + uri);
 
         long deadline = System.currentTimeMillis() + args.timeout().toMillis();
         long[] nextConnect = new long[judges.size()];

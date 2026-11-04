@@ -6,6 +6,7 @@ import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Credenciales de un solo uso por lugar: el token del QR (22 caracteres) y el código manual de 6
@@ -13,6 +14,9 @@ import java.util.Map;
  * lugar y los dos quedan usados. Los intentos fallidos se cuentan por lugar, no por conexión; al
  * agotarlos se descartan y hace falta emitir otros. Cada conexión tiene un solo intento de
  * {@code JOIN} (un nonce), así que el límite por conexión es uno.
+ *
+ * <p>El código es también el código de lugar de {@code CODE_LOOKUP} (ADR 0004): es único entre los
+ * lugares de las peleas abiertas y {@link #forget} libera los de una pelea al cerrarse.
  */
 public final class SeatTokens {
 
@@ -20,6 +24,9 @@ public final class SeatTokens {
 
     /** Lo que muestra la central por lugar: el token va en el QR y el código se lee en voz alta. */
     public record Invitation(String token, String code) {}
+
+    /** El lugar al que pertenece un código. */
+    public record Seat(String fightId, int seat) {}
 
     /** Intentos fallidos permitidos por lugar antes de descartar su token. */
     public static final int MAX_FAILURES = 5;
@@ -61,8 +68,13 @@ public final class SeatTokens {
         var bytes = new byte[16];
         random.nextBytes(bytes);
         var token = Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
-        var code = String.format("%0" + CODE_LENGTH + "d", random.nextInt(1_000_000));
-        tokens.put(new Key(fightId, seat), new Entry(token, code));
+        var key = new Key(fightId, seat);
+        String code;
+        // También distinto del código anterior del mismo lugar, que deja de servir.
+        do {
+            code = String.format("%0" + CODE_LENGTH + "d", random.nextInt(1_000_000));
+        } while (codeTaken(code));
+        tokens.put(key, new Entry(token, code));
         return new Invitation(token, code);
     }
 
@@ -88,6 +100,30 @@ public final class SeatTokens {
             tokens.remove(key);
         }
         return Check.INVALID;
+    }
+
+    /** El lugar libre de {@code code}; vacío si no existe o ya se usó. */
+    public synchronized Optional<Seat> lookup(String code) {
+        if (code == null) {
+            return Optional.empty();
+        }
+        Seat found = null;
+        // Se recorren todos y se compara en tiempo constante: el tiempo no dice si el código existe.
+        for (var e : tokens.entrySet()) {
+            if (equal(e.getValue().code, code) && !e.getValue().used) {
+                found = new Seat(e.getKey().fightId(), e.getKey().seat());
+            }
+        }
+        return Optional.ofNullable(found);
+    }
+
+    /** Descarta los tokens y códigos de la pelea (al cerrarse); sus códigos quedan libres. */
+    public synchronized void forget(String fightId) {
+        tokens.keySet().removeIf(k -> k.fightId().equals(fightId));
+    }
+
+    private boolean codeTaken(String code) {
+        return tokens.values().stream().anyMatch(e -> e.code.equals(code));
     }
 
     private static boolean equal(String expected, String given) {
