@@ -72,3 +72,4 @@ Why: a reversible option after 15 min keeps work moving.
 - 1793769507 | deadline decision/AND-017-1793768457/1793769357 | BLOCKED_OTHER_TASK | Option: Sin valor por defecto: el round abre con las esquinas vacías y el juez toca + o − en cada una antes de enviar; se ajusta ScreenDesignTest (guía v2 reemplazada); Why: cris respondió textualmente: "Sin valor por defecto" (principio 2); registro en JudgeRuntime: "En AND-019"; FinalCardActivity la borra AND-021; no money, accounts, publishing or scope expansion.
 - 1793769804 | CORE-007 | 6 argumentos intacto; forma c con constructor de 4 y c manda sobre s, seat, t | Why: central y android siguen compilando sin cambios
 - 1793769965 | DSK-028 | Sin merge ni autorrevisión | Why: Lo pide la tarea
+- 1793770834 | CORE-008 | Firma vieja delega con lista vacia y sin detalle | Why: Conserva el resultado actual sin editar pruebas
