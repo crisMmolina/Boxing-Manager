@@ -4,11 +4,15 @@ import com.sigebox.core.protocol.JoinUri;
 
 import java.util.regex.Pattern;
 
-/** Lo que el juez llenó para unirse, ya validado: lugar (del QR o del código manual) y nombre. */
+/**
+ * Lo que el juez llenó para unirse, ya validado: lugar (del QR, del código de lugar o de la forma manual vieja) y
+ * nombre.
+ */
 public final class JoinRequest {
     public static final int DEFAULT_PORT = 8765;
     static final int MAX_NAME = 80;
-    private static final Pattern CODE = Pattern.compile("\\d{6}");
+    public static final int CODE_LENGTH = 6;
+    private static final Pattern CODE = Pattern.compile("\\d{" + CODE_LENGTH + "}");
 
     public enum Error {
         NO_SEAT, NAME_EMPTY, NAME_TOO_LONG, HOST_INVALID, FIGHT_INVALID, SEAT_INVALID, CODE_INVALID
@@ -42,19 +46,36 @@ public final class JoinRequest {
         return nameError != null ? fail(nameError) : new Result(new JoinRequest(uri, name), null);
     }
 
-    /** Alternativa al QR: IP de la central (con {@code :puerto} opcional), pelea, lugar y código de 6 dígitos. */
-    public static Result manual(String rawHost, String rawFight, String rawSeat, String rawCode, String rawName) {
-        String hostPort = rawHost == null ? "" : rawHost.trim();
-        String host = hostPort;
-        int port = DEFAULT_PORT;
-        int colon = hostPort.lastIndexOf(':');
-        if (colon > 0 && hostPort.indexOf(':') == colon) {
-            host = hostPort.substring(0, colon);
-            port = parseInt(hostPort.substring(colon + 1), -1);
-        }
-        if (host.isEmpty() || host.contains(" ") || port < 1 || port > 65535) {
+    /**
+     * Nombre, código de lugar (exactamente 6 dígitos) e IP de la central con {@code :puerto} opcional (ADR 0004): la
+     * pelea y el lugar los dice la central con {@code CODE_INFO}.
+     */
+    public static Result withCode(String rawHost, String rawCode, String rawName) {
+        String[] hostPort = hostPort(rawHost);
+        if (hostPort == null) {
             return fail(Error.HOST_INVALID);
         }
+        String code = rawCode == null ? "" : rawCode.trim();
+        if (!CODE.matcher(code).matches()) {
+            return fail(Error.CODE_INVALID);
+        }
+        JoinUri uri;
+        try {
+            uri = new JoinUri(hostPort[0], Integer.parseInt(hostPort[1]), code, null);
+        } catch (IllegalArgumentException e) {
+            return fail(Error.HOST_INVALID);
+        }
+        return fromQr(uri, rawName);
+    }
+
+    /** Forma anterior: IP de la central (con {@code :puerto} opcional), pelea, lugar y código de 6 dígitos. */
+    public static Result manual(String rawHost, String rawFight, String rawSeat, String rawCode, String rawName) {
+        String[] hostPort = hostPort(rawHost);
+        if (hostPort == null) {
+            return fail(Error.HOST_INVALID);
+        }
+        String host = hostPort[0];
+        int port = Integer.parseInt(hostPort[1]);
         String fight = rawFight == null ? "" : rawFight.trim();
         if (fight.isEmpty() || fight.length() > 64) {
             return fail(Error.FIGHT_INVALID);
@@ -74,6 +95,22 @@ public final class JoinRequest {
             return fail(Error.HOST_INVALID);
         }
         return fromQr(uri, rawName);
+    }
+
+    /** {@code {host, puerto}} o {@code null} si la IP no sirve. */
+    private static String[] hostPort(String raw) {
+        String hostPort = raw == null ? "" : raw.trim();
+        String host = hostPort;
+        int port = DEFAULT_PORT;
+        int colon = hostPort.lastIndexOf(':');
+        if (colon > 0 && hostPort.indexOf(':') == colon) {
+            host = hostPort.substring(0, colon);
+            port = parseInt(hostPort.substring(colon + 1), -1);
+        }
+        if (host.isEmpty() || host.contains(" ") || port < 1 || port > 65535) {
+            return null;
+        }
+        return new String[] {host, String.valueOf(port)};
     }
 
     private static String cleanName(String raw) {

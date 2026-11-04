@@ -4,9 +4,14 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.sigebox.core.model.EstadoRound;
+import com.sigebox.core.protocol.Challenge;
+import com.sigebox.core.protocol.CodeInfo;
+import com.sigebox.core.protocol.CodeLookup;
+import com.sigebox.core.protocol.CodeUnknown;
 import com.sigebox.core.protocol.FightEnded;
 import com.sigebox.core.protocol.JoinUri;
 import com.sigebox.core.protocol.Message;
+import com.sigebox.core.protocol.Messages;
 import com.sigebox.core.protocol.NextFight;
 import com.sigebox.core.protocol.RoundClosed;
 import com.sigebox.core.protocol.RoundOpened;
@@ -36,6 +41,8 @@ import okhttp3.WebSocketListener;
 public final class JudgeConnection {
     /** Ruta del WebSocket en la central (spike DSK-002). */
     public static final String PATH = "/ws";
+    /** Espera antes de repetir una búsqueda que dio {@code CODE_UNKNOWN}: la central admite una por segundo. */
+    static final long LOOKUP_RETRY_MS = 1_100;
 
     private final OkHttpClient baseClient;
     private final SessionStore store;
@@ -61,6 +68,10 @@ public final class JudgeConnection {
     private boolean running;
     private ScheduledFuture<?> pendingReconnect;
     private ScheduledFuture<?> ticker;
+    /** Unión por código pendiente de {@code CODE_INFO} (ADR 0004): a dónde conectar y con qué nombre. */
+    private JoinUri lookup;
+    private String lookupName;
+    private boolean lookupRetried;
 
     public JudgeConnection(OkHttpClient baseClient, Outbox outbox, SessionStore store, DeviceSigner signer,
             Clock clock, Backoff backoff, long tickMs) {
@@ -169,7 +180,12 @@ public final class JudgeConnection {
         });
     }
 
-    /** Une el teléfono al lugar del QR: guarda el lugar, conecta y manda {@code JOIN} tras el {@code CHALLENGE}. */
+    /**
+     * Une el teléfono al lugar del QR: guarda el lugar, conecta y manda {@code JOIN} tras el {@code CHALLENGE}. Con
+     * el código de lugar ({@link JoinUri#code()}) primero pregunta con {@code CODE_LOOKUP}; con {@code CODE_INFO}
+     * guarda el lugar y manda el mismo {@code JOIN} firmado. Un {@code CODE_UNKNOWN} se reintenta una vez tras
+     * {@link #LOOKUP_RETRY_MS} (la central puede estar ocupada) y luego llega a los listeners sin unirse.
+     */
     public void join(JoinUri uri, String judgeName) {
         executor.execute(() -> {
             running = true;
@@ -181,7 +197,15 @@ public final class JudgeConnection {
                 fightEnded = null;
                 notSeated = null;
             }
-            session.join(uri, judgeName);
+            if (uri.code() != null) {
+                store.clear(); // sin lugar guardado, el CHALLENGE no dispara un JOIN viejo
+                lookup = uri;
+                lookupName = judgeName;
+                lookupRetried = false;
+            } else {
+                lookup = null;
+                session.join(uri, judgeName);
+            }
             open();
         });
     }
@@ -219,19 +243,75 @@ public final class JudgeConnection {
 
     private void open() {
         cancelReconnect();
-        SessionEntity target = store.load();
-        if (!running || target == null) {
+        SessionEntity saved = lookup == null ? store.load() : null;
+        if (!running || (lookup == null && saved == null)) {
             return;
         }
-        OkHttpClient client = target.certFingerprint == null
+        String host = lookup != null ? lookup.host() : saved.host;
+        int port = lookup != null ? lookup.port() : saved.port;
+        String fingerprint = lookup != null ? lookup.certFingerprint() : saved.certFingerprint;
+        OkHttpClient client = fingerprint == null
                 ? baseClient
-                : PinnedTrust.pin(baseClient, target.certFingerprint);
-        String scheme = target.certFingerprint == null ? "ws" : "wss";
+                : PinnedTrust.pin(baseClient, fingerprint);
+        String scheme = fingerprint == null ? "ws" : "wss";
         Request request = new Request.Builder()
-                .url(scheme + "://" + hostForUrl(target.host) + ":" + target.port + PATH)
+                .url(scheme + "://" + hostForUrl(host) + ":" + port + PATH)
                 .build();
         int gen = ++generation;
         socket = client.newWebSocket(request, new Listener(gen));
+    }
+
+    /** Atiende lo de la búsqueda por código; {@code false} si el mensaje sigue su camino normal. */
+    private boolean onLookupText(String text) {
+        if (lookup == null) {
+            return false;
+        }
+        Message message;
+        try {
+            message = Messages.decode(text);
+        } catch (RuntimeException e) {
+            return false;
+        }
+        if (message instanceof Challenge) {
+            session.onText(text); // guarda el nonce; sin lugar guardado no manda nada
+            sendLookup();
+            return true;
+        }
+        if (message instanceof CodeInfo info && info.code().equals(lookup.code())) {
+            JoinUri place = new JoinUri(lookup.host(), lookup.port(), info.fightId(), info.seat(), lookup.code(),
+                    lookup.certFingerprint());
+            String judgeName = lookupName;
+            lookup = null;
+            session.join(place, judgeName); // guarda el lugar y manda el JOIN firmado sobre el mismo CHALLENGE
+            dispatch(info);
+            return true;
+        }
+        if (message instanceof CodeUnknown unknown && unknown.code().equals(lookup.code())) {
+            if (!lookupRetried) {
+                lookupRetried = true;
+                int gen = generation;
+                executor.schedule(() -> {
+                    if (gen == generation && lookup != null) {
+                        sendLookup();
+                    }
+                }, LOOKUP_RETRY_MS, TimeUnit.MILLISECONDS);
+                return true;
+            }
+            lookup = null;
+            running = false;
+            cancelReconnect();
+            closeSocket();
+            session.onClosed();
+            dispatch(unknown);
+            return true;
+        }
+        return false;
+    }
+
+    private void sendLookup() {
+        if (socket != null) {
+            socket.send(Messages.encode(new CodeLookup(lookup.code())));
+        }
     }
 
     private static String hostForUrl(String host) {
@@ -296,7 +376,7 @@ public final class JudgeConnection {
         @Override
         public void onMessage(WebSocket webSocket, String text) {
             executor.execute(() -> {
-                if (gen == generation) {
+                if (gen == generation && !onLookupText(text)) {
                     session.onText(text);
                 }
             });
