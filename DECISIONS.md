@@ -85,3 +85,4 @@ Why: a reversible option after 15 min keeps work moving.
 - 1793775752 | deadline decision/DSK-033-1793774837/1793775737 | REVERSIBLE_AND_LOG | Option: Sin ampliar Paths: el bloqueo al 5.º CODE_UNKNOWN se anota como JOIN_REJECTED ('búsqueda de código bloqueada tras 5 intentos · …NN'); SetupScreen no se toca y DSK-027 conectará inv.qrUri(); Why: decisión del líder (sesión que me lanzó): no se cambian Paths de una tarea reclamada; no money, accounts, publishing or scope expansion.
 - 1793776015 | DSK-030 | CorrectionService se queda (crea CAPTURADA/CORREGIDA y lo usa JudgeHubHandoffTest); CorrectionScreen y register de 5 args @Deprecated por ScreenshotHarness | Why: no editar pruebas fuera de Paths
 - 1793776356 | DSK-030 | CorrectionService se queda; partialSummary es deuda de DSK-024 | Why: crea CAPTURADA/CORREGIDA; RoundService no es mío
+- 1793776427 | DSK-030 | trabajo detenido por pedido de cris; sin merge | Why: pedido de cris vía la sesión líder
