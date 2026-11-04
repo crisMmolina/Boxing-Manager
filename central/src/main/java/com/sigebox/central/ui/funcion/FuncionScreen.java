@@ -5,6 +5,8 @@ import com.sigebox.central.service.FuncionService.Esquinas;
 import com.sigebox.central.service.FuncionService.Fila;
 import com.sigebox.central.ui.Screens;
 import com.sigebox.central.ui.theme.Ui;
+import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
@@ -12,6 +14,7 @@ import javafx.animation.Timeline;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.TextField;
@@ -21,9 +24,9 @@ import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 
 /**
- * Función (spec 002): la configuración base y la cartelera ordenada con el estado de cada pelea. Antes
- * de que empiece una pelea se puede agregar, quitar, mover, saltar y cambiar sus rounds o jueces. Cada
- * cambio se guarda con {@link FuncionService} y la lista se vuelve a leer de lo guardado.
+ * Evento (spec 002): la configuración base y la cartelera ordenada con el estado de cada pelea. Antes
+ * de que empiece una pelea se puede agregar, quitar, mover, saltar, renombrar y cambiar sus rounds o
+ * jueces. Cada cambio se guarda con {@link FuncionService} y la lista se vuelve a leer de lo guardado.
  */
 public final class FuncionScreen {
 
@@ -40,13 +43,13 @@ public final class FuncionScreen {
 
     public static void register(Screens<Node> screens, FuncionFlow flow, Runnable onStarted) {
         var screen = new FuncionScreen(flow, onStarted);
-        screens.register(ID, "Función", screen::build);
+        screens.register(ID, "Evento", screen::build);
     }
 
     Node build() {
         var status = Ui.support("");
         var body = new VBox(16);
-        var root = new VBox(16, Ui.screenTitle("Función"), body, status);
+        var root = new VBox(16, Ui.screenTitle("Evento"), body, status);
 
         String[] signature = {null};
         Runnable[] draw = new Runnable[1];
@@ -79,22 +82,31 @@ public final class FuncionScreen {
     }
 
     private Node create(Label status, Runnable refresh) {
+        var name = new TextField();
+        name.setPromptText("Ej. Velada de mayo");
+        var date = new DatePicker(LocalDate.now());
+        date.setPromptText("Ej. 01/05/2026");
         var rounds = new Spinner<Integer>(1, 12, 10);
         var judges = new Spinner<Integer>(1, 5, 3);
-        var create = Ui.primary("Crear función");
+        var fights = new Spinner<Integer>(1, FuncionService.MAX_PELEAS, 1);
+        var create = Ui.primary("Crear evento");
         create.setOnAction(e -> act(status, refresh, () -> {
-            flow.service().crear(rounds.getValue(), judges.getValue(), List.of());
-            return "Función creada. Agrega las peleas en el orden en que van.";
+            flow.service().crear(name.getText(), date.getValue(), rounds.getValue(), judges.getValue(),
+                    Collections.nCopies(fights.getValue(), new Esquinas("", "")));
+            return "Evento creado. Escribe las esquinas de cada pelea.";
         }));
-        return Ui.card(Ui.cardTitle("Nueva función"),
+        return Ui.card(Ui.cardTitle("Nuevo evento"),
                 Ui.support("La configuración base sirve para todas las peleas; cada una puede cambiarla antes de "
                         + "empezar."),
-                new HBox(12, Ui.field("Rounds", rounds), Ui.field("Jueces", judges)), create);
+                new HBox(12, Ui.field("Nombre del evento", name), Ui.field("Fecha", date)),
+                new HBox(12, Ui.field("Rounds", rounds), Ui.field("Jueces", judges), Ui.field("Peleas", fights)),
+                create);
     }
 
     private Node show(String id, List<Fila> rows, Label status, Runnable refresh) {
         var f = flow.service().funcion(id);
-        var base = Ui.card(Ui.cardTitle("Base"), new HBox(40, Ui.field("Fecha", Ui.body(f.fecha())),
+        var base = Ui.card(Ui.cardTitle("Base"), new HBox(40, Ui.field("Evento", Ui.body(FuncionView.nombre(f))),
+                Ui.field("Fecha", Ui.body(f.fecha())),
                 Ui.field("Rounds", Ui.numeral(String.valueOf(f.baseRounds()), "neutral")),
                 Ui.field("Jueces", Ui.numeral(String.valueOf(f.baseJueces()), "neutral"))),
                 Ui.support("Las peleas heredan esta base salvo que cambies la suya."));
@@ -117,11 +129,7 @@ public final class FuncionScreen {
         var service = flow.service();
         var number = Ui.numeral(String.valueOf(r.orden()), "neutral");
         number.setMinWidth(36);
-        var red = new HBox(6, Ui.cornerDot(true), Ui.body(r.roja()));
-        red.setAlignment(Pos.CENTER_LEFT);
-        var blue = new HBox(6, Ui.cornerDot(false), Ui.body(r.azul()));
-        blue.setAlignment(Pos.CENTER_LEFT);
-        var names = new VBox(2, red, blue);
+        var names = FuncionView.editable(r) ? editableNames(id, r, status, refresh) : fixedNames(r);
         names.setMinWidth(200);
         names.setPrefWidth(200);
 
@@ -180,11 +188,46 @@ public final class FuncionScreen {
         return row;
     }
 
+    private static VBox fixedNames(Fila r) {
+        var red = new HBox(6, Ui.cornerDot(true), Ui.body(r.roja()));
+        red.setAlignment(Pos.CENTER_LEFT);
+        var blue = new HBox(6, Ui.cornerDot(false), Ui.body(r.azul()));
+        blue.setAlignment(Pos.CENTER_LEFT);
+        return new VBox(2, red, blue);
+    }
+
+    /** Los nombres de una pelea que no ha empezado: se guardan con Enter o al salir del campo. */
+    private VBox editableNames(String id, Fila r, Label status, Runnable refresh) {
+        var red = new TextField(r.roja());
+        var blue = new TextField(r.azul());
+        red.setPromptText("Ej. Ana Pérez");
+        blue.setPromptText("Ej. Bea Ruiz");
+        red.setAccessibleText("Esquina roja de la pelea " + r.orden());
+        blue.setAccessibleText("Esquina azul de la pelea " + r.orden());
+        Runnable save = () -> {
+            if (!red.getText().equals(r.roja()) || !blue.getText().equals(r.azul())) {
+                act(status, refresh, () -> {
+                    flow.service().renombrar(id, r.orden(), red.getText(), blue.getText());
+                    return "";
+                });
+            }
+        };
+        for (var field : List.of(red, blue)) {
+            field.setOnAction(e -> save.run());
+            field.focusedProperty().addListener((o, was, now) -> {
+                if (!now) {
+                    save.run();
+                }
+            });
+        }
+        return new VBox(4, Ui.field("Esquina roja", red), Ui.field("Esquina azul", blue));
+    }
+
     private Node add(String id, Label status, Runnable refresh) {
         var red = new TextField();
-        red.setPromptText("Esquina roja");
+        red.setPromptText("Ej. Ana Pérez");
         var blue = new TextField();
-        blue.setPromptText("Esquina azul");
+        blue.setPromptText("Ej. Bea Ruiz");
         var add = Ui.secondary("Agregar pelea");
         Runnable go = () -> act(status, refresh, () -> {
             flow.service().agregar(id, new Esquinas(red.getText(), blue.getText()));
@@ -198,8 +241,12 @@ public final class FuncionScreen {
         redBox.setAlignment(Pos.CENTER_LEFT);
         var blueBox = new HBox(8, Ui.cornerDot(false), blue);
         blueBox.setAlignment(Pos.CENTER_LEFT);
-        var box = new HBox(12, redBox, blueBox, add);
-        box.setAlignment(Pos.CENTER_LEFT);
+        var redField = Ui.field("Esquina roja", redBox);
+        var blueField = Ui.field("Esquina azul", blueBox);
+        HBox.setHgrow(redField, Priority.ALWAYS);
+        HBox.setHgrow(blueField, Priority.ALWAYS);
+        var box = new HBox(12, redField, blueField, add);
+        box.setAlignment(Pos.BOTTOM_LEFT);
         return box;
     }
 

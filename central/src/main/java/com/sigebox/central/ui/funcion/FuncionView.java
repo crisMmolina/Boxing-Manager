@@ -2,6 +2,7 @@ package com.sigebox.central.ui.funcion;
 
 import com.sigebox.central.service.FuncionService.Estado;
 import com.sigebox.central.service.FuncionService.Fila;
+import com.sigebox.central.service.FuncionService.Funcion;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,7 +31,12 @@ public final class FuncionView {
         return fila.estado() == Estado.PROGRAMADA;
     }
 
-    /** La siguiente pelea que inicia la función: la primera programada. */
+    /** El nombre guardado del evento o, si no tiene, "Evento 2026-05-01". */
+    public static String nombre(Funcion f) {
+        return f.nombre() == null || f.nombre().isBlank() ? "Evento " + f.fecha() : f.nombre();
+    }
+
+    /** La siguiente pelea que inicia el evento: la primera programada. */
     public static Optional<Fila> siguiente(List<Fila> cartelera) {
         return cartelera.stream().filter(FuncionView::editable).findFirst();
     }

@@ -5,7 +5,7 @@ import com.sigebox.central.service.FuncionService.Fila;
 import com.sigebox.core.model.Pelea;
 import java.util.Optional;
 
-/** La función en curso y su siguiente pelea; lo comparten la pantalla Función y el paso Resultado. */
+/** El evento en curso y su siguiente pelea; lo comparten la pantalla Evento y el paso Resultado. */
 public final class FuncionFlow {
 
     private final FuncionService service;
@@ -34,7 +34,7 @@ public final class FuncionFlow {
      * (el aviso lo conecta {@code App} con {@code FuncionService.alSiguiente}).
      */
     public Pelea start() {
-        var id = funcionId().orElseThrow(() -> new IllegalStateException("no hay una función"));
+        var id = funcionId().orElseThrow(() -> new IllegalStateException("no hay un evento"));
         return service.siguiente(id);
     }
 }

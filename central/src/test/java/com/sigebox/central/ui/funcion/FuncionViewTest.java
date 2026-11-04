@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.sigebox.central.service.FuncionService.Estado;
 import com.sigebox.central.service.FuncionService.Fila;
+import com.sigebox.central.service.FuncionService.Funcion;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -14,6 +15,13 @@ class FuncionViewTest {
 
     private static Fila fila(int orden, Estado estado) {
         return new Fila(orden, "Roja " + orden, "Azul " + orden, 10, 3, false, estado, null);
+    }
+
+    @Test
+    void anEventWithoutNameIsCalledByItsDate() {
+        assertEquals("Velada de mayo", FuncionView.nombre(new Funcion("F", "Velada de mayo", "2026-05-01", 10, 3)));
+        assertEquals("Evento 2026-05-01", FuncionView.nombre(new Funcion("F", null, "2026-05-01", 10, 3)));
+        assertEquals("Evento 2026-05-01", FuncionView.nombre(new Funcion("F", "  ", "2026-05-01", 10, 3)));
     }
 
     @Test
