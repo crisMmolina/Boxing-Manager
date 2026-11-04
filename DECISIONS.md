@@ -70,3 +70,4 @@ Why: a reversible option after 15 min keeps work moving.
 - 1793768168 | DSK-023 | descuento se crea en V3 como pide el plan 004 | Why: expansión sola, sin tocar columnas
 - 1793768473 | AND-017 | Decisiones de cris: sin 10–10; JudgeRuntime en AND-019; FinalCardActivity en AND-021 | Why: Respuestas de cris
 - 1793769507 | deadline decision/AND-017-1793768457/1793769357 | BLOCKED_OTHER_TASK | Option: Sin valor por defecto: el round abre con las esquinas vacías y el juez toca + o − en cada una antes de enviar; se ajusta ScreenDesignTest (guía v2 reemplazada); Why: cris respondió textualmente: "Sin valor por defecto" (principio 2); registro en JudgeRuntime: "En AND-019"; FinalCardActivity la borra AND-021; no money, accounts, publishing or scope expansion.
+- 1793769804 | CORE-007 | 6 argumentos intacto; forma c con constructor de 4 y c manda sobre s, seat, t | Why: central y android siguen compilando sin cambios
