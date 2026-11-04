@@ -80,3 +80,4 @@ Why: a reversible option after 15 min keeps work moving.
 - 1793772678 | DSK-026 | no fuerzo el merge | Why: gate usa las Paths del claim, no TASKS.md
 - 1793774168 | DSK-029 | orden por creación como FuncionQuery.latest; eventos anteriores en cartelera de consulta | Why: Evento siempre muestra el último y ui/funcion no es mío
 - 1793774338 | DSK-033 | Invitation suma qrUri, uri queda vieja (FightServiceTest) | Why: no editar pruebas existentes
+- 1793774805 | deadline decision/DSK-033-1793773863/1793774763 | BLOCKED_OTHER_TASK | Option: FightService.Invitation suma qrUri (forma c=código); uri() queda con la forma vieja para no editar FightServiceTest. El QR que se muestra cambia solo si SetupScreen usa QrCode con inv.qrUri(): pido sumar SetupScreen.java a Paths (2 líneas); Why: invite().uri() nuevo rompe FightServiceTest (fuera de Paths, no se edita); SetupScreen.qr está fuera de Paths; no money, accounts, publishing or scope expansion.
