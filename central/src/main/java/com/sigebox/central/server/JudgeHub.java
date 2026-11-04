@@ -55,10 +55,12 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -99,7 +101,10 @@ public final class JudgeHub implements AutoCloseable {
      * (revisión de seguridad de DSK-033). Las que sobran no se consultan y cuentan como desconocidas.
      */
     static final int GLOBAL_LOOKUPS_PER_SECOND = 5;
-    /** Conexiones abiertas sin {@code JOIN}/{@code HELLO} válido; la siguiente se cierra sin {@code CHALLENGE}. */
+    /**
+     * Conexiones abiertas sin {@code JOIN}/{@code HELLO} válido. Al llegar otra se cierra la más vieja sin autenticar:
+     * quien acapara conexiones no deja fuera el {@code HELLO} de un juez, que se autentica en cuanto abre.
+     */
     static final int MAX_UNAUTHENTICATED = 16;
     /** El bloqueo por códigos se anota a lo más una vez por minuto, para no inundar la bitácora. */
     static final long LIMIT_LOG_INTERVAL_MS = 60_000;
@@ -151,6 +156,8 @@ public final class JudgeHub implements AutoCloseable {
     private final EventLog log;
 
     private final Map<String, Session> sessions = new HashMap<>();
+    /** Ids de las sesiones sin autenticar, de la más vieja a la más nueva. */
+    private final Set<String> unauthenticated = new LinkedHashSet<>();
     /** Momentos de las búsquedas consultadas en el último segundo (toda la central). */
     private final ArrayDeque<Long> recentLookups = new ArrayDeque<>();
     private long lastLimitLogMs;
@@ -181,12 +188,15 @@ public final class JudgeHub implements AutoCloseable {
     // ---- transporte ----
 
     public synchronized void onOpen(Conn conn) {
-        if (sessions.values().stream().filter(x -> !x.authenticated).count() >= MAX_UNAUTHENTICATED) {
-            conn.close(Conn.POLICY, "busy");
-            return;
+        if (unauthenticated.size() >= MAX_UNAUTHENTICATED) {
+            var oldest = sessions.get(unauthenticated.iterator().next());
+            if (oldest != null) {
+                drop(oldest, Conn.POLICY, "busy");
+            }
         }
         var s = new Session(conn, DeviceProof.newNonce(random));
         sessions.put(conn.id(), s);
+        unauthenticated.add(conn.id());
         conn.send(Messages.encode(new Challenge(s.nonce)));
         timer.schedule(() -> expireIfUnauthenticated(conn.id()), authTimeout.toMillis(), TimeUnit.MILLISECONDS);
     }
@@ -250,6 +260,7 @@ public final class JudgeHub implements AutoCloseable {
 
     public synchronized void onClose(String connId) {
         var s = sessions.remove(connId);
+        unauthenticated.remove(connId);
         if (s == null || s.fightId == null) {
             return;
         }
@@ -389,18 +400,22 @@ public final class JudgeHub implements AutoCloseable {
         boolean tooSoon = s.lookups > 0 && now - s.lastLookupMs < LOOKUP_INTERVAL_MS;
         s.lookups++;
         s.lastLookupMs = now;
-        var info = tooSoon || !takeGlobalLookup(now) ? null : codeInfo(m.code());
+        boolean overBudget = !tooSoon && !takeGlobalLookup(now);
+        var info = tooSoon || overBudget ? null : codeInfo(m.code());
         if (info != null) {
             send(s, info);
             return;
         }
-        // No dice si no existe, ya se usó o es de una pelea cerrada.
+        // No dice si no existe, ya se usó o es de una pelea cerrada. Sin cupo global no se consultó nada, así que no
+        // cuenta para cerrar: un atacante que agota el cupo no hace que la central eche a los jueces legítimos.
         send(s, new CodeUnknown(m.code()));
-        if (++s.unknownCodes >= MAX_UNKNOWN_CODES) {
+        if (!overBudget && ++s.unknownCodes >= MAX_UNKNOWN_CODES) {
             if (!limitLogged || now - lastLimitLogMs >= LIMIT_LOG_INTERVAL_MS) {
                 limitLogged = true;
                 lastLimitLogMs = now;
-                log.append(null, "CODE_LOOKUP_LIMIT", MAX_UNKNOWN_CODES + " códigos desconocidos"); // nunca los códigos
+                // Tipo con etiqueta ya existente; del código solo los 2 últimos dígitos.
+                log.append(null, "JOIN_REJECTED", "búsqueda de código bloqueada tras " + MAX_UNKNOWN_CODES
+                        + " intentos · …" + m.code().substring(m.code().length() - 2));
             }
             drop(s, Conn.POLICY, "codes");
         }
@@ -610,6 +625,7 @@ public final class JudgeHub implements AutoCloseable {
 
     private void bind(Session s, String fightId, int seat) {
         s.authenticated = true;
+        unauthenticated.remove(s.conn.id());
         s.fightId = fightId;
         s.seat = seat;
         var old = holders.put(new SeatKey(fightId, seat), s);
@@ -782,6 +798,7 @@ public final class JudgeHub implements AutoCloseable {
 
     private void drop(Session s, int code, String reason) {
         sessions.remove(s.conn.id());
+        unauthenticated.remove(s.conn.id());
         if (s.fightId != null) {
             holders.remove(new SeatKey(s.fightId, s.seat), s);
         }

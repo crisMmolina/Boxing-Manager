@@ -46,6 +46,8 @@ import org.junit.jupiter.api.io.TempDir;
 class JudgeHubCodeTest {
 
     private static final String F = "PELEA1";
+    /** Tipo con etiqueta ya existente (Labels) y solo los 2 últimos dígitos del código. */
+    private static final String BLOCKED = "JOIN_REJECTED · búsqueda de código bloqueada tras 5 intentos · …";
 
     @TempDir
     Path dir;
@@ -96,7 +98,8 @@ class JudgeHubCodeTest {
     private List<String> anonymousLog() {
         return db.inTransaction(c -> {
             var out = new ArrayList<String>();
-            try (var ps = c.prepareStatement("SELECT type FROM event_log WHERE fight_id IS NULL ORDER BY id");
+            try (var ps = c.prepareStatement(
+                    "SELECT type || ' · ' || detail FROM event_log WHERE fight_id IS NULL ORDER BY id");
                     var rs = ps.executeQuery()) {
                 while (rs.next()) {
                     out.add(rs.getString(1));
@@ -167,7 +170,7 @@ class JudgeHubCodeTest {
         lookup(c, "000005");
         assertInstanceOf(CodeUnknown.class, c.last());
         assertEquals(Conn.POLICY, c.closedWith);
-        assertEquals(List.of("CODE_LOOKUP_LIMIT"), anonymousLog());
+        assertEquals(List.of(BLOCKED + "05"), anonymousLog());
     }
 
     @Test
@@ -222,29 +225,47 @@ class JudgeHubCodeTest {
             }
             assertEquals(Conn.POLICY, c.closedWith);
         }
-        assertEquals(List.of("CODE_LOOKUP_LIMIT"), anonymousLog());
+        assertEquals(List.of(BLOCKED + "56"), anonymousLog());
         now.addAndGet(60_000);
         var c = open();
         for (int i = 0; i < JudgeHub.MAX_UNKNOWN_CODES; i++) {
             send(c, new CodeLookup("123456"));
         }
-        assertEquals(List.of("CODE_LOOKUP_LIMIT", "CODE_LOOKUP_LIMIT"), anonymousLog());
+        assertEquals(List.of(BLOCKED + "56", BLOCKED + "56"), anonymousLog());
     }
 
     @Test
-    void demasiadasConexionesSinAutenticarSeCierranAlAbrir() {
-        var open = new ArrayList<FakeConn>();
+    void conDemasiadasConexionesSinAutenticarSeCierraLaMasViejaYUnJuezVuelveIgual() throws Exception {
+        var phone = new Phone("A-1");
+        approvedJudge(F, phone, 1);
+        var hoarded = new ArrayList<FakeConn>();
         for (int i = 0; i < JudgeHub.MAX_UNAUTHENTICATED; i++) {
-            open.add(open());
+            hoarded.add(open());
         }
-        assertTrue(open.stream().allMatch(c -> c.closedWith == null));
-        var extra = open();
-        assertEquals(Conn.POLICY, extra.closedWith);
-        assertTrue(extra.sent.isEmpty(), "sin CHALLENGE");
+        assertTrue(hoarded.stream().allMatch(c -> c.closedWith == null));
 
-        hub.onClose(open.get(0).id());
-        var again = open();
-        assertNull(again.closedWith);
+        var back = open(); // el juez reconecta en plena pelea
+        assertEquals(Conn.POLICY, hoarded.get(0).closedWith, "se cierra la más vieja");
+        send(back, phone.hello(F, 1, back.nonce()));
+        assertInstanceOf(State.class, back.last());
+        assertNull(back.closedWith);
+    }
+
+    @Test
+    void sinCupoGlobalNoSeCuentaComoIntentoFallido() {
+        tokens.issueInvitation(F, 1);
+        for (int i = 0; i < JudgeHub.GLOBAL_LOOKUPS_PER_SECOND; i++) {
+            send(open(), new CodeLookup("99999" + i));
+        }
+        var juez = open();
+        lookup(juez, "888888"); // sin cupo: CODE_UNKNOWN, pero no cuenta
+        assertInstanceOf(CodeUnknown.class, juez.last());
+        for (int i = 1; i < JudgeHub.MAX_UNKNOWN_CODES; i++) {
+            lookup(juez, "77777" + i);
+        }
+        assertNull(juez.closedWith, "4 consultados: aún no se cierra");
+        lookup(juez, "777775");
+        assertEquals(Conn.POLICY, juez.closedWith);
     }
 
     @Test
