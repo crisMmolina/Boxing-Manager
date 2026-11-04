@@ -868,13 +868,13 @@ En Windows (zoe) los comandos `Verify` se corren en Git Bash.
 - **Estimate:** 1 d
 - **Rubric / Spec:** spec 004 §Imagen y diseño, §Ayuda de conexión · DSN-004
 - **Depends on:** DSN-004
-- **Paths:** central/src/main/java/com/sigebox/central/ui/theme/, central/src/main/java/com/sigebox/central/ui/help/, central/src/main/resources/com/sigebox/central/light.css, central/src/main/resources/com/sigebox/central/dark.css, central/src/main/resources/com/sigebox/central/app.css, central/src/test/java/com/sigebox/central/ui/theme/, central/src/test/java/com/sigebox/central/ui/help/
+- **Paths:** central/src/main/resources/com/sigebox/central/ui/theme/, central/src/main/resources/com/sigebox/central/ui/help/, central/src/main/java/com/sigebox/central/ui/theme/, central/src/main/java/com/sigebox/central/ui/help/, central/src/main/resources/com/sigebox/central/light.css, central/src/main/resources/com/sigebox/central/dark.css, central/src/main/resources/com/sigebox/central/app.css, central/src/test/java/com/sigebox/central/ui/theme/, central/src/test/java/com/sigebox/central/ui/help/
 - **Freeze-Allowed:** no
 - **Acceptance:**
   - Paleta v4 en claro y oscuro; prueba de tema mide contraste AA de cada par texto/fondo de DESIGN.md
   - Encabezado con el logo; paso y enlace activos con fondo, exactamente uno activo por pantalla (prueba)
   - Componentes en `ui/theme`: `Skeleton` (sin animación con movimiento reducido), campo con etiqueta arriba + ejemplo dentro, botones principal y secundario
-  - "?" fijo en la barra y junto a cada juez desconectado: abre la guía de `docs/design/guia-conexion.md` (copiada en recursos, sin internet)
+  - "?" fijo en la barra: abre la guía de `docs/design/guia-conexion.md` (copiada en recursos, sin internet)
   - Evidencia: capturas en claro y oscuro (rama `evidence/dsk-026`)
 - **Verify:** `central/gradlew -p central test --tests 'com.sigebox.central.ui.theme.*' --tests 'com.sigebox.central.ui.help.*'`
 - **Next step:** prueba de contraste con la paleta v4
@@ -959,6 +959,7 @@ En Windows (zoe) los comandos `Verify` se corren en Git Bash.
 - **Acceptance:**
   - Todo campo de formulario de la central usa el campo de DSK-026 (etiqueta arriba, ejemplo dentro); prueba que recorre las pantallas y no encuentra un `TextField`/`Spinner`/`DatePicker` sin `Label` asociado
   - Cada pantalla muestra una línea "Qué sigue"; todo botón deshabilitado dice por qué
+  - `HelpButton.connection(...)` (DSK-026) junto a cada juez desconectado en Jueces (`SetupScreen`) y En vivo (`RoundsScreen`); prueba
   - Ningún código en mayúsculas ni enum visible (prueba con `ScreenshotHarness` o el árbol de nodos); "Función" no aparece en ninguna pantalla
   - Evidencia: capturas de un evento completo de 2 peleas con judge-sim (rama `evidence/dsk-027`), revisadas con `design-critic`
 - **Verify:** `central/gradlew -p central test`
