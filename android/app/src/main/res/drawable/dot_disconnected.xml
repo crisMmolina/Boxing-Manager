@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Sin conexión: anillo vacío de 2 dp (DESIGN.md v3 §5). -->
-<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="oval">
-    <stroke android:width="@dimen/dot_ring" android:color="@color/disconnected" />
-    <size android:width="@dimen/dot" android:height="@dimen/dot" />
-</shape>

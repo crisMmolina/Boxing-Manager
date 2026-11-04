@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Barlow Condensed recta (OFL, licencia en res/raw/ofl_barlow_condensed.txt): números y títulos. Sin cursiva. -->
-<font-family xmlns:app="http://schemas.android.com/apk/res-auto">
-    <font app:font="@font/barlow_condensed_bold" app:fontStyle="normal" app:fontWeight="700" />
-    <font app:font="@font/barlow_condensed_extrabold" app:fontStyle="normal" app:fontWeight="800" />
-</font-family>

@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- DESIGN.md v3 §3.4: en oscuro no hay sombras; la elevación es tonal (bg → surface → surface_2). -->
-<resources>
-    <dimen name="card_elevation">0dp</dimen>
-</resources>

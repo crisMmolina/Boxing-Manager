@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- Marca que Screen.applyInsets dejó en la raíz (para pruebas). -->
-    <item name="screen_insets_applied" type="id" />
-</resources>

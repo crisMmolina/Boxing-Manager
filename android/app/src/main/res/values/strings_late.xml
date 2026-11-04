@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Captura tardía (AND-006), textos de DESIGN.md v2 §6.5. Los estados de tarjeta vienen de strings_score.xml. -->
-<resources>
-    <string name="late_title">Califica el round %1$d</string>
-    <string name="late_status">Round %1$d cerrado</string>
-    <string name="late_body">Califica ahora este round: se cerró sin tu calificación y es obligatoria.</string>
-    <string name="late_send">Enviar round tardío</string>
-    <string name="late_sent">Calificación tardía enviada.</string>
-</resources>
