@@ -17,3 +17,4 @@
 - 1793768084 | CLAIMED | crismmolina-3 | heartbeat; lease until 1793782484
 - 1793768152 | REVIEW | crismmolina-3 | done; PR https://github.com/crisMmolina/Boxing-Manager/pull/78; evidence: android/gradlew -p android :app:testDebugUnitTest exit 0 (113 pruebas) y smoke exit 0 en d063eaa; criterios: ErrorText, esperas y tarjeta final automática listos; 'sin valor por defecto' pendiente de decisión; sin capturas (lección #8); reviewer: -
 - 1793768160 | REVIEW | crismmolina-3 | checkpoint; next: Wait for review of SHA d063eaa
+- 1793768457 | REVIEW | crismmolina-3 | pending decision AND-017-1793768457; option: Sin valor por defecto: el round abre con las esquinas vacías y el juez toca + o − en cada una antes de enviar; se ajusta ScreenDesignTest (guía v2 reemplazada); Why: cris respondió textualmente: "Sin valor por defecto" (principio 2); registro en JudgeRuntime: "En AND-019"; FinalCardActivity la borra AND-021
