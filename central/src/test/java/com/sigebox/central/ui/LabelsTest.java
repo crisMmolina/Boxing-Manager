@@ -47,20 +47,28 @@ class LabelsTest {
         assertEquals("En curso", Labels.of(EstadoPelea.EN_CURSO));
     }
 
-    /** Recorre el código de la central: todo literal con forma de código de evento debe tener etiqueta. */
+    /** Literales en mayúsculas que no son tipos de evento: carpeta, variable de entorno y palabras a teclear. */
+    private static final Set<String> NO_SON_EVENTOS = Set.of("SIGEBOX", "APPDATA", "TERMINAR", "AVANZAR");
+
+    /**
+     * Recorre el código de la central (sin {@code Labels}): todo literal en mayúsculas es un tipo de
+     * evento y debe tener etiqueta, o estar en {@link #NO_SON_EVENTOS}.
+     */
     @Test
     void cadaTipoDeEventoQueEscribeLaCentralTieneEtiqueta() throws IOException {
         var codes = new TreeSet<String>();
-        var literal = Pattern.compile("\"([A-Z]+(?:_[A-Z]+)+|MALFORMED)\"");
+        var literal = Pattern.compile("\"([A-Z]{4,}(?:_[A-Z]+)*)\"");
         try (Stream<Path> files = Files.walk(Path.of("src/main/java"))) {
-            for (var f : files.filter(p -> p.toString().endsWith(".java")).toList()) {
+            for (var f : files.filter(p -> p.toString().endsWith(".java") && !p.endsWith("Labels.java")).toList()) {
                 var m = literal.matcher(Files.readString(f));
                 while (m.find()) {
-                    codes.add(m.group(1));
+                    if (!NO_SON_EVENTOS.contains(m.group(1))) {
+                        codes.add(m.group(1));
+                    }
                 }
             }
         }
-        assertTrue(codes.contains("SUBMIT_ROUND") && codes.contains("TERMS_ACCEPTED"), codes.toString());
+        assertTrue(codes.contains("SUBMIT_ROUND") && codes.contains("TERMS_ACCEPTED") && codes.contains("MALFORMED"), codes.toString());
         var missing = codes.stream().filter(c -> !Labels.EVENTOS.containsKey(c)).toList();
         assertEquals(List.of(), missing, "tipos sin etiqueta");
         for (var label : Labels.EVENTOS.values()) {
