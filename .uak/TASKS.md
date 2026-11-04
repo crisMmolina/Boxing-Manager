@@ -1061,13 +1061,14 @@ En Windows (zoe) los comandos `Verify` se corren en Git Bash.
 - **Estimate:** 3 h
 - **Rubric / Spec:** spec 004 §En vivo, §Quitar Corrección · principio 3
 - **Depends on:** DSK-029
-- **Paths:** central/src/main/java/com/sigebox/central/App.java, central/src/main/java/com/sigebox/central/ui/correction/, central/src/main/java/com/sigebox/central/service/CorrectionService.java, central/src/main/java/com/sigebox/central/ui/rounds/, central/src/test/java/com/sigebox/central/ui/correction/, central/src/test/java/com/sigebox/central/service/CorrectionServiceTest.java, central/src/test/java/com/sigebox/central/ui/rounds/
+- **Paths:** central/src/test/java/com/sigebox/central/ui/ScreenshotHarness.java, central/src/main/java/com/sigebox/central/ui/inicio/Nav.java, central/src/test/java/com/sigebox/central/ui/inicio/, central/src/main/java/com/sigebox/central/App.java, central/src/main/java/com/sigebox/central/ui/correction/, central/src/main/java/com/sigebox/central/service/CorrectionService.java, central/src/main/java/com/sigebox/central/ui/rounds/, central/src/test/java/com/sigebox/central/ui/correction/, central/src/test/java/com/sigebox/central/service/CorrectionServiceTest.java, central/src/test/java/com/sigebox/central/ui/rounds/
 - **Freeze-Allowed:** no
 - **Acceptance:**
-  - No existe la sección ni el enlace Corrección (ni "Corregir tarjeta" ni "Capturar desde papel"); enlaces secundarios: Terminación · Bitácora
+  - No existe la sección ni el enlace Corrección (ni "Corregir tarjeta" ni "Capturar desde papel"); enlaces secundarios: Inicio · Terminación · Bitácora
   - En vivo no tiene "Ver resumen parcial"; prueba: ningún nodo de En vivo muestra un total ni un ganador
   - Las tarjetas `CORREGIDA`/`CAPTURADA` de peleas viejas siguen contando en el resultado y en el acta (prueba)
   - Las pruebas que solo cubrían lo quitado se borran junto con su código (no se edita ninguna otra prueba)
+  - `CorrectionService` se conserva (crea las tarjetas `CORREGIDA`/`CAPTURADA` de peleas viejas y lo usa `JudgeHubHandoffTest`); se borran `CorrectionScreen` y su captura "05-correccion" del `ScreenshotHarness`
 - **Verify:** `central/gradlew -p central test`
 - **Next step:** prueba de que `RoundsScreen` no tiene el botón de resumen parcial
 
