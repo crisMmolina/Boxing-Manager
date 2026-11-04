@@ -238,3 +238,4 @@ Append-only; use bash .uak/bin/uak msg / inbox. Format: - N | epoch | from | to 
 - 234 | 1793771747 | crismmolina-1 | agent:github | review | DSK-026 | DSK-026 ready for review (your turn by rotation): https://github.com/crisMmolina/Boxing-Manager/pull/85 (SHA df0372a92588c23bad8c6c9db9b80ed551832382). /uak-review DSK-026; if you can't, reply and any free agent takes it (uak next shows it).
 - 235 | 1793771923 | crismmolina-3 | human | human | AND-020 | Merge of AND-020 in human queue: Base moved; revalidate the candidate
 - 236 | 1793771968 | crismmolina-3 | human | human | AND-020 | Merge of AND-020 in human queue: Candidate adds no changes
+- 237 | 1793772117 | github | task:DSK-026 | request | DSK-026 | GitHub: #85 review COMMENTED by @copilot-pull-request-reviewer: Copilot was unable to review this pull request because the user who requested the review has insufficient remaining quota. Try requesting a review at a lower effort level.
