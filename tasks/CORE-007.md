@@ -15,8 +15,8 @@ Task-Base: 48c7ee02ac8c47aae289f8b4e3393a00bac5555b
 Next: Wait for review of SHA d54b0f5
 PR: https://github.com/crisMmolina/Boxing-Manager/pull/80
 Evidence: core/gradlew -p core build exit 0 en d54b0f5; smoke PRODUCT_PASS exit 0 en e99ddb6 (luego solo TASKS.md); JoinUri 39 pruebas y ProtocolSchemaTest en verde; JaCoCo lineas 97.7; JOIN, HELLO y DeviceProof sin cambios
-Events: 4
+Events: 5
 Checkpoints: 2
-Sessions: 1
+Sessions: 2
 Last-Checkpoint: 1793769804
 Task-Tip: d54b0f54f4346eee52cbec4b5bacf00933e4eba7
