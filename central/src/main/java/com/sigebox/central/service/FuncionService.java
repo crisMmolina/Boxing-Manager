@@ -15,6 +15,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.regex.Pattern;
 
 /**
  * Función con cartelera (spec 002): una base de rounds y jueces, la lista ordenada de peleas y los
@@ -27,7 +28,8 @@ public final class FuncionService {
     /** Estado de una pelea de la cartelera; se deriva de lo guardado, no se guarda aparte. */
     public enum Estado { PROGRAMADA, EN_CURSO, CERRADA, SALTADA }
 
-    public record Funcion(String id, String fecha, int baseRounds, int baseJueces) {}
+    /** @param nombre el que le dieron al evento; {@code null} si no tiene (se muestra "Evento <fecha>") */
+    public record Funcion(String id, String nombre, String fecha, int baseRounds, int baseJueces) {}
 
     public record Esquinas(String roja, String azul) {}
 
@@ -35,7 +37,13 @@ public final class FuncionService {
     public record Fila(int orden, String roja, String azul, int rounds, int jueces, boolean cambiada, Estado estado,
             String peleaId) {}
 
+    /** Peleas que se pueden pedir al crear un evento. */
+    public static final int MAX_PELEAS = 20;
+
     private static final String ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
+    /** Hasta 6 cifras: un nombre escrito a mano con un número enorme no debe romper la cuenta. */
+    private static final Pattern ESQUINA_VACIA = Pattern.compile("Esquina (?:roja|azul) (\\d{1,6})");
 
     private final Database db;
     private final FightService fights;
@@ -72,9 +80,37 @@ public final class FuncionService {
             rows.add(new CardRow(0, nombre(e.roja(), "la esquina roja"), nombre(e.azul(), "la esquina azul"), null,
                     null, false, null));
         }
-        var f = new Funcion(newId(), LocalDate.now().toString(), baseRounds, baseJueces);
+        return guardarNueva(null, LocalDate.now(), baseRounds, baseJueces, rows);
+    }
+
+    /**
+     * Crea el evento con su nombre, su fecha y sus peleas. Sin nombre se guarda {@code null}; una esquina
+     * vacía queda como "Esquina roja N" o "Esquina azul N", con N fijo desde la creación.
+     */
+    public synchronized Funcion crear(String nombre, LocalDate fecha, int baseRounds, int baseJueces,
+            List<Esquinas> cartelera) {
+        rounds(baseRounds);
+        jueces(baseJueces);
+        if (fecha == null) {
+            throw new IllegalArgumentException("falta la fecha del evento");
+        }
+        if (cartelera.size() > MAX_PELEAS) {
+            throw new IllegalArgumentException("un evento lleva hasta " + MAX_PELEAS + " peleas");
+        }
+        var evento = nombre == null || nombre.isBlank() ? null : nombre(nombre, "el evento");
+        var rows = new ArrayList<CardRow>();
+        for (var e : cartelera) {
+            int n = rows.size() + 1;
+            rows.add(new CardRow(0, esquina(e.roja(), "la esquina roja", "Esquina roja " + n),
+                    esquina(e.azul(), "la esquina azul", "Esquina azul " + n), null, null, false, null));
+        }
+        return guardarNueva(evento, fecha, baseRounds, baseJueces, rows);
+    }
+
+    private Funcion guardarNueva(String nombre, LocalDate fecha, int baseRounds, int baseJueces, List<CardRow> rows) {
+        var f = new Funcion(newId(), nombre, fecha.toString(), baseRounds, baseJueces);
         db.inTransaction(c -> {
-            repo.save(new FuncionRepository.FuncionRow(f.id(), f.fecha(), baseRounds, baseJueces));
+            repo.save(new FuncionRepository.FuncionRow(f.id(), nombre, f.fecha(), baseRounds, baseJueces));
             repo.replaceCard(f.id(), rows);
             repo.log(f.id(), "FUNCION_CREADA", baseRounds + " rounds, " + baseJueces + " jueces, "
                     + rows.size() + " peleas");
@@ -83,9 +119,13 @@ public final class FuncionService {
         return f;
     }
 
+    private static String esquina(String text, String what, String vacia) {
+        return text == null || text.isBlank() ? vacia : nombre(text, what);
+    }
+
     public synchronized Funcion funcion(String funcionId) {
         var r = repo.find(funcionId).orElseThrow(() -> new IllegalArgumentException("función desconocida"));
-        return new Funcion(r.id(), r.fecha(), r.baseRounds(), r.baseJueces());
+        return new Funcion(r.id(), r.nombre(), r.fecha(), r.baseRounds(), r.baseJueces());
     }
 
     public synchronized List<Fila> cartelera(String funcionId) {
@@ -93,12 +133,33 @@ public final class FuncionService {
         return repo.card(funcionId).stream().map(r -> fila(f, r)).toList();
     }
 
-    /** Agrega una pelea al final. */
+    /**
+     * Agrega una pelea al final. Una esquina vacía queda como "Esquina roja N" o "Esquina azul N", con un N
+     * que no repite el de ninguna esquina de la cartelera aunque antes se haya quitado una pelea.
+     */
     public synchronized void agregar(String funcionId, Esquinas e) {
         var rows = new ArrayList<>(rows(funcionId));
-        rows.add(new CardRow(0, nombre(e.roja(), "la esquina roja"), nombre(e.azul(), "la esquina azul"), null, null,
-                false, null));
-        guardar(funcionId, rows, "CARTELERA_CAMBIADA", "agrega " + e.roja() + " vs " + e.azul());
+        if (rows.size() >= MAX_PELEAS) {
+            throw new IllegalArgumentException("un evento lleva hasta " + MAX_PELEAS + " peleas");
+        }
+        int n = siguienteNumero(rows);
+        var roja = esquina(e.roja(), "la esquina roja", "Esquina roja " + n);
+        var azul = esquina(e.azul(), "la esquina azul", "Esquina azul " + n);
+        rows.add(new CardRow(0, roja, azul, null, null, false, null));
+        guardar(funcionId, rows, "CARTELERA_CAMBIADA", "agrega " + roja + " vs " + azul);
+    }
+
+    private static int siguienteNumero(List<CardRow> rows) {
+        int mayor = rows.size();
+        for (var r : rows) {
+            for (var text : List.of(r.roja(), r.azul())) {
+                var m = ESQUINA_VACIA.matcher(text);
+                if (m.matches()) {
+                    mayor = Math.max(mayor, Integer.parseInt(m.group(1)));
+                }
+            }
+        }
+        return mayor + 1;
     }
 
     /** Quita una pelea que no ha empezado. */
@@ -150,6 +211,17 @@ public final class FuncionService {
         guardar(funcionId, rows, "CARTELERA_CAMBIADA", r.roja() + " vs " + r.azul() + ": "
                 + (nueva.rounds() == null ? "base" : nueva.rounds()) + " rounds, "
                 + (nueva.jueces() == null ? "base" : nueva.jueces()) + " jueces");
+    }
+
+    /** Cambia los nombres de las esquinas de una pelea que no ha empezado. */
+    public synchronized void renombrar(String funcionId, int orden, String roja, String azul) {
+        var nuevaRoja = nombre(roja, "la esquina roja");
+        var nuevaAzul = nombre(azul, "la esquina azul");
+        var rows = new ArrayList<>(rows(funcionId));
+        var r = noEmpezada(funcionId, rows, orden);
+        rows.set(orden - 1, new CardRow(r.orden(), nuevaRoja, nuevaAzul, r.rounds(), r.jueces(), r.saltada(), null));
+        guardar(funcionId, rows, "CARTELERA_CAMBIADA", r.roja() + " vs " + r.azul() + " ahora es " + nuevaRoja + " vs "
+                + nuevaAzul);
     }
 
     /**
@@ -297,7 +369,7 @@ public final class FuncionService {
             throw new IllegalArgumentException(
                     "el nombre de " + what + " admite hasta " + FightService.MAX_NAME + " caracteres");
         }
-        if (t.chars().anyMatch(Character::isISOControl)) {
+        if (t.chars().anyMatch(c -> Character.isISOControl(c) || Character.getType(c) == Character.FORMAT)) {
             throw new IllegalArgumentException("el nombre de " + what + " tiene caracteres no permitidos");
         }
         return t;

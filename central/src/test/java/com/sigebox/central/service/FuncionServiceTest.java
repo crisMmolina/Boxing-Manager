@@ -97,7 +97,7 @@ class FuncionServiceTest {
         assertThrows(IllegalArgumentException.class, () -> funciones.crear(0, 3, List.of()));
         assertThrows(IllegalArgumentException.class, () -> funciones.crear(4, 6, List.of()));
         var f = funciones.crear(4, 3, List.of());
-        assertThrows(IllegalArgumentException.class, () -> funciones.agregar(f.id(), pelea(" ", "Bea")));
+        assertThrows(IllegalArgumentException.class, () -> funciones.agregar(f.id(), pelea("A\nB", "Bea")));
         funciones.agregar(f.id(), pelea("Ana", "Bea"));
         assertThrows(IllegalArgumentException.class, () -> funciones.cambiar(f.id(), 1, 13, null));
         assertThrows(IllegalArgumentException.class, () -> funciones.cambiar(f.id(), 1, null, 0));
@@ -123,6 +123,107 @@ class FuncionServiceTest {
 
         var tipos = new FuncionRepository(db).bitacora(f.id());
         assertTrue(tipos.containsAll(List.of("FUNCION_CREADA", "CARTELERA_CAMBIADA", "SIGUIENTE_PELEA")), tipos.toString());
+    }
+
+    @Test
+    void crearEventoGuardaNombreFechaYNombraLasEsquinasVacias() {
+        var fecha = LocalDate.of(2026, 12, 5);
+        var f = funciones.crear("Copa Tlaxcala", fecha, 6, 3,
+                List.of(pelea("", " "), pelea("Ana", null), pelea(null, "Bea")));
+
+        db.close(); // lo guardado es lo que se muestra
+        db = Database.open(dir.resolve("sigebox.db"));
+        funciones = service(db);
+
+        assertEquals(f, funciones.funcion(f.id()));
+        assertEquals("Copa Tlaxcala", funciones.funcion(f.id()).nombre());
+        assertEquals("2026-12-05", funciones.funcion(f.id()).fecha());
+        var filas = funciones.cartelera(f.id());
+        assertEquals(List.of("Esquina roja 1", "Ana", "Esquina roja 3"),
+                filas.stream().map(FuncionService.Fila::roja).toList());
+        assertEquals(List.of("Esquina azul 1", "Esquina azul 2", "Bea"),
+                filas.stream().map(FuncionService.Fila::azul).toList());
+    }
+
+    @Test
+    void agregarNombraLasEsquinasVaciasSinRepetirNumero() {
+        var f = funciones.crear(null, LocalDate.of(2026, 12, 5), 6, 3,
+                List.of(pelea("", ""), pelea("", ""), pelea("", "")));
+        funciones.quitar(f.id(), 1); // quedan la 2 y la 3
+        funciones.agregar(f.id(), pelea(" ", null));
+        funciones.agregar(f.id(), pelea("Ana", ""));
+
+        var filas = funciones.cartelera(f.id());
+        assertEquals(List.of("Esquina roja 2", "Esquina roja 3", "Esquina roja 4", "Ana"),
+                filas.stream().map(FuncionService.Fila::roja).toList());
+        assertEquals(List.of("Esquina azul 2", "Esquina azul 3", "Esquina azul 4", "Esquina azul 5"),
+                filas.stream().map(FuncionService.Fila::azul).toList());
+    }
+
+    @Test
+    void agregarNoPasaDelMaximoDePeleas() {
+        var f = funciones.crear("A", LocalDate.of(2026, 12, 5), 6, 3,
+                java.util.Collections.nCopies(FuncionService.MAX_PELEAS, pelea("", "")));
+        assertThrows(IllegalArgumentException.class, () -> funciones.agregar(f.id(), pelea("Ana", "Bea")));
+        assertEquals(FuncionService.MAX_PELEAS, funciones.cartelera(f.id()).size());
+    }
+
+    @Test
+    void unNombreConCaracteresInvisiblesNoSeGuarda() {
+        var f = funciones.crear("A", LocalDate.of(2026, 12, 5), 6, 3, List.of(pelea("", "")));
+        assertThrows(IllegalArgumentException.class, () -> funciones.renombrar(f.id(), 1, "Ana‮", "Bea"));
+        assertThrows(IllegalArgumentException.class, () -> funciones.agregar(f.id(), pelea("Ana", "Bea​")));
+        assertThrows(IllegalArgumentException.class,
+                () -> funciones.crear("A‮", LocalDate.of(2026, 12, 5), 6, 3, List.of()));
+        assertEquals("Esquina roja 1", funciones.cartelera(f.id()).get(0).roja());
+    }
+
+    @Test
+    void elNumeroDeLaEsquinaNoCambiaAlMoverLaPelea() {
+        var f = funciones.crear(null, LocalDate.of(2026, 12, 5), 6, 3, List.of(pelea("", ""), pelea("", "")));
+        funciones.mover(f.id(), 2, 1);
+        assertEquals(List.of("Esquina roja 2", "Esquina roja 1"),
+                funciones.cartelera(f.id()).stream().map(FuncionService.Fila::roja).toList());
+    }
+
+    @Test
+    void crearEventoSinNombreLoDejaVacio() {
+        var f = funciones.crear("   ", LocalDate.of(2026, 12, 5), 6, 3, List.of());
+        assertEquals(null, funciones.funcion(f.id()).nombre());
+    }
+
+    @Test
+    void crearEventoValidaRangosYNombre() {
+        var fecha = LocalDate.of(2026, 12, 5);
+        var veintiuna = java.util.Collections.nCopies(21, pelea("", ""));
+        assertThrows(IllegalArgumentException.class, () -> funciones.crear("A", fecha, 13, 3, List.of()));
+        assertThrows(IllegalArgumentException.class, () -> funciones.crear("A", fecha, 6, 0, List.of()));
+        assertThrows(IllegalArgumentException.class, () -> funciones.crear("A", fecha, 6, 3, veintiuna));
+        assertThrows(IllegalArgumentException.class, () -> funciones.crear("A", null, 6, 3, List.of()));
+        assertThrows(IllegalArgumentException.class, () -> funciones.crear("A\nB", fecha, 6, 3, List.of()));
+        assertThrows(IllegalArgumentException.class,
+                () -> funciones.crear("A", fecha, 6, 3, List.of(pelea("A\nB", ""))));
+        assertEquals(20, funciones.cartelera(funciones.crear("A", fecha, 6, 3,
+                java.util.Collections.nCopies(20, pelea("", ""))).id()).size());
+    }
+
+    @Test
+    void renombrarCambiaLasEsquinasSoloAntesDeEmpezar() {
+        var f = funciones.crear(null, LocalDate.of(2026, 12, 5), 6, 3, List.of(pelea("", ""), pelea("", "")));
+        funciones.cambiar(f.id(), 1, 8, null);
+
+        funciones.renombrar(f.id(), 1, " Ana ", "Bea");
+
+        var fila = funciones.cartelera(f.id()).get(0);
+        assertEquals(List.of("Ana", "Bea", 8), List.of(fila.roja(), fila.azul(), fila.rounds()));
+        assertThrows(IllegalArgumentException.class, () -> funciones.renombrar(f.id(), 1, " ", "Bea"));
+        assertThrows(IllegalArgumentException.class, () -> funciones.renombrar(f.id(), 1, "A\nB", "Bea"));
+
+        var p = funciones.siguiente(f.id());
+        assertEquals("Ana", p.esquinaRoja());
+        assertThrows(IllegalStateException.class, () -> funciones.renombrar(f.id(), 1, "Caro", "Bea"));
+        assertEquals(List.of("Ana", "Esquina roja 2"),
+                funciones.cartelera(f.id()).stream().map(FuncionService.Fila::roja).toList());
     }
 
     @Test

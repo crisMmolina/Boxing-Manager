@@ -8,11 +8,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-/** Tablas {@code funcion}, {@code funcion_card} y {@code funcion_log} (V2, spec 002). */
+/** Tablas {@code funcion}, {@code funcion_card} y {@code funcion_log} (V2, spec 002; nombre en V3). */
 public final class FuncionRepository {
 
-    /** Fila guardada de la función. */
-    public record FuncionRow(String id, String fecha, int baseRounds, int baseJueces) {}
+    /** Fila guardada de la función; {@code nombre} nulo = sin nombre propio. */
+    public record FuncionRow(String id, String nombre, String fecha, int baseRounds, int baseJueces) {}
 
     /** Fila guardada de la cartelera; {@code rounds}/{@code jueces} nulos = usa la base. */
     public record CardRow(int orden, String roja, String azul, Integer rounds, Integer jueces, boolean saltada,
@@ -27,13 +27,14 @@ public final class FuncionRepository {
     public void save(FuncionRow f) {
         db.inTransaction(c -> {
             try (var ps = c.prepareStatement("""
-                    INSERT INTO funcion (id, date, base_rounds, base_judges, created_ms) VALUES (?, ?, ?, ?, ?)
+                    INSERT INTO funcion (id, nombre, date, base_rounds, base_judges, created_ms) VALUES (?, ?, ?, ?, ?, ?)
                     """)) {
                 ps.setString(1, f.id());
-                ps.setString(2, f.fecha());
-                ps.setInt(3, f.baseRounds());
-                ps.setInt(4, f.baseJueces());
-                ps.setLong(5, System.currentTimeMillis());
+                ps.setString(2, f.nombre());
+                ps.setString(3, f.fecha());
+                ps.setInt(4, f.baseRounds());
+                ps.setInt(5, f.baseJueces());
+                ps.setLong(6, System.currentTimeMillis());
                 ps.executeUpdate();
             }
             return null;
@@ -46,7 +47,7 @@ public final class FuncionRepository {
                 ps.setString(1, id);
                 try (var rs = ps.executeQuery()) {
                     return rs.next()
-                            ? Optional.of(new FuncionRow(rs.getString("id"), rs.getString("date"),
+                            ? Optional.of(new FuncionRow(rs.getString("id"), rs.getString("nombre"), rs.getString("date"),
                                     rs.getInt("base_rounds"), rs.getInt("base_judges")))
                             : Optional.empty();
                 }
