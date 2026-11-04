@@ -12,3 +12,4 @@
 - 1793775763 | CLAIMED | crismmolina-1 | claim; next: prueba de que `RoundsScreen` no tiene el botón de resumen parcial
 - 1793776015 | CLAIMED | crismmolina-1 | checkpoint; next: con Paths ampliadas: quitar enlace en Nav, borrar CorrectionScreen y la sobrecarga; luego /uak-ship
 - 1793776174 | AVAILABLE | crismmolina-1 | release; claim released by crismmolina-1; reason: -; summary kept
+- 1793776180 | CLAIMED | crismmolina-1 | claim; next: con Paths ampliadas: quitar enlace en Nav, borrar CorrectionScreen y la sobrecarga; luego /uak-ship
