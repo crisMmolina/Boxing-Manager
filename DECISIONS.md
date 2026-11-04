@@ -59,3 +59,4 @@ Why: a reversible option after 15 min keeps work moving.
 - 1793767379 | AND-017 | Registrar en JudgeRuntime; mantener 10–10 inicial | Why: Sin pantalla; no editar ScreenDesignTest
 - 1793767493 | DSK-025 | Traducir solo al mostrar; LabelsTest escanea src/main/java | Why: spec 003: la BD sigue con códigos; nada queda sin traducir
 - 1793767705 | CORE-007 | Solo se agregan 4 samples a la lista de mensajesConstruidosEnJavaPasanSuSchema | Why: El guard values().length+1 obliga; CORE-005 hizo igual
+- 1793767768 | DSK-028 | Round de terminacion, el unico que puede llegar tarde sin faltar al calculo | Why: ResultCalculator exige las tarjetas de los rounds que cuentan
