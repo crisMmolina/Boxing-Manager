@@ -7,6 +7,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextInputControl;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
@@ -16,7 +17,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
 import javafx.util.Duration;
 
-/** Componentes de DESIGN v3 §5 para JavaFX. Solo aplican clases de {@code app.css}. */
+/** Componentes de DESIGN v4 §5 para JavaFX. Solo aplican clases de {@code app.css}. */
 public final class Ui {
 
     private Ui() {
@@ -54,13 +55,22 @@ public final class Ui {
         return l;
     }
 
-    /** Campo con su etiqueta arriba (5.8). */
+    /** Campo con su etiqueta arriba, siempre visible y asociada al control (§5.4). */
     public static VBox field(String label, Node control) {
-        var box = new VBox(6, label(label, "field-label"), control);
+        var l = label(label, "field-label");
+        l.setLabelFor(control);
+        var box = new VBox(6, l, control);
+        box.getStyleClass().add("field");
         if (control instanceof Region r) {
             r.setMaxWidth(Double.MAX_VALUE);
         }
         return box;
+    }
+
+    /** Campo con etiqueta arriba y un valor de ejemplo real dentro ("María López", "123456"), que no repite la etiqueta. */
+    public static VBox field(String label, String example, TextInputControl control) {
+        control.setPromptText(example);
+        return field(label, control);
     }
 
     public static Button primary(String text) {
@@ -121,9 +131,10 @@ public final class Ui {
         return r;
     }
 
-    /** Marca: solo la palabra SIGEBOX en Barlow Condensed (DESIGN v3: nada de logotipos). */
+    /** Marca (§3.6): guantes de 28 px + SIGEBOX en Barlow Condensed dorado, separados 8 px. */
     public static HBox brand() {
-        var box = new HBox(label("SIGEBOX", "brand-name"));
+        var box = new HBox(8, Logo.node(28, true), label("SIGEBOX", "brand-name"));
+        box.getStyleClass().add("brand");
         box.setAlignment(Pos.CENTER_LEFT);
         return box;
     }

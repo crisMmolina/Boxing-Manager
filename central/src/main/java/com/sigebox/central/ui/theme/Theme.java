@@ -8,7 +8,7 @@ import javafx.scene.Scene;
 import javafx.scene.text.Font;
 
 /**
- * Fuentes empaquetadas y hojas de estilo de DESIGN v3. Las fuentes se cargan una vez al arrancar, desde los
+ * Fuentes empaquetadas y hojas de estilo de DESIGN v4. Las fuentes se cargan una vez al arrancar, desde los
  * recursos (nunca de internet), antes de crear la primera escena. Cada escena lleva el archivo de colores del
  * tema actual y, después, {@code app.css} con los componentes.
  */
@@ -24,7 +24,7 @@ public final class Theme {
 
     static final String FONT_DIR = "/com/sigebox/central/fonts/";
 
-    /** Tema claro «cantera» u oscuro «noche de arena» (DESIGN v3 §2). */
+    /** Tema claro (blanco) u oscuro (negro), los dos con dorado y barra negra (DESIGN v4 §3.1). */
     public enum Mode {
         LIGHT("/com/sigebox/central/light.css", "Tema oscuro"),
         DARK("/com/sigebox/central/dark.css", "Tema claro");
@@ -53,6 +53,9 @@ public final class Theme {
     }
 
     private static volatile Mode mode = Mode.LIGHT;
+
+    /** {@code null} sigue el ajuste "Reducir movimiento" del sistema. */
+    private static volatile Boolean reducedMotion;
 
     private static final List<Scene> SCENES = new ArrayList<>();
 
@@ -89,6 +92,24 @@ public final class Theme {
 
     public static Mode mode() {
         return mode;
+    }
+
+    /** Movimiento reducido (DESIGN v4 §3.7): el ajuste del sistema, salvo que se fije con {@link #setReducedMotion}. */
+    public static boolean reducedMotion() {
+        var forced = reducedMotion;
+        if (forced != null) {
+            return forced;
+        }
+        try {
+            return Platform.getPreferences().isReducedMotion();
+        } catch (RuntimeException e) {
+            return false; // sin preferencias del sistema, con movimiento
+        }
+    }
+
+    /** Fija el movimiento reducido; {@code null} vuelve a seguir al sistema. */
+    public static void setReducedMotion(Boolean value) {
+        reducedMotion = value;
     }
 
     /** Hojas en orden: primero los colores del tema y luego los componentes. */

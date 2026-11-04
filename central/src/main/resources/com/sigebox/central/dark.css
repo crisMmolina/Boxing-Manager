@@ -1,21 +1,28 @@
-/* SIGEBOX · Central. Tokens de color del tema oscuro «noche de arena» (docs/DESIGN.md v3 §3.1). Solo colores. */
+/* SIGEBOX · Central. Tokens de color del tema oscuro, negro con dorado (docs/DESIGN.md v4 §3.1). Solo colores. */
 .root {
-    -sg-bg: #14120F;
-    -sg-surface: #1F1C18;
-    -sg-surface-2: #2A2621;
-    -sg-ink: #F3EFE8;
-    -sg-ink-2: #B8B1A6;
-    -sg-primary: #F3EFE8;
-    -sg-on-primary: #1C1A17;
-    -sg-accent: #BC955C;
+    -sg-bg: #0E0E0C;
+    -sg-surface: #1A1917;
+    -sg-surface-2: #24221F;
+    -sg-line: #34312C;
+    -sg-ink: #F5F3EE;
+    -sg-ink-2: #B9B3A8;
+    -sg-field-border: #7D776D;
+    -sg-primary: #D4AF5A;
+    -sg-on-primary: #111110;
+    -sg-accent: #D4AF5A;
+    -sg-accent-soft: #3A3020;
+    -sg-bar: #0E0E0C;
+    -sg-on-bar: #F5F3EE;
+    -sg-on-bar-2: #B9B3A8;
+    -sg-bar-accent: #D4AF5A;
     -sg-red: #E58A9D;
-    -sg-on-red: #1C1A17;
+    -sg-on-red: #111110;
     -sg-red-numeral: #E58A9D;
     -sg-blue: #8CB8EE;
-    -sg-on-blue: #1C1A17;
+    -sg-on-blue: #111110;
     -sg-blue-numeral: #8CB8EE;
     -sg-connected: #4CC97A;
-    -sg-disconnected: #B8B1A6;
-    -sg-line: #3A352E;
+    -sg-disconnected: #B9B3A8;
+    -sg-skeleton: #36332E;
     -sg-shadow: transparent;
 }
