@@ -1205,3 +1205,18 @@ En Windows (zoe) los comandos `Verify` se corren en Git Bash.
   - Corte de 60 s de un juez durante la pelea 2: 0 calificaciones perdidas; último `ACK` → Resultado listo ≤ 1 s (p95)
 - **Verify:** `central/gradlew -p central test --tests 'com.sigebox.central.it.EventoTest'`
 - **Next step:** esqueleto de `EventoTest` a partir de `FuncionFlowTest`
+
+## DSK-034 · Etiqueta en español para `CARD_OVER_CAPTURE` (followup de DSK-028)
+
+- **Type:** fix
+- **Priority:** P0
+- **Estimate:** 30 min
+- **Rubric / Spec:** spec 003 §Español en las interfaces · `main` en rojo tras DSK-028 + DSK-025
+- **Depends on:** DSK-028, DSK-025
+- **Paths:** central/src/main/java/com/sigebox/central/ui/Labels.java
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - `LabelsTest.cadaTipoDeEventoQueEscribeLaCentralTieneEtiqueta` pasa sin editarla: `CARD_OVER_CAPTURE` tiene etiqueta en español
+  - La suite completa de la central pasa
+- **Verify:** `central/gradlew -p central test`
+- **Next step:** agregar la entrada a `Labels.EVENTOS`
