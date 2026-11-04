@@ -54,16 +54,6 @@ public final class RoundsScreen {
         screens.register(ID, "En vivo", () -> build(service, fightId, onFinish));
     }
 
-    /**
-     * Firma anterior con {@code onCorrect}, que ya no se usa (Corrección se quitó). Solo la llama
-     * {@code ScreenshotHarness}, que está fuera de DSK-030; se borra cuando esa prueba pase a la firma nueva.
-     */
-    @Deprecated
-    public static void register(Screens<Node> screens, RoundService service, Supplier<String> fightId,
-            Runnable onCorrect, Runnable onFinish) {
-        register(screens, service, fightId, onFinish);
-    }
-
     /** {@code Ctrl+Enter}: pulsa el botón principal del tablero dentro de {@code scope}, si está. */
     public static boolean firePrimary(Node scope) {
         if (scope.lookup("#" + PRIMARY_ID) instanceof Button b && !b.isDisabled()) {
