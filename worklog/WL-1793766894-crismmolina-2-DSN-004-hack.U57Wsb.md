@@ -6,7 +6,7 @@
 - Why: Regla de la tarea
 - Failing: none
 - Commands: Verify; python3 docs/design/contraste.py
-- Next: Another agent reviews https://github.com/crisMmolina/Boxing-Manager/pull/77; run .uak/bin/smoke
+- Next: Integrated in main: 67c98778f74fe92d05a9a519b3eba002dd3ea713
 
 ## History
 - 1793766894 | CLAIMED | crismmolina-2 | claim; next: buscar opciones de logo con licencia CC0 y anotarlas en `CREDITOS.md`
@@ -17,3 +17,4 @@
 - 1793768353 | REVIEW | crismmolina-2 | heartbeat; lease until 1793854753
 - 1793768434 | REVIEW | crismmolina-2 | done; PR https://github.com/crisMmolina/Boxing-Manager/pull/77; evidence: Verify exit 0 + logo SVG presente; smoke exit 0 en 1808b70; reviewer: -
 - 1793769160 | REVIEW | crismmolina-4 | review; approve; SHA 5c059ff49565a9433204102eedd4e9415e223f67; reviewer crismmolina-4
+- 1793769961 | INTEGRATED | crismmolina-2 | merge; smoke and Verify PASS; commit 67c98778f74fe92d05a9a519b3eba002dd3ea713; reviewer crismmolina-4
