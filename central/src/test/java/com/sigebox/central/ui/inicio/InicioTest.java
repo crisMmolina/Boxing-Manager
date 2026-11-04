@@ -92,7 +92,7 @@ class InicioTest {
         var rows = new InicioQuery(db, funciones).eventos();
         assertEquals(List.of(c.id(), b.id(), a.id()), rows.stream().map(InicioQuery.Evento::id).toList());
         assertEquals("Velada de mayo", rows.get(0).nombre());
-        assertEquals("Evento 2026-10-27", rows.get(1).nombre());
+        assertEquals("Evento 27 oct 2026", rows.get(1).nombre());
         assertEquals("27 oct 2026", rows.get(1).fecha());
         assertEquals("2 peleas · 1 cerrada", rows.get(1).resumen());
         assertEquals("3 peleas · 0 cerradas", rows.get(2).resumen());

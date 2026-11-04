@@ -138,8 +138,10 @@ public final class Splash<T> extends StackPane {
         error.setManaged(on);
         retry.setVisible(on);
         retry.setManaged(on);
-        progress.setVisible(!on);
-        message.setVisible(!on);
+        for (var n : new javafx.scene.Node[] {progress, message}) {
+            n.setVisible(!on);
+            n.setManaged(!on);
+        }
         if (on) {
             retry.requestFocus();
         }

@@ -61,7 +61,7 @@ public final class InicioQuery {
         var out = new ArrayList<Evento>();
         for (int i = 0; i < ids.size(); i++) {
             var f = funciones.funcion(ids.get(i));
-            out.add(new Evento(f.id(), FuncionView.nombre(f), fecha(f.fecha()),
+            out.add(new Evento(f.id(), nombre(f), fecha(f.fecha()),
                     FuncionView.resumen(funciones.cartelera(f.id())), i == 0));
         }
         return out;
@@ -74,6 +74,11 @@ public final class InicioQuery {
         }
         return funciones.cartelera(id).stream().anyMatch(f -> f.estado() == Estado.EN_CURSO)
                 ? Destino.EN_VIVO : Destino.EVENTO;
+    }
+
+    /** El nombre guardado o, si no tiene, "Evento 27 oct 2026" (DESIGN v4 §7.1). */
+    static String nombre(FuncionService.Funcion f) {
+        return f.nombre() == null || f.nombre().isBlank() ? "Evento " + fecha(f.fecha()) : f.nombre();
     }
 
     /** "3 nov 2026" (sin el punto que Java pone a la abreviatura del mes). */

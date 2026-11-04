@@ -39,7 +39,7 @@ public final class CarteleraScreen {
             line.setAlignment(Pos.CENTER_LEFT);
             list.getChildren().add(line);
         }
-        var root = new VBox(24, Ui.screenTitle(FuncionView.nombre(f)),
+        var root = new VBox(24, Ui.screenTitle(InicioQuery.nombre(f)),
                 Ui.support(InicioQuery.fecha(f.fecha()) + " · " + FuncionView.detalle(f.baseRounds(), f.baseJueces())
                         + ". Evento anterior: solo se consulta."),
                 list);
