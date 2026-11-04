@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Mide los tokens de color de DESIGN.md v3 y escribe docs/design/contraste.md.
+"""Mide los tokens de color de DESIGN.md v4 y escribe docs/design/contraste.md.
 
 Métodos:
 - Contraste: luminancia relativa de WCAG 2.x, (L1 + 0.05) / (L2 + 0.05).
@@ -13,22 +13,24 @@ from pathlib import Path
 
 TOKENS = {
     "claro": {
-        "bg": "#F7F4EF", "surface": "#FFFFFF", "surface_2": "#EFEAE2",
-        "ink": "#1C1A17", "ink_2": "#55585A",
-        "primary": "#1C1A17", "on_primary": "#FFFFFF",
-        "accent": "#7A5A2A",
+        "bg": "#FAF9F6", "surface": "#FFFFFF", "surface_2": "#F2F0EB", "line": "#E3DFD7",
+        "ink": "#111110", "ink_2": "#57534C", "field_border": "#8C877D",
+        "primary": "#111110", "on_primary": "#FFFFFF",
+        "accent": "#7A5A2A", "accent_soft": "#F3E7CF",
+        "bar": "#111110", "on_bar": "#F7F5F0", "on_bar_2": "#B9B3A8", "bar_accent": "#C9A35E",
         "red": "#9F2241", "on_red": "#FFFFFF", "red_numeral": "#9F2241",
         "blue": "#266CB4", "on_blue": "#FFFFFF", "blue_numeral": "#266CB4",
-        "connected": "#027A35", "disconnected": "#55585A",
+        "connected": "#027A35", "disconnected": "#57534C",
     },
     "oscuro": {
-        "bg": "#14120F", "surface": "#1F1C18", "surface_2": "#2A2621",
-        "ink": "#F3EFE8", "ink_2": "#B8B1A6",
-        "primary": "#F3EFE8", "on_primary": "#1C1A17",
-        "accent": "#BC955C",
-        "red": "#E58A9D", "on_red": "#1C1A17", "red_numeral": "#E58A9D",
-        "blue": "#8CB8EE", "on_blue": "#1C1A17", "blue_numeral": "#8CB8EE",
-        "connected": "#4CC97A", "disconnected": "#B8B1A6",
+        "bg": "#0E0E0C", "surface": "#1A1917", "surface_2": "#24221F", "line": "#34312C",
+        "ink": "#F5F3EE", "ink_2": "#B9B3A8", "field_border": "#7D776D",
+        "primary": "#D4AF5A", "on_primary": "#111110",
+        "accent": "#D4AF5A", "accent_soft": "#3A3020",
+        "bar": "#0E0E0C", "on_bar": "#F5F3EE", "on_bar_2": "#B9B3A8", "bar_accent": "#D4AF5A",
+        "red": "#E58A9D", "on_red": "#111110", "red_numeral": "#E58A9D",
+        "blue": "#8CB8EE", "on_blue": "#111110", "blue_numeral": "#8CB8EE",
+        "connected": "#4CC97A", "disconnected": "#B9B3A8",
     },
 }
 
@@ -36,12 +38,14 @@ TOKENS = {
 PARES = [
     ("ink", "bg", "texto"), ("ink", "surface", "texto"), ("ink", "surface_2", "texto"),
     ("ink_2", "bg", "texto"), ("ink_2", "surface", "texto"), ("ink_2", "surface_2", "texto"),
-    ("on_primary", "primary", "texto"),
+    ("on_primary", "primary", "texto"), ("ink", "accent_soft", "texto"),
+    ("on_bar", "bar", "texto"), ("on_bar_2", "bar", "texto"), ("bar_accent", "bar", "texto"),
     ("on_red", "red", "texto"), ("on_blue", "blue", "texto"),
     ("red_numeral", "surface", "texto"), ("blue_numeral", "surface", "texto"),
     ("red_numeral", "bg", "texto"), ("blue_numeral", "bg", "texto"),
-    ("accent", "bg", "texto"), ("accent", "surface", "texto"),
-    ("primary", "bg", "ui"), ("red", "surface", "ui"), ("blue", "surface", "ui"),
+    ("accent", "bg", "texto"), ("accent", "surface", "texto"), ("accent", "surface_2", "texto"),
+    ("primary", "bg", "ui"), ("primary", "surface", "ui"), ("field_border", "surface", "ui"),
+    ("red", "surface", "ui"), ("blue", "surface", "ui"),
     ("accent", "surface_2", "ui"), ("connected", "surface", "ui"), ("disconnected", "surface", "ui"),
 ]
 
@@ -101,7 +105,7 @@ def delta_e(a, b):
 
 
 def informe():
-    out = ["# Contraste y daltonismo de los tokens v3", "",
+    out = ["# Contraste y daltonismo de los tokens v4", "",
            "Generado por `docs/design/contraste.py`. No editar a mano: cambia un token y vuelve a correr el script.", ""]
     fallas = 0
     for tema, t in TOKENS.items():

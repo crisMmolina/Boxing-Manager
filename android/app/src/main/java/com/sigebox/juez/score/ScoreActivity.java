@@ -11,12 +11,11 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
-import com.sigebox.core.protocol.Ack;
 import com.sigebox.core.protocol.Message;
 import com.sigebox.juez.R;
 import com.sigebox.juez.data.SessionEntity;
 import com.sigebox.juez.data.SigeboxDatabase;
-import com.sigebox.juez.finalcard.FinalCardActivity;
+import com.sigebox.juez.finalcard.AutoFinalCard;
 import com.sigebox.juez.net.ConnectionState;
 import com.sigebox.juez.net.JudgeConnection;
 import com.sigebox.juez.net.JudgeListener;
@@ -25,6 +24,7 @@ import com.sigebox.core.protocol.State;
 import com.sigebox.juez.net.JudgeRuntime;
 import com.sigebox.juez.ui.ConfirmSheet;
 import com.sigebox.juez.ui.CornerCard;
+import com.sigebox.juez.ui.ErrorText;
 import com.sigebox.juez.ui.RoundProgress;
 import com.sigebox.juez.ui.Screen;
 import com.sigebox.juez.ui.TopBar;
@@ -46,7 +46,6 @@ public class ScoreActivity extends AppCompatActivity {
     private ScoreViewModel vm;
     private JudgeConnection connection;
     private SigeboxDatabase database;
-    private boolean finalOpened;
     private CornerCard red;
     private CornerCard blue;
     private boolean wasOpen;
@@ -81,6 +80,7 @@ public class ScoreActivity extends AppCompatActivity {
         Screen.setup(this);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         JudgeRuntime runtime = JudgeRuntime.get(this);
+        AutoFinalCard.install(runtime); // la tarjeta final sale sola al terminar la pelea (spec 004)
         connection = runtime.connection();
         database = runtime.database();
         vm = new ViewModelProvider(this, new ViewModelProvider.Factory() {
@@ -169,10 +169,8 @@ public class ScoreActivity extends AppCompatActivity {
         boolean opened = input && !wasOpen;
         wasOpen = input;
         if (opened) {
+            // Sin valor por defecto: el juez toca + o − en cada esquina antes de enviar.
             findViewById(R.id.score_root).performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
-            if (vm.applyDefault()) {
-                return; // cada round empieza en 10–10; el ViewModel vuelve a publicar y se pinta
-            }
         }
         boolean showSent = ui.card != null && !ui.editing;
         red.bind(showSent ? ui.card.red : ui.red, input);
@@ -195,11 +193,6 @@ public class ScoreActivity extends AppCompatActivity {
         if (ui.lateRound != null) {
             vm.lateHandled();
             startActivity(new Intent().setClassName(this, LATE_ACTIVITY).putExtra(EXTRA_ROUND, (int) ui.lateRound));
-        }
-        if (ui.fightEnded && !finalOpened) {
-            finalOpened = true;
-            startActivity(new Intent(this, FinalCardActivity.class));
-            finish();
         }
     }
 
@@ -245,10 +238,8 @@ public class ScoreActivity extends AppCompatActivity {
     private void renderMessage(ScoreUi ui, boolean online) {
         TextView message = findViewById(R.id.score_message);
         String text = null;
-        if (ui.lastError == Ack.Error.ROUND_NOT_OPEN) {
-            text = getString(R.string.score_error_round_not_open);
-        } else if (ui.lastError != null) {
-            text = getString(R.string.score_error_generic, ui.lastError.name());
+        if (ui.lastError != null) {
+            text = getString(ErrorText.of(ui.lastError));
         } else if (!online && ui.seat > 0) {
             text = getString(R.string.score_offline);
         } else if (!ui.roundOpen && ui.round == 0) {
