@@ -50,7 +50,8 @@ Inspirado en el cinturón de campeonato y la tarjeta impresa del juez: papel bla
 - **En los dos temas:**
   - **Barra superior negra** (`bar`) con el logo y SIGEBOX en Barlow Condensed 700 dorado (`bar_accent`), y un filete dorado de 1 px en el borde inferior.
   - Superficies sólidas que se separan por tono; formas grandes y redondeadas.
-  - El dorado nunca es fondo de una zona grande: solo marca, filete, paso activo, foco, selección (`accent_soft` como fondo de la fila elegida) y el botón principal en oscuro.
+  - El dorado nunca es fondo de una zona grande: solo marca, filete, paso activo, foco, selección (`accent_soft` como fondo tenue de la fila elegida, siempre con su franja de 3 px `accent`) y el botón principal en oscuro.
+  - **En claro**, el dorado vivo (`bar_accent` `#C9A35E`) vive en la barra negra, donde pasa AA; sobre blanco se usa su versión profunda `accent` `#7A5A2A`, que es la que pasa AA como texto y foco. Son el mismo dorado a distinta luz, no un café aparte.
 - **El tema** sigue al sistema (`DayNight` en Android; en la central, el botón de alternar en la barra). El juez puede fijarlo en ajustes.
 
 ## 3. Tokens
@@ -83,7 +84,7 @@ Ninguna pantalla usa valores sueltos.
 | `blue_numeral` | `#266CB4` | `#8CB8EE` | Números de la esquina azul |
 | `connected` | `#027A35` | `#4CC97A` | Punto **lleno** de conectado |
 | `disconnected` | `#57534C` | `#B9B3A8` | **Anillo** vacío de sin conexión |
-| `skeleton` | `#E9E6DF` | `#2C2A26` | Bloques de *skeleton* (decorativo, sin texto) |
+| `skeleton` | `#E9E6DF` | `#36332E` | Bloques de *skeleton* (decorativo, sin texto) |
 
 ### 3.2 Contraste AA medido
 
@@ -184,6 +185,7 @@ Rejilla de 4: 4, 8, 12, 16, 20, 24, 32, 40 y 56. Margen de 20 dp en el teléfono
 - **Qué es:** una ilustración de guantes de box rojos, estilo caricatura, con licencia CC0 (dominio público). Fuente, autor, URL y licencia verificada en `docs/design/CREDITOS.md`. El archivo elegido vive en `docs/design/logo/` (SVG, o PNG ≥ 1024 px) y se copia a cada app; nada se descarga en ejecución.
 - **Estado:** cris elige entre las opciones de `CREDITOS.md`. Hasta entonces las apps no cambian de marca.
 - **Composición (lockup):** guantes a la izquierda + SIGEBOX en Barlow Condensed 700 `bar_accent`, separados 8 px. Altura del logo = 1.4 × la altura de la «S».
+- **Versión chica (≤ 32 px):** para la barra y los íconos pequeños se prepara una versión simplificada (un solo guante o la silueta del par, sin brillos ni trazos finos). Se prueba sobre la barra negra a 28 px antes de darla por buena.
 - **Limpieza:** si la ilustración trae texto (p. ej., «BOXE»), se quita en el SVG antes de usarla. Se permite simplificar trazos para tamaños chicos; no se cambia el rojo por otro color de la interfaz.
 - **Usos:**
 
@@ -285,8 +287,9 @@ Código                         ← etiqueta: Inter 600, ink, siempre visible
 - **Etiqueta:** encima del campo, a 6 dp / 6 px, Inter 600, color `ink`. Nunca se oculta ni se mueve. Si el campo es opcional, la etiqueta dice "(opcional)". Se asocia al campo para lectores de pantalla (`labelFor` en Android; `Label.setLabelFor` en JavaFX).
 - **Ejemplo (placeholder):** un valor de ejemplo real ("María López", "123456", "192.168.43.1"), en `ink_2`. No repite la etiqueta.
 - **Campo:** fondo `surface`, borde 1 px `field_border`, radio 12, alto 52 dp / 44 px, texto Inter 400 16 sp / 15 px `ink`.
-- **Foco:** borde 2 px `accent`.
-- **Error:** borde 2 px `ink` y, debajo, un ícono de alerta (triángulo de trazo) + el mensaje en Inter 500 `ink` ("Ese código no es válido. Pídele a la mesa el código de tu lugar."). **Sin rojo.** El mensaje se anuncia al lector de pantalla.
+- **Foco:** borde 2 px `accent` **y** anillo exterior de 2 px `accent` separado 2 px.
+- **Error:** borde 2 px `ink`, un ícono de alerta (triángulo de trazo con «!») **dentro del campo a la derecha** y, justo debajo, el mismo ícono + el mensaje en Inter 500 `ink` ("Ese código no es válido. Pídele a la mesa el código de tu lugar."). **Sin rojo.** El mensaje se anuncia al lector de pantalla.
+- **Foco frente a error:** el foco se reconoce por el anillo doble dorado; el error, por el ícono dentro del campo y el mensaje debajo. Nunca dependen solo del tono del borde.
 - **Deshabilitado:** opacidad 0.38.
 - **Teclado:** Código → numérico, solo 6 dígitos (`inputType="number"`, `maxLength=6`; en la central, un `TextFormatter` que rechaza otra cosa). IP → `inputType="text"` con dígitos y punto. En el código, cifras en Barlow Condensed 800 24 sp con espaciado amplio.
 - En Android **no** se usa la etiqueta flotante de `TextInputLayout` (`app:hintEnabled="false"`); la etiqueta es un `TextView` aparte y el placeholder es `placeholderText`.
@@ -301,12 +304,13 @@ Código                         ← etiqueta: Inter 600, ink, siempre visible
 - Bloques `skeleton` con la forma del contenido que viene: líneas de texto de 12 dp / px de alto y radio 6, al 100 %, 80 % y 60 % de ancho; tarjetas con su mismo radio; círculos para los puntos de conexión.
 - Animación: brillo de izquierda a derecha cada 1.4 s. **Movimiento reducido: fijo, sin brillo.**
 - Se muestra mientras una sección carga sus datos o el teléfono espera el primer `STATE`. Reemplaza a "Cargando…".
+- El skeleton reemplaza **toda** la sección que carga (por ejemplo, las 4 filas de Inicio); nunca convive con filas ya cargadas de la misma lista.
 - Si tarda más de 3 s, debajo aparece en `ink_2` "Esto está tardando más de lo normal." y, si aplica, el botón "?".
 - Accesible: el contenedor se anuncia como "Cargando" una sola vez (`contentDescription` / `accessibleText`).
 
 ### 5.7 Barra de pasos con paso activo
 
-- **Central (barra superior, 52 px, fondo `bar`):** logo + SIGEBOX a la izquierda; al centro **Evento · Jueces · En vivo · Resultado** en Inter 600 15 px; a la derecha "Terminación" y "Bitácora" (enlaces secundarios, `on_bar_2`), "Inicio", el "?" y el botón de tema.
+- **Central (barra superior, 52 px, fondo `bar`):** logo + SIGEBOX a la izquierda y, junto a la marca, **Inicio** (ícono de casa + texto, `on_bar`; clic en la marca también lleva a Inicio); al centro **Evento · Jueces · En vivo · Resultado** en Inter 600 15 px; a la derecha "Terminación" y "Bitácora" como dos enlaces secundarios separados 16 px, con zona de clic de 36 px (`on_bar_2`), el "?" y el botón de tema.
   - Paso activo: texto `on_bar` + línea de 3 px `bar_accent` debajo + `aria`/`accessibleRole` de pestaña seleccionada.
   - Pasos completados: `on_bar` con un check pequeño; pendientes: `on_bar_2`.
   - Navegable con teclado (`Ctrl+1…4`) y foco visible en `bar_accent`.
@@ -315,7 +319,7 @@ Código                         ← etiqueta: Inter 600, ink, siempre visible
 ### 5.8 Botón "?" y ayuda de conexión
 
 - **Siempre** en la barra superior de las dos apps: ícono de signo de interrogación en un círculo, 48 dp / 36 px, color `on_bar`, descripción accesible "Ayuda de conexión".
-- **Además**, junto a cada "Sin conexión" (aviso del teléfono, bloque de juez desconectado en la central) aparece un botón secundario pequeño "? Cómo reconectar".
+- **Además**, junto a cada "Sin conexión" (aviso del teléfono, bloque de juez desconectado en la central) aparece un botón secundario pequeño "? Cómo reconectar": 36 dp / px de alto, relleno `surface_2`, borde 1 px `field_border`, radio 14, Inter 600 14. Si no cabe en la misma línea, va en una segunda línea debajo del estado, nunca partido.
 - Abre una hoja inferior (teléfono) o un panel lateral de 420 px (central) con el título "Recuperar la conexión" y los pasos de `docs/design/guia-conexion.md` (la parte que toca a esa app primero), numerados en Barlow Condensed 800 `accent`, texto Inter 16 / 15 `ink`.
 - El texto viaja dentro de la app (recurso de cadenas / archivo de recursos). Sin enlaces a internet.
 - Botón principal al final: "Listo" (cierra).
