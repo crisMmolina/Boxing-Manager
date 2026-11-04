@@ -125,7 +125,7 @@ public class AutoFinalCardReconnectTest {
         signer = new TestSigner();
         connection = new JudgeConnection(new OkHttpClient(), outbox, store, signer, Clock.SYSTEM,
                 new Backoff(50, 200), 60_000);
-        connection.addListener(new AutoFinalCard(() -> db.getOpenHelper().getReadableDatabase(), signer::sign,
+        connection.addListener(new AutoFinalCard(() -> db.getOpenHelper().getReadableDatabase(), store::load, signer::sign,
                 connection::submit, Executors.newSingleThreadExecutor()));
     }
 
