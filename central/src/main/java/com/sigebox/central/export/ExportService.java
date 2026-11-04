@@ -1,5 +1,6 @@
 package com.sigebox.central.export;
 
+import com.sigebox.central.ui.Labels;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 import org.openpdf.text.Document;
@@ -13,7 +14,10 @@ import org.openpdf.text.pdf.PdfPCell;
 import org.openpdf.text.pdf.PdfPTable;
 import org.openpdf.text.pdf.PdfWriter;
 
-/** Exporta el resultado de una pelea a CSV (UTF-8 con BOM, para Excel) y a PDF (OpenPDF). */
+/**
+ * Exporta el resultado de una pelea a CSV (UTF-8 con BOM, para Excel) y a PDF (OpenPDF). Estados y
+ * decisiones salen con {@link Labels}, nunca como código.
+ */
 public final class ExportService {
 
     private static final String BOM = "﻿";
@@ -27,9 +31,12 @@ public final class ExportService {
         line(out, "esquina roja", p.esquinaRoja());
         line(out, "esquina azul", p.esquinaAzul());
         line(out, "resultado", sheet.headline());
+        if (sheet.resultado().tipo() != null) {
+            line(out, "decision", Labels.of(sheet.resultado().tipo()));
+        }
         if (sheet.terminacion() != null) {
             var t = sheet.terminacion();
-            line(out, "terminacion", t.motivo().name(), "round " + t.round(), t.tiempo(),
+            line(out, "terminacion", Labels.of(t.motivo()), "round " + t.round(), t.tiempo(),
                     t.textoOtro() == null ? "" : t.textoOtro());
         }
         out.append("\r\n");
@@ -88,7 +95,7 @@ public final class ExportService {
         doc.add(headline);
         if (sheet.terminacion() != null) {
             var t = sheet.terminacion();
-            doc.add(para("Terminación: " + t.motivo() + " en el round " + t.round() + " (" + t.tiempo() + ")"
+            doc.add(para("Terminación: " + Labels.of(t.motivo()) + " en el round " + t.round() + " (" + t.tiempo() + ")"
                     + (t.textoOtro() == null ? "" : " · " + t.textoOtro())
                     + (t.observaciones() == null ? "" : " · " + t.observaciones()), normal));
         }

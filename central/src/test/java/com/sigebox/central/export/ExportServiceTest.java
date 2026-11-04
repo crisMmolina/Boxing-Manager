@@ -1,13 +1,16 @@
 package com.sigebox.central.export;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.sigebox.central.db.Database;
 import com.sigebox.central.service.ResultService;
 import com.sigebox.central.service.ResultServiceTest;
+import com.sigebox.core.model.Esquina;
 import com.sigebox.core.model.EstadoPelea;
 import com.sigebox.core.model.MotivoTerminacion;
+import com.sigebox.core.model.Terminacion;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import org.junit.jupiter.api.AfterEach;
@@ -82,5 +85,24 @@ class ExportServiceTest {
         assertEquals("'=1+1", ExportService.escape("=1+1"));
         assertEquals("-5", ExportService.escape("-5"));
         assertEquals("", ExportService.escape(null));
+    }
+
+    @Test
+    void csvYPdfMuestranDecisionYTerminacionEnEspanol() throws Exception {
+        var csv = export.csv(sheet);
+        assertTrue(csv.contains("decision,Dividida\r\n"), csv);
+        assertFalse(csv.contains("DIVIDIDA"), csv);
+
+        var terminated = new ResultSheet(sheet.pelea(), sheet.resultado(), sheet.headline(), sheet.rows(),
+                new Terminacion(sheet.pelea().id(), MotivoTerminacion.KOT, null, Esquina.ROJA, 3, "1:42", null));
+        csv = export.csv(terminated);
+        assertTrue(csv.contains("terminacion,KO técnico,round 3,1:42,"), csv);
+        assertFalse(csv.contains("KOT"), csv);
+
+        var reader = new PdfReader(export.pdf(terminated));
+        var text = new PdfTextExtractor(reader).getTextFromPage(1);
+        reader.close();
+        assertTrue(text.contains("Terminación: KO técnico en el round 3"), text);
+        assertFalse(text.contains("KOT"), text);
     }
 }
