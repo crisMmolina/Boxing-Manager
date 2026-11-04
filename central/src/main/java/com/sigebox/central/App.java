@@ -2,6 +2,7 @@ package com.sigebox.central;
 
 import com.sigebox.central.db.Database;
 import com.sigebox.central.db.PeleaRepository;
+import com.sigebox.central.db.RecoveryService;
 import com.sigebox.central.export.ExportService;
 import com.sigebox.central.server.JudgeHub;
 import com.sigebox.central.server.JudgeServer;
@@ -18,18 +19,21 @@ import com.sigebox.central.ui.correction.CorrectionScreen;
 import com.sigebox.central.ui.funcion.FuncionFlow;
 import com.sigebox.central.ui.funcion.FuncionQuery;
 import com.sigebox.central.ui.funcion.FuncionScreen;
+import com.sigebox.central.ui.inicio.InicioQuery;
+import com.sigebox.central.ui.inicio.InicioScreen;
+import com.sigebox.central.ui.inicio.Nav;
 import com.sigebox.central.ui.log.LogQuery;
 import com.sigebox.central.ui.log.LogScreen;
 import com.sigebox.central.ui.result.ResultStepScreen;
 import com.sigebox.central.ui.rounds.RoundsScreen;
 import com.sigebox.central.ui.setup.SetupScreen;
+import com.sigebox.central.ui.splash.Splash;
 import com.sigebox.central.ui.termination.TerminationScreen;
 import com.sigebox.central.ui.terms.TermsGate;
 import com.sigebox.central.ui.terms.TermsScreen;
 import com.sigebox.central.ui.theme.StepsBar;
 import com.sigebox.central.ui.theme.Theme;
 import com.sigebox.central.ui.theme.Ui;
-import java.util.List;
 import java.util.function.Supplier;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -52,22 +56,8 @@ public final class App {
 
     public static final String TITLE = "SIGEBOX · Central";
 
-    /** El paso "Jueces" muestra la misma pantalla de preparar la pelea (DESIGN v3 §7.1). */
-    static final String JUECES = "jueces";
-
-    /** Pasos de la barra superior (DESIGN v3 §7), en orden. */
-    static final List<StepsBar.Item> STEPS = List.of(
-            new StepsBar.Item(SetupScreen.ID, "Pelea"),
-            new StepsBar.Item(JUECES, "Jueces"),
-            new StepsBar.Item(RoundsScreen.ID, "En vivo"),
-            new StepsBar.Item(ResultStepScreen.ID, "Resultado"));
-
-    /** Enlaces secundarios a la derecha de la barra. */
-    static final List<StepsBar.Item> LINKS = List.of(
-            new StepsBar.Item(FuncionScreen.ID, "Función"),
-            new StepsBar.Item(TerminationScreen.ID, "Terminación"),
-            new StepsBar.Item(CorrectionScreen.ID, "Corrección"),
-            new StepsBar.Item(LogScreen.ID, "Bitácora"));
+    /** El paso "Jueces" muestra la misma pantalla de preparar la pelea (DESIGN v4 §7). */
+    static final String JUECES = Nav.JUECES;
 
     private App() {
     }
@@ -87,9 +77,9 @@ public final class App {
         return funciones;
     }
 
-    /** Pantalla con la que arranca la app: los términos si no están aceptados. */
+    /** Pantalla después de la carga: los términos si no están aceptados; si no, Inicio. */
     static String firstScreen(TermsGate gate) {
-        return gate.firstScreen(RoundsScreen.ID);
+        return gate.firstScreen(InicioScreen.ID);
     }
 
     /** Ancho máximo de la columna centrada (DESIGN v3 §7). */
@@ -98,15 +88,35 @@ public final class App {
     /** Ventana principal: barra de pasos arriba y la pantalla activa al centro. */
     public static final class Window extends Application {
 
-        private Database db;
-        private JudgeHub hub;
-        private JudgeServer server;
+        private volatile Database db;
+        private volatile JudgeHub hub;
+        private volatile JudgeServer server;
+
+        /** Lo que deja la carga; {@code serverError} si la conexión local no arrancó (la app sigue). */
+        private record Loaded(SeatTokens tokens, String serverError) {}
 
         @Override
         public void start(Stage stage) {
             Theme.loadFonts();
             Theme.followSystem();
+            var scene = new Scene(new StackPane(), 1280, 800);
+            Theme.apply(scene);
+            stage.setTitle(TITLE);
+            stage.setMinWidth(1100);
+            stage.setMinHeight(700);
+            stage.setScene(scene);
+            // Pantalla de carga (DESIGN v4 §5.1) mientras la base migra y se reconstruye la pelea activa.
+            var splash = new Splash<Loaded>(this::load, loaded -> main(scene, loaded));
+            scene.setRoot(splash);
+            stage.show();
+            splash.start();
+        }
+
+        /** Fuera del hilo de JavaFX: abre y migra la base, reconstruye la pelea activa y arranca el servidor. */
+        private Loaded load() {
+            stop(); // un reintento empieza limpio
             db = Database.openDefault();
+            new RecoveryService(db).load();
             var tokens = new SeatTokens(); // uno solo: lo emite la pantalla de pelea y lo valida el servidor
             hub = new JudgeHub(db, tokens, ServerEvents.NONE);
             String serverError = null;
@@ -114,9 +124,13 @@ public final class App {
                 server = JudgeServer.start(hub, JudgeServer.DEFAULT_PORT);
             } catch (RuntimeException e) {
                 serverError = "No se pudo iniciar la conexión local. Revisa que la computadora esté en la red "
-                        + "de la función.";
+                        + "del evento.";
             }
+            return new Loaded(tokens, serverError);
+        }
 
+        /** Arma la ventana principal en la misma escena (el tema y los atajos viven en ella). */
+        private void main(Scene scene, Loaded loaded) {
             var peleas = new PeleaRepository(db);
             Supplier<String> fightId = () -> peleas.findActive().map(p -> p.id()).orElse(null);
             var gate = new TermsGate(db);
@@ -125,13 +139,16 @@ public final class App {
             var root = new BorderPane();
             root.getStyleClass().add("app-root");
             var screens = new Screens<Node>();
-            var bar = new StepsBar(STEPS, LINKS, id -> show(screens, root, content, id));
+            var bar = new StepsBar(Nav.STEPS, Nav.LINKS, id -> show(screens, root, content, id));
             root.setTop(bar);
             root.setCenter(content);
 
-            TermsScreen.register(screens, gate, () -> show(screens, root, content, RoundsScreen.ID));
-            var fights = new FightService(db, tokens);
-            var flow = new FuncionFlow(funciones(db, fights, hub), new FuncionQuery(db));
+            TermsScreen.register(screens, gate, () -> show(screens, root, content, InicioScreen.ID));
+            var fights = new FightService(db, loaded.tokens());
+            var service = funciones(db, fights, hub);
+            var flow = new FuncionFlow(service, new FuncionQuery(db));
+            InicioScreen.register(screens, new InicioQuery(db, service), service,
+                    id -> show(screens, root, content, id));
             var setup = new SetupScreen(fights, hub, JudgeServer.DEFAULT_PORT,
                     () -> show(screens, root, content, RoundsScreen.ID));
             setup.register(screens, SetupScreen.ID, "Pelea");
@@ -156,22 +173,16 @@ public final class App {
             });
 
             show(screens, root, content, firstScreen(gate));
+            scene.setRoot(root);
 
-            var scene = new Scene(root, 1280, 800);
-            Theme.apply(scene);
-            // Ctrl+Enter (DESIGN v3 §7.2): en el tablero abre o cierra el round; en otra pantalla lleva al tablero.
+            // Ctrl+Enter (DESIGN §7): en el tablero abre o cierra el round; en otra pantalla lleva al tablero.
             scene.getAccelerators().put(new KeyCodeCombination(KeyCode.ENTER, KeyCombination.CONTROL_DOWN), () -> {
                 if (!(RoundsScreen.ID.equals(current[0]) && RoundsScreen.firePrimary(content))) {
                     show(screens, root, content, RoundsScreen.ID);
                 }
             });
-            stage.setTitle(TITLE);
-            stage.setMinWidth(1100);
-            stage.setMinHeight(700);
-            stage.setScene(scene);
-            stage.show();
-            if (serverError != null) {
-                var msg = serverError;
+            if (loaded.serverError() != null) {
+                var msg = loaded.serverError();
                 Platform.runLater(() -> Ui.toast(content, msg));
             }
         }
@@ -196,12 +207,15 @@ public final class App {
         public void stop() {
             if (server != null) {
                 server.close();
+                server = null;
             }
             if (hub != null) {
                 hub.close();
+                hub = null;
             }
             if (db != null) {
                 db.close();
+                db = null;
             }
         }
     }

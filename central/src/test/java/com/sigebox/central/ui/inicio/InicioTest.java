@@ -65,6 +65,9 @@ class InicioTest {
     private static List<Node> all(Node root) {
         var out = new ArrayList<Node>();
         out.add(root);
+        if (root instanceof javafx.scene.control.Labeled l && l.getGraphic() != null) {
+            out.addAll(all(l.getGraphic())); // sin escena el botón aún no tiene skin con su gráfico
+        }
         if (root instanceof Parent p) {
             for (var c : p.getChildrenUnmodifiable()) {
                 out.addAll(all(c));
