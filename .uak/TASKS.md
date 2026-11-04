@@ -1184,6 +1184,7 @@ En Windows (zoe) los comandos `Verify` se corren en Git Bash.
 - **Freeze-Allowed:** no
 - **Acceptance:**
   - Paleta v4 en claro y oscuro con contraste AA (prueba de colores), ícono de la app con el logo, rojo y azul solo para esquinas
+  - Tokens `logo_negro`, `logo_rojo` y `logo_claro` en `colors.xml` con los colores exactos del SVG; `drawable/splash.xml` (AND-018, hoy con colores del framework) los usa
   - Todo campo con etiqueta arriba siempre visible y ejemplo dentro (prueba que recorre los layouts)
   - Skeleton con la forma de la tarjeta mientras llega el primer `STATE` (prueba)
   - Se borra `FinalCardActivity` (sin uso desde AND-017) y su entrada del manifiesto
