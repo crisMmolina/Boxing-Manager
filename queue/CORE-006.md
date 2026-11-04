@@ -1,5 +1,5 @@
 ID: CORE-006
-State: HUMAN
+State: INTEGRATED
 Owner: crxtrhx-3
-Updated: 1793264245
+Updated: 1793764063
 Reason: Shared resource/CI needs a human: .uak/PROJECT.md
