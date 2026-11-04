@@ -26,8 +26,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        com.sigebox.juez.ui.Screen.setup(this);
+        // Sin contenido propio: se ve el tema de arranque (logo sobre bg) hasta que abre la primera pantalla.
         JudgeRuntime runtime = JudgeRuntime.get(this);
         io.execute(() -> {
             SessionEntity session = runtime.database().sessionDao().load();
