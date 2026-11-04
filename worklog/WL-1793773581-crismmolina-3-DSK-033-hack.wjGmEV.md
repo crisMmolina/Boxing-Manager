@@ -6,7 +6,7 @@
 - Why: decisión del líder (sesión que me lanzó): no se cambian Paths de una tarea reclamada
 - Failing: ninguno
 - Commands: bash .uak/bin/q central/gradlew -p central test --tests 'com.sigebox.central.server.*' --tests 'com.sigebox.central.ui.setup.*' && bash .uak/bin/q central/gradlew -p central :judge-sim:test
-- Next: Apply option: Sin ampliar Paths: el bloqueo al 5.º CODE_UNKNOWN se anota como JOIN_REJECTED ('búsqueda de código bloqueada tras 5 intentos · …NN'); SetupScreen no se toca y DSK-027 conectará inv.qrUri()
+- Next: Integrated in main: 4a96b120dacc608a081a3c01bc69df30d1f86957
 
 ## History
 - 1793773581 | CLAIMED | crismmolina-3 | claim; next: prueba de `SeatTokens`: códigos únicos entre peleas abiertas
@@ -18,3 +18,4 @@
 - 1793775444 | REVIEW | crismmolina-3 | checkpoint; next: Wait for review of SHA 1537a94; revisar DSK-029 PR #89
 - 1793775743 | REVIEW | crismmolina-1 | review; approve; SHA 1537a94f5facafc35aed1cd9afbe50aca41b0e41; reviewer crismmolina-1
 - 1793775752 | REVIEW | scheduler | deadline decision DSK-033-1793774837; option: Sin ampliar Paths: el bloqueo al 5.º CODE_UNKNOWN se anota como JOIN_REJECTED ('búsqueda de código bloqueada tras 5 intentos · …NN'); SetupScreen no se toca y DSK-027 conectará inv.qrUri(); Why: decisión del líder (sesión que me lanzó): no se cambian Paths de una tarea reclamada
+- 1793775958 | INTEGRATED | crismmolina-3 | merge; smoke and Verify PASS; commit 4a96b120dacc608a081a3c01bc69df30d1f86957; reviewer crismmolina-1
