@@ -7,7 +7,6 @@ import com.sigebox.core.model.EstadoRound;
 import java.util.function.Supplier;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
-import javafx.animation.PauseTransition;
 import javafx.animation.Timeline;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
@@ -22,14 +21,14 @@ import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 
 /**
- * Tablero en vivo del operador (DESIGN v3 §7.2), en rejilla bento: el round actual en grande, las
- * acciones, el estado de cada juez por round y "Ver resumen parcial" discreto. Sin puntos, totales ni ganador (PROJECT.md principio 3). Se
- * refresca cada 500 ms, así un envío se ve en ≤ 1 s.
+ * Tablero en vivo del operador (DESIGN v4 §7.3), en rejilla bento: el round actual en grande, las
+ * acciones y el estado de cada juez por round. Sin puntos, totales ni ganador, sin excepción (PROJECT.md
+ * principio 3; spec 004 quitó "Ver resumen parcial" y Corrección). Se refresca cada 500 ms, así un envío se ve
+ * en ≤ 1 s.
  */
 public final class RoundsScreen {
 
@@ -47,12 +46,22 @@ public final class RoundsScreen {
     }
 
     /**
-     * Registra la pantalla; {@code fightId} da la pelea activa (o null si no hay). {@code onCorrect}
-     * lleva a corregir un round y {@code onFinish} a cerrar la pelea tras el último round.
+     * Registra la pantalla; {@code fightId} da la pelea activa (o null si no hay) y {@code onFinish} lleva a
+     * cerrar la pelea tras el último round.
      */
     public static void register(Screens<Node> screens, RoundService service, Supplier<String> fightId,
+            Runnable onFinish) {
+        screens.register(ID, "En vivo", () -> build(service, fightId, onFinish));
+    }
+
+    /**
+     * Firma anterior con {@code onCorrect}, que ya no se usa (Corrección se quitó). Solo la llama
+     * {@code ScreenshotHarness}, que está fuera de DSK-030; se borra cuando esa prueba pase a la firma nueva.
+     */
+    @Deprecated
+    public static void register(Screens<Node> screens, RoundService service, Supplier<String> fightId,
             Runnable onCorrect, Runnable onFinish) {
-        screens.register(ID, "En vivo", () -> build(service, fightId, onCorrect, onFinish));
+        register(screens, service, fightId, onFinish);
     }
 
     /** {@code Ctrl+Enter}: pulsa el botón principal del tablero dentro de {@code scope}, si está. */
@@ -65,23 +74,16 @@ public final class RoundsScreen {
     }
 
     static Node build(RoundService service, Supplier<String> fightId) {
-        return build(service, fightId, () -> { }, () -> { });
+        return build(service, fightId, () -> { });
     }
 
-    static Node build(RoundService service, Supplier<String> fightId, Runnable onCorrect, Runnable onFinish) {
+    static Node build(RoundService service, Supplier<String> fightId, Runnable onFinish) {
         var title = Ui.screenTitle("En vivo");
         var grid = new GridPane();
         grid.setHgap(8);
         grid.setVgap(4);
         var cards = Ui.card(Ui.cardTitle("Tarjetas"), grid);
 
-        var summary = Ui.secondary("Ver resumen parcial");
-        summary.setMaxWidth(Double.MAX_VALUE);
-        var summaryBox = new VBox(6);
-        var summaryNote = Ui.support("Totales de los rounds cerrados por " + RoundService.SUMMARY_VISIBLE_SECONDS
-                + " s. Cada vista queda en la bitácora.");
-        summaryNote.setMinHeight(Region.USE_PREF_SIZE);
-        var summaryCard = Ui.card(Ui.cardTitle("Resumen parcial"), summaryNote, summary, summaryBox);
 
         var roundTitle = Ui.statBig("");
         var pill = Ui.pill("");
@@ -89,13 +91,10 @@ public final class RoundsScreen {
         var action = Ui.primary("");
         action.setId(PRIMARY_ID);
         action.setMaxWidth(Double.MAX_VALUE);
-        var correct = Ui.secondary("Corregir un round");
-        correct.setMaxWidth(Double.MAX_VALUE);
-        correct.setOnAction(e -> onCorrect.run());
         var status = Ui.support("");
         var hero = Ui.card(roundTitle, pill, sent);
         hero.getStyleClass().add("hero");
-        var actions = Ui.card(Ui.cardTitle("Acciones"), action, correct, status);
+        var actions = Ui.card(Ui.cardTitle("Acciones"), action, status);
 
         Runnable refresh = () -> {
             var f = fightId.get();
@@ -110,19 +109,6 @@ public final class RoundsScreen {
             fillControl(live, roundTitle, pill, sent, action);
             title.setText("En vivo");
         };
-
-        summary.setOnAction(e -> {
-            var f = fightId.get();
-            if (f == null) {
-                return;
-            }
-            var ask = new Alert(Alert.AlertType.CONFIRMATION, "El resumen parcial queda registrado en la bitácora. "
-                    + "Mostrar " + RoundService.SUMMARY_VISIBLE_SECONDS + " s?", ButtonType.CANCEL, ButtonType.OK);
-            if (ask.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) {
-                return;
-            }
-            showSummary(summaryBox, summary, service.partialSummary(f, true));
-        });
 
         action.setOnAction(e -> {
             var f = fightId.get();
@@ -160,7 +146,7 @@ public final class RoundsScreen {
         timer.play();
         refresh.run();
 
-        var body = bento(hero, actions, cards, summaryCard);
+        var body = bento(hero, actions, cards);
         var root = new VBox(20, title, body);
         root.getStyleClass().add("screen");
         root.setPadding(new Insets(24));
@@ -173,8 +159,8 @@ public final class RoundsScreen {
         return root;
     }
 
-    /** Rejilla bento de 2 × 2: columna ancha (round actual, tarjetas) y columna de 280 px (acciones, resumen). */
-    static GridPane bento(Node hero, Node actions, Node cards, Node summary) {
+    /** Rejilla bento: arriba el round actual (ancho) y las acciones (280 px); abajo las tarjetas a todo lo ancho. */
+    static GridPane bento(Node hero, Node actions, Node cards) {
         var bento = new GridPane();
         bento.getStyleClass().add("bento");
         var wide = new ColumnConstraints();
@@ -183,9 +169,8 @@ public final class RoundsScreen {
         bento.getColumnConstraints().addAll(wide, side);
         bento.add(hero, 0, 0);
         bento.add(actions, 1, 0);
-        bento.add(cards, 0, 1);
-        bento.add(summary, 1, 1);
-        for (var n : new Node[] {hero, actions, cards, summary}) {
+        bento.add(cards, 0, 1, 2, 1);
+        for (var n : new Node[] {hero, actions, cards}) {
             GridPane.setFillWidth(n, true);
             GridPane.setFillHeight(n, true);
         }
@@ -237,29 +222,6 @@ public final class RoundsScreen {
 
     private static Node score(RoundService.Cell c) {
         return Ui.support(c.casilla() == null ? "—" : texto(c.casilla()));
-    }
-
-    /** Muestra los totales parciales y los oculta pasados {@link RoundService#SUMMARY_VISIBLE_SECONDS}. */
-    static void showSummary(VBox box, Button button, java.util.List<RoundService.PartialTotal> totals) {
-        box.getChildren().setAll(totals.stream().map(t -> {
-            var who = "Juez " + t.seat() + (t.judgeName() == null ? "" : " · " + t.judgeName());
-            var numbers = new HBox(4, Ui.numeral(String.valueOf(t.red()), "red"), Ui.numeral("–", "neutral"),
-                    Ui.numeral(String.valueOf(t.blue()), "blue"));
-            numbers.setMinWidth(Region.USE_PREF_SIZE); // el nombre se recorta, los totales nunca
-            var name = Ui.body(who);
-            name.setWrapText(false);
-            name.setMinWidth(0);
-            var row = new HBox(6, name, Ui.grow(), numbers);
-            row.setAlignment(Pos.CENTER_LEFT);
-            return (Node) row;
-        }).toList());
-        button.setDisable(true);
-        var hide = new PauseTransition(Duration.seconds(RoundService.SUMMARY_VISIBLE_SECONDS));
-        hide.setOnFinished(x -> {
-            box.getChildren().clear();
-            button.setDisable(false);
-        });
-        hide.play();
     }
 
     private static Node cell(Node content, boolean open) {

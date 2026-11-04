@@ -14,7 +14,13 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
-/** Corrección de una tarjeta o captura desde papel por el organizador, con motivo obligatorio. */
+/**
+ * Corrección de una tarjeta o captura desde papel por el organizador, con motivo obligatorio.
+ *
+ * <p>Ya no está en la app (spec 004 quitó Corrección): {@code App} no la registra ni hay enlace. Queda solo porque
+ * {@code ScreenshotHarness}, fuera de DSK-030, la usa; se borra junto con esa captura.
+ */
+@Deprecated
 public final class CorrectionScreen {
 
     public static final String ID = "correccion";

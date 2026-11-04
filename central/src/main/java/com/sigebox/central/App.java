@@ -8,14 +8,12 @@ import com.sigebox.central.server.JudgeHub;
 import com.sigebox.central.server.JudgeServer;
 import com.sigebox.central.server.SeatTokens;
 import com.sigebox.central.server.ServerEvents;
-import com.sigebox.central.service.CorrectionService;
 import com.sigebox.central.service.FightService;
 import com.sigebox.central.service.FuncionService;
 import com.sigebox.central.service.ResultService;
 import com.sigebox.central.service.RoundService;
 import com.sigebox.central.service.TerminationService;
 import com.sigebox.central.ui.Screens;
-import com.sigebox.central.ui.correction.CorrectionScreen;
 import com.sigebox.central.ui.funcion.FuncionFlow;
 import com.sigebox.central.ui.funcion.FuncionQuery;
 import com.sigebox.central.ui.funcion.FuncionScreen;
@@ -154,7 +152,6 @@ public final class App {
             setup.register(screens, SetupScreen.ID, "Pelea");
             setup.register(screens, JUECES, "Jueces");
             RoundsScreen.register(screens, RoundService.forHub(db, hub), fightId,
-                    () -> show(screens, root, content, CorrectionScreen.ID),
                     () -> show(screens, root, content, ResultStepScreen.ID));
             FuncionScreen.register(screens, flow, () -> show(screens, root, content, JUECES));
             ResultStepScreen.register(screens, ResultService.forHub(db, hub), new ExportService(), fightId,
@@ -163,7 +160,6 @@ public final class App {
                         show(screens, root, content, JUECES);
                     });
             TerminationScreen.register(screens, TerminationService.forHub(db, hub), fightId);
-            CorrectionScreen.register(screens, new CorrectionService(db, System::currentTimeMillis), fightId);
             LogScreen.register(screens, new LogQuery(db));
             var current = new String[1];
             screens.onChange(s -> {
