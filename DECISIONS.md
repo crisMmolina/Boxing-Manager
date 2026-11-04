@@ -86,3 +86,4 @@ Why: a reversible option after 15 min keeps work moving.
 - 1793776015 | DSK-030 | CorrectionService se queda (crea CAPTURADA/CORREGIDA y lo usa JudgeHubHandoffTest); CorrectionScreen y register de 5 args @Deprecated por ScreenshotHarness | Why: no editar pruebas fuera de Paths
 - 1793776356 | DSK-030 | CorrectionService se queda; partialSummary es deuda de DSK-024 | Why: crea CAPTURADA/CORREGIDA; RoundService no es mío
 - 1793776427 | DSK-030 | trabajo detenido por pedido de cris; sin merge | Why: pedido de cris vía la sesión líder
+- 1793776630 | AND-018 | logo con colores del framework hasta respuesta del líder | Why: NoLooseColorsTest y colors.xml fuera de Paths
