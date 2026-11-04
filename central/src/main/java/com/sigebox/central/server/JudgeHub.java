@@ -538,6 +538,11 @@ public final class JudgeHub implements AutoCloseable {
         } else if (round == EstadoRound.CERRADO && existing == null) {
             estado = EstadoTarjeta.TARDIA;
         } else {
+            if (existing != null && existing.estado() == EstadoTarjeta.CAPTURADA) {
+                // Lo capturado manda, pero el organizador debe ver que el juez puntuó distinto o igual.
+                logSeat(s, "CARD_OVER_CAPTURE", "round " + roundNo + " juez " + m.red() + "-" + m.blue()
+                        + " capturada " + existing.rojo() + "-" + existing.azul());
+            }
             send(s, new Ack(m.id(), false, null, Ack.Error.ROUND_NOT_OPEN));
             return;
         }
