@@ -1150,6 +1150,7 @@ En Windows (zoe) los comandos `Verify` se corren en Git Bash.
   - Al recibir `FIGHT_CLOSED` de su pelea: pantalla "Espera la siguiente pelea" (con esquinas si ya llegó `NEXT_FIGHT`) hasta que la central la abra; con `NEXT_FIGHT` sigue como hoy (AND-013)
   - Al recibir `EVENT_ENDED`: "El evento terminó" y regreso a Unirse con el nombre ya escrito; se borra la sesión del lugar (prueba)
   - Nada se pierde: si hay envíos pendientes en la `Outbox`, se entregan antes de cambiar de pantalla (principio 1; prueba)
+  - `AutoFinalCard` (AND-017) se registra una vez por proceso en `JudgeRuntime` y no en `ScoreActivity`: si la app reinicia en otra pantalla, la tarjeta final automática sigue funcionando (prueba). Decisión de cris, 2026-11-03
   - La nueva Activity se declara en el manifiesto
 - **Verify:** `android/gradlew -p android :app:testDebugUnitTest --tests 'com.sigebox.juez.wait.*' --tests 'com.sigebox.juez.net.*'`
 - **Next step:** prueba de `JudgeRuntime` con `EVENT_ENDED`
@@ -1177,12 +1178,13 @@ En Windows (zoe) los comandos `Verify` se corren en Git Bash.
 - **Estimate:** 1 d
 - **Rubric / Spec:** spec 004 §Imagen y diseño, §Formularios, §Datos siempre al día · DSN-004
 - **Depends on:** DSN-004, AND-017, AND-018, AND-019, AND-020
-- **Paths:** android/app/src/main/res/values/, android/app/src/main/res/values-night/, android/app/src/main/res/drawable/, android/app/src/main/res/mipmap-anydpi/, android/app/src/main/res/mipmap-hdpi/, android/app/src/main/res/mipmap-mdpi/, android/app/src/main/res/mipmap-xhdpi/, android/app/src/main/res/mipmap-xxhdpi/, android/app/src/main/res/mipmap-xxxhdpi/, android/app/src/main/res/layout/, android/app/src/main/AndroidManifest.xml, android/app/src/main/java/com/sigebox/juez/ui/, android/app/src/test/java/com/sigebox/juez/ui/
+- **Paths:** android/app/src/main/java/com/sigebox/juez/finalcard/, android/app/src/main/res/values/, android/app/src/main/res/values-night/, android/app/src/main/res/drawable/, android/app/src/main/res/mipmap-anydpi/, android/app/src/main/res/mipmap-hdpi/, android/app/src/main/res/mipmap-mdpi/, android/app/src/main/res/mipmap-xhdpi/, android/app/src/main/res/mipmap-xxhdpi/, android/app/src/main/res/mipmap-xxxhdpi/, android/app/src/main/res/layout/, android/app/src/main/AndroidManifest.xml, android/app/src/main/java/com/sigebox/juez/ui/, android/app/src/test/java/com/sigebox/juez/ui/
 - **Freeze-Allowed:** no
 - **Acceptance:**
   - Paleta v4 en claro y oscuro con contraste AA (prueba de colores), ícono de la app con el logo, rojo y azul solo para esquinas
   - Todo campo con etiqueta arriba siempre visible y ejemplo dentro (prueba que recorre los layouts)
   - Skeleton con la forma de la tarjeta mientras llega el primer `STATE` (prueba)
+  - Se borra `FinalCardActivity` (sin uso desde AND-017) y su entrada del manifiesto
   - Evidencia: capturas en emulador de cada pantalla en claro y oscuro, revisadas con `design-critic`
 - **Verify:** `android/gradlew -p android :app:testDebugUnitTest`
 - **Next step:** prueba de contraste de `colors.xml` v4
