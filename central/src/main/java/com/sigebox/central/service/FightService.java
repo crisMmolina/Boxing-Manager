@@ -37,8 +37,11 @@ public final class FightService {
     /** Largo del id de la pelea (contrato AND-004: ≤ 8). */
     public static final int ID_LENGTH = 6;
 
-    /** Lo que se muestra por lugar antes de que el juez se una. */
-    public record Invitation(int seat, String uri, String code) {}
+    /**
+     * Lo que se muestra por lugar antes de que el juez se una. {@code qrUri} es el QR con solo el
+     * código (ADR 0004); {@code uri} es la forma anterior con pelea, lugar y token, que sigue sirviendo.
+     */
+    public record Invitation(int seat, String uri, String code, String qrUri) {}
 
     /** Estado visible de un lugar. */
     public enum SeatState { SIN_CONECTAR, ESPERANDO_APROBACION, CONECTADO, SIN_CONEXION, RECHAZADO }
@@ -100,8 +103,8 @@ public final class FightService {
     }
 
     /**
-     * Emite (o vuelve a emitir) la invitación del lugar: URI del QR con el token y el código de 6
-     * dígitos. Las anteriores dejan de servir.
+     * Emite (o vuelve a emitir) la invitación del lugar: el código de 6 dígitos, el URI del QR con ese
+     * código y el URI anterior con el token. Las anteriores dejan de servir.
      */
     public synchronized Invitation invite(String fightId, int seat, String host, int port) {
         var pelea = peleas.find(fightId).orElseThrow(() -> new IllegalArgumentException("pelea desconocida"));
@@ -110,7 +113,8 @@ public final class FightService {
         }
         var inv = tokens.issueInvitation(fightId, seat);
         log.append(fightId, "INVITATION_ISSUED", "lugar " + seat);
-        return new Invitation(seat, new JoinUri(host, port, fightId, seat, inv.token(), null).toUri(), inv.code());
+        return new Invitation(seat, new JoinUri(host, port, fightId, seat, inv.token(), null).toUri(), inv.code(),
+                new JoinUri(host, port, inv.code(), null).toUri());
     }
 
     /** Estado de cada lugar, en orden; {@code connected} son los lugares con conexión abierta. */
