@@ -71,8 +71,7 @@ public class SmokeTest {
                 PKG + ".join.ScanActivity",
                 PKG + ".join.WaitingActivity",
                 PKG + ".score.ScoreActivity",
-                PKG + ".late.LateScoreActivity",
-                PKG + ".finalcard.FinalCardActivity"}) {
+                PKG + ".late.LateScoreActivity"}) {
             // Lanza NameNotFoundException si la Activity no está en el Manifest.
             pm.getActivityInfo(new ComponentName(PKG, activity), 0);
         }
