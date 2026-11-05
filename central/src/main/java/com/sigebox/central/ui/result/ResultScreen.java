@@ -4,7 +4,6 @@ import com.sigebox.central.export.ExportService;
 import com.sigebox.central.export.ResultSheet;
 import com.sigebox.central.ui.theme.Theme;
 import com.sigebox.central.ui.theme.Ui;
-import com.sigebox.core.model.Ganador;
 import java.io.IOException;
 import java.nio.file.Files;
 import javafx.geometry.Insets;
@@ -13,7 +12,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
@@ -22,9 +20,9 @@ import javafx.stage.Stage;
 import javafx.stage.Window;
 
 /**
- * Resultado a pantalla completa, solo en la laptop del operador: la frase del resultado, la
- * tarjeta y el total de cada juez con su nombre y los botones de exportar (DESIGN v3 §7.4, sin
- * logotipos). Esc la cierra.
+ * Resultado a pantalla completa, solo en la laptop del operador: los puntos de cada juez con sus
+ * descuentos y su suma, y los botones de exportar (DESIGN v3 §7.4, sin logotipos). El ganador y la
+ * decisión solo van en el PDF y el CSV. Esc la cierra.
  */
 public final class ResultScreen {
 
@@ -36,43 +34,6 @@ public final class ResultScreen {
         stage.initOwner(owner);
         stage.setTitle("Resultado · " + sheet.pelea().esquinaRoja() + " vs " + sheet.pelea().esquinaAzul());
 
-        var p = sheet.pelea();
-        var ganador = sheet.resultado().ganador();
-        var winner = new Label(switch (ganador) {
-            case ROJA -> p.esquinaRoja();
-            case AZUL -> p.esquinaAzul();
-            case EMPATE -> "Empate";
-            case SIN_DECISION -> "Sin decisión";
-        });
-        winner.getStyleClass().addAll("result-winner", "numeral",
-                ganador == Ganador.ROJA ? "red" : ganador == Ganador.AZUL ? "blue" : "neutral");
-        var winnerRow = new HBox(16, winner);
-        winnerRow.setAlignment(Pos.CENTER_LEFT);
-        if (ganador == Ganador.ROJA || ganador == Ganador.AZUL) {
-            winnerRow.getChildren().add(Ui.cornerPill(ganador == Ganador.ROJA));
-        }
-        var main = Ui.card(Ui.support("Resultado final"), winnerRow, Ui.cardTitle(sheet.headline()),
-                Ui.support(p.esquinaRoja() + " (roja) vs " + p.esquinaAzul() + " (azul) · " + p.rounds() + " rounds"),
-                rounds(sheet));
-        HBox.setHgrow(main, Priority.ALWAYS);
-
-        // Una tarjeta por juez con su total en grande y una píldora neutra.
-        var judges = new VBox(16);
-        judges.setPrefWidth(440);
-        judges.setMinWidth(440);
-        for (var row : sheet.rows()) {
-            var total = new HBox(8, Ui.numeral(String.valueOf(row.totalRed()), "red"), Ui.numeral("–", "neutral"),
-                    Ui.numeral(String.valueOf(row.totalBlue()), "blue"));
-            total.getChildren().forEach(n -> n.getStyleClass().add("big"));
-            total.setAlignment(Pos.CENTER_LEFT);
-            var top = new HBox(Ui.cardTitle("Juez " + row.seat() + (row.name() == null ? "" : " · " + row.name())),
-                    Ui.grow(), Ui.pill(row.winner()));
-            top.setAlignment(Pos.CENTER_LEFT);
-            var card = Ui.card(top, total);
-            card.getStyleClass().add("compact");
-            judges.getChildren().add(card);
-        }
-
         var status = Ui.support("");
         var pdf = Ui.primary("Exportar PDF");
         pdf.setOnAction(e -> save(stage, status, "pdf", export.pdf(sheet), sheet));
@@ -83,7 +44,7 @@ public final class ResultScreen {
         var actions = new HBox(12, pdf, csv, close, status);
         actions.setAlignment(Pos.CENTER_LEFT);
 
-        var body = new HBox(24, main, judges);
+        var body = body(sheet);
         var root = new BorderPane(body);
         root.getStyleClass().add("app-root");
         root.setTop(new HBox(16, Ui.brand()));
@@ -100,31 +61,28 @@ public final class ResultScreen {
         return stage;
     }
 
-    /** Tarjeta de cada juez por round: "rojo – azul" con cada número en su color. */
-    private static GridPane rounds(ResultSheet sheet) {
-        var grid = new GridPane();
-        grid.setHgap(20);
-        grid.setVgap(8);
-        int rounds = sheet.pelea().rounds();
-        grid.add(Ui.support("Juez"), 0, 0);
-        for (int r = 1; r <= rounds; r++) {
-            grid.add(Ui.support("R" + r), r, 0);
-        }
-        int y = 1;
+    /** La tabla de puntos y, al lado, la suma de cada juez en grande. */
+    static HBox body(ResultSheet sheet) {
+        var p = sheet.pelea();
+        var main = Ui.card(Ui.support("Resultado final"),
+                Ui.support(p.esquinaRoja() + " (roja) vs " + p.esquinaAzul() + " (azul) · " + p.rounds() + " rounds"),
+                ResultTable.of(sheet));
+        HBox.setHgrow(main, Priority.ALWAYS);
+
+        var judges = new VBox(16);
+        judges.setPrefWidth(440);
+        judges.setMinWidth(440);
         for (var row : sheet.rows()) {
-            grid.add(Ui.body("Juez " + row.seat()), 0, y);
-            for (var c : row.cells()) {
-                if (c.red() == null) {
-                    grid.add(Ui.support("—"), c.round(), y);
-                } else {
-                    var cell = new HBox(4, Ui.numeral(String.valueOf(c.red()), "red"), Ui.numeral("–", "neutral"),
-                            Ui.numeral(String.valueOf(c.blue()), "blue"));
-                    grid.add(cell, c.round(), y);
-                }
-            }
-            y++;
+            var total = new HBox(8, Ui.numeral(String.valueOf(row.totalRed()), "red"), Ui.numeral("–", "neutral"),
+                    Ui.numeral(String.valueOf(row.totalBlue()), "blue"));
+            total.getChildren().forEach(n -> n.getStyleClass().add("big"));
+            total.setAlignment(Pos.CENTER_LEFT);
+            var card = Ui.card(Ui.cardTitle("Juez " + row.seat() + (row.name() == null ? "" : " · " + row.name())),
+                    total);
+            card.getStyleClass().add("compact");
+            judges.getChildren().add(card);
         }
-        return grid;
+        return new HBox(24, main, judges);
     }
 
     private static void save(Stage stage, Label status, String ext, byte[] data, ResultSheet sheet) {

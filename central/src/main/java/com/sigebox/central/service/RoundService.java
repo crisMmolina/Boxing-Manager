@@ -1,12 +1,15 @@
 package com.sigebox.central.service;
 
 import com.sigebox.central.db.Database;
+import com.sigebox.central.db.DescuentoRepository;
 import com.sigebox.central.db.EventLog;
 import com.sigebox.central.db.LugarJuezRepository;
 import com.sigebox.central.db.PeleaRepository;
 import com.sigebox.central.db.RoundRepository;
 import com.sigebox.central.db.TarjetaRoundRepository;
 import com.sigebox.central.server.JudgeHub;
+import com.sigebox.core.model.Descuento;
+import com.sigebox.core.model.Esquina;
 import com.sigebox.core.model.EstadoConexion;
 import com.sigebox.core.model.EstadoPelea;
 import com.sigebox.core.model.EstadoRound;
@@ -35,11 +38,18 @@ public final class RoundService {
     /** Segundos que la UI muestra el resumen parcial antes de ocultarlo. */
     public static final int SUMMARY_VISIBLE_SECONDS = 15;
 
+    /** Detalle de {@code FIGHT_ENDED} cuando la pelea termina sola al cerrar su último round. */
+    public static final String ENDED_BY_LAST_ROUND = "último round";
+
     /** Lo que la central difunde a los teléfonos; en la app es {@link JudgeHub}. */
     public interface Broadcaster {
         void roundOpened(String fightId, int round);
 
         void roundClosed(String fightId, int round, boolean forced);
+
+        /** La pelea terminó sola al cerrar su último round: los teléfonos mandan su tarjeta final. */
+        default void fightEnded(String fightId) {
+        }
     }
 
     /** Casilla de un juez en el tablero del round. */
@@ -110,6 +120,7 @@ public final class RoundService {
     private final RoundRepository rounds;
     private final LugarJuezRepository lugares;
     private final TarjetaRoundRepository tarjetas;
+    private final DescuentoRepository descuentos;
     private final EventLog log;
 
     public RoundService(Database db, Broadcaster broadcaster, LongSupplier clock) {
@@ -120,6 +131,7 @@ public final class RoundService {
         this.rounds = new RoundRepository(db);
         this.lugares = new LugarJuezRepository(db);
         this.tarjetas = new TarjetaRoundRepository(db);
+        this.descuentos = new DescuentoRepository(db);
         this.log = new EventLog(db);
     }
 
@@ -134,6 +146,11 @@ public final class RoundService {
             @Override
             public void roundClosed(String fightId, int round, boolean forced) {
                 hub.roundClosed(fightId, round, forced);
+            }
+
+            @Override
+            public void fightEnded(String fightId) {
+                hub.fightEnded(fightId, null);
             }
         }, System::currentTimeMillis);
     }
@@ -173,7 +190,8 @@ public final class RoundService {
 
     /**
      * Cierra el round abierto {@code n}. Con jueces faltantes exige {@code confirmation} =
-     * {@value #CONFIRM_WORD} y lo registra como cierre forzado.
+     * {@value #CONFIRM_WORD} y lo registra como cierre forzado. Cerrar el último round programado
+     * deja la pelea en {@code TERMINADA} en la misma transacción y pide las tarjetas finales.
      *
      * @return los lugares que quedaron faltantes (vacío si todos enviaron)
      */
@@ -184,6 +202,8 @@ public final class RoundService {
         }
         var missing = board(fightId, n).missing();
         boolean forced = !missing.isEmpty();
+        var pelea = pelea(fightId);
+        boolean last = n == pelea.rounds() && pelea.estado() == EstadoPelea.EN_CURSO;
         if (forced && (confirmation == null || !CONFIRM_WORD.equals(confirmation.strip()))) {
             throw new ConfirmationRequired(missing);
         }
@@ -191,9 +211,16 @@ public final class RoundService {
             rounds.save(new Round(fightId, n, EstadoRound.CERRADO, round.abiertoEnMs(), clock.getAsLong(), forced));
             log.append(fightId, forced ? "ROUND_CLOSED_FORCED" : "ROUND_CLOSED",
                     "round " + n + (forced ? " faltantes " + missing : ""));
+            if (last) {
+                peleas.updateEstado(fightId, EstadoPelea.TERMINADA);
+                log.append(fightId, "FIGHT_ENDED", ENDED_BY_LAST_ROUND);
+            }
             return null;
         });
         broadcaster.roundClosed(fightId, n, forced);
+        if (last) {
+            broadcaster.fightEnded(fightId);
+        }
         return missing;
     }
 
@@ -264,8 +291,9 @@ public final class RoundService {
     }
 
     /**
-     * Totales parciales por juez de los rounds cerrados. Solo con {@code confirmed}; cada consulta
-     * queda en la bitácora.
+     * Totales parciales por juez de los rounds cerrados, con los descuentos vigentes (ADR 0005: uno
+     * menos en esa esquina y round, sin bajar de 0). Solo con {@code confirmed}; cada consulta queda
+     * en la bitácora.
      */
     public synchronized List<PartialTotal> partialSummary(String fightId, boolean confirmed) {
         if (!confirmed) {
@@ -279,6 +307,7 @@ public final class RoundService {
         Map<Integer, String> names = lugares.byPelea(fightId).stream()
                 .filter(l -> l.nombre() != null)
                 .collect(Collectors.toMap(LugarJuez::numero, LugarJuez::nombre));
+        var vigentes = descuentos.byPelea(fightId).stream().filter(d -> !d.anulado()).toList();
         var out = new ArrayList<PartialTotal>();
         for (int seat = 1; seat <= pelea.jueces(); seat++) {
             int s = seat;
@@ -286,11 +315,17 @@ public final class RoundService {
                     .filter(t -> t.juez() == s && closed.contains(t.round()))
                     .toList();
             out.add(new PartialTotal(seat, names.get(seat),
-                    own.stream().mapToInt(TarjetaRound::rojo).sum(),
-                    own.stream().mapToInt(TarjetaRound::azul).sum()));
+                    own.stream().mapToInt(t -> descontado(t.rojo(), t.round(), Esquina.ROJA, vigentes)).sum(),
+                    own.stream().mapToInt(t -> descontado(t.azul(), t.round(), Esquina.AZUL, vigentes)).sum()));
         }
         log.append(fightId, "PARTIAL_SUMMARY_VIEWED", "rounds cerrados " + closed.size());
         return List.copyOf(out);
+    }
+
+    private static int descontado(int puntos, int round, Esquina esquina, List<Descuento> vigentes) {
+        int menos = vigentes.stream().filter(d -> d.round() == round && d.esquina() == esquina)
+                .mapToInt(Descuento::puntos).sum();
+        return Math.max(0, puntos - menos);
     }
 
     private Pelea pelea(String fightId) {

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.sigebox.central.db.Database;
+import com.sigebox.central.db.DescuentoRepository;
 import com.sigebox.central.service.ResultService;
 import com.sigebox.central.service.ResultServiceTest;
 import com.sigebox.core.model.Esquina;
@@ -104,5 +105,41 @@ class ExportServiceTest {
         reader.close();
         assertTrue(text.contains("Terminación: KO técnico en el round 3"), text);
         assertFalse(text.contains("KOT"), text);
+    }
+
+    private ResultSheet discounted() {
+        var fight = sheet.pelea().id();
+        new DescuentoRepository(db).save(fight, 2, Esquina.ROJA, 1L);
+        return new ResultService(db, new ResultService.Broadcaster() {
+            @Override
+            public void fightEnded(String fightId, MotivoTerminacion reason) {
+            }
+
+            @Override
+            public void fightClosed(String fightId) {
+            }
+        }).sheet(fight);
+    }
+
+    @Test
+    void csvKeepsWinnerAndDecisionAndAddsTheDiscounts() {
+        var csv = export.csv(discounted());
+        assertTrue(csv.contains("descuento,round 2,Roja,1\r\n"), csv);
+        assertTrue(csv.contains("resultado,Gana "), csv);
+        assertTrue(csv.contains("decision,"), csv);
+        assertTrue(csv.contains(",38,37,Roja\r\n"), csv);
+        assertFalse(export.csv(sheet).contains("descuento"));
+    }
+
+    @Test
+    void pdfKeepsWinnerAndAddsTheDiscounts() throws Exception {
+        var withDiscount = discounted();
+        var reader = new PdfReader(export.pdf(withDiscount));
+        var text = new PdfTextExtractor(reader).getTextFromPage(1);
+        reader.close();
+        assertTrue(text.contains("Descuentos: round 2 Roja -1"), text);
+        assertTrue(text.contains(ExportService.pdfText(withDiscount.headline())), text);
+        assertTrue(text.contains("Ganador"), text);
+        assertTrue(text.contains("38-37"), text);
     }
 }

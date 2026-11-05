@@ -9,6 +9,7 @@ import com.sigebox.central.db.ProcessedMessages;
 import com.sigebox.central.db.RoundRepository;
 import com.sigebox.central.db.TarjetaFinalRepository;
 import com.sigebox.central.db.TarjetaRoundRepository;
+import com.sigebox.central.db.TerminacionRepository;
 import com.sigebox.central.db.VersionTarjetaRepository;
 import com.sigebox.core.model.EstadoConexion;
 import com.sigebox.core.model.EstadoPelea;
@@ -152,6 +153,7 @@ public final class JudgeHub implements AutoCloseable {
     private final TarjetaRoundRepository tarjetas;
     private final VersionTarjetaRepository versiones;
     private final TarjetaFinalRepository finales;
+    private final TerminacionRepository terminaciones;
     private final ProcessedMessages processed;
     private final EventLog log;
 
@@ -181,6 +183,7 @@ public final class JudgeHub implements AutoCloseable {
         this.tarjetas = new TarjetaRoundRepository(db);
         this.versiones = new VersionTarjetaRepository(db);
         this.finales = new TarjetaFinalRepository(db);
+        this.terminaciones = new TerminacionRepository(db);
         this.processed = new ProcessedMessages(db);
         this.log = new EventLog(db);
     }
@@ -664,7 +667,10 @@ public final class JudgeHub implements AutoCloseable {
             return;
         }
         // Una conexión de traspaso entrega a la pelea cerrada lo que el teléfono no alcanzó a mandar (principio 1).
-        boolean accepts = pelea.estado() == EstadoPelea.EN_CURSO || (s.handoff && pelea.estado() == EstadoPelea.CERRADA);
+        // La pelea termina sola al cerrar el último round: su tarjeta tardía aún entra, salvo que una terminación la cortó.
+        boolean accepts = pelea.estado() == EstadoPelea.EN_CURSO
+                || (pelea.estado() == EstadoPelea.TERMINADA && terminaciones.find(s.fightId).isEmpty())
+                || (s.handoff && pelea.estado() == EstadoPelea.CERRADA);
         if (!accepts) {
             send(s, new Ack(m.id(), false, null, Ack.Error.FIGHT_NOT_ACTIVE));
             return;
