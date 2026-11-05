@@ -1,5 +1,5 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- docs/DESIGN.md v3: Material 3 Expressive, claro «cantera» y oscuro «noche de arena» según el sistema.
+    <!-- docs/DESIGN.md v4: Material 3 Expressive, claro y oscuro según el sistema.
          Inter para el texto y Barlow Condensed recta para números y títulos. Colores solo de colors.xml. -->
     <style name="Base.Theme.Sigebox" parent="Theme.Material3Expressive.DayNight.NoActionBar">
         <item name="colorPrimary">@color/primary</item>
