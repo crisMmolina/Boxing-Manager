@@ -14,6 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import javafx.collections.FXCollections;
 import javafx.geometry.Pos;
+import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
@@ -80,6 +81,7 @@ public final class SetupScreen {
         left.setMinWidth(340);
         var seats = new FlowPane(16, 16, Skeleton.block(240, 200));
         seats.setPrefWrapLength(780); // sin esto el FlowPane pide una sola columna muy alta
+        seats.setRowValignment(VPos.TOP); // tarjetas de distinta altura, alineadas arriba
         HBox.setHgrow(seats, Priority.ALWAYS);
         var footer = new HBox(16);
         footer.setAlignment(Pos.CENTER_LEFT);
@@ -95,14 +97,21 @@ public final class SetupScreen {
                 return;
             }
             var id = s.pelea().id();
-            Ui.next(next, fights.pendingSeats(id, s.connected()) > 0
-                    ? "Pide a cada juez que escanee su QR y aprueba su huella."
-                    : "Inicia la pelea.");
+            Ui.next(next, nextStep(s));
             LiveRefresh.swap(left, List.of(summary(s.pelea())));
             LiveRefresh.swap(seats, s.seats().stream().map(seat -> seatCard(id, seat, status)).toList());
             footer.getChildren().setAll(footer(id, s.connected()));
         });
         return root;
+    }
+
+    private String nextStep(Snapshot s) {
+        if (s.seats().stream().anyMatch(seat -> seat.state() == FightService.SeatState.SIN_CONEXION)) {
+            return "Ayuda al juez sin conexión a reconectarse.";
+        }
+        return fights.pendingSeats(s.pelea().id(), s.connected()) > 0
+                ? "Pide a cada juez que escanee su QR y aprueba su huella."
+                : "Inicia la pelea.";
     }
 
     private Snapshot read() {

@@ -61,7 +61,7 @@ public final class ResultStepScreen {
         var status = Ui.support("");
         var card = Ui.card();
         card.setMaxWidth(860);
-        var nextLine = Ui.next("Cierra una pelea para ver su resultado aquí.");
+        var nextLine = Ui.next("Ve a Evento para ver cómo va.");
         var root = new VBox(16, Ui.screenTitle("Resultado"), nextLine, card, status);
 
         // Solo se reconstruye si cambió lo que se ve: así el botón sigue pulsable entre lecturas.
@@ -80,9 +80,9 @@ public final class ResultStepScreen {
                     card.getChildren().addAll(nextFight(following.get(), startNext, status));
                     return;
                 }
-                Ui.next(nextLine, "Cierra una pelea para ver su resultado aquí.");
+                Ui.next(nextLine, "Ve a Evento para ver cómo va.");
                 card.getChildren().addAll(Ui.cardTitle("Sin pelea activa"),
-                        Ui.support("Cuando cierres una pelea, su resultado aparece aquí."));
+                        Ui.support("El resultado de cada pelea se abre al cerrarla."));
                 return;
             }
             boolean ended = service.ended(f);

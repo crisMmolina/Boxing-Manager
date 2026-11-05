@@ -33,7 +33,17 @@ public final class ResultScreen {
         var stage = new Stage();
         stage.initOwner(owner);
         stage.setTitle("Resultado · " + sheet.pelea().esquinaRoja() + " vs " + sheet.pelea().esquinaAzul());
+        var scene = new Scene(content(stage, sheet, export), 1280, 800);
+        Theme.apply(scene);
+        stage.setScene(scene);
+        stage.setFullScreenExitHint("Esc para salir de pantalla completa");
+        stage.setFullScreen(true);
+        stage.show();
+        return stage;
+    }
 
+    /** Lo que muestra la ventana {@code stage}, que no hace falta que esté abierta. */
+    public static BorderPane content(Stage stage, ResultSheet sheet, ExportService export) {
         var status = Ui.support("");
         var pdf = Ui.primary("Exportar PDF");
         pdf.setOnAction(e -> save(stage, status, "pdf", export.pdf(sheet), sheet));
@@ -47,18 +57,11 @@ public final class ResultScreen {
         var body = body(sheet);
         var root = new BorderPane(body);
         root.getStyleClass().add("app-root");
-        root.setTop(new HBox(16, Ui.brand()));
+        root.setTop(new VBox(16, Ui.brand(), Ui.next("Exporta el resultado o cierra esta ventana.")));
         root.setBottom(actions);
         BorderPane.setMargin(body, new Insets(24, 0, 24, 0));
         root.setPadding(new Insets(40));
-
-        var scene = new Scene(root, 1280, 800);
-        Theme.apply(scene);
-        stage.setScene(scene);
-        stage.setFullScreenExitHint("Esc para salir de pantalla completa");
-        stage.setFullScreen(true);
-        stage.show();
-        return stage;
+        return root;
     }
 
     /** La tabla de puntos y, al lado, la suma de cada juez en grande. */

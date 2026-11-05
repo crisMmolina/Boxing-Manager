@@ -21,6 +21,7 @@ import com.sigebox.central.ui.inicio.InicioScreen;
 import com.sigebox.central.ui.inicio.Nav;
 import com.sigebox.central.ui.log.LogQuery;
 import com.sigebox.central.ui.log.LogScreen;
+import com.sigebox.central.ui.result.ResultScreen;
 import com.sigebox.central.ui.result.ResultStepScreen;
 import com.sigebox.central.ui.rounds.RoundsScreen;
 import com.sigebox.central.ui.setup.SetupScreen;
@@ -38,7 +39,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -60,6 +63,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
+import javafx.stage.Stage;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -75,6 +79,8 @@ class ScreensTourTest {
     private static final Pattern CODE = Pattern.compile("\\b[A-ZÁÉÍÓÚÑ][A-ZÁÉÍÓÚÑ_]{3,}\\b");
     private static final Pattern QR_URI = Pattern.compile("sigebox://join\\?h=[^&]+&p=\\d+&c=(\\d{6})");
 
+    private static final String WINDOW = "Ventana del resultado";
+
     private static final Set<String> unlabeled = new TreeSet<>();
     private static final Set<String> noExample = new TreeSet<>();
     private static final Set<String> noNext = new TreeSet<>();
@@ -87,6 +93,7 @@ class ScreensTourTest {
     private static final List<String> decodedQrs = new ArrayList<>();
     private static final List<String> shownCodes = new ArrayList<>();
     private static final Set<String> helpOn = new TreeSet<>();
+    private static final Map<String, String> nextLines = new TreeMap<>();
 
     private static Path dir;
     private static JudgeSimRig rig;
@@ -132,6 +139,7 @@ class ScreensTourTest {
         JudgeSimRig.await(() -> rig.results.canClose(first), 10_000, "tarjeta final");
         rig.results.close(first);
         visit("pelea cerrada");
+        visitResultWindow(first);
 
         var second = flow.start().id();
         allowed.add(second);
@@ -184,6 +192,19 @@ class ScreensTourTest {
         }
     }
 
+    /** La ventana del resultado no es un paso de la barra: se abre al cerrar la pelea. */
+    private static void visitResultWindow(String fightId) throws Exception {
+        var sheet = rig.results.sheet(fightId);
+        FxTest.onFx(() -> {
+            var root = ResultScreen.content(new Stage(), sheet, new ExportService());
+            new Scene(root, 1280, 800);
+            root.applyCss();
+            root.layout();
+            inspect("ventana-resultado", WINDOW, root);
+            return null;
+        });
+    }
+
     /** Deja que la lectura de fondo termine y que su dibujo pase por el hilo de JavaFX. */
     private static void settle() throws Exception {
         for (int i = 0; i < 2; i++) {
@@ -214,6 +235,7 @@ class ScreensTourTest {
             if (n instanceof Label l && l.getStyleClass().contains("next-step") && l.getText().startsWith("Qué sigue: ")
                     && l.getText().length() > "Qué sigue: ".length()) {
                 next = true;
+                nextLines.put(where, l.getText());
             }
             if (n instanceof ButtonBase b && b.isDisable() && !saysWhy(b)) {
                 noWhy.add(where + ": " + b.getText());
@@ -399,5 +421,21 @@ class ScreensTourTest {
             assertTrue(m.matches(), uri);
             assertTrue(shownCodes.contains(m.group(1)), uri + " no está en " + shownCodes);
         }
+    }
+
+    @Test
+    void theResultWindowSaysWhatComesNext() {
+        assertTrue(nextLines.containsKey(WINDOW), nextLines.keySet().toString());
+    }
+
+    @Test
+    void aDisconnectedJudgeIsNotAskedToScanAQr() {
+        var line = nextLines.get("Jueces / juez desconectado");
+        assertTrue(line.contains("reconect"), line);
+    }
+
+    @Test
+    void noScreenAsksToCloseAFightThatDoesNotExist() {
+        nextLines.forEach((where, line) -> assertFalse(line.contains("Cierra una pelea"), where + ": " + line));
     }
 }
