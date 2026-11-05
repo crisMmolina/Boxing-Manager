@@ -1,6 +1,7 @@
 package com.sigebox.central.service;
 
 import com.sigebox.central.db.Database;
+import com.sigebox.central.db.DescuentoRepository;
 import com.sigebox.central.db.EventLog;
 import com.sigebox.central.db.LugarJuezRepository;
 import com.sigebox.central.db.PeleaRepository;
@@ -52,6 +53,7 @@ public final class ResultService {
     private final TarjetaFinalRepository finales;
     private final TerminacionRepository terminaciones;
     private final ResultadoRepository resultados;
+    private final DescuentoRepository descuentos;
     private final EventLog log;
 
     public ResultService(Database db, Broadcaster broadcaster) {
@@ -64,6 +66,7 @@ public final class ResultService {
         this.finales = new TarjetaFinalRepository(db);
         this.terminaciones = new TerminacionRepository(db);
         this.resultados = new ResultadoRepository(db);
+        this.descuentos = new DescuentoRepository(db);
         this.log = new EventLog(db);
     }
 
@@ -131,11 +134,17 @@ public final class ResultService {
                 && (terminaciones.find(fightId).isPresent() || missingFinalCards(fightId).isEmpty());
     }
 
-    /** Resultado calculado por {@code core} con lo guardado (no lo persiste). */
+    /** Si la pelea ya terminó (cerrada o no): antes de esto no se muestran puntos (principio 3). */
+    public synchronized boolean ended(String fightId) {
+        var estado = pelea(fightId).estado();
+        return estado == EstadoPelea.TERMINADA || estado == EstadoPelea.CERRADA;
+    }
+
+    /** Resultado calculado por {@code core} con lo guardado y los descuentos (no lo persiste). */
     public synchronized Resultado compute(String fightId) {
         var pelea = pelea(fightId);
         return ResultCalculator.calcular(pelea, lugares.byPelea(fightId), rounds.byPelea(fightId),
-                tarjetas.byPelea(fightId), terminaciones.find(fightId).orElse(null));
+                tarjetas.byPelea(fightId), terminaciones.find(fightId).orElse(null), descuentos.byPelea(fightId));
     }
 
     /** Cierra la pelea: guarda el resultado, la pasa a {@code CERRADA} y avisa a los jueces. */
@@ -162,7 +171,22 @@ public final class ResultService {
         return resultados.find(fightId);
     }
 
-    /** Hoja para la pantalla de resultado y la exportación. */
+    /**
+     * Hoja para el paso Resultado: vacía mientras la pelea siga en curso o si aún falta la tarjeta de
+     * algún round que cuenta.
+     */
+    public synchronized Optional<ResultSheet> scoreSheet(String fightId) {
+        if (!ended(fightId)) {
+            return Optional.empty();
+        }
+        try {
+            return Optional.of(sheet(fightId));
+        } catch (IllegalArgumentException | IllegalStateException incompleta) {
+            return Optional.empty();
+        }
+    }
+
+    /** Hoja para la pantalla de resultado y la exportación: los puntos ya llevan los descuentos. */
     public synchronized ResultSheet sheet(String fightId) {
         var pelea = pelea(fightId);
         var resultado = resultados.find(fightId).orElseGet(() -> compute(fightId));
@@ -176,12 +200,20 @@ public final class ResultService {
                 .collect(Collectors.toMap(LugarJuez::numero, LugarJuez::nombre));
         var rows = new ArrayList<ResultSheet.JudgeRow>();
         for (var total : resultado.totales()) {
+            var discounted = total.rounds().stream()
+                    .collect(Collectors.toMap(Resultado.RoundJuez::round, Function.identity()));
             var cells = new ArrayList<ResultSheet.Cell>();
             for (int r = 1; r <= pelea.rounds(); r++) {
                 var t = cards.get(total.juez() + "/" + r);
                 boolean counts = r <= lastCounted && closed.contains(r);
-                cells.add(t == null || !counts ? new ResultSheet.Cell(r, null, null, null)
-                        : new ResultSheet.Cell(r, t.rojo(), t.azul(), t.estado().name()));
+                if (t == null || !counts) {
+                    cells.add(new ResultSheet.Cell(r, null, null, null));
+                    continue;
+                }
+                // Un resultado guardado antes de los descuentos no trae desglose: vale la tarjeta.
+                var d = discounted.get(r);
+                cells.add(new ResultSheet.Cell(r, d != null ? d.rojo() : t.rojo(), d != null ? d.azul() : t.azul(),
+                        t.estado().name()));
             }
             var name = total.nombre() != null ? total.nombre() : names.get(total.juez());
             rows.add(new ResultSheet.JudgeRow(total.juez(), name, cells, total.rojo(), total.azul(),

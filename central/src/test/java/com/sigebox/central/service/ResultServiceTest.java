@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.gson.Gson;
 import com.sigebox.central.db.Database;
+import com.sigebox.central.db.DescuentoRepository;
 import com.sigebox.central.db.LugarJuezRepository;
 import com.sigebox.central.db.PeleaRepository;
 import com.sigebox.central.db.RoundRepository;
@@ -198,5 +199,75 @@ public class ResultServiceTest {
                 null);
         assertEquals("Sin decisión · sin decisión", ResultService.headline(p, sinDecision, Optional.of(
                 new Terminacion(p.id(), MotivoTerminacion.SIN_DECISION, null, null, 2, "0:30", null))));
+    }
+
+    @Test
+    void whatIsStoredIsWhatWasComputedWithTheStandingDiscounts() {
+        ref.into(db, EstadoPelea.TERMINADA);
+        finalCards(1, 2, 3);
+        var descuentos = new DescuentoRepository(db);
+        long vigente = descuentos.save(fight, 2, Esquina.ROJA, 1L);
+        descuentos.anular(descuentos.save(fight, 3, Esquina.AZUL, 2L), "error del operador", 3L);
+
+        var computed = service.compute(fight);
+        var closed = service.close(fight);
+        var stored = service.stored(fight).orElseThrow();
+
+        assertEquals(List.of("38–37", "36–39", "38–37"),
+                stored.totales().stream().map(t -> t.rojo() + "–" + t.azul()).toList());
+        assertEquals(new Gson().toJson(computed), new Gson().toJson(closed));
+        assertEquals(new Gson().toJson(computed), new Gson().toJson(stored));
+        assertEquals(List.of(vigente), stored.totales().get(0).descuentos().stream().map(d -> d.id()).toList());
+    }
+
+    @Test
+    void aDiscountRemovedBeforeClosingDoesNotCount() {
+        ref.into(db, EstadoPelea.TERMINADA);
+        finalCards(1, 2, 3);
+        var descuentos = new DescuentoRepository(db);
+        long id = descuentos.save(fight, 2, Esquina.ROJA, 1L);
+        assertEquals(38, service.compute(fight).totales().get(0).rojo());
+
+        descuentos.anular(id, "error del operador", 2L);
+
+        assertEquals(List.of("39–37", "37–39", "39–37"),
+                service.close(fight).totales().stream().map(t -> t.rojo() + "–" + t.azul()).toList());
+    }
+
+    @Test
+    void sheetCellsAndSumsCarryTheDiscounts() {
+        ref.into(db, EstadoPelea.TERMINADA);
+        var sinDescuento = service.sheet(fight).rows().get(0).cells().get(1);
+        new DescuentoRepository(db).save(fight, 2, Esquina.ROJA, 1L);
+
+        var sheet = service.sheet(fight);
+        var row = sheet.rows().get(0);
+        var cell = row.cells().get(1);
+        assertEquals(sinDescuento.red() - 1, cell.red());
+        assertEquals(sinDescuento.blue(), cell.blue());
+        assertEquals(sinDescuento.status(), cell.status());
+        assertEquals(row.totalRed(), row.cells().stream().mapToInt(c -> c.red()).sum());
+        assertEquals(1, sheet.descuentos().size());
+        assertEquals(1, sheet.descuentos(1).size());
+    }
+
+    @Test
+    void closeOpensWithATerminationEvenWithoutFinalCards() {
+        ref.into(db, EstadoPelea.TERMINADA);
+        assertFalse(service.canClose(fight));
+        new TerminacionRepository(db).save(
+                new Terminacion(fight, MotivoTerminacion.KO, null, Esquina.ROJA, 3, "1:42", null));
+        assertTrue(service.canClose(fight));
+    }
+
+    @Test
+    void noScoreSheetWhileTheFightIsLive() {
+        ref.into(db, EstadoPelea.EN_CURSO);
+        assertFalse(service.ended(fight));
+        assertTrue(service.scoreSheet(fight).isEmpty());
+
+        new PeleaRepository(db).updateEstado(fight, EstadoPelea.TERMINADA);
+        assertTrue(service.ended(fight));
+        assertTrue(service.scoreSheet(fight).isPresent());
     }
 }

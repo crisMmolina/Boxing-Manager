@@ -39,6 +39,9 @@ public final class ExportService {
             line(out, "terminacion", Labels.of(t.motivo()), "round " + t.round(), t.tiempo(),
                     t.textoOtro() == null ? "" : t.textoOtro());
         }
+        for (var d : sheet.descuentos()) {
+            line(out, "descuento", "round " + d.round(), Labels.of(d.esquina()), String.valueOf(d.puntos()));
+        }
         out.append("\r\n");
 
         var header = new java.util.ArrayList<String>();
@@ -120,6 +123,11 @@ public final class ExportService {
             cell(table, row.winner(), normal);
         }
         doc.add(table);
+        if (!sheet.descuentos().isEmpty()) {
+            doc.add(para("Descuentos: " + sheet.descuentos().stream()
+                    .map(d -> "round " + d.round() + " " + Labels.of(d.esquina()) + " -" + d.puntos())
+                    .collect(java.util.stream.Collectors.joining(", ")), normal));
+        }
         var c = sheet.resultado().conteo();
         if (c != null) {
             doc.add(para("Tarjetas: " + c.enviadas() + " enviadas, " + c.tardias() + " tardías, "
