@@ -1,37 +1,63 @@
 package com.sigebox.juez.join;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.Editable;
+import android.text.InputFilter;
 import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
-
+import com.sigebox.core.protocol.CodeInfo;
+import com.sigebox.core.protocol.CodeUnknown;
 import com.sigebox.core.protocol.JoinUri;
+import com.sigebox.core.protocol.Message;
 import com.sigebox.juez.R;
+import com.sigebox.juez.net.ConnectionState;
+import com.sigebox.juez.net.JudgeConnection;
+import com.sigebox.juez.net.JudgeListener;
 import com.sigebox.juez.net.JudgeRuntime;
 import com.sigebox.juez.terms.TermsActivity;
 import com.sigebox.juez.terms.TermsStore;
+import java.util.function.Function;
 
-/** Nombre del juez + lugar (QR o código manual) → {@code JOIN} (DESIGN.md §6.2). */
+/**
+ * Nombre, código de lugar e IP (o el QR, que los llena) → {@code CODE_LOOKUP} → espera de aprobación (spec 004,
+ * ADR 0004). Un QR de la forma anterior trae pelea y lugar y se une directo, como antes.
+ */
 public class JoinActivity extends AppCompatActivity {
+
+    /** De dónde sale la conexión; las pruebas la cambian por una sin llave del equipo. */
+    static Function<Context, JudgeConnection> connections = context -> JudgeRuntime.get(context).connection();
 
     private EditText name;
     private EditText host;
-    private EditText fight;
-    private EditText seat;
     private EditText code;
-    private View manualGroup;
     private TextView seatLabel;
     private TextView error;
     private Button submit;
-    private JoinUri scanned;
+    /** QR de la forma anterior (pelea, lugar y token); con el QR nuevo los datos quedan en los campos. */
+    private JoinUri legacy;
+    /** Se mandó el código y se espera {@code CODE_INFO} o {@code CODE_UNKNOWN}. */
+    private JoinRequest looking;
+    private boolean codeRejected;
+    /** El QR está llenando los campos: no cuenta como escritura a mano. */
+    private boolean filling;
+    private JudgeConnection listening;
+    /** Sin respuesta en este tiempo se avisa; está muy por arriba de los reintentos de la conexión. */
+    static final long LOOKUP_TIMEOUT_MS = 10_000;
+    /** Huella de la central que traía el QR nuevo; escribir otra IP u otro código la deja de lado. */
+    private String scannedPin;
+    private boolean lookupFailed;
+    private final Handler timeouts = new Handler(Looper.getMainLooper());
+    private final Runnable lookupTimeout = this::onLookupTimeout;
 
     private final ActivityResultLauncher<Intent> scanLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(), result -> {
@@ -39,6 +65,18 @@ public class JoinActivity extends AppCompatActivity {
                     onQrScanned(result.getData().getStringExtra(ScanActivity.EXTRA_QR));
                 }
             });
+
+    private final JudgeListener codeListener = new JudgeListener() {
+        @Override
+        public void onState(ConnectionState state) {}
+
+        @Override
+        public void onMessage(Message message) {
+            if (message instanceof CodeInfo || message instanceof CodeUnknown) {
+                runOnUiThread(() -> onCodeAnswer(message));
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,13 +91,24 @@ public class JoinActivity extends AppCompatActivity {
         com.sigebox.juez.ui.TopBar.bind(findViewById(R.id.join_root), false, getString(R.string.status_disconnected));
         name = findViewById(R.id.join_name);
         host = findViewById(R.id.join_host);
-        fight = findViewById(R.id.join_fight);
-        seat = findViewById(R.id.join_seat_input);
         code = findViewById(R.id.join_code);
-        manualGroup = findViewById(R.id.join_manual_group);
         seatLabel = findViewById(R.id.join_seat);
         error = findViewById(R.id.join_error);
         submit = findViewById(R.id.join_submit);
+        // Solo dígitos y a lo más 6, también al pegar (el teclado numérico no basta).
+        code.setFilters(new InputFilter[] {
+                new InputFilter.LengthFilter(JoinRequest.CODE_LENGTH),
+                (source, start, end, dest, dstart, dend) -> {
+                    StringBuilder digits = new StringBuilder();
+                    for (int i = start; i < end; i++) {
+                        char c = source.charAt(i);
+                        if (c >= '0' && c <= '9') {
+                            digits.append(c);
+                        }
+                    }
+                    return digits.length() == end - start ? null : digits;
+                }
+        });
 
         TextWatcher watcher = new TextWatcher() {
             @Override
@@ -70,23 +119,36 @@ public class JoinActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
+                if (!filling && s != name.getText()) {
+                    legacy = null; // escribir IP o código a mano deja de lado el QR viejo
+                    scannedPin = null;
+                }
+                codeRejected = false;
+                lookupFailed = false;
                 render();
             }
         };
-        for (EditText field : new EditText[] {name, host, fight, seat, code}) {
+        for (EditText field : new EditText[] {name, host, code}) {
             field.addTextChangedListener(watcher);
         }
         findViewById(R.id.join_scan).setOnClickListener(v -> scanLauncher.launch(new Intent(this, ScanActivity.class)));
-        findViewById(R.id.join_manual).setOnClickListener(v -> {
-            scanned = null;
-            manualGroup.setVisibility(View.VISIBLE);
-            render();
-        });
         submit.setOnClickListener(v -> join());
         render();
     }
 
-    /** Resultado del escáner (o de una prueba). Un QR ajeno deja el lugar como estaba y avisa. */
+    @Override
+    protected void onDestroy() {
+        timeouts.removeCallbacks(lookupTimeout);
+        if (listening != null) {
+            listening.removeListener(codeListener);
+            if (looking != null) {
+                listening.stop(); // nadie va a leer la respuesta: no sigue reintentando
+            }
+        }
+        super.onDestroy();
+    }
+
+    /** Resultado del escáner (o de una prueba): llena IP y código. Un QR ajeno deja todo como estaba y avisa. */
     public void onQrScanned(String raw) {
         JoinUri uri = QrParser.parse(raw);
         if (uri == null) {
@@ -94,28 +156,35 @@ public class JoinActivity extends AppCompatActivity {
             error.setVisibility(View.VISIBLE);
             return;
         }
-        scanned = uri;
-        manualGroup.setVisibility(View.GONE);
+        filling = true;
+        host.setText(uri.port() == JoinRequest.DEFAULT_PORT ? uri.host() : uri.host() + ":" + uri.port());
+        code.setText(uri.code() == null ? "" : uri.code());
+        filling = false;
+        legacy = uri.code() == null ? uri : null;
+        scannedPin = uri.code() != null ? uri.certFingerprint() : null;
         render();
     }
 
-    private JoinRequest.Result current() {
-        if (manualGroup.getVisibility() == View.VISIBLE) {
-            return JoinRequest.manual(text(host), text(fight), text(seat), text(code), text(name));
+    JoinRequest.Result current() {
+        if (legacy != null) {
+            return JoinRequest.fromQr(legacy, text(name));
         }
-        return JoinRequest.fromQr(scanned, text(name));
+        return JoinRequest.withCode(text(host), text(code), text(name), scannedPin);
     }
 
     private void render() {
-        if (scanned != null) {
-            seatLabel.setText(getString(R.string.join_seat, scanned.seat(), scanned.fightId()));
+        if (legacy != null) {
+            seatLabel.setText(getString(R.string.join_seat, legacy.seat(), legacy.fightId()));
+            seatLabel.setVisibility(View.VISIBLE);
         } else {
-            seatLabel.setText(R.string.join_no_seat);
+            seatLabel.setVisibility(View.GONE);
         }
         JoinRequest.Result result = current();
-        submit.setEnabled(result.error == null);
-        int message = messageFor(result.error);
-        boolean show = message != 0 && !text(name).isEmpty();
+        submit.setEnabled(result.error == null && looking == null);
+        int message = codeRejected ? R.string.join_code_unknown
+                : lookupFailed ? R.string.join_lookup_timeout
+                : looking != null ? R.string.join_looking : messageFor(result.error);
+        boolean show = message != 0 && (codeRejected || lookupFailed || looking != null || !text(name).isEmpty());
         error.setVisibility(show ? View.VISIBLE : View.GONE);
         if (show) {
             error.setText(message);
@@ -124,14 +193,61 @@ public class JoinActivity extends AppCompatActivity {
 
     private void join() {
         JoinRequest.Result result = current();
-        if (result.error != null) {
+        if (result.error != null || looking != null) {
             return;
         }
         JoinRequest request = result.request;
-        JudgeRuntime.get(this).connection().join(request.uri, request.judgeName);
+        JudgeConnection connection = connections.apply(this);
+        if (listening == null && request.uri.code() != null) {
+            listening = connection;
+            connection.addListener(codeListener);
+        }
+        connection.join(request.uri, request.judgeName);
+        if (request.uri.code() == null) {
+            openWaiting(request.uri.seat(), request.judgeName);
+            return;
+        }
+        // Con el código, la pelea y el lugar los dice la central; se espera aquí para avisar si no es válido.
+        looking = request;
+        codeRejected = false;
+        lookupFailed = false;
+        timeouts.postDelayed(lookupTimeout, LOOKUP_TIMEOUT_MS);
+        render();
+    }
+
+    private void onCodeAnswer(Message message) {
+        JoinRequest request = looking;
+        if (request == null || !request.uri.code().equals(code(message))) {
+            return;
+        }
+        looking = null;
+        timeouts.removeCallbacks(lookupTimeout);
+        if (message instanceof CodeInfo info) {
+            openWaiting(info.seat(), request.judgeName);
+        } else {
+            codeRejected = true;
+        }
+        render();
+    }
+
+    /** Nadie contestó: se deja de buscar y se puede reintentar; una respuesta tardía ya no cuenta. */
+    private void onLookupTimeout() {
+        looking = null;
+        lookupFailed = true;
+        if (listening != null) {
+            listening.stop();
+        }
+        render();
+    }
+
+    private static String code(Message message) {
+        return message instanceof CodeInfo info ? info.code() : ((CodeUnknown) message).code();
+    }
+
+    private void openWaiting(int seat, String judgeName) {
         startActivity(new Intent(this, WaitingActivity.class)
-                .putExtra(WaitingActivity.EXTRA_SEAT, request.uri.seat())
-                .putExtra(WaitingActivity.EXTRA_NAME, request.judgeName));
+                .putExtra(WaitingActivity.EXTRA_SEAT, seat)
+                .putExtra(WaitingActivity.EXTRA_NAME, judgeName));
     }
 
     private static int messageFor(JoinRequest.Error error) {

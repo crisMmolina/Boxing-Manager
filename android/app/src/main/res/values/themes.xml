@@ -39,6 +39,11 @@
     <style name="Theme.Sigebox" parent="Base.Theme.Sigebox" />
 
     <!-- §5 Botón principal y secundario en cápsula -->
+    <!-- Arranque (AND-018): el logo sobre bg lo dibuja la ventana antes del primer cuadro (DESIGN.md v4 §5.1). -->
+    <style name="Theme.Sigebox.Splash" parent="Theme.Sigebox">
+        <item name="android:windowBackground">@drawable/splash</item>
+    </style>
+
     <style name="Widget.Sigebox.Button.Primary" parent="Widget.Material3Expressive.Button">
         <item name="android:minHeight">@dimen/button_height</item>
         <item name="android:insetTop">0dp</item>
