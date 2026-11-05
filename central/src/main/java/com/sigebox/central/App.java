@@ -7,12 +7,12 @@ import com.sigebox.central.export.ExportService;
 import com.sigebox.central.server.JudgeHub;
 import com.sigebox.central.server.JudgeServer;
 import com.sigebox.central.server.SeatTokens;
-import com.sigebox.central.server.ServerEvents;
 import com.sigebox.central.service.FightService;
 import com.sigebox.central.service.FuncionService;
 import com.sigebox.central.service.ResultService;
 import com.sigebox.central.service.RoundService;
 import com.sigebox.central.service.TerminationService;
+import com.sigebox.central.ui.LiveRefresh;
 import com.sigebox.central.ui.Screens;
 import com.sigebox.central.ui.funcion.FuncionFlow;
 import com.sigebox.central.ui.funcion.FuncionQuery;
@@ -116,7 +116,7 @@ public final class App {
             db = Database.openDefault();
             new RecoveryService(db).load();
             var tokens = new SeatTokens(); // uno solo: lo emite la pantalla de pelea y lo valida el servidor
-            hub = new JudgeHub(db, tokens, ServerEvents.NONE);
+            hub = new JudgeHub(db, tokens, LiveRefresh.EVENTS);
             String serverError = null;
             try {
                 server = JudgeServer.start(hub, JudgeServer.DEFAULT_PORT);
