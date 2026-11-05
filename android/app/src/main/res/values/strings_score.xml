@@ -45,18 +45,6 @@
     <string name="a11y_connected">conectado</string>
     <string name="a11y_disconnected">sin conexión</string>
 
-    <string name="final_title">Pelea terminada</string>
-    <string name="final_col_round">Round</string>
-    <string name="final_col_status">Estado</string>
-    <string name="final_body">Revisa tu tarjeta. Al enviarla ya no podrás corregir.</string>
-    <string name="final_wait_acks">Espera a que la central confirme todos tus rounds.</string>
-    <string name="final_send">Enviar tarjeta final</string>
-    <string name="final_sent">Tarjeta final enviada</string>
-    <string name="final_body_sent">La central recibió tu tarjeta.</string>
-    <string name="final_retry">No se pudo enviar. Intenta de nuevo.</string>
-    <string name="final_row_round">R%1$d</string>
-    <string name="final_row_score">%1$d – %2$d</string>
-    <string name="final_error">La central no aceptó la tarjeta (%1$s).</string>
 
     <!-- Espera de aprobación (join/WaitingActivity): una frase con qué hacer (spec 003). -->
     <string name="waiting_approval_todo">Pide a la mesa que te apruebe en la central: esta pantalla avanza sola.</string>

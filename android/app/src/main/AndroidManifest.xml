@@ -68,9 +68,6 @@
             android:turnScreenOn="true"
             tools:targetApi="27" />
         <activity
-            android:name=".finalcard.FinalCardActivity"
-            android:exported="false" />
-        <activity
             android:name=".wait.NextFightActivity"
             android:exported="false" />
     </application>
