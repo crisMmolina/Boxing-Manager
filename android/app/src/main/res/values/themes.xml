@@ -184,4 +184,8 @@
         <item name="android:textColor">@color/ink</item>
         <item name="android:letterSpacing">0.05</item>
     </style>
+
+    <style name="Text.Sigebox.Brand.Bar">
+        <item name="android:textColor">@color/bar_accent</item>
+    </style>
 </resources>

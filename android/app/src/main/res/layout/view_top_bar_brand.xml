@@ -1,13 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Barra superior solo con la marca (pantallas sin estado de conexión). -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/top_bar"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginStart="@dimen/screen_margin_neg"
+    android:layout_marginTop="@dimen/screen_margin_neg"
+    android:layout_marginEnd="@dimen/screen_margin_neg"
+    android:layout_marginBottom="@dimen/gap"
+    android:background="@drawable/bar_background"
     android:gravity="center_vertical"
-    android:orientation="horizontal">
+    android:minHeight="@dimen/bar_height"
+    android:orientation="horizontal"
+    android:paddingStart="@dimen/screen_margin"
+    android:paddingTop="4dp"
+    android:paddingEnd="@dimen/screen_margin"
+    android:paddingBottom="4dp">
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/gap_small"
+        android:importantForAccessibility="no"
+        android:src="@drawable/logo" />
 
     <TextView
-        style="@style/Text.Sigebox.Brand"
+        style="@style/Text.Sigebox.Brand.Bar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
                 android:text="@string/app_name" />

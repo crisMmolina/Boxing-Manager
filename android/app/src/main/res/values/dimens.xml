@@ -2,6 +2,9 @@
 <!-- docs/DESIGN.md v3 §3.3 (rejilla de 4) y §5. -->
 <resources>
     <dimen name="screen_margin">20dp</dimen>
+    <!-- La barra superior cruza el margen de la pantalla hasta los bordes. -->
+    <dimen name="screen_margin_neg">-20dp</dimen>
+    <dimen name="bar_height">56dp</dimen>
     <dimen name="card_radius">28dp</dimen>
     <dimen name="sheet_radius">32dp</dimen>
     <dimen name="field_radius">16dp</dimen>

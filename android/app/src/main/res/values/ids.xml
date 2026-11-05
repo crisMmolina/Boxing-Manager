@@ -2,4 +2,5 @@
 <resources>
     <!-- Marca que Screen.applyInsets dejó en la raíz (para pruebas). -->
     <item name="screen_insets_applied" type="id" />
+    <item name="status_strip" type="id" />
 </resources>

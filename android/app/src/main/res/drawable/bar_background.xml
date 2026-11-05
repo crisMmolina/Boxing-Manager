@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Barra superior negra con su filete dorado abajo (DESIGN.md v4). -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@color/bar_accent" />
+    <item
+        android:bottom="1dp"
+        android:drawable="@color/bar" />
+</layer-list>
