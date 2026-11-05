@@ -1,6 +1,5 @@
 package com.sigebox.central.ui.inicio;
 
-import com.sigebox.central.ui.correction.CorrectionScreen;
 import com.sigebox.central.ui.funcion.FuncionScreen;
 import com.sigebox.central.ui.log.LogScreen;
 import com.sigebox.central.ui.result.ResultStepScreen;
@@ -26,7 +25,6 @@ public final class Nav {
     public static final List<StepsBar.Item> LINKS = List.of(
             new StepsBar.Item(InicioScreen.ID, "Inicio"),
             new StepsBar.Item(TerminationScreen.ID, "Terminación"),
-            new StepsBar.Item(CorrectionScreen.ID, "Corrección"),
             new StepsBar.Item(LogScreen.ID, "Bitácora"));
 
     private Nav() {

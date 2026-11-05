@@ -10,12 +10,10 @@ import com.sigebox.central.export.ExportService;
 import com.sigebox.central.server.JudgeHub;
 import com.sigebox.central.server.SeatTokens;
 import com.sigebox.central.server.ServerEvents;
-import com.sigebox.central.service.CorrectionService;
 import com.sigebox.central.service.FightService;
 import com.sigebox.central.service.ResultService;
 import com.sigebox.central.service.RoundService;
 import com.sigebox.central.service.TerminationService;
-import com.sigebox.central.ui.correction.CorrectionScreen;
 import com.sigebox.central.ui.log.LogQuery;
 import com.sigebox.central.ui.log.LogScreen;
 import com.sigebox.central.ui.result.ResultScreen;
@@ -110,11 +108,9 @@ class ScreenshotHarness {
             capture(out, "02-pelea-" + suffix, "setup",
                     s -> new SetupScreen(fights, setupHub, 8765, () -> { }).register(s, "setup", "Pelea"));
             capture(out, "03-en-vivo-" + suffix, RoundsScreen.ID,
-                    s -> RoundsScreen.register(s, RoundService.forHub(liveDb, liveHub), () -> f, () -> { }, () -> { }));
+                    s -> RoundsScreen.register(s, RoundService.forHub(liveDb, liveHub), () -> f, () -> { }));
             capture(out, "04-terminacion-" + suffix, TerminationScreen.ID,
                     s -> TerminationScreen.register(s, TerminationService.forHub(liveDb, liveHub), () -> f));
-            capture(out, "05-correccion-" + suffix, CorrectionScreen.ID,
-                    s -> CorrectionScreen.register(s, new CorrectionService(liveDb, System::currentTimeMillis), () -> f));
             capture(out, "06-bitacora-" + suffix, LogScreen.ID, s -> LogScreen.register(s, new LogQuery(liveDb)));
             capture(out, "07-cerrar-pelea-" + suffix, ResultStepScreen.ID,
                     s -> ResultStepScreen.register(s, ResultService.forHub(doneDb, doneHub), new ExportService(), () -> f));
