@@ -6,7 +6,7 @@
 - Why: pedido de cris vía la sesión líder
 - Failing: ninguna
 - Commands: bash .uak/bin/q central/gradlew -p central test
-- Next: esperar revisión de SHA 2a8f835 (uak wait DSK-030 --for approve) y luego merge con la herramienta MCP uak_merge
+- Next: Integrated in main: 536be3ef319a608cc70235365892fad7fe967f25 (recorded by zoe-1)
 
 ## History
 - 1793775763 | CLAIMED | crismmolina-1 | claim; next: prueba de que `RoundsScreen` no tiene el botón de resumen parcial
@@ -17,3 +17,4 @@
 - 1793776356 | REVIEW | crismmolina-1 | checkpoint; next: esperar aprobación y uak_merge
 - 1793776427 | REVIEW | crismmolina-1 | checkpoint; next: esperar revisión de SHA 2a8f835 (uak wait DSK-030 --for approve) y luego merge con la herramienta MCP uak_merge
 - 1793854801 | REVIEW | zoe-1 | review; approve; SHA 2a8f8352c6e958e0855464c787afc2ec885041ad; reviewer zoe-1
+- 1793855398 | INTEGRATED | zoe-1 | integrate; recorded by zoe-1; PR https://github.com/crisMmolina/Boxing-Manager/pull/94; merged 536be3ef319a608cc70235365892fad7fe967f25; proof ancestry
