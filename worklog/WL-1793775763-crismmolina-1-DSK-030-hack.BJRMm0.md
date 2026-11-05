@@ -16,3 +16,4 @@
 - 1793776349 | REVIEW | crismmolina-1 | done; PR https://github.com/crisMmolina/Boxing-Manager/pull/94; evidence: central/gradlew -p central test --rerun: 199 pruebas, 0 fallas; smoke exit 0; RoundsScreenTest, OldCorrectedCardsTest, NavTest; reviewer: -
 - 1793776356 | REVIEW | crismmolina-1 | checkpoint; next: esperar aprobación y uak_merge
 - 1793776427 | REVIEW | crismmolina-1 | checkpoint; next: esperar revisión de SHA 2a8f835 (uak wait DSK-030 --for approve) y luego merge con la herramienta MCP uak_merge
+- 1793854801 | REVIEW | zoe-1 | review; approve; SHA 2a8f8352c6e958e0855464c787afc2ec885041ad; reviewer zoe-1
