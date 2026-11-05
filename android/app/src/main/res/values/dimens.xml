@@ -26,4 +26,9 @@
     <dimen name="card_elevation">2dp</dimen>
     <dimen name="score_number">128sp</dimen>
     <dimen name="fingerprint">40sp</dimen>
+    <!-- §5.6 Esqueleto de carga. -->
+    <dimen name="skeleton_line">12dp</dimen>
+    <dimen name="skeleton_line_radius">6dp</dimen>
+    <dimen name="skeleton_dot">12dp</dimen>
+    <dimen name="skeleton_card_height">196dp</dimen>
 </resources>

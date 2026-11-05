@@ -70,4 +70,6 @@
     <string name="error_round_not_open">El round ya estaba cerrado y no se registró: si la mesa la necesita, te la pedirá como round tardío.</string>
     <string name="error_fight_not_active">La pelea ya no está en curso: espera las indicaciones de la mesa.</string>
     <string name="error_already_final">Tu tarjeta final ya se envió: ya no se puede corregir.</string>
+    <string name="skeleton_loading">Cargando</string>
+    <string name="skeleton_slow">Esto está tardando más de lo normal.</string>
 </resources>

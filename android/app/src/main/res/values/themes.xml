@@ -228,4 +228,18 @@
     <style name="Text.Sigebox.Brand.Bar">
         <item name="android:textColor">@color/bar_accent</item>
     </style>
+
+    <style name="Widget.Sigebox.SkeletonDot" parent="">
+        <item name="android:layout_width">@dimen/skeleton_dot</item>
+        <item name="android:layout_height">@dimen/skeleton_dot</item>
+        <item name="android:layout_marginEnd">8dp</item>
+        <item name="android:background">@drawable/skeleton_dot</item>
+    </style>
+
+    <style name="Widget.Sigebox.SkeletonCard" parent="">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/skeleton_card_height</item>
+        <item name="android:layout_marginTop">16dp</item>
+        <item name="android:background">@drawable/skeleton_card</item>
+    </style>
 </resources>
