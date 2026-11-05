@@ -67,6 +67,7 @@ final class DescuentosPanel {
     private final VBox list = new VBox(4);
     private final VBox card;
 
+    private String fight;
     private int rounds;
     private int current;
     private boolean open;
@@ -93,6 +94,8 @@ final class DescuentosPanel {
     void clear() {
         open = false;
         shown = null;
+        fight = null;
+        status.setText("");
         list.getChildren().clear();
         setButtons();
     }
@@ -103,6 +106,10 @@ final class DescuentosPanel {
         if (f == null) {
             clear();
             return;
+        }
+        if (!f.equals(fight)) {
+            fight = f;
+            status.setText("");
         }
         this.rounds = rounds;
         this.current = current;
@@ -143,7 +150,11 @@ final class DescuentosPanel {
         } catch (RuntimeException ex) {
             status.setText(ex.getMessage());
         }
-        refresh(rounds, current);
+        try {
+            refresh(rounds, current);
+        } catch (RuntimeException ex) {
+            status.setText(ex.getMessage());
+        }
     }
 
     private void fillList(List<Descuento> descuentos) {

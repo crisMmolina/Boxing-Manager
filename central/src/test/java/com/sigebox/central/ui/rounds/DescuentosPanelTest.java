@@ -17,6 +17,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -237,5 +238,50 @@ class DescuentosPanelTest {
             assertFalse(SCORE.matcher(t).find(), t);
             assertFalse(RESULT.matcher(t).find(), t);
         }
+    }
+
+    @Test
+    void elErrorNoPasaALaSiguientePelea() throws Exception {
+        var fight = new AtomicReference<>(F);
+        var panel = panelConError(fight);
+
+        fight.set("pelea-2");
+        FxTest.onFx(() -> {
+            panel.refresh(3, 1);
+            return null;
+        });
+
+        assertFalse(FxTest.onFx(() -> texts(panel.node())).contains("la pelea ya terminó"));
+    }
+
+    @Test
+    void elErrorSeBorraSiYaNoHayPelea() throws Exception {
+        var fight = new AtomicReference<>(F);
+        var panel = panelConError(fight);
+
+        fight.set(null);
+        FxTest.onFx(() -> {
+            panel.refresh(3, 1);
+            return null;
+        });
+
+        assertFalse(FxTest.onFx(() -> texts(panel.node())).contains("la pelea ya terminó"));
+    }
+
+    /** Panel abierto cuyo último intento falló porque la pelea terminó mientras seguía en pantalla. */
+    private DescuentosPanel panelConError(AtomicReference<String> fight) throws Exception {
+        var panel = FxTest.onFx(() -> new DescuentosPanel(service, fight::get, ask));
+        FxTest.onFx(() -> {
+            panel.refresh(3, 2);
+            return null;
+        });
+        round = Optional.of(1);
+        pelea(EstadoPelea.TERMINADA);
+        FxTest.onFx(() -> {
+            button(panel.node(), DescuentosPanel.ROJA_ID).fire();
+            return null;
+        });
+        assertTrue(FxTest.onFx(() -> texts(panel.node())).contains("la pelea ya terminó"));
+        return panel;
     }
 }
