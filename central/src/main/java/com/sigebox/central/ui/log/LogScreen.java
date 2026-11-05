@@ -80,7 +80,8 @@ public final class LogScreen {
         table.getColumns().add(column("Hora", e -> TIME.format(Instant.ofEpochMilli(e.horaMs()))));
         table.getColumns().add(column("Pelea", e -> e.peleaId() == null ? LogQuery.GLOBAL : e.peleaId()));
         table.getColumns().add(column("Tipo", e -> Labels.evento(e.tipo())));
-        table.getColumns().add(column("Detalle", e -> Labels.mensaje(e.tipo(), e.detalle())));
+        table.getColumns().add(column("Detalle",
+                e -> Labels.mensaje(e.tipo(), e.detalle()).replace("función ", "evento ")));
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
         VBox.setVgrow(table, Priority.ALWAYS);
         var slot = new VBox(Skeleton.lines(3));
@@ -91,7 +92,8 @@ public final class LogScreen {
         filters.setAlignment(javafx.geometry.Pos.BOTTOM_LEFT);
         var card = Ui.card(filters, slot);
         VBox.setVgrow(card, Priority.ALWAYS);
-        var root = new VBox(16, Ui.screenTitle("Bitácora"), card);
+        var root = new VBox(16, Ui.screenTitle("Bitácora"),
+                Ui.next("Filtra por pelea o tipo para revisar lo ocurrido."), card);
 
         var filter = new AtomicReference<>(new Filter(null, null));
         var live = LiveRefresh.watch(root, reads, () -> {

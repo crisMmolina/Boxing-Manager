@@ -1,6 +1,7 @@
 package com.sigebox.central.ui.termination;
 
 import com.sigebox.central.service.TerminationService;
+import com.sigebox.central.ui.Labels;
 import com.sigebox.central.ui.LiveRefresh;
 import com.sigebox.central.ui.Screens;
 import com.sigebox.central.ui.theme.Skeleton;
@@ -10,6 +11,7 @@ import com.sigebox.core.model.MotivoTerminacion;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Executor;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
@@ -24,7 +26,7 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
-import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 /** Formulario de terminación extraordinaria con doble confirmación (aviso + escribir TERMINAR). */
@@ -33,6 +35,7 @@ public final class TerminationScreen {
     public static final String ID = "terminacion";
 
     static final String NO_FIGHT = "No hay pelea en curso.";
+    private static final String START_FIRST = "Inicia una pelea para poder terminarla.";
 
     private TerminationScreen() {
     }
@@ -53,14 +56,14 @@ public final class TerminationScreen {
 
     static Node build(TerminationService service, Supplier<String> fightId, Executor reads) {
         var motivo = new ComboBox<>(FXCollections.observableArrayList(MotivoTerminacion.values()));
-        motivo.setCellFactory(l -> new MotivoCell());
-        motivo.setButtonCell(new MotivoCell());
+        motivo.setCellFactory(l -> new NameCell<>(TerminationService::label));
+        motivo.setButtonCell(new NameCell<>(TerminationService::label));
         var otro = new TextField();
-        otro.setPromptText("Razón (obligatoria con Otro)");
         var esquina = new ComboBox<>(FXCollections.observableArrayList(Esquina.values()));
+        esquina.setCellFactory(l -> new NameCell<>(Labels::of));
+        esquina.setButtonCell(new NameCell<>(Labels::of));
         var round = new Spinner<Integer>(1, 12, 1);
         var tiempo = new TextField();
-        tiempo.setPromptText("m:ss");
         var obs = new TextArea();
         obs.setPrefRowCount(3);
         var status = Ui.support("");
@@ -72,6 +75,7 @@ public final class TerminationScreen {
 
         var terminar = Ui.primary("Terminar pelea");
         terminar.setDisable(true); // hasta saber si hay pelea
+        var why = Ui.why(START_FIRST, terminar);
         terminar.setOnAction(e -> {
             var f = fightId.get();
             if (f == null || motivo.getValue() == null) {
@@ -93,29 +97,28 @@ public final class TerminationScreen {
                     service.terminate(f, input, text);
                     status.setText("Pelea terminada");
                     terminar.setDisable(true);
+                    why.setText("La pelea ya terminó.");
                 } catch (RuntimeException ex) {
                     status.setText(ex.getMessage());
                 }
             });
         });
 
-        var form = new GridPane();
-        form.getStyleClass().add("form");
-        form.setHgap(12);
-        form.setVgap(10);
-        form.addRow(0, Ui.support("Motivo"), motivo);
-        form.addRow(1, Ui.support("Razón"), otro);
-        form.addRow(2, Ui.support("Esquina ganadora"), esquina);
-        form.addRow(3, Ui.support("Round"), round);
-        form.addRow(4, Ui.support("Tiempo"), tiempo);
-        form.addRow(5, Ui.support("Observaciones"), obs);
-        var card = Ui.card(Ui.cardTitle("Datos de la terminación"), form, terminar);
+        var card = Ui.card(Ui.cardTitle("Datos de la terminación"), Ui.field("Motivo", motivo),
+                Ui.field("Razón (obligatoria con Otro)", "Ej. Decisión del médico", otro),
+                Ui.field("Esquina ganadora", esquina),
+                new HBox(12, Ui.field("Round", round), Ui.field("Tiempo", "Ej. 1:30", tiempo)),
+                Ui.field("Observaciones", "Ej. Corte en la ceja", obs), terminar, why);
         card.setMaxWidth(720);
         var fightState = new VBox(Skeleton.lines(1));
-        var root = new VBox(16, Ui.screenTitle("Terminación extraordinaria"), fightState, card, status);
+        var next = Ui.next("Inicia una pelea desde Evento.");
+        var root = new VBox(16, Ui.screenTitle("Terminación extraordinaria"), next, fightState, card, status);
         // Solo se refresca el estado de la pelea: lo que se lleva escrito en el formulario no se toca.
         LiveRefresh.watch(root, reads, () -> Optional.ofNullable(fightId.get()), fight -> {
             terminar.setDisable(fight.isEmpty());
+            why.setText(START_FIRST);
+            Ui.next(next, fight.isPresent() ? "Usa esta pantalla solo si la pelea no puede seguir."
+                    : "Inicia una pelea desde Evento.");
             if (fight.isPresent()) {
                 status.setText("");
             }
@@ -124,11 +127,18 @@ public final class TerminationScreen {
         return root;
     }
 
-    private static final class MotivoCell extends ListCell<MotivoTerminacion> {
+    /** Muestra el nombre visible de un valor, nunca su código. */
+    private static final class NameCell<T> extends ListCell<T> {
+        private final Function<T, String> name;
+
+        NameCell(Function<T, String> name) {
+            this.name = name;
+        }
+
         @Override
-        protected void updateItem(MotivoTerminacion item, boolean empty) {
+        protected void updateItem(T item, boolean empty) {
             super.updateItem(item, empty);
-            setText(empty || item == null ? null : TerminationService.label(item));
+            setText(empty || item == null ? null : name.apply(item));
         }
     }
 }

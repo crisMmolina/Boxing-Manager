@@ -199,6 +199,13 @@
     -fx-wrap-text: false;
 }
 
+/* Spec 003: qué hacer ahora, en cada pantalla */
+.next-step {
+    -fx-font-size: 15px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -sg-ink;
+}
+
 /* §5.4 Etiqueta arriba del campo: siempre visible */
 .field-label {
     -fx-font-size: 14px;
