@@ -1,5 +1,5 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- docs/DESIGN.md v3: Material 3 Expressive, claro «cantera» y oscuro «noche de arena» según el sistema.
+    <!-- docs/DESIGN.md v4: Material 3 Expressive, claro y oscuro según el sistema.
          Inter para el texto y Barlow Condensed recta para números y títulos. Colores solo de colors.xml. -->
     <style name="Base.Theme.Sigebox" parent="Theme.Material3Expressive.DayNight.NoActionBar">
         <item name="colorPrimary">@color/primary</item>
@@ -96,17 +96,43 @@
         <item name="contentPadding">20dp</item>
     </style>
 
-    <style name="Widget.Sigebox.TextInput" parent="Widget.Material3.TextInputLayout.FilledBox">
+    <!-- §5.4 Campo: etiqueta afuera, ejemplo adentro, borde de 1dp que el foco sube a 2dp. -->
+    <style name="Widget.Sigebox.TextInput" parent="Widget.Material3.TextInputLayout.OutlinedBox">
         <item name="boxCornerRadiusTopStart">@dimen/field_radius</item>
         <item name="boxCornerRadiusTopEnd">@dimen/field_radius</item>
         <item name="boxCornerRadiusBottomStart">@dimen/field_radius</item>
         <item name="boxCornerRadiusBottomEnd">@dimen/field_radius</item>
-        <item name="boxBackgroundColor">@color/surface_2</item>
-        <item name="boxStrokeWidth">0dp</item>
-        <!-- Anillo de foco en dorado (§5). -->
+        <item name="boxBackgroundColor">@color/surface</item>
+        <item name="boxStrokeWidth">1dp</item>
         <item name="boxStrokeWidthFocused">@dimen/focus_ring</item>
         <item name="boxStrokeColor">@color/accent</item>
-        <item name="hintTextColor">@color/ink_2</item>
+        <item name="expandedHintEnabled">false</item>
+        <item name="placeholderTextColor">@color/ink_2</item>
+    </style>
+
+    <style name="Widget.Sigebox.FieldEdit" parent="Widget.Material3.TextInputEditText.OutlinedBox">
+        <item name="android:fontFamily">@font/inter_regular</item>
+        <item name="android:minHeight">@dimen/field_height</item>
+        <item name="android:paddingTop">14dp</item>
+        <item name="android:paddingBottom">14dp</item>
+        <item name="android:textColor">@color/ink</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="Widget.Sigebox.FieldEdit.Code">
+        <item name="android:fontFamily">@font/barlow_condensed_extrabold</item>
+        <item name="android:paddingTop">10dp</item>
+        <item name="android:paddingBottom">10dp</item>
+        <item name="android:textSize">24sp</item>
+    </style>
+
+    <!-- Lleva el anillo de foco exterior; el margen negativo alinea el campo con su etiqueta. -->
+    <style name="Widget.Sigebox.FieldFrame" parent="">
+        <item name="android:addStatesFromChildren">true</item>
+        <item name="android:background">@drawable/field_focus_ring</item>
+        <item name="android:layout_marginStart">@dimen/field_ring_space_neg</item>
+        <item name="android:layout_marginEnd">@dimen/field_ring_space_neg</item>
+        <item name="android:padding">@dimen/field_ring_space</item>
     </style>
 
     <style name="Widget.Sigebox.CheckBox" parent="Widget.Material3.CompoundButton.CheckBox">
@@ -183,5 +209,37 @@
         <item name="android:textSize">24sp</item>
         <item name="android:textColor">@color/ink</item>
         <item name="android:letterSpacing">0.05</item>
+    </style>
+
+    <!-- 6dp hasta el borde del campo: 2dp de margen más los 4dp del anillo. -->
+    <style name="Text.Sigebox.FieldLabel" parent="">
+        <item name="android:fontFamily">@font/inter_semibold</item>
+        <item name="android:layout_marginTop">12dp</item>
+        <item name="android:layout_marginBottom">2dp</item>
+        <item name="android:textColor">@color/ink</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="Text.Sigebox.FieldCode" parent="">
+        <item name="android:fontFamily">@font/barlow_condensed_extrabold</item>
+        <item name="android:textSize">24sp</item>
+    </style>
+
+    <style name="Text.Sigebox.Brand.Bar">
+        <item name="android:textColor">@color/bar_accent</item>
+    </style>
+
+    <style name="Widget.Sigebox.SkeletonDot" parent="">
+        <item name="android:layout_width">@dimen/skeleton_dot</item>
+        <item name="android:layout_height">@dimen/skeleton_dot</item>
+        <item name="android:layout_marginEnd">8dp</item>
+        <item name="android:background">@drawable/skeleton_dot</item>
+    </style>
+
+    <style name="Widget.Sigebox.SkeletonCard" parent="">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/skeleton_card_height</item>
+        <item name="android:layout_marginTop">16dp</item>
+        <item name="android:background">@drawable/skeleton_card</item>
     </style>
 </resources>

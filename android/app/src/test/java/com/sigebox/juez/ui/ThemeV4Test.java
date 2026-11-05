@@ -21,28 +21,35 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
-/** DESIGN.md v3 §3.1: los tokens del código son los de la guía, en claro y en oscuro, y cada pantalla infla con el tema. */
+/** DESIGN.md v4 §3.1: los tokens del código son los de la guía, en claro y en oscuro, y cada pantalla infla con el tema. */
 @RunWith(RobolectricTestRunner.class)
 @Config(sdk = 36)
-public class ThemeV3Test {
+public class ThemeV4Test {
 
     private static final int[] LAYOUTS = {
         R.layout.activity_main, R.layout.activity_terms, R.layout.activity_join, R.layout.activity_scan,
         R.layout.activity_waiting, R.layout.activity_score, R.layout.activity_late_score,
-        R.layout.activity_final_card, R.layout.view_confirm_sheet, R.layout.view_corner_card,
+        R.layout.view_confirm_sheet, R.layout.view_corner_card,
         R.layout.view_top_bar, R.layout.view_top_bar_brand,
     };
 
     private static Map<Integer, String> light() {
         Map<Integer, String> t = new LinkedHashMap<>();
-        t.put(R.color.bg, "#F7F4EF");
+        t.put(R.color.bg, "#FAF9F6");
         t.put(R.color.surface, "#FFFFFF");
-        t.put(R.color.surface_2, "#EFEAE2");
-        t.put(R.color.ink, "#1C1A17");
-        t.put(R.color.ink_2, "#55585A");
-        t.put(R.color.primary, "#1C1A17");
+        t.put(R.color.surface_2, "#F2F0EB");
+        t.put(R.color.line, "#E3DFD7");
+        t.put(R.color.ink, "#111110");
+        t.put(R.color.ink_2, "#57534C");
+        t.put(R.color.field_border, "#8C877D");
+        t.put(R.color.primary, "#111110");
         t.put(R.color.on_primary, "#FFFFFF");
         t.put(R.color.accent, "#7A5A2A");
+        t.put(R.color.accent_soft, "#F3E7CF");
+        t.put(R.color.bar, "#111110");
+        t.put(R.color.on_bar, "#F7F5F0");
+        t.put(R.color.on_bar_2, "#B9B3A8");
+        t.put(R.color.bar_accent, "#C9A35E");
         t.put(R.color.red, "#9F2241");
         t.put(R.color.on_red, "#FFFFFF");
         t.put(R.color.red_numeral, "#9F2241");
@@ -50,30 +57,43 @@ public class ThemeV3Test {
         t.put(R.color.on_blue, "#FFFFFF");
         t.put(R.color.blue_numeral, "#266CB4");
         t.put(R.color.connected, "#027A35");
-        t.put(R.color.disconnected, "#55585A");
-        t.put(R.color.line, "#D9D2C7");
+        t.put(R.color.disconnected, "#57534C");
+        t.put(R.color.skeleton, "#E9E6DF");
+        t.put(R.color.logo_negro, "#000000");
+        t.put(R.color.logo_rojo, "#FF1800");
+        t.put(R.color.logo_claro, "#FFF7F9");
         return t;
     }
 
     private static Map<Integer, String> dark() {
         Map<Integer, String> t = new LinkedHashMap<>();
-        t.put(R.color.bg, "#14120F");
-        t.put(R.color.surface, "#1F1C18");
-        t.put(R.color.surface_2, "#2A2621");
-        t.put(R.color.ink, "#F3EFE8");
-        t.put(R.color.ink_2, "#B8B1A6");
-        t.put(R.color.primary, "#F3EFE8");
-        t.put(R.color.on_primary, "#1C1A17");
-        t.put(R.color.accent, "#BC955C");
+        t.put(R.color.bg, "#0E0E0C");
+        t.put(R.color.surface, "#1A1917");
+        t.put(R.color.surface_2, "#24221F");
+        t.put(R.color.line, "#34312C");
+        t.put(R.color.ink, "#F5F3EE");
+        t.put(R.color.ink_2, "#B9B3A8");
+        t.put(R.color.field_border, "#7D776D");
+        t.put(R.color.primary, "#D4AF5A");
+        t.put(R.color.on_primary, "#111110");
+        t.put(R.color.accent, "#D4AF5A");
+        t.put(R.color.accent_soft, "#3A3020");
+        t.put(R.color.bar, "#0E0E0C");
+        t.put(R.color.on_bar, "#F5F3EE");
+        t.put(R.color.on_bar_2, "#B9B3A8");
+        t.put(R.color.bar_accent, "#D4AF5A");
         t.put(R.color.red, "#E58A9D");
-        t.put(R.color.on_red, "#1C1A17");
+        t.put(R.color.on_red, "#111110");
         t.put(R.color.red_numeral, "#E58A9D");
         t.put(R.color.blue, "#8CB8EE");
-        t.put(R.color.on_blue, "#1C1A17");
+        t.put(R.color.on_blue, "#111110");
         t.put(R.color.blue_numeral, "#8CB8EE");
         t.put(R.color.connected, "#4CC97A");
-        t.put(R.color.disconnected, "#B8B1A6");
-        t.put(R.color.line, "#3A352E");
+        t.put(R.color.disconnected, "#B9B3A8");
+        t.put(R.color.skeleton, "#36332E");
+        t.put(R.color.logo_negro, "#000000");
+        t.put(R.color.logo_rojo, "#FF1800");
+        t.put(R.color.logo_claro, "#FFF7F9");
         return t;
     }
 
@@ -96,24 +116,24 @@ public class ThemeV3Test {
     }
 
     @Test
-    public void tokensClaroCantera() {
+    public void tokensClaro() {
         assertTokens(light());
     }
 
     @Test
     @Config(qualifiers = "+night")
-    public void tokensOscuroNocheDeArena() {
+    public void tokensOscuro() {
         assertTokens(dark());
     }
 
     @Test
-    public void cadaPantallaInflaConElTemaV3EnClaro() {
+    public void cadaPantallaInflaConElTemaV4EnClaro() {
         assertAllInflate();
     }
 
     @Test
     @Config(qualifiers = "+night")
-    public void cadaPantallaInflaConElTemaV3EnOscuro() {
+    public void cadaPantallaInflaConElTemaV4EnOscuro() {
         assertAllInflate();
     }
 }

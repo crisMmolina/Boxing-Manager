@@ -44,12 +44,12 @@ public final class TopBar {
         circle.setShape(GradientDrawable.OVAL);
         int stroke = Math.round(2 * ctx.getResources().getDisplayMetrics().density);
         if (connected) {
-            circle.setStroke(stroke, ContextCompat.getColor(ctx, R.color.ink));
-            help.setTextColor(ContextCompat.getColor(ctx, R.color.ink));
+            circle.setStroke(stroke, ContextCompat.getColor(ctx, R.color.on_bar));
+            help.setTextColor(ContextCompat.getColor(ctx, R.color.on_bar));
         } else {
-            circle.setColor(ContextCompat.getColor(ctx, R.color.accent));
-            circle.setStroke(stroke, ContextCompat.getColor(ctx, R.color.accent));
-            help.setTextColor(ContextCompat.getColor(ctx, R.color.on_primary));
+            circle.setColor(ContextCompat.getColor(ctx, R.color.bar_accent));
+            circle.setStroke(stroke, ContextCompat.getColor(ctx, R.color.bar_accent));
+            help.setTextColor(ContextCompat.getColor(ctx, R.color.bar));
         }
         help.setBackground(circle);
         help.setOnClickListener(v -> ConnectionHelp.show(v.getContext(), connected));

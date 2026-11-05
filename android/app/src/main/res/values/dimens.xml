@@ -2,9 +2,17 @@
 <!-- docs/DESIGN.md v3 §3.3 (rejilla de 4) y §5. -->
 <resources>
     <dimen name="screen_margin">20dp</dimen>
+    <!-- La barra superior cruza el margen de la pantalla hasta los bordes. -->
+    <dimen name="screen_margin_neg">-20dp</dimen>
+    <dimen name="bar_height">56dp</dimen>
     <dimen name="card_radius">28dp</dimen>
     <dimen name="sheet_radius">32dp</dimen>
-    <dimen name="field_radius">16dp</dimen>
+    <dimen name="field_radius">12dp</dimen>
+    <dimen name="field_height">52dp</dimen>
+    <!-- Anillo de foco: 2dp de aire y 2dp de trazo por fuera del campo. -->
+    <dimen name="field_ring_space">4dp</dimen>
+    <dimen name="field_ring_space_neg">-4dp</dimen>
+    <dimen name="field_ring_radius">16dp</dimen>
     <dimen name="gap">16dp</dimen>
     <dimen name="gap_small">8dp</dimen>
     <dimen name="round_button">76dp</dimen>
@@ -18,4 +26,9 @@
     <dimen name="card_elevation">2dp</dimen>
     <dimen name="score_number">128sp</dimen>
     <dimen name="fingerprint">40sp</dimen>
+    <!-- §5.6 Esqueleto de carga. -->
+    <dimen name="skeleton_line">12dp</dimen>
+    <dimen name="skeleton_line_radius">6dp</dimen>
+    <dimen name="skeleton_dot">12dp</dimen>
+    <dimen name="skeleton_card_height">196dp</dimen>
 </resources>
