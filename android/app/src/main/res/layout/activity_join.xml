@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Unirse (DESIGN.md v2 §6.2): escanear el QR del lugar o escribir el código; nombre del juez y "Unirme". -->
+<!-- Unirse (DESIGN.md v4 §6.2): escanear el QR del lugar o escribir el código; nombre del juez y "Unirme". -->
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/join_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -37,6 +38,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:clipChildren="false"
                 android:orientation="vertical">
 
                 <!-- Escanear QR es la acción principal (spec 004); el QR llena la IP y el código. -->
@@ -55,58 +57,94 @@
                     android:gravity="center"
                     android:text="@string/join_or_code" />
 
-                <com.google.android.material.textfield.TextInputLayout
+                <TextView
+                    style="@style/Text.Sigebox.FieldLabel"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:hint="@string/join_name_hint">
+                    android:labelFor="@+id/join_name"
+                    android:text="@string/join_name_label" />
 
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/join_name"
+                <FrameLayout
+                    style="@style/Widget.Sigebox.FieldFrame"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:importantForAutofill="no"
-                        android:inputType="textPersonName|textCapWords"
-                        android:maxLength="80"
-                        android:minHeight="56dp"
-                        android:textSize="17sp" />
-                </com.google.android.material.textfield.TextInputLayout>
+                        app:hintEnabled="false"
+                        app:placeholderText="@string/join_name_example">
 
-                <com.google.android.material.textfield.TextInputLayout
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@id/join_name"
+                            style="@style/Widget.Sigebox.FieldEdit"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:importantForAutofill="no"
+                            android:inputType="textPersonName|textCapWords"
+                            android:maxLength="80" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                </FrameLayout>
+
+                <TextView
+                    style="@style/Text.Sigebox.FieldLabel"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:hint="@string/join_code_hint">
+                    android:labelFor="@+id/join_code"
+                    android:text="@string/join_code_label" />
 
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/join_code"
+                <FrameLayout
+                    style="@style/Widget.Sigebox.FieldFrame"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:digits="0123456789"
-                        android:gravity="center"
-                        android:importantForAutofill="no"
-                        android:inputType="number"
-                        android:maxLength="6"
-                        android:minHeight="56dp"
-                        android:textSize="24sp" />
-                </com.google.android.material.textfield.TextInputLayout>
+                        app:hintEnabled="false"
+                        app:placeholderTextAppearance="@style/Text.Sigebox.FieldCode"
+                        app:placeholderText="@string/join_code_example">
 
-                <com.google.android.material.textfield.TextInputLayout
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@id/join_code"
+                            style="@style/Widget.Sigebox.FieldEdit.Code"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:digits="0123456789"
+                            android:importantForAutofill="no"
+                            android:inputType="number"
+                            android:maxLength="6" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                </FrameLayout>
+
+                <TextView
+                    style="@style/Text.Sigebox.FieldLabel"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:hint="@string/join_manual_host_hint">
+                    android:labelFor="@+id/join_host"
+                    android:text="@string/join_host_label" />
 
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/join_host"
+                <FrameLayout
+                    style="@style/Widget.Sigebox.FieldFrame"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:digits="0123456789.:abcdefABCDEF[]"
-                        android:importantForAutofill="no"
-                        android:inputType="text"
-                        android:minHeight="56dp"
-                        android:textSize="17sp" />
-                </com.google.android.material.textfield.TextInputLayout>
+                        app:hintEnabled="false"
+                        app:placeholderText="@string/join_host_example">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@id/join_host"
+                            style="@style/Widget.Sigebox.FieldEdit"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:digits="0123456789.:abcdefABCDEF[]"
+                            android:importantForAutofill="no"
+                            android:inputType="text" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                </FrameLayout>
 
                 <!-- Solo con un QR de la forma anterior (pelea y lugar ya vienen en él). -->
                 <TextView

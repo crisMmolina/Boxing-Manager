@@ -11,10 +11,12 @@
     <string name="terms_accept">Aceptar y continuar</string>
 
     <string name="join_title">Unirme a la pelea</string>
-    <string name="join_name_hint">Tu nombre</string>
+    <string name="join_name_label">Nombre</string>
+    <string name="join_name_example">María López</string>
     <string name="join_seat">Lugar: Juez %1$d · Pelea %2$s</string>
     <string name="join_scan">Escanear QR</string>
-    <string name="join_manual_host_hint">IP de la central (ej. 192.168.43.10)</string>
+    <string name="join_host_label">IP de la central</string>
+    <string name="join_host_example">192.168.43.1</string>
     <string name="join_submit">Unirme</string>
     <string name="join_not_sigebox">Este código no es de SIGEBOX</string>
 
@@ -24,7 +26,8 @@
     <string name="join_error_fight">Escribe la pelea que muestra la central</string>
     <string name="join_error_seat">El lugar va de 1 a 5</string>
     <string name="join_error_code">El código tiene 6 dígitos</string>
-    <string name="join_code_hint">Código de tu lugar (6 dígitos)</string>
+    <string name="join_code_label">Código</string>
+    <string name="join_code_example">123456</string>
     <string name="join_code_unknown">Ese código no es válido. Pídele a la mesa el código de tu lugar.</string>
     <string name="join_looking">Buscando tu lugar…</string>
     <string name="join_lookup_timeout">No encontramos la central. Revisa la IP y que estés en el mismo Wi‑Fi.</string>
@@ -45,6 +48,6 @@
     <string name="join_rejected_seat_taken">No fuiste aprobado: ese lugar ya está ocupado</string>
     <string name="join_rejected_bad_signature">No fuiste aprobado: la central no reconoció este teléfono</string>
     <string name="join_subtitle">Escanea el QR de tu lugar en la pantalla de la mesa.</string>
-    <string name="join_or_code">o escribe tus datos</string>
+    <string name="join_or_code">o escribe los datos</string>
     <string name="join_wifi_note">Primero conéctate al Wi‑Fi de la función.</string>
 </resources>
