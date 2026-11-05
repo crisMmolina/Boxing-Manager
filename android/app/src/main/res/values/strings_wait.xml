@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Entre peleas y fin del evento (AND-019, spec 004). -->
+<resources>
+    <string name="next_fight_title">Espera la siguiente pelea</string>
+    <string name="next_fight_corners">%1$s vs %2$s</string>
+    <string name="next_fight_support">La central la abrirá cuando esté lista.</string>
+    <string name="next_fight_event_ended">El evento terminó</string>
+    <string name="next_fight_event_ended_support">Tus calificaciones ya llegaron a la central.</string>
+    <string name="next_fight_back_to_join">Volver a Unirse</string>
+</resources>

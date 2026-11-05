@@ -10,6 +10,9 @@ import com.sigebox.juez.data.Clock;
 import com.sigebox.juez.data.Outbox;
 import com.sigebox.juez.data.SessionStore;
 import com.sigebox.juez.data.SigeboxDatabase;
+import com.sigebox.juez.finalcard.AutoFinalCard;
+import com.sigebox.juez.wait.FightEndFlow;
+import com.sigebox.juez.wait.NextFightActivity;
 
 import java.util.concurrent.TimeUnit;
 
@@ -32,13 +35,19 @@ public final class JudgeRuntime {
     private final NetworkBinder networkBinder;
 
     private JudgeRuntime(Context app) {
-        database = SigeboxDatabase.create(app);
+        this(app, SigeboxDatabase.create(app), new KeystoreSigner());
+    }
+
+    /** Las pruebas pasan base en memoria y llave de software: Robolectric no tiene AndroidKeyStore. */
+    JudgeRuntime(Context app, SigeboxDatabase database, DeviceSigner signer) {
+        this.database = database;
         OkHttpClient client = new OkHttpClient.Builder()
                 .connectTimeout(5, TimeUnit.SECONDS)
                 .readTimeout(0, TimeUnit.MILLISECONDS)
                 .build();
-        connection = new JudgeConnection(client, new Outbox(database.outboxDao(), Clock.SYSTEM),
-                new SessionStore(database.sessionDao()), new KeystoreSigner(), Clock.SYSTEM,
+        Outbox outbox = new Outbox(database.outboxDao(), Clock.SYSTEM);
+        SessionStore sessions = new SessionStore(database.sessionDao());
+        connection = new JudgeConnection(client, outbox, sessions, signer, Clock.SYSTEM,
                 new Backoff(500, 5_000), TICK_MS);
         networkBinder = new NetworkBinder(app.getSystemService(ConnectivityManager.class));
         // NEXT_FIGHT lleva al juez a la pantalla de puntuación desde donde esté, sin confirmación (spec 002).
@@ -51,6 +60,10 @@ public final class JudgeRuntime {
                 }
             }
         });
+        // Antes que el cierre de pelea: un ACK primero le avisa a la tarjeta final. Sale sola en cualquier pantalla.
+        AutoFinalCard.install(this);
+        connection.addListener(new FightEndFlow(sessions::load, sessions::clear, outbox::pendingCount,
+                connection::stop, NextFightActivity.screens(app)));
     }
 
     public static JudgeRuntime get(Context context) {
