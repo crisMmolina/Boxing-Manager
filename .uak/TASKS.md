@@ -937,7 +937,7 @@ En Windows (zoe) los comandos `Verify` se corren en Git Bash.
 - **Estimate:** 1 d
 - **Rubric / Spec:** spec 004 §Cierre sin pedir tarjetas, §Resultado · principios 2 y 3
 - **Depends on:** DSK-031, DSK-028, CORE-008
-- **Paths:** central/src/main/java/com/sigebox/central/ui/result/, central/src/main/java/com/sigebox/central/service/ResultService.java, central/src/main/java/com/sigebox/central/service/RoundService.java, central/src/main/java/com/sigebox/central/export/, central/src/test/java/com/sigebox/central/ui/result/, central/src/test/java/com/sigebox/central/service/ResultServiceTest.java, central/src/test/java/com/sigebox/central/service/RoundServiceTest.java, central/src/test/java/com/sigebox/central/export/
+- **Paths:** central/src/main/java/com/sigebox/central/ui/result/, central/src/main/java/com/sigebox/central/service/ResultService.java, central/src/main/java/com/sigebox/central/service/RoundService.java, central/src/main/java/com/sigebox/central/export/, central/src/test/java/com/sigebox/central/ui/result/, central/src/test/java/com/sigebox/central/service/ResultServiceTest.java, central/src/test/java/com/sigebox/central/service/RoundServiceTest.java, central/src/test/java/com/sigebox/central/export/, central/src/main/java/com/sigebox/central/server/JudgeHub.java
 - **Freeze-Allowed:** no
 - **Acceptance:**
   - Cerrar el último round programado deja la pelea terminada sola; no existe "Terminar pelea"; la terminación anticipada sigue igual
