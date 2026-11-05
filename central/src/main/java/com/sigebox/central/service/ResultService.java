@@ -31,8 +31,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * Fin de la pelea: terminar tras el último round, cerrar cuando están todas las tarjetas finales
- * (o hay terminación) y calcular el resultado con {@link ResultCalculator} de {@code core}.
+ * Fin de la pelea: cerrar cuando están todas las tarjetas finales (o hay terminación) y calcular el
+ * resultado con {@link ResultCalculator} de {@code core}, con los descuentos vigentes.
  */
 public final class ResultService {
 
@@ -83,10 +83,14 @@ public final class ResultService {
 
     /**
      * Pelea completa: con todos los rounds cerrados pasa a {@code TERMINADA} y pide a los jueces
-     * su tarjeta final.
+     * su tarjeta final. Lo normal es que {@link RoundService#closeRound} ya lo haya hecho al cerrar
+     * el último round; entonces no hace nada.
      */
     public synchronized void endFight(String fightId) {
         var pelea = pelea(fightId);
+        if (pelea.estado() == EstadoPelea.TERMINADA && endedByLastRound(fightId)) {
+            return;
+        }
         if (pelea.estado() != EstadoPelea.EN_CURSO) {
             throw new IllegalStateException("la pelea no está en curso");
         }
@@ -100,6 +104,11 @@ public final class ResultService {
             return null;
         });
         broadcaster.fightEnded(fightId, null);
+    }
+
+    private boolean endedByLastRound(String fightId) {
+        return log.byPelea(fightId).stream().anyMatch(e -> "FIGHT_ENDED".equals(e.tipo())
+                && RoundService.ENDED_BY_LAST_ROUND.equals(e.detalle()));
     }
 
     /** Lugares que aún no mandan su tarjeta final (vacío si ya están todas). */

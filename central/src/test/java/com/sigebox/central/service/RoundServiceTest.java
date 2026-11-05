@@ -6,11 +6,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.sigebox.central.db.Database;
+import com.sigebox.central.db.DescuentoRepository;
 import com.sigebox.central.db.EventLog;
 import com.sigebox.central.db.LugarJuezRepository;
 import com.sigebox.central.db.PeleaRepository;
 import com.sigebox.central.db.RoundRepository;
 import com.sigebox.central.db.TarjetaRoundRepository;
+import com.sigebox.core.model.Esquina;
 import com.sigebox.core.model.EstadoConexion;
 import com.sigebox.core.model.EstadoPelea;
 import com.sigebox.core.model.EstadoRound;
@@ -223,5 +225,76 @@ class RoundServiceTest {
             service.closeRound(F, n, RoundService.CONFIRM_WORD);
         }
         assertEquals(0, service.currentRound(F));
+    }
+
+    private RoundService endingService(List<String> ended) {
+        return new RoundService(db, new RoundService.Broadcaster() {
+            @Override
+            public void roundOpened(String fightId, int round) {
+            }
+
+            @Override
+            public void roundClosed(String fightId, int round, boolean forced) {
+                ended.add("close " + round);
+            }
+
+            @Override
+            public void fightEnded(String fightId) {
+                // Persistido antes de difundir.
+                assertEquals(EstadoPelea.TERMINADA, new PeleaRepository(db).find(fightId).orElseThrow().estado());
+                ended.add("ended");
+            }
+        }, () -> 5_000L);
+    }
+
+    @Test
+    void closingTheLastRoundEndsTheFightByItself() {
+        var events = new ArrayList<String>();
+        var ending = endingService(events);
+        var peleas = new PeleaRepository(db);
+        for (int n = 1; n <= 2; n++) {
+            ending.openRound(F, n);
+            ending.closeRound(F, n, RoundService.CONFIRM_WORD);
+            assertEquals(EstadoPelea.EN_CURSO, peleas.find(F).orElseThrow().estado());
+        }
+        assertEquals(List.of("close 1", "close 2"), events);
+
+        ending.openRound(F, 3);
+        card(1, 3, 10, 9, EstadoTarjeta.ENVIADA);
+        card(2, 3, 10, 9, EstadoTarjeta.ENVIADA);
+        ending.closeRound(F, 3, null);
+
+        assertEquals(EstadoPelea.TERMINADA, peleas.find(F).orElseThrow().estado());
+        assertEquals(List.of("close 1", "close 2", "close 3", "ended"), events);
+        assertEquals(1, logTypes().stream().filter("FIGHT_ENDED"::equals).count());
+    }
+
+    @Test
+    void forcedCloseOfTheLastRoundAlsoEndsTheFight() {
+        var events = new ArrayList<String>();
+        var ending = endingService(events);
+        for (int n = 1; n <= 3; n++) {
+            ending.openRound(F, n);
+            ending.closeRound(F, n, RoundService.CONFIRM_WORD);
+        }
+
+        assertEquals(EstadoPelea.TERMINADA, new PeleaRepository(db).find(F).orElseThrow().estado());
+        assertTrue(logTypes().contains("ROUND_CLOSED_FORCED"));
+        assertTrue(events.contains("ended"));
+    }
+
+    @Test
+    void partialSummarySubtractsTheStandingDiscounts() {
+        service.openRound(F, 1);
+        card(1, 1, 10, 9, EstadoTarjeta.ENVIADA);
+        card(2, 1, 10, 8, EstadoTarjeta.ENVIADA);
+        service.closeRound(F, 1, null);
+        var descuentos = new DescuentoRepository(db);
+        descuentos.save(F, 1, Esquina.ROJA, 1L);
+        descuentos.anular(descuentos.save(F, 1, Esquina.AZUL, 1L), "error", 2L);
+
+        assertEquals(List.of(
+                new RoundService.PartialTotal(1, "Ana", 9, 9),
+                new RoundService.PartialTotal(2, "María López", 9, 8)), service.partialSummary(F, true));
     }
 }
