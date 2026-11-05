@@ -1,10 +1,15 @@
 package com.sigebox.central.ui.termination;
 
 import com.sigebox.central.service.TerminationService;
+import com.sigebox.central.ui.LiveRefresh;
 import com.sigebox.central.ui.Screens;
+import com.sigebox.central.ui.theme.Skeleton;
 import com.sigebox.central.ui.theme.Ui;
 import com.sigebox.core.model.Esquina;
 import com.sigebox.core.model.MotivoTerminacion;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
@@ -27,14 +32,26 @@ public final class TerminationScreen {
 
     public static final String ID = "terminacion";
 
+    static final String NO_FIGHT = "No hay pelea en curso.";
+
     private TerminationScreen() {
     }
 
     public static void register(Screens<Node> screens, TerminationService service, Supplier<String> fightId) {
-        screens.register(ID, "Terminación", () -> build(service, fightId));
+        register(screens, service, fightId, LiveRefresh.BACKGROUND);
+    }
+
+    /** Como {@link #register(Screens, TerminationService, Supplier)}, con las lecturas en {@code reads}. */
+    public static void register(Screens<Node> screens, TerminationService service, Supplier<String> fightId,
+            Executor reads) {
+        screens.register(ID, "Terminación", () -> build(service, fightId, reads));
     }
 
     static Node build(TerminationService service, Supplier<String> fightId) {
+        return build(service, fightId, LiveRefresh.DIRECT);
+    }
+
+    static Node build(TerminationService service, Supplier<String> fightId, Executor reads) {
         var motivo = new ComboBox<>(FXCollections.observableArrayList(MotivoTerminacion.values()));
         motivo.setCellFactory(l -> new MotivoCell());
         motivo.setButtonCell(new MotivoCell());
@@ -54,6 +71,7 @@ public final class TerminationScreen {
         });
 
         var terminar = Ui.primary("Terminar pelea");
+        terminar.setDisable(true); // hasta saber si hay pelea
         terminar.setOnAction(e -> {
             var f = fightId.get();
             if (f == null || motivo.getValue() == null) {
@@ -93,7 +111,16 @@ public final class TerminationScreen {
         form.addRow(5, Ui.support("Observaciones"), obs);
         var card = Ui.card(Ui.cardTitle("Datos de la terminación"), form, terminar);
         card.setMaxWidth(720);
-        var root = new VBox(16, Ui.screenTitle("Terminación extraordinaria"), card, status);
+        var fightState = new VBox(Skeleton.lines(1));
+        var root = new VBox(16, Ui.screenTitle("Terminación extraordinaria"), fightState, card, status);
+        // Solo se refresca el estado de la pelea: lo que se lleva escrito en el formulario no se toca.
+        LiveRefresh.watch(root, reads, () -> Optional.ofNullable(fightId.get()), fight -> {
+            terminar.setDisable(fight.isEmpty());
+            if (fight.isPresent()) {
+                status.setText("");
+            }
+            LiveRefresh.swap(fightState, fight.isPresent() ? List.of() : List.of(Ui.support(NO_FIGHT)));
+        });
         return root;
     }
 

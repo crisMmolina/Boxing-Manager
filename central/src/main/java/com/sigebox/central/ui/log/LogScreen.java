@@ -1,14 +1,19 @@
 package com.sigebox.central.ui.log;
 
 import com.sigebox.central.ui.Labels;
+import com.sigebox.central.ui.LiveRefresh;
 import com.sigebox.central.ui.Screens;
+import com.sigebox.central.ui.theme.Skeleton;
 import com.sigebox.central.ui.theme.Ui;
 import com.sigebox.core.model.EventoBitacora;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicReference;
 import javafx.beans.property.ReadOnlyStringWrapper;
-import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
@@ -21,7 +26,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.util.StringConverter;
 
-/** Vista de bitácora filtrable por pelea y tipo. */
+/** Vista de bitácora filtrable por pelea y tipo; los eventos nuevos aparecen solos. */
 public final class LogScreen {
 
     public static final String ID = "bitacora";
@@ -30,16 +35,36 @@ public final class LogScreen {
     private static final DateTimeFormatter TIME =
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault());
 
+    /** Filtros elegidos; {@code null} es "Todos". */
+    private record Filter(String fight, String type) {
+    }
+
+    private record Snapshot(Filter filter, List<EventoBitacora> rows, List<String> fights, List<String> types) {
+    }
+
     private LogScreen() {
     }
 
     public static void register(Screens<Node> screens, LogQuery query) {
-        screens.register(ID, "Bitácora", () -> build(query));
+        register(screens, query, LiveRefresh.BACKGROUND);
+    }
+
+    /** Como {@link #register(Screens, LogQuery)}, con las lecturas en {@code reads}. */
+    public static void register(Screens<Node> screens, LogQuery query, Executor reads) {
+        screens.register(ID, "Bitácora", () -> build(query, reads));
     }
 
     static Node build(LogQuery query) {
+        return build(query, LiveRefresh.DIRECT);
+    }
+
+    static Node build(LogQuery query, Executor reads) {
         var fight = new ComboBox<String>();
         var type = new ComboBox<String>();
+        fight.getItems().add(ALL);
+        type.getItems().add(ALL);
+        fight.setValue(ALL);
+        type.setValue(ALL);
         type.setConverter(new StringConverter<>() { // muestra la etiqueta; el valor sigue siendo el código
             @Override
             public String toString(String code) {
@@ -58,44 +83,72 @@ public final class LogScreen {
         table.getColumns().add(column("Detalle", e -> Labels.mensaje(e.tipo(), e.detalle())));
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
         VBox.setVgrow(table, Priority.ALWAYS);
+        var slot = new VBox(Skeleton.lines(3));
+        VBox.setVgrow(slot, Priority.ALWAYS);
         var count = Ui.support("");
 
-        Runnable load = () -> {
-            var f = fight.getValue();
-            var t = type.getValue();
-            var rows = query.find(f == null || ALL.equals(f) ? null : f, t == null || ALL.equals(t) ? null : t,
-                    LogQuery.DEFAULT_LIMIT);
-            table.setItems(FXCollections.observableArrayList(rows));
-            count.setText(rows.size() + " eventos" + (rows.size() == LogQuery.DEFAULT_LIMIT ? " (los más recientes)" : ""));
-        };
-        Runnable reloadFilters = () -> {
-            var fights = FXCollections.observableArrayList(ALL);
-            fights.addAll(query.fights());
-            var types = FXCollections.observableArrayList(ALL);
-            types.addAll(query.types());
-            var f = fight.getValue();
-            var t = type.getValue();
-            fight.setItems(fights);
-            type.setItems(types);
-            fight.setValue(f != null && fights.contains(f) ? f : ALL);
-            type.setValue(t != null && types.contains(t) ? t : ALL);
-        };
-        fight.setOnAction(e -> load.run());
-        type.setOnAction(e -> load.run());
-        var refresh = Ui.secondary("Actualizar");
-        refresh.setOnAction(e -> {
-            reloadFilters.run();
-            load.run();
-        });
-        reloadFilters.run();
-        load.run();
-
-        var filters = new HBox(12, Ui.field("Pelea", fight), Ui.field("Tipo", type), refresh, count);
+        var filters = new HBox(12, Ui.field("Pelea", fight), Ui.field("Tipo", type), count);
         filters.setAlignment(javafx.geometry.Pos.BOTTOM_LEFT);
-        var card = Ui.card(filters, table);
+        var card = Ui.card(filters, slot);
         VBox.setVgrow(card, Priority.ALWAYS);
         var root = new VBox(16, Ui.screenTitle("Bitácora"), card);
+
+        var filter = new AtomicReference<>(new Filter(null, null));
+        var live = LiveRefresh.watch(root, reads, () -> {
+            var f = filter.get();
+            return new Snapshot(f, query.find(f.fight(), f.type(), LogQuery.DEFAULT_LIMIT), query.fights(), query.types());
+        }, s -> {
+            sync(fight, s.fights());
+            sync(type, s.types());
+            show(table, s.rows());
+            count.setText(s.rows().size() + " eventos"
+                    + (s.rows().size() == LogQuery.DEFAULT_LIMIT ? " (los más recientes)" : ""));
+            LiveRefresh.swap(slot, List.of(table));
+        });
+        Runnable choose = () -> {
+            filter.set(new Filter(chosen(fight), chosen(type)));
+            live.poke();
+        };
+        fight.setOnAction(e -> choose.run());
+        type.setOnAction(e -> choose.run());
         return root;
+    }
+
+    private static String chosen(ComboBox<String> box) {
+        var value = box.getValue();
+        return value == null || ALL.equals(value) ? null : value;
+    }
+
+    /** Actualiza las opciones sin cambiar la lista: un filtro abierto sigue abierto y conserva lo elegido. */
+    private static void sync(ComboBox<String> box, List<String> options) {
+        var next = new ArrayList<>(List.of(ALL));
+        next.addAll(options);
+        var items = box.getItems();
+        if (items.equals(next)) {
+            return;
+        }
+        var value = box.getValue();
+        items.retainAll(next);
+        for (int i = 0; i < next.size(); i++) {
+            if (!items.contains(next.get(i))) {
+                items.add(i, next.get(i));
+            }
+        }
+        if (value == null || !next.contains(value)) {
+            box.setValue(ALL);
+        }
+    }
+
+    /** Cambia las filas solo si son otras y conserva la seleccionada. */
+    private static void show(TableView<EventoBitacora> table, List<EventoBitacora> rows) {
+        if (table.getItems().equals(rows)) {
+            return;
+        }
+        var selected = table.getSelectionModel().getSelectedItem();
+        table.getItems().setAll(rows);
+        if (selected != null && rows.contains(selected)) {
+            table.getSelectionModel().select(selected);
+        }
     }
 
     /** Etiqueta del filtro de tipo: "Todos" o la etiqueta en español del código guardado. */

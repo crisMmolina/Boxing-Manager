@@ -1,10 +1,15 @@
 package com.sigebox.central.ui.inicio;
 
 import com.sigebox.central.service.FuncionService;
+import com.sigebox.central.ui.LiveRefresh;
 import com.sigebox.central.ui.Screens;
 import com.sigebox.central.ui.funcion.FuncionScreen;
 import com.sigebox.central.ui.rounds.RoundsScreen;
+import com.sigebox.central.ui.theme.Skeleton;
 import com.sigebox.central.ui.theme.Ui;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -57,11 +62,18 @@ public final class InicioScreen {
     private final InicioQuery query;
     private final Consumer<String> onOpen;
     private final Runnable onNuevo;
+    private final Executor reads;
 
     public InicioScreen(InicioQuery query, Consumer<String> onOpen, Runnable onNuevo) {
+        this(query, onOpen, onNuevo, LiveRefresh.DIRECT);
+    }
+
+    /** Con las lecturas en {@code reads}: mientras no llegan, la lista muestra su skeleton. */
+    public InicioScreen(InicioQuery query, Consumer<String> onOpen, Runnable onNuevo, Executor reads) {
         this.query = query;
         this.onOpen = onOpen;
         this.onNuevo = onNuevo;
+        this.reads = reads;
     }
 
     /**
@@ -71,11 +83,11 @@ public final class InicioScreen {
     public static Routes register(Screens<Node> screens, InicioQuery query, FuncionService funciones,
             Consumer<String> go) {
         var routes = new Routes(query, go);
-        var inicio = new InicioScreen(query, routes::open, routes::nuevo);
+        var inicio = new InicioScreen(query, routes::open, routes::nuevo, LiveRefresh.BACKGROUND);
         screens.register(ID, "Inicio", inicio::build);
         var nuevo = new NuevoEventoScreen(funciones, id -> go.accept(FuncionScreen.ID));
         screens.register(NuevoEventoScreen.ID, "Nuevo evento", nuevo::build);
-        var cartelera = new CarteleraScreen(funciones, routes::selected);
+        var cartelera = new CarteleraScreen(funciones, routes::selected, LiveRefresh.BACKGROUND);
         screens.register(CarteleraScreen.ID, "Cartelera", cartelera::build);
         return routes;
     }
@@ -85,18 +97,22 @@ public final class InicioScreen {
         nuevo.setOnAction(e -> onNuevo.run());
         var head = new HBox(16, Ui.screenTitle("Eventos"), Ui.grow(), nuevo);
         head.setAlignment(Pos.CENTER_LEFT);
-        var list = new VBox(8);
-        var eventos = query.eventos();
-        if (eventos.isEmpty()) {
-            list.getChildren().add(Ui.card(Ui.body("Aún no hay eventos."),
-                    Ui.support("Crea el primero con \"Nuevo evento\".")));
-        }
-        for (var ev : eventos) {
-            list.getChildren().add(row(ev));
-        }
+        var list = new VBox(8, Skeleton.lines(3));
         var root = new VBox(24, head, list);
         root.setMaxWidth(900);
+        LiveRefresh.watch(root, reads, query::eventos, eventos -> LiveRefresh.swap(list, rows(eventos)));
         return root;
+    }
+
+    private List<Node> rows(List<InicioQuery.Evento> eventos) {
+        var out = new ArrayList<Node>();
+        if (eventos.isEmpty()) {
+            out.add(Ui.card(Ui.body("Aún no hay eventos."), Ui.support("Crea el primero con \"Nuevo evento\".")));
+        }
+        for (var ev : eventos) {
+            out.add(row(ev));
+        }
+        return out;
     }
 
     private Button row(InicioQuery.Evento ev) {

@@ -6,14 +6,15 @@ import com.google.zxing.WriterException;
 import com.google.zxing.qrcode.QRCodeWriter;
 import com.sigebox.central.server.JudgeHub;
 import com.sigebox.central.service.FightService;
+import com.sigebox.central.ui.LiveRefresh;
 import com.sigebox.central.ui.Screens;
+import com.sigebox.central.ui.theme.Skeleton;
 import com.sigebox.central.ui.theme.Ui;
-import java.util.HashMap;
+import com.sigebox.core.model.Pelea;
 import java.util.List;
 import java.util.Map;
-import javafx.animation.Animation;
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
 import javafx.collections.FXCollections;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -29,7 +30,6 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import javafx.util.Duration;
 
 /**
  * Preparar la pelea y emparejar a los jueces (DESIGN v3 §7.1): formulario de la pelea a la
@@ -49,14 +49,28 @@ public final class SetupScreen {
     private final JudgeHub hub;
     private final int port;
     private final Runnable onStart;
-    private final Map<String, FightService.Invitation> invitations = new HashMap<>();
-    private String host;
+    private final Executor reads;
+    /** Se escriben en el hilo de JavaFX y se leen en la lectura de fondo. */
+    private final Map<String, FightService.Invitation> invitations = new ConcurrentHashMap<>();
+    private volatile String host;
+
+    /** Lo que la pantalla dibuja; con otro valor se redibuja, con el mismo no se pierde el foco. */
+    private record Snapshot(Pelea pelea, List<Integer> connected, List<FightService.Seat> seats,
+            List<FightService.Invitation> invitations, String host) {
+        static final Snapshot NO_FIGHT = new Snapshot(null, List.of(), List.of(), List.of(), null);
+    }
 
     public SetupScreen(FightService fights, JudgeHub hub, int port, Runnable onStart) {
+        this(fights, hub, port, onStart, LiveRefresh.BACKGROUND);
+    }
+
+    /** Con las lecturas en {@code reads}: mientras no llegan, la pantalla muestra su skeleton. */
+    public SetupScreen(FightService fights, JudgeHub hub, int port, Runnable onStart, Executor reads) {
         this.fights = fights;
         this.hub = hub;
         this.port = port;
         this.onStart = onStart;
+        this.reads = reads;
     }
 
     /** Registra la pantalla bajo {@code id} (los pasos "Pelea" y "Jueces" pueden compartirla). */
@@ -66,51 +80,39 @@ public final class SetupScreen {
 
     Node build() {
         var status = Ui.support("");
-        var left = new VBox(16);
+        var left = new VBox(16, Skeleton.lines(3));
         left.setPrefWidth(340);
         left.setMinWidth(340);
-        var seats = new FlowPane(16, 16);
+        var seats = new FlowPane(16, 16, Skeleton.block(240, 200));
         seats.setPrefWrapLength(780); // sin esto el FlowPane pide una sola columna muy alta
         HBox.setHgrow(seats, Priority.ALWAYS);
         var footer = new HBox(16);
         footer.setAlignment(Pos.CENTER_LEFT);
         var root = new VBox(16, Ui.screenTitle("Emparejar jueces"), new HBox(24, left, seats), footer, status);
 
-        String[] signature = {""};
-        Runnable refresh = () -> {
-            var active = fights.active();
-            if (active.isEmpty()) {
-                if (!"form".equals(signature[0])) {
-                    left.getChildren().setAll(form(status));
-                    seats.getChildren().setAll(Ui.support("Crea la pelea para ver el código de cada lugar."));
-                    footer.getChildren().clear();
-                    signature[0] = "form";
-                }
+        LiveRefresh.watch(root, reads, this::read, s -> {
+            if (s.pelea() == null) {
+                LiveRefresh.swap(left, List.of(form(status)));
+                LiveRefresh.swap(seats, List.of(Ui.support("Crea la pelea para ver el código de cada lugar.")));
+                footer.getChildren().clear();
                 return;
             }
-            var pelea = active.get();
-            var connected = hub.connectedSeats(pelea.id());
-            var list = fights.seats(pelea.id(), connected);
-            var sig = pelea.id() + list + invitations.values() + host;
-            if (sig.equals(signature[0])) {
-                return; // sin cambios: no se redibuja (no se pierde el foco)
-            }
-            signature[0] = sig;
-            left.getChildren().setAll(summary(pelea));
-            seats.getChildren().setAll(list.stream().map(s -> seatCard(pelea.id(), s, status)).toList());
-            footer.getChildren().setAll(footer(pelea.id(), connected));
-        };
-
-        var timer = new Timeline(new KeyFrame(Duration.seconds(1), e -> refresh.run()));
-        timer.setCycleCount(Animation.INDEFINITE);
-        timer.play();
-        root.sceneProperty().addListener((obs, old, scene) -> {
-            if (scene == null) {
-                timer.stop();
-            }
+            var id = s.pelea().id();
+            LiveRefresh.swap(left, List.of(summary(s.pelea())));
+            LiveRefresh.swap(seats, s.seats().stream().map(seat -> seatCard(id, seat, status)).toList());
+            footer.getChildren().setAll(footer(id, s.connected()));
         });
-        refresh.run();
         return root;
+    }
+
+    private Snapshot read() {
+        var active = fights.active();
+        if (active.isEmpty()) {
+            return Snapshot.NO_FIGHT;
+        }
+        var id = active.get().id();
+        var connected = hub.connectedSeats(id);
+        return new Snapshot(active.get(), connected, fights.seats(id, connected), List.copyOf(invitations.values()), host);
     }
 
     private Node form(Label status) {
