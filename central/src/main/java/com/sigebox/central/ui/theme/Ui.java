@@ -20,6 +20,9 @@ import javafx.util.Duration;
 /** Componentes de DESIGN v4 §5 para JavaFX. Solo aplican clases de {@code app.css}. */
 public final class Ui {
 
+    /** Clave, en las propiedades de un botón, de la etiqueta que dice por qué está deshabilitado. */
+    public static final String WHY = "why";
+
     private Ui() {
     }
 
@@ -71,6 +74,34 @@ public final class Ui {
     public static VBox field(String label, String example, TextInputControl control) {
         control.setPromptText(example);
         return field(label, control);
+    }
+
+    /** La línea "Qué sigue" de una pantalla (spec 003 §Sin capacitación). */
+    public static Label next(String text) {
+        var l = label("", "next-step");
+        l.setWrapText(true);
+        next(l, text);
+        return l;
+    }
+
+    /** Cambia lo que dice la línea "Qué sigue". */
+    public static void next(Label line, String text) {
+        line.setText("Qué sigue: " + text);
+    }
+
+    /**
+     * Por qué {@code buttons} están deshabilitados: se ve solo mientras lo están (un tooltip no sirve,
+     * un nodo deshabilitado no lo muestra). Cada botón la guarda en sus propiedades bajo {@link #WHY}.
+     */
+    public static Label why(String text, Button... buttons) {
+        var l = support(text);
+        l.getStyleClass().add("why");
+        l.visibleProperty().bind(buttons[0].disableProperty());
+        l.managedProperty().bind(l.visibleProperty());
+        for (var b : buttons) {
+            b.getProperties().put(WHY, l);
+        }
+        return l;
     }
 
     public static Button primary(String text) {

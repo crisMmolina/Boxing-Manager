@@ -83,7 +83,8 @@ final class DescuentosPanel {
         azul.setOnAction(e -> poner(Esquina.AZUL));
         var buttons = new HBox(8, roja, azul);
         buttons.setAlignment(Pos.CENTER_LEFT);
-        card = Ui.card(Ui.cardTitle("Descuentos"), buttons, status, list);
+        var why = Ui.why("Los descuentos se aplican con la pelea en curso.", roja, azul);
+        card = Ui.card(Ui.cardTitle("Descuentos"), buttons, why, status, list);
     }
 
     Node node() {

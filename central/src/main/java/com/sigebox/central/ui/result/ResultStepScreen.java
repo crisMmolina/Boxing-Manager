@@ -61,7 +61,8 @@ public final class ResultStepScreen {
         var status = Ui.support("");
         var card = Ui.card();
         card.setMaxWidth(860);
-        var root = new VBox(16, Ui.screenTitle("Resultado"), card, status);
+        var nextLine = Ui.next("Ve a Evento para ver cómo va.");
+        var root = new VBox(16, Ui.screenTitle("Resultado"), nextLine, card, status);
 
         // Solo se reconstruye si cambió lo que se ve: así el botón sigue pulsable entre lecturas.
         String[] shown = new String[1];
@@ -75,11 +76,13 @@ public final class ResultStepScreen {
                 }
                 card.getChildren().clear();
                 if (following.isPresent()) {
+                    Ui.next(nextLine, "Inicia la siguiente pelea.");
                     card.getChildren().addAll(nextFight(following.get(), startNext, status));
                     return;
                 }
+                Ui.next(nextLine, "Ve a Evento para ver cómo va.");
                 card.getChildren().addAll(Ui.cardTitle("Sin pelea activa"),
-                        Ui.support("Cuando cierres una pelea, su resultado aparece aquí."));
+                        Ui.support("El resultado de cada pelea se abre al cerrarla."));
                 return;
             }
             boolean ended = service.ended(f);
@@ -92,6 +95,8 @@ public final class ResultStepScreen {
                 return;
             }
             card.getChildren().clear();
+            Ui.next(nextLine, !ended ? "Termina la pelea en En vivo." : closed ? "Sigue con la siguiente pelea en Evento."
+                    : canClose ? "Cierra la pelea." : "Espera las tarjetas finales de los jueces.");
             if (!ended) {
                 card.getChildren().addAll(Ui.cardTitle("Pelea en curso"),
                         Ui.support("Los puntos aparecen cuando termine la pelea."));
@@ -99,9 +104,6 @@ public final class ResultStepScreen {
             }
             card.getChildren().add(Ui.cardTitle(closed ? "Pelea cerrada"
                     : canClose ? "Listo para cerrar" : "Esperando tarjetas finales"));
-            if (!closed && !canClose) {
-                card.getChildren().add(Ui.support("Aún sin tarjeta final: " + seats(missing) + "."));
-            }
             card.getChildren().add(sheet.<Node>map(ResultTable::of)
                     .orElseGet(() -> Ui.support("Falta la tarjeta de algún round: los puntos aparecen al llegar.")));
             if (closed) {
@@ -120,7 +122,7 @@ public final class ResultStepScreen {
                 }
                 refresh[0].run();
             });
-            card.getChildren().add(close);
+            card.getChildren().addAll(close, Ui.why(canClose ? "" : "Aún sin tarjeta final: " + seats(missing) + ".", close));
         };
         refresh[0].run();
 
@@ -154,7 +156,7 @@ public final class ResultStepScreen {
         return sheet.rows() + " " + sheet.descuentos();
     }
 
-    /** Tarjeta de la siguiente pelea de la función: esquinas, rounds, jueces y el botón que la inicia. */
+    /** Tarjeta de la siguiente pelea del evento: esquinas, rounds, jueces y el botón que la inicia. */
     static List<Node> nextFight(Fila fila, Runnable startNext, Label status) {
         var red = new HBox(8, Ui.cornerDot(true), Ui.body(fila.roja()));
         red.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
@@ -168,7 +170,7 @@ public final class ResultStepScreen {
                 status.setText(ex.getMessage());
             }
         });
-        return List.of(Ui.cardTitle("Pelea " + fila.orden() + " de la función"), red, blue,
+        return List.of(Ui.cardTitle("Pelea " + fila.orden() + " del evento"), red, blue,
                 Ui.support(FuncionView.detalle(fila.rounds(), fila.jueces())
                         + ". Los jueces conectados pasan solos; solo los lugares nuevos usan QR."), start);
     }

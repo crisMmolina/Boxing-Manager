@@ -3,6 +3,7 @@ package com.sigebox.central.ui.rounds;
 import com.sigebox.central.service.DescuentoService;
 import com.sigebox.central.service.RoundService;
 import com.sigebox.central.ui.Screens;
+import com.sigebox.central.ui.help.HelpButton;
 import com.sigebox.central.ui.theme.Ui;
 import com.sigebox.core.model.EstadoRound;
 import java.util.function.Supplier;
@@ -37,6 +38,7 @@ public final class RoundsScreen {
 
     /** Id del botón principal (abrir, cerrar o "Cerrar pelea"), para {@link #firePrimary}. */
     public static final String PRIMARY_ID = "round-primary";
+    private static final String NO_FIGHT = "Inicia una pelea desde Evento.";
 
     private static final Duration REFRESH = Duration.millis(500);
 
@@ -96,13 +98,20 @@ public final class RoundsScreen {
         var status = Ui.support("");
         var hero = Ui.card(roundTitle, pill, sent);
         hero.getStyleClass().add("hero");
-        var actions = Ui.card(Ui.cardTitle("Acciones"), action, status);
+        var next = Ui.next(NO_FIGHT);
+        var why = Ui.why("Inicia una pelea desde Evento para abrir rounds.", action);
+        var actions = Ui.card(Ui.cardTitle("Acciones"), action, why, status);
         var panel = descuentos == null ? null : new DescuentosPanel(descuentos, fightId, ask);
+        // Solo se redibuja con otro dato: el refresco no debe quitar el botón de ayuda bajo el cursor.
+        var drawn = new RoundService.Live[1];
 
         Runnable refresh = () -> {
             var f = fightId.get();
             if (f == null) {
                 title.setText("Sin pelea activa");
+                drawn[0] = null;
+                Ui.next(next, NO_FIGHT);
+                action.setText("Abrir round");
                 grid.getChildren().clear();
                 action.setDisable(true);
                 if (panel != null) {
@@ -111,8 +120,11 @@ public final class RoundsScreen {
                 return;
             }
             var live = service.live(f);
-            fillGrid(grid, live);
-            fillControl(live, roundTitle, pill, sent, action);
+            if (!live.equals(drawn[0])) {
+                drawn[0] = live;
+                fillGrid(grid, live);
+                fillControl(live, roundTitle, pill, sent, action, next);
+            }
             if (panel != null) {
                 panel.refresh(live.rounds(), live.current());
             }
@@ -156,7 +168,7 @@ public final class RoundsScreen {
         refresh.run();
 
         var body = panel == null ? bento(hero, actions, cards) : bento(hero, actions, cards, panel.node());
-        var root = new VBox(20, title, body);
+        var root = new VBox(20, title, next, body);
         root.getStyleClass().add("screen");
         root.setPadding(new Insets(24));
         // Detener el refresco cuando la pantalla deja de estar en la escena.
@@ -213,7 +225,7 @@ public final class RoundsScreen {
             var who = "Juez " + j.seat();
             var head = new HBox(6, Ui.dot(j.connected(), who), Ui.body(j.name() == null ? who : who + " · " + j.name()));
             head.setAlignment(Pos.CENTER);
-            grid.add(head, col++, 0);
+            grid.add(j.connected() ? head : new VBox(4, head, HelpButton.connection(false, who)), col++, 0);
         }
 
         int line = 1;
@@ -253,13 +265,15 @@ public final class RoundsScreen {
         return box;
     }
 
-    private static void fillControl(RoundService.Live live, Label title, Label pill, Label sent, Button action) {
+    private static void fillControl(RoundService.Live live, Label title, Label pill, Label sent, Button action,
+            Label next) {
         int n = live.current();
         if (n == 0) {
             title.setText("Rounds terminados");
             pill.setText("Todos cerrados");
             sent.setText("");
             action.setText("Cerrar pelea");
+            Ui.next(next, "Cierra la pelea para ver el resultado.");
             action.setDisable(false);
             return;
         }
@@ -269,10 +283,12 @@ public final class RoundsScreen {
             pill.setText("Round abierto");
             sent.setText("Enviaron " + live.sent(n) + " de " + live.judges().size() + " jueces");
             action.setText("Cerrar round " + n);
+            Ui.next(next, "Espera las tarjetas y cierra el round " + n + ".");
         } else {
             pill.setText("Por abrir");
             sent.setText("");
             action.setText("Abrir round " + n);
+            Ui.next(next, "Abre el round " + n + ".");
         }
         action.setDisable(false);
     }

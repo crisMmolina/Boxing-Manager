@@ -51,7 +51,8 @@ public final class FuncionScreen {
     Node build() {
         var status = Ui.support("");
         var body = new VBox(16);
-        var root = new VBox(16, Ui.screenTitle("Evento"), body, status);
+        var next = Ui.next("Crea el evento.");
+        var root = new VBox(16, Ui.screenTitle("Evento"), next, body, status);
 
         String[] signature = {null};
         Runnable[] draw = new Runnable[1];
@@ -71,6 +72,7 @@ public final class FuncionScreen {
                 return; // sin cambios: no se redibuja (no se pierde el foco)
             }
             signature[0] = sig;
+            Ui.next(next, nextStep(id, rows));
             body.getChildren().setAll(id == null ? create(status, refresh) : show(id, rows, status, refresh, synced));
         };
 
@@ -166,7 +168,7 @@ public final class FuncionScreen {
                 return "";
             }));
             var up = Ui.secondary("Subir");
-            up.setDisable(r.orden() == 1);
+            up.setVisible(r.orden() > 1); // la primera no puede subir; el hueco mantiene las columnas
             up.setOnAction(e -> act(status, refresh, () -> {
                 service.mover(id, r.orden(), r.orden() - 1);
                 return "";
@@ -250,9 +252,7 @@ public final class FuncionScreen {
 
     private Node add(String id, Label status, Runnable refresh) {
         var red = new TextField();
-        red.setPromptText("Ej. Ana Pérez");
         var blue = new TextField();
-        blue.setPromptText("Ej. Bea Ruiz");
         var add = Ui.secondary("Agregar pelea");
         Runnable go = () -> act(status, refresh, () -> {
             flow.service().agregar(id, new Esquinas(red.getText(), blue.getText()));
@@ -260,19 +260,33 @@ public final class FuncionScreen {
         });
         add.setOnAction(e -> go.run());
         blue.setOnAction(e -> go.run());
-        HBox.setHgrow(red, Priority.ALWAYS);
-        HBox.setHgrow(blue, Priority.ALWAYS);
-        var redBox = new HBox(8, Ui.cornerDot(true), red);
-        redBox.setAlignment(Pos.CENTER_LEFT);
-        var blueBox = new HBox(8, Ui.cornerDot(false), blue);
-        blueBox.setAlignment(Pos.CENTER_LEFT);
-        var redField = Ui.field("Esquina roja", redBox);
-        var blueField = Ui.field("Esquina azul", blueBox);
+        var redField = cornerField(true, "Esquina roja", "Ej. Ana Pérez", red);
+        var blueField = cornerField(false, "Esquina azul", "Ej. Bea Ruiz", blue);
         HBox.setHgrow(redField, Priority.ALWAYS);
         HBox.setHgrow(blueField, Priority.ALWAYS);
         var box = new HBox(12, redField, blueField, add);
         box.setAlignment(Pos.BOTTOM_LEFT);
         return box;
+    }
+
+    /** Campo de una esquina con el punto de su color a la izquierda; la etiqueta queda en el campo mismo. */
+    private static HBox cornerField(boolean isRed, String label, String example, TextField input) {
+        var field = Ui.field(label, example, input);
+        HBox.setHgrow(field, Priority.ALWAYS);
+        var box = new HBox(8, Ui.cornerDot(isRed), field);
+        box.setAlignment(Pos.BOTTOM_LEFT);
+        return box;
+    }
+
+    private static String nextStep(String id, List<Fila> rows) {
+        if (id == null) {
+            return "Crea el evento.";
+        }
+        if (rows.isEmpty()) {
+            return "Agrega la primera pelea.";
+        }
+        return FuncionView.siguiente(rows).isPresent() ? "Revisa las esquinas e inicia la siguiente pelea."
+                : "No quedan peleas por iniciar.";
     }
 
     private Node footer(List<Fila> rows, Label status, Runnable refresh, StringProperty nextText) {

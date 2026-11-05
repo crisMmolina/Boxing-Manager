@@ -98,9 +98,13 @@ public final class InicioScreen {
         var head = new HBox(16, Ui.screenTitle("Eventos"), Ui.grow(), nuevo);
         head.setAlignment(Pos.CENTER_LEFT);
         var list = new VBox(8, Skeleton.lines(3));
-        var root = new VBox(24, head, list);
+        var next = Ui.next("Abre un evento o crea uno nuevo.");
+        var root = new VBox(24, head, next, list);
         root.setMaxWidth(900);
-        LiveRefresh.watch(root, reads, query::eventos, eventos -> LiveRefresh.swap(list, rows(eventos)));
+        LiveRefresh.watch(root, reads, query::eventos, eventos -> {
+            Ui.next(next, eventos.isEmpty() ? "Crea tu primer evento con Nuevo evento." : "Abre un evento o crea uno nuevo.");
+            LiveRefresh.swap(list, rows(eventos));
+        });
         return root;
     }
 

@@ -34,7 +34,7 @@ public final class Labels {
             Map.entry("FIGHT_ENDED", "Pelea terminada"),
             Map.entry("FIGHT_TERMINATED", "Terminación extraordinaria"),
             Map.entry("FINAL_CARD_REJECTED", "Tarjeta final rechazada"),
-            Map.entry("FUNCION_CREADA", "Función creada"),
+            Map.entry("FUNCION_CREADA", "Evento creado"),
             Map.entry("INVITATION_ISSUED", "Invitación emitida"),
             Map.entry("JOIN_APPROVED", "Juez aprobado"),
             Map.entry("JOIN_REJECTED", "Juez rechazado"),

@@ -42,7 +42,7 @@ public final class CarteleraScreen {
     public Node build() {
         var id = selected.get();
         if (id == null) {
-            return new VBox(24, Ui.screenTitle("Cartelera"), Ui.body("Elige un evento en Inicio."));
+            return new VBox(24, Ui.screenTitle("Cartelera"), Ui.next("Elige un evento en Inicio."));
         }
         var root = new VBox(24, Ui.screenTitle("Cartelera"), Skeleton.lines(3));
         root.setMaxWidth(900);
@@ -61,6 +61,7 @@ public final class CarteleraScreen {
             list.getChildren().add(line);
         }
         return List.of(Ui.screenTitle(InicioQuery.nombre(f)),
+                Ui.next("Vuelve a Inicio para abrir otro evento."),
                 Ui.support(InicioQuery.fecha(f.fecha()) + " · " + FuncionView.detalle(f.baseRounds(), f.baseJueces())
                         + ". Evento anterior: solo se consulta."),
                 list);

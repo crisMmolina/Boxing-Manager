@@ -1,13 +1,10 @@
 package com.sigebox.central.ui.setup;
 
-import com.google.zxing.BarcodeFormat;
-import com.google.zxing.EncodeHintType;
-import com.google.zxing.WriterException;
-import com.google.zxing.qrcode.QRCodeWriter;
 import com.sigebox.central.server.JudgeHub;
 import com.sigebox.central.service.FightService;
 import com.sigebox.central.ui.LiveRefresh;
 import com.sigebox.central.ui.Screens;
+import com.sigebox.central.ui.help.HelpButton;
 import com.sigebox.central.ui.theme.Skeleton;
 import com.sigebox.central.ui.theme.Ui;
 import com.sigebox.core.model.Pelea;
@@ -17,6 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import javafx.collections.FXCollections;
 import javafx.geometry.Pos;
+import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
@@ -42,8 +40,6 @@ import javafx.scene.layout.VBox;
 public final class SetupScreen {
 
     public static final String ID = "pelea";
-
-    static final int QR_SIZE = 168;
 
     private final FightService fights;
     private final JudgeHub hub;
@@ -85,24 +81,37 @@ public final class SetupScreen {
         left.setMinWidth(340);
         var seats = new FlowPane(16, 16, Skeleton.block(240, 200));
         seats.setPrefWrapLength(780); // sin esto el FlowPane pide una sola columna muy alta
+        seats.setRowValignment(VPos.TOP); // tarjetas de distinta altura, alineadas arriba
         HBox.setHgrow(seats, Priority.ALWAYS);
         var footer = new HBox(16);
         footer.setAlignment(Pos.CENTER_LEFT);
-        var root = new VBox(16, Ui.screenTitle("Emparejar jueces"), new HBox(24, left, seats), footer, status);
+        var next = Ui.next("Un momento, leyendo la pelea.");
+        var root = new VBox(16, Ui.screenTitle("Emparejar jueces"), next, new HBox(24, left, seats), footer, status);
 
         LiveRefresh.watch(root, reads, this::read, s -> {
             if (s.pelea() == null) {
+                Ui.next(next, "Crea la pelea para emparejar a los jueces.");
                 LiveRefresh.swap(left, List.of(form(status)));
                 LiveRefresh.swap(seats, List.of(Ui.support("Crea la pelea para ver el código de cada lugar.")));
                 footer.getChildren().clear();
                 return;
             }
             var id = s.pelea().id();
+            Ui.next(next, nextStep(s));
             LiveRefresh.swap(left, List.of(summary(s.pelea())));
             LiveRefresh.swap(seats, s.seats().stream().map(seat -> seatCard(id, seat, status)).toList());
             footer.getChildren().setAll(footer(id, s.connected()));
         });
         return root;
+    }
+
+    private String nextStep(Snapshot s) {
+        if (s.seats().stream().anyMatch(seat -> seat.state() == FightService.SeatState.SIN_CONEXION)) {
+            return "Ayuda al juez sin conexión a reconectarse.";
+        }
+        return fights.pendingSeats(s.pelea().id(), s.connected()) > 0
+                ? "Pide a cada juez que escanee su QR y aprueba su huella."
+                : "Inicia la pelea.";
     }
 
     private Snapshot read() {
@@ -117,9 +126,7 @@ public final class SetupScreen {
 
     private Node form(Label status) {
         var red = new TextField();
-        red.setPromptText("Nombre de la esquina roja");
         var blue = new TextField();
-        blue.setPromptText("Nombre de la esquina azul");
         var rounds = new Spinner<Integer>(1, 12, 10);
         var judges = new Spinner<Integer>(1, 5, 3);
         var create = Ui.primary("Crear pelea");
@@ -132,12 +139,8 @@ public final class SetupScreen {
                 status.setText(ex.getMessage());
             }
         });
-        var redRow = new HBox(8, Ui.cornerDot(true), Ui.support("Roja"));
-        redRow.setAlignment(Pos.CENTER_LEFT);
-        var blueRow = new HBox(8, Ui.cornerDot(false), Ui.support("Azul"));
-        blueRow.setAlignment(Pos.CENTER_LEFT);
-        return Ui.card(Ui.cardTitle("Pelea"), new VBox(6, redRow, red), new VBox(6, blueRow, blue),
-                new HBox(12, Ui.field("Rounds", rounds), Ui.field("Jueces", judges)), create);
+        return Ui.card(Ui.cardTitle("Pelea"), Ui.field("Esquina roja", "Ej. Ana Pérez", red),
+                Ui.field("Esquina azul", "Ej. Bea Ruiz", blue), new HBox(12, Ui.field("Rounds", rounds), Ui.field("Jueces", judges)), create);
     }
 
     private Node summary(com.sigebox.core.model.Pelea p) {
@@ -183,7 +186,7 @@ public final class SetupScreen {
                 if (s.state() == FightService.SeatState.RECHAZADO) {
                     card.getChildren().add(Ui.support("Rechazado"));
                 }
-                card.getChildren().addAll(qr(inv.uri()), code, again);
+                card.getChildren().addAll(qr(inv.qrUri()), code, again);
             }
             case ESPERANDO_APROBACION -> {
                 var approve = Ui.primary("Aprobar");
@@ -202,7 +205,7 @@ public final class SetupScreen {
                         Ui.support("Compárala con la que muestra el teléfono del juez."), new VBox(8, approve, reject));
             }
             case CONECTADO -> card.getChildren().add(Ui.body(s.judgeName()));
-            case SIN_CONEXION -> card.getChildren().addAll(Ui.body(s.judgeName()), Ui.support("Reconectando…"));
+            case SIN_CONEXION -> card.getChildren().addAll(Ui.body(s.judgeName()), HelpButton.connection(false, who));
         }
         return card;
     }
@@ -221,10 +224,10 @@ public final class SetupScreen {
         var start = Ui.primary("Iniciar pelea");
         start.setDisable(pending > 0);
         start.setOnAction(e -> onStart.run());
-        var hint = Ui.support(pending == 0 ? "Todos los jueces están conectados."
-                : "Falta que se conecte" + (pending == 1 ? " 1 juez." : "n " + pending + " jueces."));
-        return new HBox(16, Ui.support("Dirección para los jueces"), choose, Ui.support(":" + port), Ui.grow(), hint,
-                start);
+        var why = Ui.why("Falta que se conecte" + (pending == 1 ? " 1 juez." : "n " + pending + " jueces."), start);
+        var address = new HBox(8, Ui.field("Dirección para los jueces", choose), Ui.support(":" + port));
+        address.setAlignment(Pos.BOTTOM_LEFT);
+        return new HBox(16, address, Ui.grow(), why, start);
     }
 
     private String host() {
@@ -245,21 +248,16 @@ public final class SetupScreen {
 
     /** QR de 168 px con margen blanco. */
     static ImageView qr(String text) {
-        try {
-            var matrix = new QRCodeWriter().encode(text, BarcodeFormat.QR_CODE, QR_SIZE, QR_SIZE,
-                    Map.of(EncodeHintType.MARGIN, 1));
-            var img = new WritableImage(matrix.getWidth(), matrix.getHeight());
-            var w = img.getPixelWriter();
-            for (int y = 0; y < matrix.getHeight(); y++) {
-                for (int x = 0; x < matrix.getWidth(); x++) {
-                    w.setArgb(x, y, matrix.get(x, y) ? 0xFF0F172A : 0xFFFFFFFF);
-                }
+        var matrix = QrCode.matrix(text, QrCode.SIZE);
+        var img = new WritableImage(matrix.getWidth(), matrix.getHeight());
+        var w = img.getPixelWriter();
+        for (int y = 0; y < matrix.getHeight(); y++) {
+            for (int x = 0; x < matrix.getWidth(); x++) {
+                w.setArgb(x, y, matrix.get(x, y) ? QrCode.INK : QrCode.PAPER);
             }
-            var view = new ImageView(img);
-            view.setAccessibleText("Código QR para unirse");
-            return view;
-        } catch (WriterException e) {
-            throw new IllegalStateException("no se pudo generar el QR", e);
         }
+        var view = new ImageView(img);
+        view.setAccessibleText("Código QR para unirse");
+        return view;
     }
 }

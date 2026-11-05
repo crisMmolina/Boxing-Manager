@@ -58,7 +58,7 @@ public final class NuevoEventoScreen {
                 Ui.support("Las esquinas se escriben después en la cartelera; cada pelea puede cambiar sus rounds "
                         + "y jueces antes de empezar."),
                 create, status);
-        var root = new VBox(24, Ui.screenTitle("Nuevo evento"), card);
+        var root = new VBox(24, Ui.screenTitle("Nuevo evento"), Ui.next("Escribe los datos y pulsa Crear evento."), card);
         root.setMaxWidth(640);
         return root;
     }
