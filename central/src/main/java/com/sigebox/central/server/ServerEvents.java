@@ -33,5 +33,9 @@ public interface ServerEvents {
     default void onFinalCardRejected(String fightId, int seat) {
     }
 
+    /** Se puso o se anuló un descuento de la pelea. */
+    default void onDescuentoChanged(String fightId) {
+    }
+
     ServerEvents NONE = new ServerEvents() {};
 }

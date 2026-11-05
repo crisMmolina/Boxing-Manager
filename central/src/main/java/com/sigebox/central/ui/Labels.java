@@ -27,6 +27,8 @@ public final class Labels {
             Map.entry("CARD_OVER_CAPTURE", "Tarjeta del juez sobre una captura"),
             Map.entry("CARTELERA_CAMBIADA", "Cartelera cambiada"),
             Map.entry("CONTROL_REJECTED", "Mensaje de control rechazado"),
+            Map.entry("DESCUENTO", "Punto descontado"),
+            Map.entry("DESCUENTO_ANULADO", "Descuento anulado"),
             Map.entry("FIGHT_CLOSED", "Pelea cerrada"),
             Map.entry("FIGHT_CREATED", "Pelea creada"),
             Map.entry("FIGHT_ENDED", "Pelea terminada"),
@@ -158,6 +160,7 @@ public final class Labels {
         Function<String, String> code = switch (tipo == null ? "" : tipo) {
             case "SUBMIT_ROUND" -> t -> lower(enumLabel(EstadoTarjeta.class, t, Labels::of));
             case "FIGHT_TERMINATED" -> t -> enumLabel(MotivoTerminacion.class, t, Labels::of);
+            case "DESCUENTO", "DESCUENTO_ANULADO" -> t -> lower(enumLabel(Esquina.class, t, Labels::of));
             case "FIGHT_CLOSED", "SIGUIENTE_PELEA", "FUNCION_CREADA", "CARTELERA_CAMBIADA", "PELEA_SALTADA" -> null;
             default -> t -> null;
         };
