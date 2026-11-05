@@ -1,5 +1,6 @@
 package com.sigebox.central.ui.rounds;
 
+import com.sigebox.central.service.DescuentoService;
 import com.sigebox.central.service.RoundService;
 import com.sigebox.central.ui.Screens;
 import com.sigebox.central.ui.theme.Ui;
@@ -54,6 +55,12 @@ public final class RoundsScreen {
         screens.register(ID, "En vivo", () -> build(service, fightId, onFinish));
     }
 
+    /** Igual, con la tarjeta de descuentos. */
+    public static void register(Screens<Node> screens, RoundService service, DescuentoService descuentos,
+            Supplier<String> fightId, Runnable onFinish) {
+        screens.register(ID, "En vivo", () -> build(service, descuentos, DescuentosPanel.DIALOGS, fightId, onFinish));
+    }
+
     /** {@code Ctrl+Enter}: pulsa el botón principal del tablero dentro de {@code scope}, si está. */
     public static boolean firePrimary(Node scope) {
         if (scope.lookup("#" + PRIMARY_ID) instanceof Button b && !b.isDisabled()) {
@@ -68,6 +75,11 @@ public final class RoundsScreen {
     }
 
     static Node build(RoundService service, Supplier<String> fightId, Runnable onFinish) {
+        return build(service, null, null, fightId, onFinish);
+    }
+
+    static Node build(RoundService service, DescuentoService descuentos, DescuentosPanel.Ask ask,
+            Supplier<String> fightId, Runnable onFinish) {
         var title = Ui.screenTitle("En vivo");
         var grid = new GridPane();
         grid.setHgap(8);
@@ -85,6 +97,7 @@ public final class RoundsScreen {
         var hero = Ui.card(roundTitle, pill, sent);
         hero.getStyleClass().add("hero");
         var actions = Ui.card(Ui.cardTitle("Acciones"), action, status);
+        var panel = descuentos == null ? null : new DescuentosPanel(descuentos, fightId, ask);
 
         Runnable refresh = () -> {
             var f = fightId.get();
@@ -92,11 +105,17 @@ public final class RoundsScreen {
                 title.setText("Sin pelea activa");
                 grid.getChildren().clear();
                 action.setDisable(true);
+                if (panel != null) {
+                    panel.clear();
+                }
                 return;
             }
             var live = service.live(f);
             fillGrid(grid, live);
             fillControl(live, roundTitle, pill, sent, action);
+            if (panel != null) {
+                panel.refresh(live.rounds(), live.current());
+            }
             title.setText("En vivo");
         };
 
@@ -136,7 +155,7 @@ public final class RoundsScreen {
         timer.play();
         refresh.run();
 
-        var body = bento(hero, actions, cards);
+        var body = panel == null ? bento(hero, actions, cards) : bento(hero, actions, cards, panel.node());
         var root = new VBox(20, title, body);
         root.getStyleClass().add("screen");
         root.setPadding(new Insets(24));
@@ -165,6 +184,15 @@ public final class RoundsScreen {
             GridPane.setFillHeight(n, true);
         }
         bento.setMaxWidth(Double.MAX_VALUE);
+        return bento;
+    }
+
+    /** La misma rejilla con los descuentos debajo de las tarjetas, a todo lo ancho. */
+    static GridPane bento(Node hero, Node actions, Node cards, Node descuentos) {
+        var bento = bento(hero, actions, cards);
+        bento.add(descuentos, 0, 2, 2, 1);
+        GridPane.setFillWidth(descuentos, true);
+        GridPane.setFillHeight(descuentos, true);
         return bento;
     }
 
