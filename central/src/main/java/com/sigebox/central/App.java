@@ -164,7 +164,7 @@ public final class App {
             var current = new String[1];
             screens.onChange(s -> {
                 current[0] = s.id();
-                bar.select(s.id());
+                Nav.apply(bar, s.id()); // spec 005: Inicio sin barra del evento
                 bar.setDisable(TermsScreen.ID.equals(s.id()));
             });
 
