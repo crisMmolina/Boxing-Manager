@@ -1,7 +1,7 @@
 # TASKS · SIGEBOX v1 (spec `docs/specs/001-sigebox/`)
 
 State lives on the `claims` branch (`uak status`); this file holds only tasks.
-Prefijos: CORE (núcleo compartido `core/`), AND (app del juez `android/`, humano cris), DSK (central `central/`, humano zoe), DSN (diseño), QA, DOC. Specs: `docs/specs/001…004`.
+Prefijos: CORE (núcleo compartido `core/`), AND (app del juez `android/`, humano cris), DSK (central `central/`, humano zoe), DSN (diseño), QA, DOC. Specs: `docs/specs/001…005`.
 Cada tarea empieza con una prueba que falla. Contratos en `core/schemas/` y `core/src/main/java/com/sigebox/core/protocol/`.
 En Windows (zoe) los comandos `Verify` se corren en Git Bash.
 
@@ -1223,3 +1223,84 @@ En Windows (zoe) los comandos `Verify` se corren en Git Bash.
   - La suite completa de la central pasa
 - **Verify:** `central/gradlew -p central test`
 - **Next step:** agregar la entrada a `Labels.EVENTOS`
+
+## DSK-035 · Inicio solo con eventos; barra del evento con Bitácora y regreso a Inicio
+
+- **Type:** feature
+- **Priority:** P0
+- **Estimate:** 4 h
+- **Rubric / Spec:** spec 005 §Inicio y navegación
+- **Depends on:** None
+- **Paths:** central/src/main/java/com/sigebox/central/App.java, central/src/main/java/com/sigebox/central/ui/Screens.java, central/src/main/java/com/sigebox/central/ui/inicio/Nav.java, central/src/main/java/com/sigebox/central/ui/inicio/InicioScreen.java, central/src/main/java/com/sigebox/central/ui/theme/StepsBar.java, central/src/test/java/com/sigebox/central/ui/inicio/, central/src/test/java/com/sigebox/central/ui/theme/ComponentsTest.java
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - Inicio muestra solo la lista de eventos, "Nuevo evento", "?" y el cambio de tema; sin barra de pasos ni enlaces del evento (prueba)
+  - Dentro de un evento la barra es Evento · Jueces · En vivo · Resultado · Bitácora, con "Inicio", "?" y tema; "Terminación" ya no está en la barra (prueba)
+  - Volver a Inicio quita la barra; entrar a otro evento muestra ese evento en todas las secciones (prueba)
+  - `NavTest.secondaryLinksAreInicioTerminacionAndBitacora` se reemplaza con `uak decision` (spec 005 §Decisions)
+- **Verify:** `central/gradlew -p central test --tests 'com.sigebox.central.ui.inicio.*' --tests 'com.sigebox.central.ui.theme.*'`
+- **Next step:** prueba de que Inicio no tiene StepsBar
+
+## DSK-036 · En vivo: abrir round solo con los jueces conectados y terminar la pelea ahí mismo
+
+- **Type:** feature
+- **Priority:** P0
+- **Estimate:** 1 d
+- **Rubric / Spec:** spec 005 §En vivo y terminación · principios 1 y 2
+- **Depends on:** DSK-035
+- **Paths:** central/src/main/java/com/sigebox/central/ui/rounds/RoundsScreen.java, central/src/main/java/com/sigebox/central/ui/termination/, central/src/main/java/com/sigebox/central/service/TerminationService.java, central/src/main/java/com/sigebox/central/service/ResultService.java, central/src/main/java/com/sigebox/central/ui/result/ResultStepScreen.java, central/src/test/java/com/sigebox/central/ui/rounds/RoundsScreenTest.java, central/src/test/java/com/sigebox/central/ui/rounds/RoundsGateTest.java, central/src/test/java/com/sigebox/central/ui/termination/, central/src/test/java/com/sigebox/central/service/TerminationServiceTest.java, central/src/test/java/com/sigebox/central/service/TerminationAutoCloseTest.java
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - "Abrir round" desactivado mientras falte conectar un juez; dice cuál falta y "…o baja los jueces en Evento si no va a llegar"; cerrar un round abierto sigue igual (prueba)
+  - "Terminar pelea" en En vivo: el round es el abierto o el último cerrado (sin escribirlo), se pide solo el motivo y se confirma (prueba)
+  - Al confirmar: la pelea queda cerrada con su resultado sin pulsar "Cerrar pelea", los teléfonos reciben `FIGHT_CLOSED` y `NEXT_FIGHT` o `EVENT_ENDED` como en un cierre normal, En vivo se actualiza en ≤ 1 s y se abre Resultado con la terminación (prueba que primero reproduce el fallo)
+  - `RoundsScreenTest.thereIsOneActionCardWithTheRoundButtonOnly` se reemplaza con `uak decision` (spec 005 §Decisions)
+- **Verify:** `central/gradlew -p central test`
+- **Next step:** prueba que termina una pelea y espera Resultado con la terminación sin cerrar a mano
+
+## DSK-037 · Evento: "Agregar pelea" a la izquierda y bajar jueces o rounds del evento
+
+- **Type:** feature
+- **Priority:** P1
+- **Estimate:** 5 h
+- **Rubric / Spec:** spec 005 §Evento
+- **Depends on:** None
+- **Paths:** central/src/main/java/com/sigebox/central/ui/funcion/, central/src/main/java/com/sigebox/central/service/FuncionService.java, central/src/main/java/com/sigebox/central/db/FuncionRepository.java, central/src/main/java/com/sigebox/central/db/LugarJuezRepository.java, central/src/test/java/com/sigebox/central/ui/funcion/, central/src/test/java/com/sigebox/central/service/FuncionServiceTest.java, central/src/test/java/com/sigebox/central/service/FuncionCambioTest.java
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - "Agregar pelea" va a la izquierda de los campos de las esquinas, en la misma fila (prueba de orden de nodos)
+  - Bajar jueces (1–5) o rounds (1–12) del evento cambia las peleas sin empezar, incluida la que espera en Jueces (quita lugares sobrantes y sus códigos); no toca las empezadas o terminadas; anota el cambio en la Bitácora (prueba)
+  - Una pelea con su primer round abierto no cambia y la pantalla dice por qué (prueba)
+- **Verify:** `central/gradlew -p central test --tests 'com.sigebox.central.ui.funcion.*' --tests 'com.sigebox.central.service.Funcion*'`
+- **Next step:** prueba de que bajar a 2 jueces quita el lugar 3 de la pelea pendiente
+
+## DSK-038 · Jueces: sin crear peleas y solo códigos de 6 números
+
+- **Type:** fix
+- **Priority:** P1
+- **Estimate:** 3 h
+- **Rubric / Spec:** spec 005 §Jueces
+- **Depends on:** None
+- **Paths:** central/src/main/java/com/sigebox/central/ui/setup/SetupScreen.java, central/src/test/java/com/sigebox/central/ui/setup/
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - Jueces no tiene formulario "Crear pelea"; empareja la pelea que sigue del evento; sin pelea pendiente dice "Agrega una pelea en Evento" con botón a Evento (prueba)
+  - Solo se muestran los códigos de 6 números por lugar; el identificador de la pelea no aparece como "código" (prueba)
+- **Verify:** `central/gradlew -p central test --tests 'com.sigebox.central.ui.setup.*'`
+- **Next step:** prueba de que SetupScreen sin pelea no tiene campos de rounds ni jueces
+
+## DSK-039 · Misma línea en todas las pantallas de la central
+
+- **Type:** fix
+- **Priority:** P1
+- **Estimate:** 4 h
+- **Rubric / Spec:** spec 005 §Una sola línea
+- **Depends on:** DSK-035, DSK-036, DSK-037, DSK-038
+- **Paths:** central/src/main/java/com/sigebox/central/ui/, central/src/test/java/com/sigebox/central/ui/ConsistencyTest.java
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - Cada título coincide con su sección de la barra; mismo verbo para la misma acción ("Nuevo evento" en Inicio y en el botón que lo crea); preguntas con "¿…?"; botones con mayúscula solo al inicio; "Qué sigue" con el mismo patrón
+  - `ConsistencyTest` recorre todas las pantallas y falla en cualquiera de esos casos
+  - Evidencia: capturas de cada pantalla en claro y oscuro revisadas con `design-critic`
+- **Verify:** `central/gradlew -p central test`
+- **Next step:** `ConsistencyTest` con los títulos de cada sección

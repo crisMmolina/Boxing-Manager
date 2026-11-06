@@ -24,7 +24,7 @@ An owner is not a prerequisite for everyone: consumers work on published contrac
 | central/build.gradle.kts | CORE-006 |
 | central/settings.gradle.kts | CORE-006 |
 | central/judge-sim/build.gradle.kts | CORE-006 |
-| central/src/main/java/com/sigebox/central/App.java | DSK-027 |
-| central/src/main/java/com/sigebox/central/ui/Screens.java | DSK-027 |
-| central/src/main/java/com/sigebox/central/db/ | DSK-027 |
+| central/src/main/java/com/sigebox/central/App.java | DSK-035 |
+| central/src/main/java/com/sigebox/central/ui/Screens.java | DSK-035 |
+| central/src/main/java/com/sigebox/central/db/ | DSK-037 |
 | .uak/PROJECT.md | CORE-006 |
