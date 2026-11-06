@@ -24,7 +24,7 @@ En el teléfono, lo que se observó ya está en `main` (logo de guantes en la ca
 
 ### Inicio y navegación (DSK-035)
 - When la central muestra **Inicio**, the system shall mostrar solo la lista de eventos, "Nuevo evento", el "?" y el cambio de tema claro/oscuro. Inicio no muestra la barra de pasos ni los enlaces del evento.
-- When el organizador abre o crea un evento, the system shall mostrar la barra del evento: **Evento · Jueces · En vivo · Resultado · Bitácora**, más "Inicio" para volver, el "?" y el cambio de tema. "Terminación" deja de ser una sección (pasa a En vivo).
+- When el organizador abre o crea un evento, the system shall mostrar la barra del evento: **Evento · Jueces · En vivo · Resultado · Bitácora**, más "Inicio" para volver, el "?" y el cambio de tema. "Terminación" deja de ser una sección cuando pasa a En vivo (DSK-036); hasta entonces sigue en la barra para no perderla.
 - When el organizador vuelve a Inicio, the system shall quitar la barra del evento; al entrar a otro evento, todas sus secciones muestran ese evento.
 
 ### Evento (DSK-037)
@@ -54,5 +54,5 @@ En el teléfono, lo que se observó ya está en `main` (logo de guantes en la ca
 - Cambiar el formato del identificador de la pelea (`fightId`) en el protocolo.
 
 ## Decisions to record
-- `NavTest.secondaryLinksAreInicioTerminacionAndBitacora` queda obsoleta con DSK-035 (Terminación sale de la barra): se reemplaza por una prueba de Inicio sin barra y de la barra del evento (`uak decision` en DSK-035).
+- `NavTest.secondaryLinksAreInicioTerminacionAndBitacora` queda obsoleta con DSK-036 (Terminación sale de la barra al pasar a En vivo): se reemplaza por una prueba de los enlaces Inicio · Bitácora (`uak decision` en DSK-036).
 - `RoundsScreenTest.thereIsOneActionCardWithTheRoundButtonOnly` queda obsoleta con DSK-036 (En vivo suma "Terminar pelea"): se reemplaza por una que pide "Cerrar round N" y "Terminar pelea" (`uak decision` en DSK-036).

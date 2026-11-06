@@ -1235,9 +1235,8 @@ En Windows (zoe) los comandos `Verify` se corren en Git Bash.
 - **Freeze-Allowed:** no
 - **Acceptance:**
   - Inicio muestra solo la lista de eventos, "Nuevo evento", "?" y el cambio de tema; sin barra de pasos ni enlaces del evento (prueba)
-  - Dentro de un evento la barra es Evento · Jueces · En vivo · Resultado · Bitácora, con "Inicio", "?" y tema; "Terminación" ya no está en la barra (prueba)
+  - Dentro de un evento la barra es Evento · Jueces · En vivo · Resultado con los enlaces Inicio · Terminación · Bitácora, "?" y tema; Terminación sale en DSK-036, cuando ya vive en En vivo (prueba)
   - Volver a Inicio quita la barra; entrar a otro evento muestra ese evento en todas las secciones (prueba)
-  - `NavTest.secondaryLinksAreInicioTerminacionAndBitacora` se reemplaza con `uak decision` (spec 005 §Decisions)
 - **Verify:** `central/gradlew -p central test --tests 'com.sigebox.central.ui.inicio.*' --tests 'com.sigebox.central.ui.theme.*'`
 - **Next step:** prueba de que Inicio no tiene StepsBar
 
@@ -1248,13 +1247,14 @@ En Windows (zoe) los comandos `Verify` se corren en Git Bash.
 - **Estimate:** 1 d
 - **Rubric / Spec:** spec 005 §En vivo y terminación · principios 1 y 2
 - **Depends on:** DSK-035
-- **Paths:** central/src/main/java/com/sigebox/central/ui/rounds/RoundsScreen.java, central/src/main/java/com/sigebox/central/ui/termination/, central/src/main/java/com/sigebox/central/service/TerminationService.java, central/src/main/java/com/sigebox/central/service/ResultService.java, central/src/main/java/com/sigebox/central/ui/result/ResultStepScreen.java, central/src/test/java/com/sigebox/central/ui/rounds/RoundsScreenTest.java, central/src/test/java/com/sigebox/central/ui/rounds/RoundsGateTest.java, central/src/test/java/com/sigebox/central/ui/termination/, central/src/test/java/com/sigebox/central/service/TerminationServiceTest.java, central/src/test/java/com/sigebox/central/service/TerminationAutoCloseTest.java
+- **Paths:** central/src/main/java/com/sigebox/central/ui/inicio/Nav.java, central/src/test/java/com/sigebox/central/ui/inicio/NavTest.java, central/src/main/java/com/sigebox/central/ui/rounds/RoundsScreen.java, central/src/main/java/com/sigebox/central/ui/termination/, central/src/main/java/com/sigebox/central/service/TerminationService.java, central/src/main/java/com/sigebox/central/service/ResultService.java, central/src/main/java/com/sigebox/central/ui/result/ResultStepScreen.java, central/src/test/java/com/sigebox/central/ui/rounds/RoundsScreenTest.java, central/src/test/java/com/sigebox/central/ui/rounds/RoundsGateTest.java, central/src/test/java/com/sigebox/central/ui/termination/, central/src/test/java/com/sigebox/central/service/TerminationServiceTest.java, central/src/test/java/com/sigebox/central/service/TerminationAutoCloseTest.java
 - **Freeze-Allowed:** no
 - **Acceptance:**
   - "Abrir round" desactivado mientras falte conectar un juez; dice cuál falta y "…o baja los jueces en Evento si no va a llegar"; cerrar un round abierto sigue igual (prueba)
   - "Terminar pelea" en En vivo: el round es el abierto o el último cerrado (sin escribirlo), se pide solo el motivo y se confirma (prueba)
   - Al confirmar: la pelea queda cerrada con su resultado sin pulsar "Cerrar pelea", los teléfonos reciben `FIGHT_CLOSED` y `NEXT_FIGHT` o `EVENT_ENDED` como en un cierre normal, En vivo se actualiza en ≤ 1 s y se abre Resultado con la terminación (prueba que primero reproduce el fallo)
-  - `RoundsScreenTest.thereIsOneActionCardWithTheRoundButtonOnly` se reemplaza con `uak decision` (spec 005 §Decisions)
+  - "Terminación" sale de los enlaces de la barra (quedan Inicio · Bitácora)
+  - `RoundsScreenTest.thereIsOneActionCardWithTheRoundButtonOnly` y `NavTest.secondaryLinksAreInicioTerminacionAndBitacora` se reemplazan con `uak decision` (spec 005 §Decisions)
 - **Verify:** `central/gradlew -p central test`
 - **Next step:** prueba que termina una pelea y espera Resultado con la terminación sin cerrar a mano
 
