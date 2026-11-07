@@ -12,3 +12,4 @@
 - 1794007374 | CLAIMED | crxthrx-1 | claim; next: prueba de que Inicio no tiene StepsBar
 - 1794013857 | REVIEW | crxthrx-1 | done; PR https://github.com/crisMmolina/Boxing-Manager/pull/106; evidence: Verify exit 0 (NavModeTest 6/6); central test exit 0; smoke PRODUCT_PASS; criterios 1-3 met; reviewer: -
 - 1794013915 | REVIEW | crxthrx-1 | checkpoint; next: Wait for review of SHA 7614262
+- 1794014938 | REVIEW | crxthrx-1 | heartbeat; lease until 1794101338
