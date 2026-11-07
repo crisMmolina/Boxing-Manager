@@ -88,6 +88,18 @@ public final class LugarJuezRepository {
         });
     }
 
+    /** Borra los lugares por encima de {@code jueces} (al bajar los jueces; solo quedan lugares sin juez). */
+    public void deleteAbove(String peleaId, int jueces) {
+        db.inTransaction(c -> {
+            try (var ps = c.prepareStatement("DELETE FROM judge_seat WHERE fight_id = ? AND number > ?")) {
+                ps.setString(1, peleaId);
+                ps.setInt(2, jueces);
+                ps.executeUpdate();
+            }
+            return null;
+        });
+    }
+
     public List<LugarJuez> byPelea(String peleaId) {
         return db.inTransaction(c -> {
             try (var ps = c.prepareStatement("SELECT * FROM judge_seat WHERE fight_id = ? ORDER BY number")) {

@@ -8,7 +8,6 @@ import com.sigebox.central.db.Database;
 import com.sigebox.central.db.FuncionRepository;
 import com.sigebox.central.server.SeatTokens;
 import com.sigebox.central.service.FuncionService.Esquinas;
-import com.sigebox.central.service.FuncionService.Estado;
 import com.sigebox.central.service.FuncionService.Fila;
 import java.nio.file.Path;
 import java.time.LocalDate;
@@ -73,22 +72,6 @@ class FuncionCambioTest {
         assertEquals(6, funciones.funcion(id).baseRounds());
         assertEquals(List.of(6, 6, 6), rounds(id));
         assertEquals(List.of(3, 3, 3), jueces(id));
-    }
-
-    @Test
-    void unaPeleaQueYaEmpezoConservaSusJuecesYRounds() {
-        var id = evento();
-        var primera = funciones.siguiente(id); // la pelea 1 ya existe con 10 rounds y 3 jueces
-
-        funciones.cambiarEvento(id, 4, 2);
-
-        var filas = funciones.cartelera(id);
-        assertEquals(Estado.EN_CURSO, filas.get(0).estado());
-        assertEquals(10, filas.get(0).rounds());
-        assertEquals(3, filas.get(0).jueces());
-        assertEquals(List.of(4, 4), filas.subList(1, 3).stream().map(Fila::rounds).toList());
-        assertEquals(List.of(2, 2), filas.subList(1, 3).stream().map(Fila::jueces).toList());
-        assertEquals(3, primera.jueces());
     }
 
     @Test

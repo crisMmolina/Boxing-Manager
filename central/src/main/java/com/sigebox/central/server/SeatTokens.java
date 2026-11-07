@@ -122,6 +122,11 @@ public final class SeatTokens {
         tokens.keySet().removeIf(k -> k.fightId().equals(fightId));
     }
 
+    /** Descarta el token y el código de un solo lugar (al bajar los jueces); los demás lugares siguen igual. */
+    public synchronized void forget(String fightId, int seat) {
+        tokens.remove(new Key(fightId, seat));
+    }
+
     private boolean codeTaken(String code) {
         return tokens.values().stream().anyMatch(e -> e.code.equals(code));
     }

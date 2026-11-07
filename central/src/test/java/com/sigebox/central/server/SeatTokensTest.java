@@ -49,6 +49,20 @@ class SeatTokensTest {
         assertEquals(SeatTokens.Check.INVALID, t.consume(F, 3, inv.token()));
     }
 
+    /** DSK-040: al bajar los jueces, el lugar que sobra pierde su código; los demás lugares siguen igual. */
+    @Test
+    void forgetOneSeatKillsOnlyThatSeat() {
+        var t = new SeatTokens();
+        var kept = t.issueInvitation(F, 2);
+        var gone = t.issueInvitation(F, 3);
+        t.forget(F, 3);
+        assertTrue(t.lookup(gone.code()).isEmpty());
+        assertEquals(SeatTokens.Check.INVALID, t.consume(F, 3, gone.token()));
+        assertEquals(SeatTokens.Check.INVALID, t.consume(F, 3, gone.code()));
+        assertEquals(new SeatTokens.Seat(F, 2), t.lookup(kept.code()).orElseThrow());
+        assertEquals(SeatTokens.Check.OK, t.consume(F, 2, kept.code()));
+    }
+
     @Test
     void issueStillReturnsOnlyTheToken() {
         var t = new SeatTokens();

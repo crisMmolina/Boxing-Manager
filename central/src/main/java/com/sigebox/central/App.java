@@ -67,9 +67,11 @@ public final class App {
     /**
      * Funciones con cartelera. Al iniciar la siguiente pelea, el servicio copia los lugares aprobados y
      * después {@link JudgeHub#nextFight} avisa a cada teléfono (ADR 0002); sin este enlace los teléfonos
-     * se quedarían en la pelea cerrada.
+     * se quedarían en la pelea cerrada. Bajar los jueces de la pelea en Jueces pasa por el candado del hub, para que
+     * ningún {@code JOIN} caiga en un lugar que se está quitando (DSK-040).
      */
     public static FuncionService funciones(Database db, FightService fights, JudgeHub hub) {
+        fights.puerta(hub);
         var funciones = new FuncionService(db, fights);
         funciones.alSiguiente(hub::nextFight);
         return funciones;

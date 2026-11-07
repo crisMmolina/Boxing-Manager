@@ -207,6 +207,25 @@ public final class FuncionScreen {
             }
             row.getChildren().addAll(Ui.field("Rounds", rounds), Ui.field("Jueces", judges), Ui.grow(), pill, up, down,
                     skip, remove);
+        } else if (r.preparada()) {
+            // DSK-040: la pelea que espera en Jueces cambia rounds y baja jueces hasta abrir el round 1.
+            var rounds = new Spinner<Integer>(1, 12, r.rounds());
+            var judges = new Spinner<Integer>(1, r.jueces(), r.jueces());
+            rounds.setPrefWidth(110);
+            judges.setPrefWidth(110);
+            rounds.setAccessibleText("Rounds de la pelea " + r.orden());
+            judges.setAccessibleText("Jueces de la pelea " + r.orden());
+            rounds.valueProperty().addListener((o, a, b) -> act(status, refresh, () -> {
+                service.cambiar(id, r.orden(), b, null);
+                return "";
+            }));
+            judges.valueProperty().addListener((o, a, b) -> act(status, refresh, () -> {
+                service.cambiar(id, r.orden(), null, b);
+                return "";
+            }));
+            var hint = Ui.support("En Jueces. Hasta el round 1 se pueden cambiar sus rounds y bajar sus jueces.");
+            hint.setWrapText(true);
+            row.getChildren().addAll(Ui.field("Rounds", rounds), Ui.field("Jueces", judges), hint, Ui.grow(), pill);
         } else {
             var detail = Ui.support(FuncionView.detalle(r.rounds(), r.jueces()) + (r.cambiada() ? " · cambiada" : ""));
             row.getChildren().addAll(detail, Ui.grow(), pill);
