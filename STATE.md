@@ -1,16 +1,15 @@
 # STATE
 
 Phase: execution
-Updated: 1794024835
+Updated: 1794024892
 AVAILABLE: DSK-036 DSK-039 DSK-040 
 CLAIMED: -
 BLOCKED: -
-REVIEW: DSK-037 
-INTEGRATED: (74; last 12) ... DSK-033 DSK-034 DSK-035 DSK-038 DSN-001 DSN-002 DSN-003 DSN-004 QA-001 QA-002 QA-003 QA-004 
+REVIEW: -
+INTEGRATED: (75; last 12) ... DSK-034 DSK-035 DSK-037 DSK-038 DSN-001 DSN-002 DSN-003 DSN-004 QA-001 QA-002 QA-003 QA-004 
 CANCELLED: -
 
 Claims (first 24; status --task ID shows detail):
-DSK-037 | REVIEW | crxthrx-3 | until 1794103886
 
 Blockers: BLOCKED tasks; use status --task ID --summary.
 Current decisions (last 5):
