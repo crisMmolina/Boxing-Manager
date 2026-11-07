@@ -18,11 +18,7 @@ import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.Spinner;
-import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.Clipboard;
-import javafx.scene.input.ClipboardContent;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
@@ -30,7 +26,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
 /**
- * Preparar la pelea y emparejar a los jueces (DESIGN v3 §7.1): formulario de la pelea a la
+ * Emparejar a los jueces de la pelea que sigue (DESIGN v3 §7.1, spec 005): la pelea a la
  * izquierda, una tarjeta por lugar a la derecha (QR + código, aprobar con la huella corta, estado de
  * conexión) y el pie con la dirección para los jueces e "Iniciar pelea".
  *
@@ -90,9 +86,11 @@ public final class SetupScreen {
 
         LiveRefresh.watch(root, reads, this::read, s -> {
             if (s.pelea() == null) {
-                Ui.next(next, "Crea la pelea para emparejar a los jueces.");
-                LiveRefresh.swap(left, List.of(form(status)));
-                LiveRefresh.swap(seats, List.of(Ui.support("Crea la pelea para ver el código de cada lugar.")));
+                // Spec 005: las peleas se crean en Evento; aquí solo se empareja la que sigue.
+                Ui.next(next, "Crea la pelea en Evento para emparejar a los jueces.");
+                LiveRefresh.swap(left, List.of(Ui.card(Ui.cardTitle("Pelea"),
+                        Ui.support("Las peleas del evento se agregan en Evento. Al iniciar la siguiente, aparece aquí."))));
+                LiveRefresh.swap(seats, List.of(Ui.support("Crea la pelea en Evento para ver el código de cada lugar.")));
                 footer.getChildren().clear();
                 return;
             }
@@ -124,43 +122,13 @@ public final class SetupScreen {
         return new Snapshot(active.get(), connected, fights.seats(id, connected), List.copyOf(invitations.values()), host);
     }
 
-    private Node form(Label status) {
-        var red = new TextField();
-        var blue = new TextField();
-        var rounds = new Spinner<Integer>(1, 12, 10);
-        var judges = new Spinner<Integer>(1, 5, 3);
-        var create = Ui.primary("Crear pelea");
-        create.setMaxWidth(Double.MAX_VALUE);
-        create.setOnAction(e -> {
-            try {
-                fights.create(red.getText(), blue.getText(), rounds.getValue(), judges.getValue());
-                status.setText("");
-            } catch (RuntimeException ex) {
-                status.setText(ex.getMessage());
-            }
-        });
-        return Ui.card(Ui.cardTitle("Pelea"), Ui.field("Esquina roja", "Ej. Ana Pérez", red),
-                Ui.field("Esquina azul", "Ej. Bea Ruiz", blue), new HBox(12, Ui.field("Rounds", rounds), Ui.field("Jueces", judges)), create);
-    }
-
+    /** La pelea que se empareja; los jueces solo usan el código de 6 números de su lugar (spec 005). */
     private Node summary(com.sigebox.core.model.Pelea p) {
         var red = new HBox(8, Ui.cornerDot(true), Ui.body(p.esquinaRoja()));
         red.setAlignment(Pos.CENTER_LEFT);
         var blue = new HBox(8, Ui.cornerDot(false), Ui.body(p.esquinaAzul()));
         blue.setAlignment(Pos.CENTER_LEFT);
-        var id = Ui.numeral(p.id(), "neutral");
-        id.setAccessibleText("Pelea " + String.join(" ", p.id().split("")));
-        // Para unirse a mano (campo "Pelea" de la app) o con judge-sim --fight.
-        var copy = Ui.secondary("Copiar");
-        copy.setOnAction(e -> {
-            var content = new ClipboardContent();
-            content.putString(p.id());
-            Clipboard.getSystemClipboard().setContent(content);
-            copy.setText("Copiado");
-        });
-        var idRow = new HBox(12, id, copy);
-        idRow.setAlignment(Pos.CENTER_LEFT);
-        return Ui.card(Ui.cardTitle("Pelea"), Ui.field("Código de la pelea", idRow), red, blue,
+        return Ui.card(Ui.cardTitle("Pelea"), red, blue,
                 Ui.support(p.rounds() + " rounds · " + p.jueces() + (p.jueces() == 1 ? " juez" : " jueces")));
     }
 
