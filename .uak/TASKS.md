@@ -1246,7 +1246,7 @@ En Windows (zoe) los comandos `Verify` se corren en Git Bash.
 - **Priority:** P0
 - **Estimate:** 1 d
 - **Rubric / Spec:** spec 005 §En vivo y terminación · principios 1 y 2
-- **Depends on:** DSK-035
+- **Depends on:** DSK-035, DSK-040
 - **Paths:** central/src/main/java/com/sigebox/central/ui/inicio/Nav.java, central/src/test/java/com/sigebox/central/ui/inicio/NavTest.java, central/src/main/java/com/sigebox/central/ui/rounds/RoundsScreen.java, central/src/main/java/com/sigebox/central/ui/termination/, central/src/main/java/com/sigebox/central/service/TerminationService.java, central/src/main/java/com/sigebox/central/service/ResultService.java, central/src/main/java/com/sigebox/central/ui/result/ResultStepScreen.java, central/src/test/java/com/sigebox/central/ui/rounds/RoundsScreenTest.java, central/src/test/java/com/sigebox/central/ui/rounds/RoundsGateTest.java, central/src/test/java/com/sigebox/central/ui/termination/, central/src/test/java/com/sigebox/central/service/TerminationServiceTest.java, central/src/test/java/com/sigebox/central/service/TerminationAutoCloseTest.java
 - **Freeze-Allowed:** no
 - **Acceptance:**
@@ -1269,7 +1269,7 @@ En Windows (zoe) los comandos `Verify` se corren en Git Bash.
 - **Freeze-Allowed:** no
 - **Acceptance:**
   - "Agregar pelea" va a la izquierda de los campos de las esquinas, en la misma fila (prueba de orden de nodos)
-  - Bajar jueces (1–5) o rounds (1–12) del evento cambia las peleas sin empezar, incluida la que espera en Jueces (quita lugares sobrantes y sus códigos); no toca las empezadas o terminadas; anota el cambio en la Bitácora (prueba)
+  - Bajar jueces (1–5) o rounds (1–12) del evento cambia la base y todas las peleas programadas (sin empezar); no toca las empezadas o terminadas; anota el cambio en la Bitácora (prueba). La pelea que ya espera en Jueces la cubre DSK-040
   - Una pelea con su primer round abierto no cambia y la pantalla dice por qué (prueba)
 - **Verify:** `central/gradlew -p central test --tests 'com.sigebox.central.ui.funcion.*' --tests 'com.sigebox.central.service.Funcion*'`
 - **Next step:** prueba de que bajar a 2 jueces quita el lugar 3 de la pelea pendiente
@@ -1296,7 +1296,7 @@ En Windows (zoe) los comandos `Verify` se corren en Git Bash.
 - **Estimate:** 4 h
 - **Rubric / Spec:** spec 005 §Una sola línea
 - **Depends on:** DSK-035, DSK-036, DSK-037, DSK-038
-- **Paths:** central/src/main/java/com/sigebox/central/ui/, central/src/test/java/com/sigebox/central/ui/ConsistencyTest.java
+- **Paths:** central/src/main/java/com/sigebox/central/ui/, docs/runbook.md, central/src/test/java/com/sigebox/central/ui/ConsistencyTest.java
 - **Freeze-Allowed:** no
 - **Acceptance:**
   - Cada título coincide con su sección de la barra; mismo verbo para la misma acción ("Nuevo evento" en Inicio y en el botón que lo crea); preguntas con "¿…?"; botones con mayúscula solo al inicio; "Qué sigue" con el mismo patrón
@@ -1304,3 +1304,21 @@ En Windows (zoe) los comandos `Verify` se corren en Git Bash.
   - Evidencia: capturas de cada pantalla en claro y oscuro revisadas con `design-critic`
 - **Verify:** `central/gradlew -p central test`
 - **Next step:** `ConsistencyTest` con los títulos de cada sección
+
+## DSK-040 · Bajar jueces o rounds de la pelea preparada antes del primer round
+
+- **Type:** feature
+- **Priority:** P0
+- **Estimate:** 5 h
+- **Rubric / Spec:** spec 005 §Evento · principios 1 y 2 · ADR 0004 (código de lugar)
+- **Depends on:** DSK-037
+- **Paths:** central/src/main/java/com/sigebox/central/service/FightService.java, central/src/main/java/com/sigebox/central/db/PeleaRepository.java, central/src/main/java/com/sigebox/central/db/LugarJuezRepository.java, central/src/main/java/com/sigebox/central/server/SeatTokens.java, central/src/main/java/com/sigebox/central/server/JudgeHub.java, central/src/main/java/com/sigebox/central/ui/funcion/, central/src/test/java/com/sigebox/central/service/FightCambioTest.java, central/src/test/java/com/sigebox/central/server/SeatTokensTest.java, central/src/test/java/com/sigebox/central/server/JudgeHubCambioTest.java, central/src/test/java/com/sigebox/central/ui/funcion/
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - Mientras la pelea preparada (en Jueces) no haya abierto su primer round, Evento permite bajar sus jueces (1–5) y sus rounds (1–12); con un round abierto o cerrado no cambia y dice por qué (prueba)
+  - Nunca quita un lugar con un juez aprobado o esperando aprobación: si bajar dejaría fuera a uno, no cambia nada y dice qué juez es (prueba)
+  - Los lugares que sobran pierden su código (por lugar, no toda la pelea): el código viejo responde `CODE_UNKNOWN` y una sesión abierta en ese lugar se cierra (prueba)
+  - El cambio se anota en la Bitácora como `CARTELERA_CAMBIADA`; Jueces y En vivo muestran los lugares nuevos en ≤ 1 s
+  - Revisión con `security-reviewer` (toca códigos y sesiones)
+- **Verify:** `central/gradlew -p central test`
+- **Next step:** prueba de que bajar a 2 jueces con el lugar 3 sin juez quita su código
