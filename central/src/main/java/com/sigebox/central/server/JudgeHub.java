@@ -11,6 +11,7 @@ import com.sigebox.central.db.TarjetaFinalRepository;
 import com.sigebox.central.db.TarjetaRoundRepository;
 import com.sigebox.central.db.TerminacionRepository;
 import com.sigebox.central.db.VersionTarjetaRepository;
+import com.sigebox.central.service.FightService;
 import com.sigebox.core.model.EstadoConexion;
 import com.sigebox.core.model.EstadoPelea;
 import com.sigebox.core.model.EstadoRound;
@@ -66,6 +67,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.LongSupplier;
+import java.util.function.Supplier;
 
 /**
  * Lógica del protocolo de jueces (core/schemas/README.md), sin depender del transporte.
@@ -84,7 +86,7 @@ import java.util.function.LongSupplier;
  *
  * <p>Todos los métodos públicos son {@code synchronized}: el tráfico es de 1–5 jueces.
  */
-public final class JudgeHub implements AutoCloseable {
+public final class JudgeHub implements AutoCloseable, FightService.Puerta {
 
     /** Mismo límite que {@code Messages.decode}. */
     public static final int MAX_MESSAGE_CHARS = 16 * 1024;
@@ -373,6 +375,38 @@ public final class JudgeHub implements AutoCloseable {
                     .map(LugarJuez::numero).orElse(null);
             send(s, new NextFight(fightId, nextFightId, seat, next.esquinaRoja(), next.esquinaAzul(), next.rounds()));
             logSeat(s, "NEXT_FIGHT_SENT", seat == null ? "sin lugar" : "lugar " + seat);
+        }
+    }
+
+    /**
+     * Corre {@code trabajo} con el candado del hub (spec 005, DSK-040): mientras se revisan y quitan lugares no se
+     * atiende ningún {@code JOIN}, {@code HELLO} ni {@code CODE_LOOKUP}. Orden de candados: hub → base de datos.
+     */
+    @Override
+    public synchronized <T> T exclusivo(Supplier<T> trabajo) {
+        return trabajo.get();
+    }
+
+    /**
+     * La pelea {@code fightId} quedó con {@code jueces} lugares: se cierra cualquier conexión ligada a un lugar que
+     * sobra (no debería haber: solo se quitan lugares sin juez) y, si cambiaron los rounds, cada juez aprobado recibe
+     * un {@code STATE} nuevo (el teléfono usa {@code rounds} para pedir la tarjeta final).
+     */
+    @Override
+    public synchronized void peleaCambiada(String fightId, int jueces, boolean roundsCambiaron) {
+        for (var s : new ArrayList<>(holders.values())) {
+            if (s.fightId.equals(fightId) && s.seat > jueces) {
+                drop(s, Conn.POLICY, "seat removed");
+            }
+        }
+        if (roundsCambiaron) {
+            for (var s : approvedSessions(fightId)) {
+                try { // el cambio ya se guardó: un teléfono que falla no deja sin STATE a los demás
+                    send(s, state(s));
+                } catch (RuntimeException e) {
+                    logSeat(s, "CONTROL_REJECTED", "STATE tras cambiar rounds");
+                }
+            }
         }
     }
 

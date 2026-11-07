@@ -33,9 +33,18 @@ public final class FuncionService {
 
     public record Esquinas(String roja, String azul) {}
 
-    /** Pelea de la cartelera con sus rounds y jueces efectivos (los suyos o los de la base). */
+    /**
+     * Pelea de la cartelera con sus rounds y jueces efectivos (los suyos o los de la base). {@code preparada}: ya
+     * espera en Jueces y no abre su round 1, así que todavía baja jueces y cambia rounds (DSK-040).
+     */
     public record Fila(int orden, String roja, String azul, int rounds, int jueces, boolean cambiada, Estado estado,
-            String peleaId) {}
+            String peleaId, boolean preparada) {
+
+        public Fila(int orden, String roja, String azul, int rounds, int jueces, boolean cambiada, Estado estado,
+                String peleaId) {
+            this(orden, roja, azul, rounds, jueces, cambiada, estado, peleaId, false);
+        }
+    }
 
     /** Peleas que se pueden pedir al crear un evento. */
     public static final int MAX_PELEAS = 20;
@@ -228,8 +237,18 @@ public final class FuncionService {
         int nuevosRounds = rounds != null ? rounds : f.baseRounds();
         int nuevosJueces = jueces != null ? jueces : f.baseJueces();
         var rows = new ArrayList<CardRow>();
+        Pelea preparada = null;
+        int prepRounds = 0;
+        int prepJueces = 0;
         for (var r : rows(funcionId)) {
-            if (empezo(r)) { // fija lo que heredaba de la base vieja
+            if (preparada(r)) {
+                // Espera en Jueces sin round: sigue la base, pero sus jueces solo bajan (Jueces guarda los códigos).
+                preparada = peleas.find(r.peleaId()).orElseThrow();
+                prepRounds = rounds != null ? rounds : preparada.rounds();
+                prepJueces = jueces != null && jueces < preparada.jueces() ? jueces : preparada.jueces();
+                rows.add(new CardRow(r.orden(), r.roja(), r.azul(), prepRounds == nuevosRounds ? null : prepRounds,
+                        prepJueces == nuevosJueces ? null : prepJueces, r.saltada(), r.peleaId()));
+            } else if (empezo(r)) { // fija lo que heredaba de la base vieja
                 rows.add(new CardRow(r.orden(), r.roja(), r.azul(), r.rounds() != null ? r.rounds() : f.baseRounds(),
                         r.jueces() != null ? r.jueces() : f.baseJueces(), r.saltada(), r.peleaId()));
             } else {
@@ -237,13 +256,22 @@ public final class FuncionService {
                         jueces != null ? null : r.jueces(), r.saltada(), r.peleaId()));
             }
         }
-        db.inTransaction(c -> {
+        Runnable guardar = () -> db.inTransaction(c -> {
             repo.updateBase(funcionId, nuevosRounds, nuevosJueces);
             repo.replaceCard(funcionId, rows);
             repo.log(funcionId, "CARTELERA_CAMBIADA", "evento: " + nuevosRounds + " rounds, " + nuevosJueces
                     + (nuevosJueces == 1 ? " juez" : " jueces") + " en las peleas sin empezar");
             return null;
         });
+        if (preparada != null && (prepRounds != preparada.rounds() || prepJueces != preparada.jueces())) {
+            fights.cambiar(preparada.id(), prepRounds, prepJueces, guardar); // todo o nada, con el candado del hub
+        } else {
+            guardar.run();
+        }
+    }
+
+    private boolean preparada(CardRow r) {
+        return r.peleaId() != null && !r.saltada() && fights.preparada(r.peleaId());
     }
 
     /** Cambia los nombres de las esquinas de una pelea que no ha empezado. */
@@ -377,7 +405,7 @@ public final class FuncionService {
         }
         return new Fila(r.orden(), r.roja(), r.azul(), r.rounds() != null ? r.rounds() : f.baseRounds(),
                 r.jueces() != null ? r.jueces() : f.baseJueces(), r.rounds() != null || r.jueces() != null, estado,
-                r.peleaId());
+                r.peleaId(), estado == Estado.EN_CURSO && fights.preparada(r.peleaId()));
     }
 
     private static void rounds(int rounds) {

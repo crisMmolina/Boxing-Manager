@@ -39,6 +39,19 @@ public final class PeleaRepository {
         });
     }
 
+    /** Cambia rounds y jueces (la pelea que espera en Jueces, antes del round 1). */
+    public void updateRoundsJueces(String id, int rounds, int jueces) {
+        db.inTransaction(c -> {
+            try (var ps = c.prepareStatement("UPDATE fight SET rounds = ?, judges = ? WHERE id = ?")) {
+                ps.setInt(1, rounds);
+                ps.setInt(2, jueces);
+                ps.setString(3, id);
+                ps.executeUpdate();
+            }
+            return null;
+        });
+    }
+
     public void updateEstado(String id, EstadoPelea estado) {
         db.inTransaction(c -> {
             try (var ps = c.prepareStatement("UPDATE fight SET state = ? WHERE id = ?")) {

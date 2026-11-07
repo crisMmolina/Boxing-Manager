@@ -207,6 +207,12 @@ public final class FuncionScreen {
             }
             row.getChildren().addAll(Ui.field("Rounds", rounds), Ui.field("Jueces", judges), Ui.grow(), pill, up, down,
                     skip, remove);
+        } else if (r.preparada()) {
+            // DSK-040: la pelea que espera en Jueces sigue la base del evento hasta abrir el round 1.
+            var detail = Ui.support(FuncionView.detalle(r.rounds(), r.jueces())
+                    + " · en Jueces: sigue la base hasta el round 1 (sus jueces solo bajan)");
+            detail.setWrapText(true);
+            row.getChildren().addAll(detail, Ui.grow(), pill);
         } else {
             var detail = Ui.support(FuncionView.detalle(r.rounds(), r.jueces()) + (r.cambiada() ? " · cambiada" : ""));
             row.getChildren().addAll(detail, Ui.grow(), pill);

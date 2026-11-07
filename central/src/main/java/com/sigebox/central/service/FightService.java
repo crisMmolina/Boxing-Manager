@@ -4,6 +4,7 @@ import com.sigebox.central.db.Database;
 import com.sigebox.central.db.EventLog;
 import com.sigebox.central.db.LugarJuezRepository;
 import com.sigebox.central.db.PeleaRepository;
+import com.sigebox.central.db.RoundRepository;
 import com.sigebox.central.server.SeatTokens;
 import com.sigebox.core.model.EstadoConexion;
 import com.sigebox.core.model.EstadoPelea;
@@ -56,6 +57,31 @@ public final class FightService {
     private final PeleaRepository peleas;
     private final LugarJuezRepository lugares;
     private final EventLog log;
+    private final RoundRepository rounds;
+    private volatile Puerta puerta = DIRECTA;
+
+    /**
+     * Quien ordena el cambio de lugares con las uniones de los teléfonos: el hub. Dentro de {@link #exclusivo} no
+     * entra un {@code JOIN}, así que ninguno cae en un lugar que se está quitando. Sin hub (pruebas) corre directo.
+     */
+    public interface Puerta {
+        <T> T exclusivo(Supplier<T> trabajo);
+
+        /** Ya guardado: cierra las conexiones de los lugares que sobran y, si cambiaron los rounds, reenvía STATE. */
+        void peleaCambiada(String fightId, int jueces, boolean roundsCambiaron);
+    }
+
+    private static final Puerta DIRECTA = new Puerta() {
+        @Override
+        public <T> T exclusivo(Supplier<T> trabajo) {
+            return trabajo.get();
+        }
+
+        @Override
+        public void peleaCambiada(String fightId, int jueces, boolean roundsCambiaron) {
+            // Sin hub no hay conexiones que avisar.
+        }
+    };
 
     public FightService(Database db, SeatTokens tokens, Supplier<LocalDate> today) {
         this.db = db;
@@ -64,6 +90,7 @@ public final class FightService {
         this.peleas = new PeleaRepository(db);
         this.lugares = new LugarJuezRepository(db);
         this.log = new EventLog(db);
+        this.rounds = new RoundRepository(db);
     }
 
     public FightService(Database db, SeatTokens tokens) {
@@ -95,6 +122,79 @@ public final class FightService {
             return null;
         });
         return pelea;
+    }
+
+    /** El hub que ordena los cambios de lugares con las uniones (ver {@link Puerta}). */
+    public void puerta(Puerta puerta) {
+        this.puerta = java.util.Objects.requireNonNull(puerta);
+    }
+
+    /** La pelea ya está creada (espera en Jueces) y todavía no abre su primer round: sus jueces y rounds cambian. */
+    public boolean preparada(String fightId) {
+        return peleas.find(fightId).map(p -> sinEmpezar(p)).orElse(false);
+    }
+
+    private boolean sinEmpezar(Pelea p) {
+        return (p.estado() == EstadoPelea.CREADA || p.estado() == EstadoPelea.EN_CURSO)
+                && rounds.byPelea(p.id()).isEmpty();
+    }
+
+    /** Ver {@link #cambiar(String, Integer, Integer, Runnable)}. */
+    public Pelea cambiar(String fightId, Integer nuevosRounds, Integer nuevosJueces) {
+        return cambiar(fightId, nuevosRounds, nuevosJueces, () -> { });
+    }
+
+    /**
+     * Cambia rounds o baja jueces de la pelea preparada ({@code null} deja lo que tenía). Nunca quita un lugar con un
+     * juez aprobado o esperando aprobación; los lugares que sobran pierden su código. {@code tambien} corre en la
+     * misma transacción (la cartelera del evento). No es {@code synchronized}: el orden de candados es hub → base.
+     *
+     * @throws IllegalArgumentException si un dato está fuera de rango
+     * @throws IllegalStateException si la pelea ya empezó, si se piden más jueces o si saldría un juez; no cambia nada
+     */
+    public Pelea cambiar(String fightId, Integer nuevosRounds, Integer nuevosJueces, Runnable tambien) {
+        if (nuevosRounds != null && (nuevosRounds < 1 || nuevosRounds > 12)) {
+            throw new IllegalArgumentException("los rounds van de 1 a 12");
+        }
+        if (nuevosJueces != null && (nuevosJueces < 1 || nuevosJueces > 5)) {
+            throw new IllegalArgumentException("los jueces van de 1 a 5");
+        }
+        return puerta.exclusivo(() -> {
+            var antes = peleas.find(fightId).orElseThrow(() -> new IllegalArgumentException("pelea desconocida"));
+            var despues = db.inTransaction(c -> {
+                var p = peleas.find(fightId).orElseThrow();
+                if (p.estado() == EstadoPelea.TERMINADA || p.estado() == EstadoPelea.CERRADA) {
+                    throw new IllegalStateException("la pelea ya terminó: sus jueces y rounds ya no cambian");
+                }
+                if (!rounds.byPelea(fightId).isEmpty()) {
+                    throw new IllegalStateException("la pelea ya abrió el round 1: sus jueces y rounds ya no cambian");
+                }
+                int r = nuevosRounds != null ? nuevosRounds : p.rounds();
+                int j = nuevosJueces != null ? nuevosJueces : p.jueces();
+                if (j > p.jueces()) {
+                    throw new IllegalStateException("la pelea ya espera en Jueces: sus jueces solo se pueden bajar");
+                }
+                for (var l : lugares.byPelea(fightId)) {
+                    if (l.numero() > j && l.conexion() != EstadoConexion.RECHAZADO) {
+                        throw new IllegalStateException("no se bajan los jueces: el lugar " + l.numero() + " es de "
+                                + l.nombre() + (l.aprobadoEnMs() == null
+                                        ? ", que espera aprobación. Recházalo en Jueces si no va a juzgar."
+                                        : ", ya aprobado. Un juez aprobado no se saca."));
+                    }
+                }
+                lugares.deleteAbove(fightId, j);
+                peleas.updateRoundsJueces(fightId, r, j);
+                tambien.run();
+                log.append(fightId, "CARTELERA_CAMBIADA", r + (r == 1 ? " round, " : " rounds, ") + j
+                        + (j == 1 ? " juez" : " jueces") + " antes del round 1");
+                return new Pelea(p.id(), p.esquinaRoja(), p.esquinaAzul(), r, j, p.estado(), p.fecha());
+            });
+            for (int n = despues.jueces() + 1; n <= antes.jueces(); n++) {
+                tokens.forget(fightId, n);
+            }
+            puerta.peleaCambiada(fightId, despues.jueces(), despues.rounds() != antes.rounds());
+            return despues;
+        });
     }
 
     /** La pelea sin cerrar, si hay. */
