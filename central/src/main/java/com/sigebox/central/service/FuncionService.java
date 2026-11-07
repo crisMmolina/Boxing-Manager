@@ -213,10 +213,6 @@ public final class FuncionService {
             jueces(jueces);
         }
         var rows = new ArrayList<>(rows(funcionId));
-        if (orden >= 1 && orden <= rows.size() && preparada(rows.get(orden - 1))) {
-            cambiarPreparada(funcionId, rows, orden - 1, rounds, jueces);
-            return;
-        }
         var r = noEmpezada(funcionId, rows, orden);
         var nueva = new CardRow(r.orden(), r.roja(), r.azul(), rounds != null ? rounds : r.rounds(),
                 jueces != null ? jueces : r.jueces(), r.saltada(), null);
@@ -272,19 +268,6 @@ public final class FuncionService {
         } else {
             guardar.run();
         }
-    }
-
-    /** La fila de la pelea que espera en Jueces: rounds en ambos sentidos, jueces solo hacia abajo. */
-    private void cambiarPreparada(String funcionId, List<CardRow> rows, int index, Integer rounds, Integer jueces) {
-        var f = funcion(funcionId);
-        var r = rows.get(index);
-        var p = peleas.find(r.peleaId()).orElseThrow();
-        int nuevosRounds = rounds != null ? rounds : p.rounds();
-        int nuevosJueces = jueces != null ? jueces : p.jueces();
-        rows.set(index, new CardRow(r.orden(), r.roja(), r.azul(), nuevosRounds == f.baseRounds() ? null : nuevosRounds,
-                nuevosJueces == f.baseJueces() ? null : nuevosJueces, r.saltada(), r.peleaId()));
-        fights.cambiar(p.id(), rounds, jueces, () -> guardar(funcionId, rows, "CARTELERA_CAMBIADA", r.roja() + " vs "
-                + r.azul() + " (en Jueces): " + nuevosRounds + " rounds, " + nuevosJueces + " jueces"));
     }
 
     private boolean preparada(CardRow r) {

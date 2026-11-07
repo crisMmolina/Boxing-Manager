@@ -401,7 +401,11 @@ public final class JudgeHub implements AutoCloseable, FightService.Puerta {
         }
         if (roundsCambiaron) {
             for (var s : approvedSessions(fightId)) {
-                send(s, state(s));
+                try { // el cambio ya se guardó: un teléfono que falla no deja sin STATE a los demás
+                    send(s, state(s));
+                } catch (RuntimeException e) {
+                    logSeat(s, "CONTROL_REJECTED", "STATE tras cambiar rounds");
+                }
             }
         }
     }

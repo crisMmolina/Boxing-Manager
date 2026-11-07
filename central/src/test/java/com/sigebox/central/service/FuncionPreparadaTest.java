@@ -106,18 +106,12 @@ class FuncionPreparadaTest {
     }
 
     @Test
-    void laFilaDeLaPeleaEnJuecesBajaSusJuecesSinTocarLasDemas() {
+    void laPeleaEnJuecesSoloCambiaDesdeLaBaseDelEvento() {
         var id = evento();
         var primera = funciones.siguiente(id);
 
-        funciones.cambiar(id, 1, null, 2);
-
-        var filas = funciones.cartelera(id);
-        assertEquals(2, filas.get(0).jueces());
-        assertTrue(filas.get(0).cambiada());
-        assertEquals(2, juecesDe(primera.id()));
-        assertEquals(List.of(3, 3), filas.subList(1, 3).stream().map(Fila::jueces).toList());
-        assertThrows(IllegalStateException.class, () -> funciones.cambiar(id, 1, null, 3));
+        assertThrows(IllegalStateException.class, () -> funciones.cambiar(id, 1, null, 2));
+        assertEquals(3, juecesDe(primera.id()));
     }
 
     @Test

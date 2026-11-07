@@ -1,6 +1,7 @@
 package com.sigebox.central.ui.funcion;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.sigebox.central.db.Database;
 import com.sigebox.central.db.PeleaRepository;
@@ -71,7 +72,7 @@ class FuncionPreparadaRowTest {
     }
 
     @Test
-    void losJuecesDeLaPeleaEnJuecesBajanDesdeSuFila() throws Exception {
+    void bajarLosJuecesDelEventoBajaLaPeleaEnJueces() throws Exception {
         var id = funciones.crear(10, 3, List.of(new Esquinas("Ana", "Bea"), new Esquinas("Caro", "Dani"))).id();
         var pelea = funciones.siguiente(id);
         var screens = new Screens<Node>();
@@ -82,13 +83,13 @@ class FuncionPreparadaRowTest {
             return node;
         });
         long deadline = System.nanoTime() + 3_000_000_000L;
-        while (System.nanoTime() < deadline && !FxTest.onFx(() -> spinner(root, "Jueces de la pelea 1").isPresent())) {
+        while (System.nanoTime() < deadline && !FxTest.onFx(() -> spinner(root, "Jueces del evento").isPresent())) {
             Thread.sleep(20);
         }
-        var judges = FxTest.onFx(() -> spinner(root, "Jueces de la pelea 1").orElseThrow());
+        var judges = FxTest.onFx(() -> spinner(root, "Jueces del evento").orElseThrow());
+        assertTrue(FxTest.onFx(() -> spinner(root, "Jueces de la pelea 1").isEmpty()), "la fila en Jueces no se edita");
 
         FxTest.onFx(() -> {
-            judges.increment(); // tope: los jueces que ya tiene
             judges.decrement();
             return null;
         });
