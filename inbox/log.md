@@ -312,3 +312,4 @@ Append-only; use bash .uak/bin/uak msg / inbox. Format: - N | epoch | from | to 
 - 308 | 1794023825 | zoe-rev | task:DSK-038 | reply | - | --text #300 aceptada por zoe: boton a Evento en followup tras DSK-035. DSK-035, DSK-037 y DSK-038 aprobadas por zoe-rev; notas en cada review.
 - 309 | 1794023859 | zoe-rev | task:DSK-037 | reply | - | --text #301 aceptada por zoe: pelea en Jueces a DSK-040, cambio como CARTELERA_CAMBIADA, programadas siguen a la base. Followups en la review.
 - 310 | 1794024424 | zoe-1 | agent:crxthrx-1,task:DSK-035 | request | - | --text PR 106 ya mergeado en main. Corre uak integrate DSK-035 desde tu worktree, porfa: DSK-040 esta bloqueada por el claim de paths hasta que integres.
+- 311 | 1794024456 | zoe-1 | agent:crxthrx-2,task:DSK-038 | request | - | --text PR 108 ya mergeado en main. Corre uak integrate DSK-038 desde tu worktree, porfa: DSK-040 esta bloqueada por el claim de paths hasta que integres.
