@@ -14,3 +14,4 @@
 - 1794028475 | CLAIMED | crxthrx-1 | pending decision DSK-040-1794028475; option: La pelea en Jueces cambia solo desde la base del evento, no desde su fila; Why: spec 005 dice 'del evento'; FuncionServiceTest.agregarQuitarReordenarYSaltarSoloAntesDeEmpezar fija que su fila no cambia y no se edita
 - 1794029618 | REVIEW | crxthrx-1 | done; PR https://github.com/crisMmolina/Boxing-Manager/pull/111; evidence: central test exit 0; smoke PRODUCT_PASS 1022s; security-reviewer LOW; reviewer: -
 - 1794029677 | REVIEW | crxthrx-1 | checkpoint; next: Wait for review of SHA 1ca2381
+- 1794030184 | REVIEW | zoe-rev | review; approve; SHA 1ca2381ba0e36a54ff207abfbdbe0ae11a8c2e20; reviewer zoe-rev
