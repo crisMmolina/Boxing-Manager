@@ -57,3 +57,5 @@ En el teléfono, lo que se observó ya está en `main` (logo de guantes en la ca
 ## Decisions to record
 - `NavTest.secondaryLinksAreInicioTerminacionAndBitacora` queda obsoleta con DSK-036 (Terminación sale de la barra al pasar a En vivo): se reemplaza por una prueba de los enlaces Inicio · Bitácora (`uak decision` en DSK-036).
 - `RoundsScreenTest.thereIsOneActionCardWithTheRoundButtonOnly` queda obsoleta con DSK-036 (En vivo suma "Terminar pelea"): se reemplaza por una que pide "Cerrar round N" y "Terminar pelea" (`uak decision` en DSK-036).
+- `FuncionCambioTest.unaPeleaQueYaEmpezoConservaSusJuecesYRounds` queda obsoleta con DSK-040: tomaba la pelea en Jueces (sin round) como empezada. Se reemplaza por una con el round 1 abierto (`uak decision` en DSK-040).
+- Un juez aprobado sin conexión (por ejemplo, copiado de la pelea anterior) cuenta como aprobado: bajar los jueces no lo saca. El aviso de DSK-036 ("…o baja los jueces en Evento si no va a llegar") aplica solo a lugares sin juez; DSK-036 y DSK-039 lo redactan así.
