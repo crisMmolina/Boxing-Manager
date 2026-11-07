@@ -27,10 +27,11 @@ En el teléfono, lo que se observó ya está en `main` (logo de guantes en la ca
 - When el organizador abre o crea un evento, the system shall mostrar la barra del evento: **Evento · Jueces · En vivo · Resultado · Bitácora**, más "Inicio" para volver, el "?" y el cambio de tema. "Terminación" deja de ser una sección cuando pasa a En vivo (DSK-036); hasta entonces sigue en la barra para no perderla.
 - When el organizador vuelve a Inicio, the system shall quitar la barra del evento; al entrar a otro evento, todas sus secciones muestran ese evento.
 
-### Evento (DSK-037)
+### Evento (DSK-037; la pelea que ya espera en Jueces, DSK-040)
 - The system shall mostrar "Agregar pelea" a la izquierda de los campos de las esquinas, en la misma fila.
 - When el organizador baja los jueces (1–5) o los rounds (1–12) del evento, the system shall aplicarlo a las peleas que no han empezado (también a la que espera en Jueces, quitando los lugares que sobran y sus códigos), y dejar igual las peleas que ya empezaron o terminaron. Cada cambio se anota en la Bitácora.
 - If una pelea ya abrió su primer round, then the system shall no cambiar sus jueces ni sus rounds y decir por qué.
+- If bajar los jueces dejaría fuera a un juez aprobado o esperando aprobación, then the system shall no cambiar nada y decir qué juez es (nunca se saca a un juez conectado).
 
 ### Jueces (DSK-038)
 - The system shall emparejar solo la pelea que sigue del evento; Jueces no tiene formulario para crear peleas. Sin pelea pendiente, dice "Agrega una pelea en Evento" con un botón que lleva a Evento.
