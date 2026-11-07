@@ -119,11 +119,24 @@ public final class FuncionScreen {
             FuncionView.siguiente(flow.service().cartelera(id)).map(FuncionView::siguienteTexto)
                     .ifPresent(nextText::set);
         };
+        // Spec 005: rounds y jueces del evento se pueden cambiar después de crearlo; aplica a las peleas sin empezar.
+        var baseRounds = new Spinner<Integer>(1, 12, f.baseRounds());
+        var baseJudges = new Spinner<Integer>(1, 5, f.baseJueces());
+        baseRounds.setPrefWidth(110);
+        baseJudges.setPrefWidth(110);
+        baseRounds.setAccessibleText("Rounds del evento");
+        baseJudges.setAccessibleText("Jueces del evento");
+        baseRounds.valueProperty().addListener((o, a, b) -> act(status, refresh, () -> {
+            flow.service().cambiarEvento(id, b, null);
+            return "Rounds del evento: " + b + ". Cambian las peleas que no han empezado.";
+        }));
+        baseJudges.valueProperty().addListener((o, a, b) -> act(status, refresh, () -> {
+            flow.service().cambiarEvento(id, null, b);
+            return "Jueces del evento: " + b + ". Cambian las peleas que no han empezado.";
+        }));
         var base = Ui.card(Ui.cardTitle("Base"), new HBox(40, Ui.field("Evento", Ui.body(FuncionView.nombre(f))),
-                Ui.field("Fecha", Ui.body(f.fecha())),
-                Ui.field("Rounds", Ui.numeral(String.valueOf(f.baseRounds()), "neutral")),
-                Ui.field("Jueces", Ui.numeral(String.valueOf(f.baseJueces()), "neutral"))),
-                Ui.support("Las peleas heredan esta base salvo que cambies la suya."));
+                Ui.field("Fecha", Ui.body(f.fecha())), Ui.field("Rounds", baseRounds), Ui.field("Jueces", baseJudges)),
+                Ui.support("Cambiar la base cambia todas las peleas que no han empezado; las demás quedan igual."));
         base.setSpacing(8);
 
         var list = new VBox(8);
@@ -264,7 +277,9 @@ public final class FuncionScreen {
         var blueField = cornerField(false, "Esquina azul", "Ej. Bea Ruiz", blue);
         HBox.setHgrow(redField, Priority.ALWAYS);
         HBox.setHgrow(blueField, Priority.ALWAYS);
-        var box = new HBox(12, redField, blueField, add);
+        // Spec 005: el botón va primero, para que se lea "Agregar pelea: roja, azul".
+        add.setMinWidth(javafx.scene.layout.Region.USE_PREF_SIZE);
+        var box = new HBox(12, add, redField, blueField);
         box.setAlignment(Pos.BOTTOM_LEFT);
         return box;
     }

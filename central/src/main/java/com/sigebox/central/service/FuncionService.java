@@ -213,6 +213,39 @@ public final class FuncionService {
                 + (nueva.jueces() == null ? "base" : nueva.jueces()) + " jueces");
     }
 
+    /**
+     * Cambia los rounds o jueces del evento (spec 005); {@code null} deja lo que tenía. Las peleas sin empezar siguen
+     * la base nueva (dejan su valor propio); las que ya empezaron guardan el que tenían, así su fila no cambia.
+     */
+    public synchronized void cambiarEvento(String funcionId, Integer rounds, Integer jueces) {
+        if (rounds != null) {
+            rounds(rounds);
+        }
+        if (jueces != null) {
+            jueces(jueces);
+        }
+        var f = funcion(funcionId);
+        int nuevosRounds = rounds != null ? rounds : f.baseRounds();
+        int nuevosJueces = jueces != null ? jueces : f.baseJueces();
+        var rows = new ArrayList<CardRow>();
+        for (var r : rows(funcionId)) {
+            if (empezo(r)) { // fija lo que heredaba de la base vieja
+                rows.add(new CardRow(r.orden(), r.roja(), r.azul(), r.rounds() != null ? r.rounds() : f.baseRounds(),
+                        r.jueces() != null ? r.jueces() : f.baseJueces(), r.saltada(), r.peleaId()));
+            } else {
+                rows.add(new CardRow(r.orden(), r.roja(), r.azul(), rounds != null ? null : r.rounds(),
+                        jueces != null ? null : r.jueces(), r.saltada(), r.peleaId()));
+            }
+        }
+        db.inTransaction(c -> {
+            repo.updateBase(funcionId, nuevosRounds, nuevosJueces);
+            repo.replaceCard(funcionId, rows);
+            repo.log(funcionId, "CARTELERA_CAMBIADA", "evento: " + nuevosRounds + " rounds, " + nuevosJueces
+                    + (nuevosJueces == 1 ? " juez" : " jueces") + " en las peleas sin empezar");
+            return null;
+        });
+    }
+
     /** Cambia los nombres de las esquinas de una pelea que no ha empezado. */
     public synchronized void renombrar(String funcionId, int orden, String roja, String azul) {
         var nuevaRoja = nombre(roja, "la esquina roja");
