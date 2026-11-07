@@ -41,6 +41,19 @@ public final class FuncionRepository {
         });
     }
 
+    /** Cambia los rounds y jueces base del evento (spec 005). */
+    public void updateBase(String id, int baseRounds, int baseJueces) {
+        db.inTransaction(c -> {
+            try (var ps = c.prepareStatement("UPDATE funcion SET base_rounds = ?, base_judges = ? WHERE id = ?")) {
+                ps.setInt(1, baseRounds);
+                ps.setInt(2, baseJueces);
+                ps.setString(3, id);
+                ps.executeUpdate();
+            }
+            return null;
+        });
+    }
+
     public Optional<FuncionRow> find(String id) {
         return db.inTransaction(c -> {
             try (var ps = c.prepareStatement("SELECT * FROM funcion WHERE id = ?")) {
