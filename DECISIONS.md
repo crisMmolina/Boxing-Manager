@@ -92,3 +92,4 @@ Why: a reversible option after 15 min keeps work moving.
 - 1793897518 | deadline decision/AND-021-1793862211/1793863111 | BLOCKED_OTHER_TASK | Option: Reemplazar ThemeV3Test por ThemeV4Test; Why: La paleta v4 cambia los valores que fija la prueba; mismo precedente que DSK-026 (16a1c75); no money, accounts, publishing or scope expansion.
 - 1794013915 | DSK-035 | Terminación sigue en la barra hasta DSK-036 | Why: no perder la terminación en main
 - 1794016186 | DSK-038 | botón a Evento en followup (App.java es de DSK-035) | Why: Paths
+- 1794017486 | DSK-037 | pelea en Jueces pasa a DSK-040 | Why: SeatTokens/JudgeHub con security-reviewer
