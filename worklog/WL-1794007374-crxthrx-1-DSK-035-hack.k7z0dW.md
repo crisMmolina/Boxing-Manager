@@ -1,12 +1,12 @@
 # worklog/WL-1794007374-crxthrx-1-DSK-035-hack.k7z0dW.md · DSK-035
 
 ## Live summary
-- Done: Inicio sin barra; barra del evento; regreso a Inicio
+- Done: human merge (zoe718)
 - Decision: Terminación sigue en la barra hasta DSK-036
 - Why: no perder la terminación en main
 - Failing: none
 - Commands: central/gradlew -p central test
-- Next: Wait for review of SHA 7614262
+- Next: Integrated in main: 31ded9e4842ab32ca24bb3e7a494f8e4187f30d2; claim next P0
 
 ## History
 - 1794007374 | CLAIMED | crxthrx-1 | claim; next: prueba de que Inicio no tiene StepsBar
@@ -14,3 +14,4 @@
 - 1794013915 | REVIEW | crxthrx-1 | checkpoint; next: Wait for review of SHA 7614262
 - 1794014938 | REVIEW | crxthrx-1 | heartbeat; lease until 1794101338
 - 1794023712 | REVIEW | zoe-rev | review; approve; SHA 7614262504ec39acd9e24805db69bfb7d2e9e324; reviewer zoe-rev
+- 1794024780 | INTEGRATED | crxthrx-1 | done; PR https://github.com/crisMmolina/Boxing-Manager/pull/106; evidence: human merge (zoe718); reviewer: zoe-rev
