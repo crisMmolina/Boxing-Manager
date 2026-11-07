@@ -21,11 +21,11 @@ public final class StepsBar extends HBox {
 
     private final Map<String, Button> steps = new LinkedHashMap<>();
     private final Map<String, Button> links = new LinkedHashMap<>();
+    private final HBox stepsBox = new HBox();
     private String currentId;
 
     public StepsBar(List<Item> stepItems, List<Item> linkItems, Consumer<String> onSelect) {
         getStyleClass().add("top-bar");
-        var stepsBox = new HBox();
         stepsBox.getStyleClass().add("steps");
         for (var item : stepItems) {
             var b = new Button(item.label());
@@ -61,6 +61,20 @@ public final class StepsBar extends HBox {
                 }
             });
         }
+    }
+
+    /**
+     * Dentro de un evento se ven los pasos y todos los enlaces; fuera (spec 005), solo el logo, el "?" y el tema, más
+     * el enlace {@code keepLink} si no es {@code null} (p. ej. "Inicio" para volver desde Nuevo evento).
+     */
+    public void showEvent(boolean inEvent, String keepLink) {
+        show(stepsBox, inEvent);
+        links.forEach((k, b) -> show(b, inEvent || k.equals(keepLink)));
+    }
+
+    private static void show(javafx.scene.Node node, boolean on) {
+        node.setVisible(on);
+        node.setManaged(on);
     }
 
     /** Id del paso o enlace activo, o {@code null}. */
