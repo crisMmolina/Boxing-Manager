@@ -1,7 +1,7 @@
 # STATE
 
 Phase: execution
-Updated: 1794024487
+Updated: 1794024637
 AVAILABLE: DSK-036 DSK-039 DSK-040 
 CLAIMED: -
 BLOCKED: -
@@ -16,11 +16,11 @@ DSK-038 | REVIEW | crxthrx-2 | until 1794102586
 
 Blockers: BLOCKED tasks; use status --task ID --summary.
 Current decisions (last 5):
-- 1793777028 | deadline decision/DSK-033-1793775399/1793776299 | REVERSIBLE_AND_LOG | Option: Por la revisión de seguridad: (a) un CODE_UNKNOWN por falta de cupo global no cuenta 
-- 1793897518 | deadline decision/AND-021-1793862211/1793863111 | BLOCKED_OTHER_TASK | Option: Reemplazar ThemeV3Test por ThemeV4Test; Why: La paleta v4 cambia los valores que fija 
 - 1794013915 | DSK-035 | Terminación sigue en la barra hasta DSK-036 | Why: no perder la terminación en main
 - 1794016186 | DSK-038 | botón a Evento en followup (App.java es de DSK-035) | Why: Paths
 - 1794017486 | DSK-037 | pelea en Jueces pasa a DSK-040 | Why: SeatTokens/JudgeHub con security-reviewer
+- 1794024637 | deadline decision/DSK-037-1794014890/1794015790 | REVERSIBLE_AND_LOG | Option: DSK-037 cubre la base del evento y las peleas programadas; la pelea que ya espera en J
+- 1794024637 | deadline decision/DSK-038-1794014667/1794015567 | REVERSIBLE_AND_LOG | Option: Sin pelea, Jueces dice 'Crea la pelea en Evento…' (conserva 'Crea la pelea' para Liv
 
 Global next step: available P0; else review PRs, tests, demo, rehearsal.
 Why: bounded snapshot to resume without rereading history.
