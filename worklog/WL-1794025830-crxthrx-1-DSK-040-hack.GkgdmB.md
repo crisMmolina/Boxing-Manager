@@ -11,3 +11,4 @@
 ## History
 - 1794025830 | CLAIMED | crxthrx-1 | claim; next: prueba de que bajar a 2 jueces con el lugar 3 sin juez quita su código
 - 1794025933 | CLAIMED | crxthrx-1 | pending decision DSK-040-1794025933; option: Reemplazar FuncionCambioTest.unaPeleaQueYaEmpezoConservaSusJuecesYRounds por FuncionPreparadaTest.unaPeleaConRoundAbiertoConservaSusJuecesYRounds (round 1 abierto) y quitarla; Why: La pelea en Jueces sin round ya no cuenta como empezada (spec 005 §Decisions, plan PR #110)
+- 1794028475 | CLAIMED | crxthrx-1 | pending decision DSK-040-1794028475; option: La pelea en Jueces cambia solo desde la base del evento, no desde su fila; Why: spec 005 dice 'del evento'; FuncionServiceTest.agregarQuitarReordenarYSaltarSoloAntesDeEmpezar fija que su fila no cambia y no se edita
