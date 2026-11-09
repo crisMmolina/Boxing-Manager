@@ -11,3 +11,4 @@
 ## History
 - 1794246814 | CLAIMED | crxthrx-4 | claim; next: tokens nuevos y tabla AA en DESIGN.md
 - 1794247095 | REVIEW | crxthrx-4 | done; PR https://github.com/crisMmolina/Boxing-Manager/pull/118; evidence: Verify OK; contraste.py 0 pares sin AA · no red: solo documentación de diseño: no hay código que una prueba muestre primero; reviewer: -
+- 1794247247 | REVIEW | cris-2 | review; reject; SHA a32da68c2ad52c2a1233a505318ffcb0cd3bd66a; reviewer cris-2
