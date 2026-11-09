@@ -1,12 +1,12 @@
 # worklog/WL-1794240412-crxthrx-1-DSK-039-hack.mYfXrs.md · DSK-039
 
 ## Live summary
-- Done: central test exit 0; smoke PRODUCT_PASS · red at e821b69:     org.opentest4j.AssertionFailedError at LogNombresTest.java:61
+- Done: human merge (crisMmolina)
 - Decision: Own branch and worktree
 - Why: Parallel work without touching the main checkout
 - Failing: No validation run yet
 - Commands: `central/gradlew -p central test`
-- Next: Another agent reviews https://github.com/crisMmolina/Boxing-Manager/pull/116; run .uak/bin/smoke
+- Next: Integrated in main: 08c375ef67cb74c85aff459de4207d4cb70e551d; claim next P0
 
 ## History
 - 1794240412 | CLAIMED | crxthrx-1 | claim; next: `ConsistencyTest` con los títulos de cada sección
@@ -16,3 +16,4 @@
 - 1794242876 | REVIEW | cris-2 | review; approve; SHA 6946fcb631af4296ab6461d266800f507acd09ea; reviewer cris-2
 - 1794243195 | REVIEW | crxthrx-1 | done; PR https://github.com/crisMmolina/Boxing-Manager/pull/116; evidence: central test exit 0; smoke PRODUCT_PASS · red at e821b69:     org.opentest4j.AssertionFailedError at LogNombresTest.java:61; reviewer: -
 - 1794243412 | REVIEW | cris-2 | review; approve; SHA 91fc4fe0b8c3cf6f45bb0090346c01dc22869881; reviewer cris-2
+- 1794243667 | INTEGRATED | crxthrx-1 | done; PR https://github.com/crisMmolina/Boxing-Manager/pull/116; evidence: human merge (crisMmolina); reviewer: cris-2
