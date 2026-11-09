@@ -26,3 +26,4 @@ node_modules/
 .next/
 dist/
 **/build/
+.uak-shots/

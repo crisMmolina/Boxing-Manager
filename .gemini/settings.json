@@ -13,7 +13,7 @@
           {
             "name": "uak-start",
             "type": "command",
-            "command": "bash \"$(git rev-parse --show-toplevel)/.uak/bin/hook\" session-start gemini",
+            "command": "git -c \"alias.uak-hook=!unset GIT_DIR GIT_WORK_TREE GIT_PREFIX GIT_CONFIG_PARAMETERS; exec bash .uak/bin/hook session-start gemini\" uak-hook",
             "timeout": 45000
           }
         ]
@@ -26,13 +26,13 @@
           {
             "name": "uak-guard",
             "type": "command",
-            "command": "bash \"$(git rev-parse --show-toplevel)/.uak/bin/guard\" bash",
+            "command": "git -c \"alias.uak-hook=!unset GIT_DIR GIT_WORK_TREE GIT_PREFIX GIT_CONFIG_PARAMETERS; exec bash .uak/bin/guard bash\" uak-hook",
             "timeout": 5000
           },
           {
             "name": "uak-output-cap",
             "type": "command",
-            "command": "bash \"$(git rev-parse --show-toplevel)/.uak/bin/hook\" wrap gemini",
+            "command": "git -c \"alias.uak-hook=!unset GIT_DIR GIT_WORK_TREE GIT_PREFIX GIT_CONFIG_PARAMETERS; exec bash .uak/bin/hook wrap gemini\" uak-hook",
             "timeout": 5000
           }
         ]
@@ -45,7 +45,7 @@
           {
             "name": "uak-tick",
             "type": "command",
-            "command": "bash \"$(git rev-parse --show-toplevel)/.uak/bin/hook\" tick gemini",
+            "command": "git -c \"alias.uak-hook=!unset GIT_DIR GIT_WORK_TREE GIT_PREFIX GIT_CONFIG_PARAMETERS; exec bash .uak/bin/hook tick gemini\" uak-hook",
             "timeout": 10000
           }
         ]
@@ -58,7 +58,7 @@
           {
             "name": "uak-away",
             "type": "command",
-            "command": "bash \"$(git rev-parse --show-toplevel)/.uak/bin/hook\" session-end",
+            "command": "git -c \"alias.uak-hook=!unset GIT_DIR GIT_WORK_TREE GIT_PREFIX GIT_CONFIG_PARAMETERS; exec bash .uak/bin/hook session-end\" uak-hook",
             "timeout": 20000
           }
         ]
@@ -67,12 +67,13 @@
   },
   "mcpServers": {
     "uak": {
-      "command": "bash",
+      "command": "git",
       "args": [
         "-c",
-        "for p in python3 python py; do \"$p\" -c 'import sys; sys.exit(sys.version_info < (3, 8))' 2>/dev/null && exec \"$p\" \"$(git rev-parse --show-toplevel)/.uak/bin/uak-mcp\"; done; echo 'uak-mcp needs Python 3.8+ (the uak CLI works without it)' >&2; exit 1"
+        "alias.uak-mcp=!for p in python3 python py; do \"$p\" -c 'import sys; sys.exit(sys.version_info < (3, 8))' 2>/dev/null && exec \"$p\" .uak/bin/uak-mcp; done; echo 'uak-mcp needs Python 3.8+ (the uak CLI works without it)' >&2; exit 1",
+        "uak-mcp"
       ],
-      "timeout": 600000,
+      "timeout": 1200000,
       "trust": false
     }
   }
