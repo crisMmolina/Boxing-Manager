@@ -4,7 +4,6 @@ import com.sigebox.central.ui.funcion.FuncionScreen;
 import com.sigebox.central.ui.log.LogScreen;
 import com.sigebox.central.ui.result.ResultStepScreen;
 import com.sigebox.central.ui.rounds.RoundsScreen;
-import com.sigebox.central.ui.termination.TerminationScreen;
 import com.sigebox.central.ui.terms.TermsScreen;
 import com.sigebox.central.ui.theme.StepsBar;
 import java.util.List;
@@ -26,7 +25,6 @@ public final class Nav {
     /** Enlaces a la derecha: Inicio primero, para volver desde cualquier pantalla. */
     public static final List<StepsBar.Item> LINKS = List.of(
             new StepsBar.Item(InicioScreen.ID, "Inicio"),
-            new StepsBar.Item(TerminationScreen.ID, "Terminación"),
             new StepsBar.Item(LogScreen.ID, "Bitácora"));
 
     /** Pantallas fuera de un evento (spec 005): Inicio, Nuevo evento, la cartelera de consulta y los términos. */

@@ -4,6 +4,7 @@ import com.sigebox.central.service.DescuentoService;
 import com.sigebox.central.service.RoundService;
 import com.sigebox.central.ui.Screens;
 import com.sigebox.central.ui.help.HelpButton;
+import com.sigebox.central.ui.termination.TerminarEnVivo;
 import com.sigebox.central.ui.theme.Ui;
 import com.sigebox.core.model.EstadoRound;
 import java.util.function.Supplier;
@@ -38,6 +39,9 @@ public final class RoundsScreen {
 
     /** Id del botón principal (abrir, cerrar o "Cerrar pelea"), para {@link #firePrimary}. */
     public static final String PRIMARY_ID = "round-primary";
+
+    /** Id de "Terminar pelea" (spec 005: la terminación se hace en En vivo). */
+    public static final String END_ID = "fight-end";
     private static final String NO_FIGHT = "Inicia una pelea desde Evento.";
 
     private static final Duration REFRESH = Duration.millis(500);
@@ -63,6 +67,12 @@ public final class RoundsScreen {
         screens.register(ID, "En vivo", () -> build(service, descuentos, DescuentosPanel.DIALOGS, fightId, onFinish));
     }
 
+    /** Con "Terminar pelea" (spec 005): termina y cierra desde aquí; {@code onFinish} sigue llevando a Resultado. */
+    public static void register(Screens<Node> screens, RoundService service, Supplier<String> fightId,
+            Runnable onFinish, TerminarEnVivo terminar) {
+        screens.register(ID, "En vivo", () -> build(service, null, null, fightId, onFinish, terminar));
+    }
+
     /** {@code Ctrl+Enter}: pulsa el botón principal del tablero dentro de {@code scope}, si está. */
     public static boolean firePrimary(Node scope) {
         if (scope.lookup("#" + PRIMARY_ID) instanceof Button b && !b.isDisabled()) {
@@ -82,6 +92,11 @@ public final class RoundsScreen {
 
     static Node build(RoundService service, DescuentoService descuentos, DescuentosPanel.Ask ask,
             Supplier<String> fightId, Runnable onFinish) {
+        return build(service, descuentos, ask, fightId, onFinish, null);
+    }
+
+    static Node build(RoundService service, DescuentoService descuentos, DescuentosPanel.Ask ask,
+            Supplier<String> fightId, Runnable onFinish, TerminarEnVivo terminar) {
         var title = Ui.screenTitle("En vivo");
         var grid = new GridPane();
         grid.setHgap(8);
@@ -101,6 +116,13 @@ public final class RoundsScreen {
         var next = Ui.next(NO_FIGHT);
         var why = Ui.why("Inicia una pelea desde Evento para abrir rounds.", action);
         var actions = Ui.card(Ui.cardTitle("Acciones"), action, why, status);
+        var end = Ui.secondary("Terminar pelea");
+        end.setId(END_ID);
+        end.setMaxWidth(Double.MAX_VALUE);
+        end.setDisable(true);
+        if (terminar != null) {
+            actions.getChildren().add(2, end); // bajo el aviso del botón principal
+        }
         var panel = descuentos == null ? null : new DescuentosPanel(descuentos, fightId, ask);
         // Solo se redibuja con otro dato: el refresco no debe quitar el botón de ayuda bajo el cursor.
         var drawn = new RoundService.Live[1];
@@ -114,6 +136,8 @@ public final class RoundsScreen {
                 action.setText("Abrir round");
                 grid.getChildren().clear();
                 action.setDisable(true);
+                why.setText("Inicia una pelea desde Evento para abrir rounds.");
+                end.setDisable(true);
                 if (panel != null) {
                     panel.clear();
                 }
@@ -123,8 +147,9 @@ public final class RoundsScreen {
             if (!live.equals(drawn[0])) {
                 drawn[0] = live;
                 fillGrid(grid, live);
-                fillControl(live, roundTitle, pill, sent, action, next);
+                fillControl(live, roundTitle, pill, sent, action, next, why);
             }
+            end.setDisable(terminar == null || !terminar.disponible(f));
             if (panel != null) {
                 panel.refresh(live.rounds(), live.current());
             }
@@ -160,6 +185,14 @@ public final class RoundsScreen {
             var word = new TextInputDialog();
             word.setHeaderText("Escribe " + RoundService.CONFIRM_WORD + " para cerrar el round " + n);
             word.showAndWait().ifPresent(text -> run(status, () -> service.closeRound(f, n, text), refresh));
+        });
+
+        end.setOnAction(e -> {
+            var f = fightId.get();
+            if (f != null && terminar != null) {
+                var window = end.getScene() == null ? null : end.getScene().getWindow();
+                run(status, () -> terminar.terminar(window, f), refresh);
+            }
         });
 
         var timer = new Timeline(new KeyFrame(REFRESH, e -> refresh.run()));
@@ -265,8 +298,26 @@ public final class RoundsScreen {
         return box;
     }
 
+    /**
+     * Spec 005: con un juez sin conectar no se abre el round. Un lugar vacío (sin juez) se resuelve en Jueces o
+     * bajando los jueces en Evento; un juez aprobado que se cayó se reconecta solo al abrir SIGEBOX.
+     */
+    static String missingJudge(RoundService.Live live) {
+        for (var j : live.judges()) {
+            if (j.connected()) {
+                continue;
+            }
+            return j.name() == null
+                    ? "Falta conectar al Juez " + j.seat() + ". Conéctalo en Jueces o baja los jueces en Evento si no"
+                            + " va a llegar."
+                    : "Falta conectar al Juez " + j.seat() + " · " + j.name() + ". Pídele que abra SIGEBOX en su"
+                            + " teléfono: se reconecta solo.";
+        }
+        return null;
+    }
+
     private static void fillControl(RoundService.Live live, Label title, Label pill, Label sent, Button action,
-            Label next) {
+            Label next, Label why) {
         int n = live.current();
         if (n == 0) {
             title.setText("Rounds terminados");
@@ -288,6 +339,13 @@ public final class RoundsScreen {
             pill.setText("Por abrir");
             sent.setText("");
             action.setText("Abrir round " + n);
+            var missing = missingJudge(live);
+            if (missing != null) {
+                why.setText(missing);
+                Ui.next(next, "Conecta a todos los jueces para abrir el round " + n + ".");
+                action.setDisable(true);
+                return;
+            }
             Ui.next(next, "Abre el round " + n + ".");
         }
         action.setDisable(false);
