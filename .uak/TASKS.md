@@ -1296,12 +1296,13 @@ En Windows (zoe) los comandos `Verify` se corren en Git Bash.
 - **Estimate:** 4 h
 - **Rubric / Spec:** spec 005 §Una sola línea
 - **Depends on:** DSK-035, DSK-036, DSK-037, DSK-038
-- **Paths:** central/src/main/java/com/sigebox/central/ui/, docs/runbook.md, central/src/test/java/com/sigebox/central/ui/ConsistencyTest.java
+- **Paths:** central/src/main/java/com/sigebox/central/ui/, central/src/main/java/com/sigebox/central/App.java, docs/runbook.md, central/src/test/java/com/sigebox/central/ui/
 - **Freeze-Allowed:** no
 - **Acceptance:**
   - Cada título coincide con su sección de la barra; mismo verbo para la misma acción ("Nuevo evento" en Inicio y en el botón que lo crea); preguntas con "¿…?"; botones con mayúscula solo al inicio; "Qué sigue" con el mismo patrón
   - `ConsistencyTest` recorre todas las pantallas y falla en cualquiera de esos casos
   - Evidencia: capturas de cada pantalla en claro y oscuro revisadas con `design-critic`
+  - Jueces sin pelea: botón "Ir a Evento" que lleva a Evento (spec 005 §Jueces; followup de DSK-038, que no tenía `App.java`) (prueba)
 - **Verify:** `central/gradlew -p central test`
 - **Next step:** `ConsistencyTest` con los títulos de cada sección
 
