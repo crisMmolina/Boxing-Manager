@@ -84,7 +84,7 @@ public final class TerminationScreen {
             }
             var input = new TerminationService.Input(motivo.getValue(), otro.getText(), esquina.getValue(),
                     round.getValue(), tiempo.getText(), obs.getText());
-            var warn = new Alert(Alert.AlertType.CONFIRMATION, "Terminar la pelea por "
+            var warn = new Alert(Alert.AlertType.CONFIRMATION, "¿Terminar la pelea por "
                     + TerminationService.label(input.motivo()) + " en el round " + input.round() + "?",
                     ButtonType.CANCEL, ButtonType.OK);
             if (warn.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) {

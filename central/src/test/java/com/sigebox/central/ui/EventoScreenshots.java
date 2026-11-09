@@ -185,7 +185,7 @@ class EventoScreenshots {
         var root = new BorderPane();
         root.getStyleClass().add("app-root");
         var bar = new StepsBar(Nav.STEPS, Nav.LINKS, x -> { });
-        bar.select(id);
+        Nav.apply(bar, id); // como App: fuera del evento, sin la barra del evento (spec 005)
         root.setTop(bar);
         var node = screens.show(id);
         node.getStyleClass().add("screen");

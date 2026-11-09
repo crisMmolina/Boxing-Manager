@@ -54,6 +54,32 @@ public final class LogQuery {
         });
     }
 
+    /** Nombre visible de cada pelea (spec 005: el id interno no se muestra). */
+    public java.util.Map<String, String> nombres() {
+        return db.inTransaction(c -> {
+            var out = new java.util.HashMap<String, String>();
+            try (var st = c.createStatement();
+                    var rs = st.executeQuery("""
+                            SELECT f.id, c.position, f.red_corner, f.blue_corner
+                            FROM fight f LEFT JOIN funcion_card c ON c.fight_id = f.id""")) {
+                while (rs.next()) {
+                    var esquinas = rs.getString(3) + " vs " + rs.getString(4);
+                    int position = rs.getInt(2);
+                    out.put(rs.getString(1), rs.wasNull() ? esquinas : "Pelea " + position + " · " + esquinas);
+                }
+            }
+            return out;
+        });
+    }
+
+    /** El nombre visible de {@code fightId} (o {@link #GLOBAL}); nunca el id interno. */
+    public static String nombre(java.util.Map<String, String> nombres, String fightId) {
+        if (fightId == null || GLOBAL.equals(fightId)) {
+            return GLOBAL;
+        }
+        return nombres.getOrDefault(fightId, "Pelea sin nombre");
+    }
+
     /** Peleas con eventos, más {@link #GLOBAL} si hay eventos sin pelea. */
     public List<String> fights() {
         return db.inTransaction(c -> {
