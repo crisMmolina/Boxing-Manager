@@ -9,6 +9,14 @@ Todo recurso de terceros que usen las apps queda aquí con su origen y su licenc
 | Barlow Condensed | SIL Open Font License 1.1 | `android/app/src/main/res/font/`, `central/src/main/resources/com/sigebox/central/fonts/` |
 | Inter | SIL Open Font License 1.1 | mismas carpetas |
 
+## Íconos (DSN-005, v5)
+
+| Recurso | Licencia | Origen | Dónde está |
+|---|---|---|---|
+| Lucide (solo los trazos que se usan, ver `docs/DESIGN.md` §3.9) | ISC License (permisiva, uso comercial permitido, conservar el aviso de copyright) | https://lucide.dev · https://github.com/lucide-icons/lucide/blob/main/LICENSE | `central/.../ui/theme/Icons.java`, `android/app/src/main/res/drawable/ic_*.xml` |
+
+Aviso que se conserva junto a los trazos: «ISC License · Copyright (c) for portions of Lucide are held by Cole Bemis 2013-2022 as part of Feather (MIT). All other copyright (c) for Lucide are held by Lucide Contributors 2022.»
+
 ## Logo: guantes de box rojos (DSN-004)
 
 **Estado: elegida la opción B** (ver «Elegida»). Se preguntó con `uak msg human` (#189) el 2026-11-03 y no se descargó nada antes de la respuesta.

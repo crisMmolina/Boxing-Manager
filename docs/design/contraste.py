@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Mide los tokens de color de DESIGN.md v4 y escribe docs/design/contraste.md.
+"""Mide los tokens de color de DESIGN.md v5 (con los de la v4) y escribe docs/design/contraste.md.
 
 Métodos:
 - Contraste: luminancia relativa de WCAG 2.x, (L1 + 0.05) / (L2 + 0.05).
@@ -21,6 +21,10 @@ TOKENS = {
         "red": "#9F2241", "on_red": "#FFFFFF", "red_numeral": "#9F2241",
         "blue": "#266CB4", "on_blue": "#FFFFFF", "blue_numeral": "#266CB4",
         "connected": "#027A35", "disconnected": "#57534C",
+        # v5 (DSN-005)
+        "nav": "#111110", "nav_ink": "#B9B3A8", "nav_ink_dim": "#8F897E", "nav_active": "#2A2418",
+        "success_soft": "#E3F3E8", "success_ink": "#027A35", "pending_ink": "#5C431E", "ink_3": "#8F897E",
+        "ring_track": "#E9E6DF",
     },
     "oscuro": {
         "bg": "#0E0E0C", "surface": "#1A1917", "surface_2": "#24221F", "line": "#34312C",
@@ -31,6 +35,10 @@ TOKENS = {
         "red": "#E58A9D", "on_red": "#111110", "red_numeral": "#E58A9D",
         "blue": "#8CB8EE", "on_blue": "#111110", "blue_numeral": "#8CB8EE",
         "connected": "#4CC97A", "disconnected": "#B9B3A8",
+        # v5 (DSN-005)
+        "nav": "#0A0A09", "nav_ink": "#B9B3A8", "nav_ink_dim": "#8F897E", "nav_active": "#2A2418",
+        "success_soft": "#16301F", "success_ink": "#7FE0A2", "pending_ink": "#E9C978", "ink_3": "#8F897E",
+        "ring_track": "#24221F",
     },
 }
 
@@ -47,6 +55,10 @@ PARES = [
     ("primary", "bg", "ui"), ("primary", "surface", "ui"), ("field_border", "surface", "ui"),
     ("red", "surface", "ui"), ("blue", "surface", "ui"),
     ("accent", "surface_2", "ui"), ("connected", "surface", "ui"), ("disconnected", "surface", "ui"),
+    # v5 (DSN-005)
+    ("nav_ink", "nav", "texto"), ("nav_ink_dim", "nav", "texto"), ("on_bar", "nav_active", "texto"),
+    ("bar_accent", "nav_active", "texto"), ("success_ink", "success_soft", "texto"),
+    ("pending_ink", "accent_soft", "texto"), ("ink_3", "surface", "grande"), ("bar_accent", "nav_active", "ui"),
 ]
 
 # Colores que no deben confundirse entre sí.
