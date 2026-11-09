@@ -1,12 +1,12 @@
 # worklog/WL-1794246814-crxthrx-4-DSN-005-hack.DGwt1X.md · DSN-005
 
 ## Live summary
-- Done: Verify OK; contraste.py 0 pares sin AA · no red: solo documentación de diseño
+- Done: human merge (crisMmolina)
 - Decision: Own branch and worktree
 - Why: Parallel work without touching the main checkout
 - Failing: No validation run yet
 - Commands: `grep -q 'v5' docs/DESIGN.md && grep -q 'Lucide' docs/design/CREDITOS.md`
-- Next: Another agent reviews https://github.com/crisMmolina/Boxing-Manager/pull/118; run .uak/bin/smoke
+- Next: Integrated in main: fbc4134c661069dd152a0b0eb8c90bfb5e1b1031; claim next P0
 
 ## History
 - 1794246814 | CLAIMED | crxthrx-4 | claim; next: tokens nuevos y tabla AA en DESIGN.md
@@ -14,3 +14,4 @@
 - 1794247247 | REVIEW | cris-2 | review; reject; SHA a32da68c2ad52c2a1233a505318ffcb0cd3bd66a; reviewer cris-2
 - 1794251222 | REVIEW | crxthrx-4 | done; PR https://github.com/crisMmolina/Boxing-Manager/pull/118; evidence: Verify OK; contraste.py 0 pares sin AA · no red: solo documentación de diseño; reviewer: -
 - 1794251390 | REVIEW | cris-2 | review; approve; SHA a7860f78d8057113171fc4303f2a84d1876e2a86; reviewer cris-2
+- 1794251981 | INTEGRATED | crxthrx-4 | done; PR https://github.com/crisMmolina/Boxing-Manager/pull/118; evidence: human merge (crisMmolina); reviewer: cris-2
