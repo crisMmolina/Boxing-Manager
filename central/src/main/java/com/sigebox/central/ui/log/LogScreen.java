@@ -120,7 +120,7 @@ public final class LogScreen {
             sync(fight, s.fights());
             sync(type, s.types());
             show(table, s.rows());
-            count.setText(s.rows().size() + " registros"
+            count.setText(s.rows().size() + " eventos"
                     + (s.rows().size() == LogQuery.DEFAULT_LIMIT ? " (los más recientes)" : ""));
             LiveRefresh.swap(slot, List.of(table));
         });
