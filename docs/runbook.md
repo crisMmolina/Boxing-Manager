@@ -68,14 +68,15 @@ Al pulsar **Unirme**, el teléfono queda en **Esperando aprobación** y muestra 
 | "No encontramos la central" | Revisa la IP y que el teléfono siga en el hotspot (guía "?", §6) |
 | "No fuiste aprobado" | La mesa lo rechazó: revisa que sea el teléfono correcto y únete de nuevo |
 
-El **Código de la pelea** de la pantalla Jueces es otro: tiene letras y es el mismo para todos. El juez no lo necesita.
+La pantalla Jueces solo muestra el código de 6 números de cada lugar. Si no hay pelea que emparejar, **Ir a Evento** lleva a la cartelera para iniciar la siguiente.
 
 ## 5. Durante la pelea
 
 - **En vivo:** `Abrir round N` / `Cerrar round N`, o `Ctrl+Enter`. El tablero marca a cada juez como Pendiente, Enviado, Tardío o Corregido en cuanto llega su tarjeta, **sin puntos, totales ni ganador**.
+- **Falta conectar un juez:** `Abrir round N` queda desactivado y dice cuál falta. Si su lugar está vacío y no va a llegar, baja los jueces en **Evento** (solo antes del round 1). Si el juez se cayó, que abra SIGEBOX en su teléfono: se reconecta solo.
 - **Falta un juez al cerrar:** la central pide confirmar y escribir **AVANZAR**. El teléfono de ese juez vibra y le exige calificar; su tarjeta llega marcada **Tardío**.
 - **Corregir una tarjeta:** solo el juez puede corregir la suya, desde su teléfono; llega marcada **Corregido**. La mesa no captura ni cambia puntos.
-- **Terminación extraordinaria (KO, descalificación, etc.):** enlace **Terminación**. Pide motivo, esquina ganadora, round y tiempo, y confirmar escribiendo **TERMINAR**.
+- **Terminación extraordinaria (KO, descalificación, etc.):** **Terminar pelea** en En vivo. Pide solo el motivo (y la esquina o la razón si el motivo las pide); el round y el tiempo los pone la central. Al confirmar, la pelea se cierra con su resultado y se abre su hoja en **Resultado**.
 - **Bitácora:** el enlace **Bitácora** muestra todo lo que pasó, con filtros por pelea y tipo.
 
 ### Descuentos

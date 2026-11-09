@@ -130,7 +130,7 @@ public final class RoundsScreen {
         Runnable refresh = () -> {
             var f = fightId.get();
             if (f == null) {
-                title.setText("Sin pelea activa");
+                title.setText("En vivo"); // spec 005: el título es siempre el de su sección
                 drawn[0] = null;
                 Ui.next(next, NO_FIGHT);
                 action.setText("Abrir round");
@@ -178,7 +178,7 @@ public final class RoundsScreen {
             }
             // Doble confirmación: aviso + escribir la palabra.
             var warn = new Alert(Alert.AlertType.CONFIRMATION,
-                    "Faltan los jueces " + missing + ". Cerrar el round igual?", ButtonType.CANCEL, ButtonType.OK);
+                    "Faltan los jueces " + missing + ". ¿Cerrar el round igual?", ButtonType.CANCEL, ButtonType.OK);
             if (warn.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) {
                 return;
             }

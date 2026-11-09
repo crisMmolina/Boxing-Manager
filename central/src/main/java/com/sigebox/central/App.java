@@ -152,6 +152,7 @@ public final class App {
                     id -> show(screens, root, content, id));
             var setup = new SetupScreen(fights, hub, JudgeServer.DEFAULT_PORT,
                     () -> show(screens, root, content, RoundsScreen.ID));
+            setup.alEvento(() -> show(screens, root, content, FuncionScreen.ID)); // spec 005: Jueces sin pelea
             setup.register(screens, SetupScreen.ID, "Pelea");
             setup.register(screens, JUECES, "Jueces");
             var results = ResultService.forHub(db, hub);

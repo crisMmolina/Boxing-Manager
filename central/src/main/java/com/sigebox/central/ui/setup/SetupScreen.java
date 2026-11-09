@@ -45,6 +45,8 @@ public final class SetupScreen {
     /** Se escriben en el hilo de JavaFX y se leen en la lectura de fondo. */
     private final Map<String, FightService.Invitation> invitations = new ConcurrentHashMap<>();
     private volatile String host;
+    /** Lleva a Evento (spec 005 §Jueces); sin él, la pantalla sin pelea no tiene botón. */
+    private volatile Runnable toEvento;
 
     /** Lo que la pantalla dibuja; con otro valor se redibuja, con el mismo no se pierde el foco. */
     private record Snapshot(Pelea pelea, List<Integer> connected, List<FightService.Seat> seats,
@@ -65,6 +67,11 @@ public final class SetupScreen {
         this.reads = reads;
     }
 
+    /** Sin pelea, la pantalla ofrece "Ir a Evento", que corre {@code go}. */
+    public void alEvento(Runnable go) {
+        this.toEvento = go;
+    }
+
     /** Registra la pantalla bajo {@code id} (los pasos "Pelea" y "Jueces" pueden compartirla). */
     public void register(Screens<Node> screens, String id, String title) {
         screens.register(id, title, this::build);
@@ -81,15 +88,22 @@ public final class SetupScreen {
         HBox.setHgrow(seats, Priority.ALWAYS);
         var footer = new HBox(16);
         footer.setAlignment(Pos.CENTER_LEFT);
-        var next = Ui.next("Un momento, leyendo la pelea.");
-        var root = new VBox(16, Ui.screenTitle("Emparejar jueces"), next, new HBox(24, left, seats), footer, status);
+        var next = Ui.next("Espera a que se lea la pelea.");
+        var root = new VBox(16, Ui.screenTitle("Jueces"), next, new HBox(24, left, seats), footer, status);
 
         LiveRefresh.watch(root, reads, this::read, s -> {
             if (s.pelea() == null) {
                 // Spec 005: las peleas se crean en Evento; aquí solo se empareja la que sigue.
                 Ui.next(next, "Crea la pelea en Evento para emparejar a los jueces.");
-                LiveRefresh.swap(left, List.of(Ui.card(Ui.cardTitle("Pelea"),
-                        Ui.support("Las peleas del evento se agregan en Evento. Al iniciar la siguiente, aparece aquí."))));
+                var card = Ui.card(Ui.cardTitle("Pelea"),
+                        Ui.support("Las peleas del evento se agregan en Evento. Al iniciar la siguiente, aparece aquí."));
+                var go = toEvento;
+                if (go != null) {
+                    var toEventoButton = Ui.primary("Ir a Evento");
+                    toEventoButton.setOnAction(e -> go.run());
+                    card.getChildren().add(toEventoButton);
+                }
+                LiveRefresh.swap(left, List.of(card));
                 LiveRefresh.swap(seats, List.of(Ui.support("Crea la pelea en Evento para ver el código de cada lugar.")));
                 footer.getChildren().clear();
                 return;
