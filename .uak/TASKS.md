@@ -1324,3 +1324,154 @@ En Windows (zoe) los comandos `Verify` se corren en Git Bash.
   - Revisión con `security-reviewer` (toca códigos y sesiones)
 - **Verify:** `central/gradlew -p central test`
 - **Next step:** prueba de que bajar a 2 jueces con el lugar 3 sin juez quita su código
+
+## DSN-005 · Guía visual v5 «Arena nocturna»
+
+- **Type:** design
+- **Priority:** P0
+- **Estimate:** 0.5 d
+- **Rubric / Spec:** spec 006
+- **Depends on:** DSN-004
+- **Paths:** docs/DESIGN.md, docs/design/
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - `docs/DESIGN.md` v5 (reemplaza v4, conserva sus principios vigentes): barra lateral, encabezado, aviso "Qué sigue", stepper, menú ⋯, chips, avatar, anillo de avance y segmentos de rounds; tokens de radio, espaciado y movimiento con los mismos nombres en las dos apps
+  - Tabla AA medida para cada par nuevo (fondos tenues de conectado y pendiente, chips) en claro y oscuro
+  - Íconos: set elegido con licencia libre y URL anotados en `docs/design/CREDITOS.md`; lista de los íconos que usa cada app
+  - Movimiento: duraciones, curvas y qué hace "reducir movimiento" en cada app
+- **Verify:** `grep -q 'v5' docs/DESIGN.md && grep -q 'Lucide' docs/design/CREDITOS.md`
+- **Next step:** tokens nuevos y tabla AA en DESIGN.md
+
+## DSK-041 · Central v5: íconos, componentes y movimiento
+
+- **Type:** feature
+- **Priority:** P0
+- **Estimate:** 1 d
+- **Rubric / Spec:** spec 006 §Central, §Las dos
+- **Depends on:** DSN-005
+- **Paths:** central/src/main/java/com/sigebox/central/ui/theme/, central/src/main/resources/com/sigebox/central/app.css, central/src/main/resources/com/sigebox/central/light.css, central/src/main/resources/com/sigebox/central/dark.css, central/src/main/resources/com/sigebox/central/v5-shell.css, central/src/main/resources/com/sigebox/central/v5-evento.css, central/src/main/resources/com/sigebox/central/v5-envivo.css, central/src/main/resources/com/sigebox/central/v5-resultado.css, central/src/test/java/com/sigebox/central/ui/theme/
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - `Icons`: íconos de línea como `SVGPath` (sin dependencias), con color del tema y tamaño 16/20/24 (prueba)
+  - `Stepper` (− valor +) con rango, teclado (flechas, + y −) y texto accesible; `ActionMenu` (⋯), `Callout` ("Qué sigue" con ícono), `Chip`, `Avatar` (iniciales) (prueba)
+  - `Motion`: entrada de pantalla (fundido + 8 px, ≤ 220 ms), hover y presión; con "reducir movimiento" solo fundidos ≤ 150 ms (prueba)
+  - Tokens v5 en `app.css`, `light.css` y `dark.css`; las hojas `v5-*.css` existen y `Theme` las carga, para que cada área tenga la suya
+  - Las pantallas actuales siguen funcionando (suite completa en verde)
+- **Verify:** `central/gradlew -p central test`
+- **Next step:** prueba de `Stepper` con rango y teclado
+
+## DSK-042 · Central v5: barra lateral, encabezado y transición entre pantallas
+
+- **Type:** feature
+- **Priority:** P0
+- **Estimate:** 1 d
+- **Rubric / Spec:** spec 006 §Central
+- **Depends on:** DSK-041
+- **Paths:** central/src/main/java/com/sigebox/central/ui/theme/SideNav.java, central/src/main/java/com/sigebox/central/ui/theme/StepsBar.java, central/src/main/java/com/sigebox/central/ui/theme/PageHeader.java, central/src/main/java/com/sigebox/central/ui/inicio/Nav.java, central/src/main/java/com/sigebox/central/App.java, central/src/main/resources/com/sigebox/central/v5-shell.css, central/src/test/java/com/sigebox/central/ui/theme/SideNavTest.java, central/src/test/java/com/sigebox/central/ui/theme/PageHeaderTest.java, central/src/test/java/com/sigebox/central/ui/inicio/
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - Barra lateral: logo, evento en curso con su avance, pasos con ícono (✓ terminados, punto que late en En vivo con round abierto), Bitácora, Inicio, ayuda y tema; fuera del evento, como spec 005 (prueba)
+  - `PageHeader`: contexto, título de la sección y acción principal a la derecha (prueba)
+  - Cambio de pantalla con `Motion` (prueba con reducir movimiento)
+  - La API de la barra (`select`, `showEvent`) se conserva: `NavModeTest` y `ConsistencyTest` siguen en verde
+- **Verify:** `central/gradlew -p central test`
+- **Next step:** prueba de `SideNav` con el avance del evento
+
+## DSK-043 · Central v5: Inicio y Evento
+
+- **Type:** feature
+- **Priority:** P1
+- **Estimate:** 1 d
+- **Rubric / Spec:** spec 006 §Central
+- **Depends on:** DSK-042
+- **Paths:** central/src/main/java/com/sigebox/central/ui/inicio/InicioScreen.java, central/src/main/java/com/sigebox/central/ui/inicio/NuevoEventoScreen.java, central/src/main/java/com/sigebox/central/ui/inicio/CarteleraScreen.java, central/src/main/java/com/sigebox/central/ui/funcion/, central/src/main/resources/com/sigebox/central/v5-evento.css, central/src/test/java/com/sigebox/central/ui/funcion/, central/src/test/java/com/sigebox/central/ui/inicio/InicioV5Test.java
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - Cartelera como lista: número, esquinas con punto de color, rounds, jueces, estado y menú ⋯ con todas las acciones de hoy (prueba)
+  - Base del evento y nuevo evento con `Stepper`; ningún `Spinner` en estas pantallas (prueba)
+  - Inicio con tarjetas de evento y estado vacío dibujado
+  - Capturas claro y oscuro revisadas por un crítico de diseño
+- **Verify:** `central/gradlew -p central test`
+- **Next step:** prueba de que la fila de la cartelera tiene menú ⋯ y no botones sueltos
+
+## DSK-044 · Central v5: Jueces y En vivo
+
+- **Type:** feature
+- **Priority:** P1
+- **Estimate:** 1 d
+- **Rubric / Spec:** spec 006 §Central · principio 3
+- **Depends on:** DSK-042
+- **Paths:** central/src/main/java/com/sigebox/central/ui/setup/, central/src/main/java/com/sigebox/central/ui/rounds/, central/src/main/java/com/sigebox/central/ui/termination/, central/src/main/resources/com/sigebox/central/v5-envivo.css, central/src/test/java/com/sigebox/central/ui/setup/, central/src/test/java/com/sigebox/central/ui/rounds/, central/src/test/java/com/sigebox/central/ui/termination/
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - En vivo: anillo de tarjetas recibidas, segmentos de rounds y una tarjeta por juez (iniciales, conexión, estado del round); sin puntos ni totales (prueba)
+  - Jueces: tarjetas de lugar con código grande, QR y estado con chip (prueba)
+  - Capturas claro y oscuro revisadas por un crítico de diseño
+- **Verify:** `central/gradlew -p central test`
+- **Next step:** prueba de que En vivo muestra el anillo con N de M tarjetas y ningún marcador
+
+## DSK-045 · Central v5: Resultado, ventana de resultado, Bitácora y ayuda
+
+- **Type:** feature
+- **Priority:** P2
+- **Estimate:** 1 d
+- **Rubric / Spec:** spec 006 §Central
+- **Depends on:** DSK-042
+- **Paths:** central/src/main/java/com/sigebox/central/ui/result/, central/src/main/java/com/sigebox/central/ui/log/, central/src/main/java/com/sigebox/central/ui/help/, central/src/main/java/com/sigebox/central/ui/terms/, central/src/main/java/com/sigebox/central/ui/splash/, central/src/main/resources/com/sigebox/central/v5-resultado.css, central/src/test/java/com/sigebox/central/ui/result/, central/src/test/java/com/sigebox/central/ui/log/, central/src/test/java/com/sigebox/central/ui/help/, central/src/test/java/com/sigebox/central/ui/terms/
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - Resultado y su ventana con el encabezado v5; los totales entran contando (solo con la pelea cerrada)
+  - Bitácora con chips de tipo y filtros v5; ayuda y términos con el mismo estilo
+  - Capturas claro y oscuro revisadas por un crítico de diseño
+- **Verify:** `central/gradlew -p central test`
+- **Next step:** prueba de la ventana de resultado con el encabezado v5
+
+## AND-022 · Juez v5: tokens, íconos, chip de conexión y movimiento
+
+- **Type:** feature
+- **Priority:** P0
+- **Estimate:** 1 d
+- **Rubric / Spec:** spec 006 §Juez, §Las dos
+- **Depends on:** DSN-005
+- **Paths:** android/app/src/main/res/values/colors.xml, android/app/src/main/res/values/themes.xml, android/app/src/main/res/values/dimens.xml, android/app/src/main/res/values/strings.xml, android/app/src/main/res/values-night/, android/app/src/main/res/values-sw400dp/, android/app/src/main/res/drawable/, android/app/src/main/res/color/, android/app/src/main/res/anim/, android/app/src/main/res/layout/view_top_bar.xml, android/app/src/main/res/layout/view_top_bar_brand.xml, android/app/src/main/java/com/sigebox/juez/ui/, android/app/src/test/java/com/sigebox/juez/ui/
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - Tokens v5 en colores, dimensiones y estilos (mismos nombres que la central)
+  - Íconos como vectores `ic_*` del set de DSN-005
+  - Chip de conexión en la barra: Conectado (punto que late) y Sin conexión (anillo y texto) (prueba)
+  - `Motion`: transición de eje compartido entre pantallas y lectura de la escala de animación del sistema (prueba con escala 0)
+- **Verify:** `android/gradlew -p android :app:testDebugUnitTest`
+- **Next step:** prueba del chip de conexión con sus dos estados
+
+## AND-023 · Juez v5: Puntuar, Enviada, Round tardío y Tarjeta final
+
+- **Type:** feature
+- **Priority:** P1
+- **Estimate:** 1 d
+- **Rubric / Spec:** spec 006 §Juez · principio 3
+- **Depends on:** AND-022
+- **Paths:** android/app/src/main/java/com/sigebox/juez/score/, android/app/src/main/java/com/sigebox/juez/late/, android/app/src/main/java/com/sigebox/juez/finalcard/, android/app/src/main/res/layout/activity_score.xml, android/app/src/main/res/layout/activity_late_score.xml, android/app/src/main/res/layout/view_corner_card.xml, android/app/src/main/res/layout/view_confirm_sheet.xml, android/app/src/main/res/values/strings_score.xml, android/app/src/main/res/values/styles_score.xml, android/app/src/test/java/com/sigebox/juez/score/, android/app/src/test/java/com/sigebox/juez/late/, android/app/src/test/java/com/sigebox/juez/finalcard/
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - Segmentos de rounds; el número rueda al cambiar y hay háptica en − y + (prueba)
+  - Con el `ACK`, "Round N enviado" con palomita que se dibuja, la tarjeta enviada y "Corregir esta tarjeta" (prueba)
+  - Sin animación del sistema, los cambios aparecen sin movimiento (prueba)
+  - Capturas claro y oscuro revisadas por un crítico de diseño
+- **Verify:** `android/gradlew -p android :app:testDebugUnitTest`
+- **Next step:** prueba de la pantalla Enviada tras el ACK
+
+## AND-024 · Juez v5: Unirse, Espera de aprobación, Siguiente pelea y Términos
+
+- **Type:** feature
+- **Priority:** P2
+- **Estimate:** 1 d
+- **Rubric / Spec:** spec 006 §Juez
+- **Depends on:** AND-022
+- **Paths:** android/app/src/main/java/com/sigebox/juez/join/, android/app/src/main/java/com/sigebox/juez/wait/, android/app/src/main/java/com/sigebox/juez/terms/, android/app/src/main/java/com/sigebox/juez/help/, android/app/src/main/res/layout/activity_join.xml, android/app/src/main/res/layout/activity_scan.xml, android/app/src/main/res/layout/activity_terms.xml, android/app/src/main/res/layout/activity_waiting.xml, android/app/src/main/res/layout/activity_next_fight.xml, android/app/src/main/res/layout/dialog_help.xml, android/app/src/main/res/values/strings_join.xml, android/app/src/main/res/values/styles_join.xml, android/app/src/test/java/com/sigebox/juez/join/, android/app/src/test/java/com/sigebox/juez/wait/, android/app/src/test/java/com/sigebox/juez/help/
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - Unirse con campos v5 e ícono; Espera y Siguiente pelea con estado ilustrado y chip de conexión (prueba)
+  - Términos y ayuda con el mismo estilo
+  - Capturas claro y oscuro revisadas por un crítico de diseño
+- **Verify:** `android/gradlew -p android :app:testDebugUnitTest`
+- **Next step:** prueba de la pantalla de espera con el chip de conexión
