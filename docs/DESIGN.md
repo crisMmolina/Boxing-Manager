@@ -1,14 +1,32 @@
-# DESIGN · Guía visual de SIGEBOX (v4)
+# DESIGN · Guía visual de SIGEBOX (v5 «Arena nocturna»)
 
-Guía visual y de experiencia de las dos apps: la del juez (Android, `android/`) y la central (JavaFX, `central/`). Es la fuente de verdad visual para DSK-026, DSK-029, AND-020 y AND-021, y **reemplaza a la v3** (DSN-003).
+Guía visual y de experiencia de las dos apps: la del juez (Android, `android/`) y la central (JavaFX, `central/`). Es la fuente de verdad visual para DSK-041 a DSK-045 y AND-022 a AND-024 (spec 006), y **reemplaza a la v4** (DSN-004). Lo que la v5 no cambia sigue como en la v4: los principios, la paleta base, las esquinas, la tipografía, el logo, los textos y la accesibilidad.
+
+- **Pedido v5:** cris (2026-11-09), spec `docs/specs/006-rediseno-v5/spec.md`: «no está mal, pero se siente antiguo»; tendencias actuales, animaciones sencillas y mejor UX/UI. La dirección se aprobó con la maqueta «SIGEBOX v5 · Dirección visual».
+
+## 0. Qué cambia respecto a la v4
+
+| v4 | v5 |
+|---|---|
+| Central: barra superior negra con pestañas Evento · Jueces · En vivo · Resultado | **Barra lateral** (§5.11) con el evento en curso y su avance, los pasos con ícono (✓ en los terminados, punto que late en En vivo con round abierto), y abajo Bitácora, Inicio, ayuda y tema. Fuera de un evento, como spec 005 |
+| Título centrado y "Qué sigue" como línea de texto | **Encabezado a la izquierda** (§5.12): contexto, título de la sección y la acción principal a la derecha. "Qué sigue" es un **aviso con ícono** (§5.13) |
+| `Spinner` de JavaFX con flechas | **Stepper** − valor + propio (§5.14) |
+| Cartelera como formulario por pelea, con cuatro botones por fila | **Lista** de una línea por pelea con un **menú ⋯** (§5.15) |
+| En vivo: "Enviaron 2 de 3" en texto | **Anillo** de tarjetas recibidas, **segmentos** de rounds y **tarjeta por juez** con iniciales (§5.16) |
+| Sin íconos | **Íconos de línea** de 2 px, empaquetados (§3.9) |
+| Movimiento solo en carga, skeleton y avisos | **Movimiento corto** en cambio de pantalla, hover, presión, número que rueda y palomita al enviar (§3.7) |
+| Tarjeta de radio 24 | Radios **8 / 12 / 16 / 20** (§3.8); tarjeta 20 |
+| Juez: punto de conexión suelto | **Chip de conexión** en la barra (§5.17) y pantalla **Round enviado** con palomita (§6.4) |
+
+Se conserva de la v4: negro, blanco y dorado; rojo y azul solo para las esquinas; Barlow Condensed + Inter empaquetadas; ningún total ni ganador durante la pelea; sin cristal, neón, resplandores, degradados ni sombras de color; errores nunca en rojo.
+
+## 0.1 Qué cambió de la v3 a la v4 (historia)
 
 - **Pedido:** cris (2026-11-03), spec `docs/specs/004-eventos/spec.md` §Imagen y diseño, §Formularios, §Ayuda de conexión y §Arranque: «esa combinación de blanco y negro con dorado me gusta, pero mejóralo». Logo de guantes rojos «medio animados», etiquetas siempre visibles arriba de cada campo, *skeletons* al cargar y un botón "?" con la guía de reconexión.
 - **Manda** `PROJECT.md` principio 3, más estricto desde la spec 004: nadie ve totales ni ganador durante la pelea, **sin excepción** (ya no existe "Ver resumen parcial"). Un juez solo ve lo suyo.
 - **Idioma:** español (México). Se dice **evento**, nunca "función", en todo lo que se ve.
 - **Sin internet:** fuentes, logo, íconos y la guía de conexión van dentro de las apps.
 - **Medición:** todos los contrastes y simulaciones de daltonismo salen de `docs/design/contraste.py`, que escribe `docs/design/contraste.md`. Si cambias un color, cambia el script y vuelve a correrlo.
-
-## 0. Qué cambia respecto a la v3
 
 | v3 | v4 |
 |---|---|
@@ -89,7 +107,7 @@ Ninguna pantalla usa valores sueltos.
 
 ### 3.2 Contraste AA medido
 
-Medido con `python3 docs/design/contraste.py` (luminancia relativa WCAG 2.x). Texto ≥ 4.5; componentes de interfaz ≥ 3. **Resultado: 0 pares sin AA, 28 pares por tema.** Detalle con los hex en `docs/design/contraste.md`.
+Medido con `python3 docs/design/contraste.py` (luminancia relativa WCAG 2.x). Texto ≥ 4.5; componentes de interfaz ≥ 3. **Resultado: 0 pares sin AA, 36 pares por tema (28 de la v4 y 8 de la v5).** Detalle con los hex en `docs/design/contraste.md`.
 
 | Par (primer plano / fondo) | Tipo | Claro | Oscuro |
 |---|---|---|---|
@@ -207,9 +225,74 @@ Rejilla de 4: 4, 8, 12, 16, 20, 24, 32, 40 y 56. Margen de 20 dp en el teléfono
 - **Logo «medio animado»** (solo en la pantalla de carga): los guantes entran con un balanceo desde los cordones: giro de −8° a 0° en 420 ms con resorte (eje en el punto donde cuelgan), y después un vaivén de ±2° cada 1.6 s mientras carga. En la barra superior el logo **no** se mueve.
 - **Skeleton:** un brillo que recorre el bloque de izquierda a derecha cada 1.4 s (opacidad 0.6 ↔ 1.0).
 - **Movimiento reducido** (`ANIMATOR_DURATION_SCALE` = 0 en Android; ajuste "Reducir movimiento" en la central): el logo aparece quieto con un fundido de 150 ms; el skeleton queda fijo, sin brillo; solo cambian opacidades.
+- **v5, tokens de movimiento** (mismos nombres en las dos apps):
+
+| Token | Valor | Uso |
+|---|---|---|
+| `motion_fast` | 120 ms | Hover, presión (escala 0.98), color de un chip |
+| `motion_base` | 180 ms | Menús ⋯, avisos, aparición de una fila |
+| `motion_enter` | 220 ms | Entrada de pantalla: fundido de 0 a 1 + desplazamiento de 8 px hacia arriba |
+| `motion_number` | 200 ms | Número del juez que rueda al nuevo valor (sube o baja según el signo), con resorte leve |
+| `motion_check` | 380 ms | Palomita de "Round enviado": el círculo crece (0.6 → 1.08 → 1) y el trazo se dibuja |
+| `motion_pulse` | 1.8 s | Latido del punto de conectado / En vivo: un anillo que se expande y se desvanece |
+| Curva | `cubic-bezier(0.2, 0, 0, 1)` (central: `Interpolator.SPLINE(0.2, 0, 0, 1)`) | Todo lo que entra o se mueve |
+
+- **v5, cambio de pantalla.** Central: la pantalla nueva entra con `motion_enter`; la vieja no se anima. Juez: transición de eje compartido (Material `MaterialSharedAxis` X) de ≤ 300 ms entre actividades.
+- **v5, reducir movimiento:** sin desplazamientos, latidos, rodar ni dibujar; la palomita aparece completa; solo fundidos de ≤ 150 ms. En la central lo activa el ajuste "Reducir movimiento" o la preferencia del sistema; en el juez, la escala de animación en 0.
 - **Háptica:** vibración corta al tocar − o +, al enviar y al abrirse un round (`HapticFeedbackConstants`); nada de sonidos.
 
+### 3.8 Tokens v5
+
+Se suman a los de §3.1, con los mismos nombres en las dos apps (`nav_ink_dim` → `-sg-nav-ink-dim`).
+
+| Token | Claro | Oscuro | Uso |
+|---|---|---|---|
+| `nav` | `#111110` | `#0A0A09` | Fondo de la barra lateral (central) |
+| `nav_ink` | `#B9B3A8` | `#B9B3A8` | Pasos y enlaces de la barra lateral |
+| `nav_ink_dim` | `#8F897E` | `#8F897E` | Pasos que aún no se pueden usar |
+| `nav_active` | `#2A2418` | `#2A2418` | Fondo del paso actual, con franja interior de 3 px `bar_accent` |
+| `success_soft` / `success_ink` | `#E3F3E8` / `#027A35` | `#16301F` / `#7FE0A2` | Chip "Enviada", "Conectado", ✓ |
+| `pending_ink` | `#5C431E` | `#E9C978` | Chip "Calificando…", "Pendiente", sobre `accent_soft` |
+| `ink_3` | `#8F897E` | `#8F897E` | Texto terciario: etiquetas en mayúsculas pequeñas, hora |
+| `ring_track` | `#E9E6DF` | `#24221F` | Pista del anillo y segmentos aún sin usar (decorativo) |
+
+**Radios:** `r_sm` 8 (chips cuadrados, celdas), `r_md` 12 (botones, campos, aviso), `r_lg` 16 (filas, tarjetas de juez, stepper), `r_xl` 20 (tarjetas y bloques bento). Píldoras y avatares en cápsula. **Espaciado:** la rejilla de 4 de §3.5 sigue; el contenido de la central lleva 40 px a los lados y 28 arriba, con un ancho máximo de 1180 px.
+
+**Contraste AA medido** con `docs/design/contraste.py` (resultado completo en `docs/design/contraste.md`; texto ≥ 4.5:1, grande y componentes ≥ 3:1):
+
+| Par | Claro | Oscuro |
+|---|---|---|
+| `success_ink` sobre `success_soft` | 4.76 | 8.86 |
+| `pending_ink` sobre `accent_soft` | 7.53 | 8.06 |
+| `nav_ink` sobre `nav` | 9.07 | 9.50 |
+| `nav_ink_dim` sobre `nav` | 5.44 | 5.70 |
+| `on_bar` sobre `nav_active` | 14.13 | 13.88 |
+| `bar_accent` sobre `nav_active` (texto e ícono del paso actual) | 6.51 | 7.39 |
+| `ink_3` sobre `surface` (solo texto grande o componente) | 3.47 | 5.06 |
+
+En la barra lateral el paso actual usa `bar_accent`, no `accent`: en claro, `accent` sobre `nav_active` mide 2.44 y no pasa. En claro, `ink_3` no pasa como texto chico: ahí las etiquetas pequeñas usan `ink_2`.
+
+### 3.9 Íconos
+
+- **Set:** Lucide (licencia ISC, https://lucide.dev), trazo de 2 px, esquinas redondeadas, cuadrícula de 24. Se copian solo los trazos que se usan; nada se descarga en ejecución. Crédito en `docs/design/CREDITOS.md`.
+- **Central:** `Icons` dibuja cada uno como `SVGPath` con trazo del color del texto (`-sg-ink`, `-sg-ink-2` o `-sg-accent`), en 16, 20 o 24 px.
+- **Juez:** `res/drawable/ic_*.xml` (vectores con `strokeWidth` 2 y `strokeLineCap` round), tintados por tema.
+- **Central (nombre en Lucide → uso):** `calendar` Evento · `users` Jueces · `activity` En vivo · `trophy` Resultado · `file-text` Bitácora · `house` Inicio · `sun` / `moon` tema · `circle-question-mark` ayuda · `info` aviso "Qué sigue" · `check` paso terminado y "Enviada" · `x` terminar pelea · `plus` / `minus` stepper · `ellipsis` menú ⋯ · `play` iniciar pelea · `clock` "Calificando…" · `rotate-ccw` "Corregida" · `circle-alert` errores (círculo con línea y punto, los trazos de `info` invertidos) · `grip-vertical` arrastrar en la cartelera · `pencil` editar esquinas · `skip-forward` saltar pelea · `trash` quitar pelea · `arrow-up` / `arrow-down` subir y bajar · `qr-code` lugar en Jueces · `wifi-off` juez sin conexión.
+- **Juez (nombre en Lucide → uso):** `plus` / `minus` botones de puntos · `check` palomita de "Round enviado" · `arrow-right` enviar · `wifi` / `wifi-off` chip de conexión · `circle-question-mark` ayuda · `qr-code` escanear · `clock` espera de aprobación · `rotate-ccw` corregir tarjeta · `circle-alert` errores · `info` aviso.
+- **Nunca:** emoji como ícono, íconos rellenos de color, los guantes del logo como ícono de acción.
+
 ## 4. Tendencias: qué se adopta y por qué
+
+| Tendencia v5 | Se adopta | No se adopta | Por qué |
+|---|---|---|---|
+| Barra lateral de app de escritorio | Navegación vertical con ícono, avance del evento y estado vivo | Barra lateral plegable, multinivel | El operador ve dónde está y qué falta sin leer pestañas |
+| Encabezado de página con acción principal | Título a la izquierda, acción arriba a la derecha con su atajo | Barras de herramientas con muchos botones | Una sola acción principal por pantalla, siempre en el mismo lugar |
+| Micro-interacciones | Hover que eleva, presión que comprime, número que rueda, palomita | Animaciones decorativas largas, partículas | Confirman lo que pasó sin estorbar; se apagan con reducir movimiento |
+| Listas densas con menú contextual | Una línea por pelea con ⋯ | Tablas con botones en cada celda | Se lee de un vistazo; las acciones no compiten |
+| Datos visuales sin números sensibles | Anillo y segmentos de avance | Gráficas de puntos durante la pelea | Se ve cuánto falta sin mostrar marcadores (principio 3) |
+
+Tabla de la v4 (sigue vigente):
+
 
 | Tendencia | Se adopta | No se adopta | Por qué |
 |---|---|---|---|
@@ -340,7 +423,54 @@ Código                         ← etiqueta: Inter 600, ink, siempre visible
 - **Confirmaciones y hojas:** `surface_2`, radio 28 arriba; el botón que confirma es el principal.
 - Sin *toasts* para errores: los errores quedan a la vista hasta resolverse.
 
+### 5.11 Barra lateral (central, v5)
+
+```
+┌──────────────────────┐
+│ (guantes) SIGEBOX    │  Barlow 700 24, bar_accent
+│ ┌──────────────────┐ │
+│ │ Evento en curso  │ │  ink_3 12 · nombre Inter 600 15
+│ │ Copa Delegación  │ │
+│ │ ▬▬▬▬▬▬──────  2/5│ │  barra de avance 6 px: accent sobre ring_track
+│ └──────────────────┘ │
+│ PELEA 3              │  Inter 700 11, nav_ink_dim
+│ ▣ Evento          ✓  │  ícono 20 + texto Inter 500 15, nav_ink
+│ ◫ Jueces          ✓  │
+│▌∿ En vivo         ●  │  actual: fondo nav_active, franja de 3 px bar_accent, punto que late
+│ ⌂ Resultado          │  aún no: nav_ink_dim
+│                      │
+│ ▤ Bitácora           │
+│ ⌂ Inicio             │
+│ [? Ayuda]  [◐]       │
+└──────────────────────┘
+```
+- Ancho 248 px, fondo `nav` en los dos temas (la firma negra de la v4 pasa de arriba a la izquierda).
+- Fuera de un evento (spec 005): solo logo, Inicio (si no se está en Inicio), ayuda y tema.
+- Teclado: Tab recorre los pasos; Enter abre; el paso actual lleva `aria`/`accessibleRole` de selección.
+
+### 5.12 Encabezado de página (central, v5)
+Contexto en `ink_2` 13 (miga de pan, o "Pelea 3 de 5 · Roja vs Azul" con los nombres en su color numeral), título Barlow 800 40 igual a su sección, chip de estado opcional y, a la derecha, la acción principal (y a lo más una secundaria).
+
+### 5.13 Aviso "Qué sigue" (las dos, v5)
+Ícono de información 18 + **"Qué sigue:"** en `ink` 600 + la instrucción. Claro: fondo `accent_soft`, texto `#3D2E14`. Oscuro: fondo `surface`, borde 1 px `line`. Radio `r_md`. Una por pantalla, siempre debajo del encabezado.
+
+### 5.14 Stepper (central, v5)
+`[ − ]  4  [ + ]` en una cápsula `surface_2` de radio `r_md`, botones de 36 px, valor en Barlow 800 24 con cifras tabulares. Flechas ↑/↓ y las teclas + y − cambian el valor; en el límite el botón se apaga. Reemplaza a todo `Spinner`.
+
+### 5.15 Lista con menú ⋯ (central, v5)
+Fila de 56 px con radio `r_lg`: agarradera (arrastrar para reordenar), número Barlow 800 24, esquinas con punto de color de 10 px y nombre Inter 600 16, rounds, jueces, chip de estado y botón ⋯ de 36 px. Hover: fondo `surface` y sombra de §3.5. El menú (radio 14, sombra 0 12 32 al 14 %) reúne Editar esquinas, Cambiar rounds y jueces, Subir/Bajar, Saltar y Quitar (este último separado por una línea).
+
+### 5.16 Anillo, segmentos y tarjeta de juez (las dos, v5)
+- **Anillo** (central, En vivo): 176 px, pista de 12 px `ring_track`, arco `accent` con extremo redondeado, "2/3" en Barlow 800 56 y "tarjetas" en `ink_3`. Nunca muestra puntos.
+- **Segmentos de rounds:** uno por round, 6–8 px de alto, cápsula: cerrado `connected`, actual `accent`, futuro `ring_track`.
+- **Tarjeta de juez:** avatar de 36 px con iniciales (fondo `nav_active`, texto `accent`), nombre Inter 600 15, "Juez N" en `ink_3`, y a la derecha su estado del round con ícono: ✓ Enviada (`success_ink`), reloj Calificando… (`pending_ink`), anillo Sin conexión + "? Cómo reconectar".
+
+### 5.17 Chip de conexión (juez, v5)
+Cápsula de 28 dp en la barra: **Conectado** = punto de 7 dp `connected` que late + texto sobre `success_soft`; **Sin conexión** = anillo + texto sobre `surface_2`, y toca para abrir la ayuda (§5.8).
+
 ## 6. Pantallas del juez (Android)
+
+- **v5:** chip de conexión en la barra (§5.17) y segmentos de rounds (§5.16) en Puntuar, Round enviado y Round tardío. Cada esquina lleva una franja izquierda de 6 dp de su color además de su píldora. Al tocar − o +, el número rueda (`motion_number`) con háptica. Tras el `ACK`, **Round enviado**: palomita que se dibuja (`motion_check`), "Round N enviado", "La central lo recibió. Espera a que abra el round N+1.", la tarjeta enviada (solo la propia, principio 3) y "Corregir esta tarjeta" (secundario).
 
 - **Referencia:** 390 × 844 dp en vertical. Desde 720 dp de ancho, las tarjetas van lado a lado (Roja a la izquierda).
 - **Barra superior negra** con logo + SIGEBOX, el punto o anillo de conexión con "Juez 2", y el "?".
@@ -385,7 +515,8 @@ Como en la v3 (tarjeta doble, hoja "¿Enviar este round?", "Round 4 enviado", "C
 ## 7. Pantallas de la central (JavaFX)
 
 - **Ventana:** 1280 × 800 de referencia, mínimo 1100 × 700.
-- **Barra superior negra** (§5.7). Todo se opera con teclado y con el foco visible.
+- **v5:** barra lateral (§5.11) + contenido con encabezado (§5.12), aviso "Qué sigue" (§5.13) y bloques. Los esquemas de abajo describen el contenido; donde dicen "barra superior", en la v5 es la barra lateral. Todo se opera con teclado y con el foco visible.
+- **v5 por pantalla:** Evento = base con steppers + cartelera en lista (§5.15). En vivo = anillo + "Round N de M" con segmentos + tarjetas de juez + tabla de estados por round con chips (§5.16), sin puntos. Jueces = tarjetas de lugar con código grande, QR sobre blanco y chip de estado. Resultado = encabezado v5; los totales entran contando de 0 a su valor en 400 ms (solo con la pelea cerrada).
 
 ### 7.1 Inicio (lista de eventos)
 

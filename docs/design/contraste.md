@@ -34,6 +34,14 @@ Generado por `docs/design/contraste.py`. No editar a mano: cambia un token y vue
 | `accent` #7A5A2A | `surface_2` #F2F0EB | ui | 5.55 | 3.0 | sí |
 | `connected` #027A35 | `surface` #FFFFFF | ui | 5.47 | 3.0 | sí |
 | `disconnected` #57534C | `surface` #FFFFFF | ui | 7.64 | 3.0 | sí |
+| `nav_ink` #B9B3A8 | `nav` #111110 | texto | 9.07 | 4.5 | sí |
+| `nav_ink_dim` #8F897E | `nav` #111110 | texto | 5.44 | 4.5 | sí |
+| `on_bar` #F7F5F0 | `nav_active` #2A2418 | texto | 14.13 | 4.5 | sí |
+| `bar_accent` #C9A35E | `nav_active` #2A2418 | texto | 6.51 | 4.5 | sí |
+| `success_ink` #027A35 | `success_soft` #E3F3E8 | texto | 4.76 | 4.5 | sí |
+| `pending_ink` #5C431E | `accent_soft` #F3E7CF | texto | 7.53 | 4.5 | sí |
+| `ink_3` #8F897E | `surface` #FFFFFF | grande | 3.47 | 3.0 | sí |
+| `bar_accent` #C9A35E | `nav_active` #2A2418 | ui | 6.51 | 3.0 | sí |
 
 | Par | ΔE normal | ΔE deuteranopía | ΔE protanopía | ΔE tritanopía |
 |---|---|---|---|---|
@@ -76,6 +84,14 @@ Generado por `docs/design/contraste.py`. No editar a mano: cambia un token y vue
 | `accent` #D4AF5A | `surface_2` #24221F | ui | 7.61 | 3.0 | sí |
 | `connected` #4CC97A | `surface` #1A1917 | ui | 8.32 | 3.0 | sí |
 | `disconnected` #B9B3A8 | `surface` #1A1917 | ui | 8.43 | 3.0 | sí |
+| `nav_ink` #B9B3A8 | `nav` #0A0A09 | texto | 9.50 | 4.5 | sí |
+| `nav_ink_dim` #8F897E | `nav` #0A0A09 | texto | 5.70 | 4.5 | sí |
+| `on_bar` #F5F3EE | `nav_active` #2A2418 | texto | 13.88 | 4.5 | sí |
+| `bar_accent` #D4AF5A | `nav_active` #2A2418 | texto | 7.39 | 4.5 | sí |
+| `success_ink` #7FE0A2 | `success_soft` #16301F | texto | 8.86 | 4.5 | sí |
+| `pending_ink` #E9C978 | `accent_soft` #3A3020 | texto | 8.06 | 4.5 | sí |
+| `ink_3` #8F897E | `surface` #1A1917 | grande | 5.06 | 3.0 | sí |
+| `bar_accent` #D4AF5A | `nav_active` #2A2418 | ui | 7.39 | 3.0 | sí |
 
 | Par | ΔE normal | ΔE deuteranopía | ΔE protanopía | ΔE tritanopía |
 |---|---|---|---|---|
