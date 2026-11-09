@@ -107,7 +107,7 @@ Ninguna pantalla usa valores sueltos.
 
 ### 3.2 Contraste AA medido
 
-Medido con `python3 docs/design/contraste.py` (luminancia relativa WCAG 2.x). Texto ≥ 4.5; componentes de interfaz ≥ 3. **Resultado: 0 pares sin AA, 28 pares por tema.** Detalle con los hex en `docs/design/contraste.md`.
+Medido con `python3 docs/design/contraste.py` (luminancia relativa WCAG 2.x). Texto ≥ 4.5; componentes de interfaz ≥ 3. **Resultado: 0 pares sin AA, 36 pares por tema (28 de la v4 y 8 de la v5).** Detalle con los hex en `docs/design/contraste.md`.
 
 | Par (primer plano / fondo) | Tipo | Claro | Oscuro |
 |---|---|---|---|
@@ -277,7 +277,8 @@ En la barra lateral el paso actual usa `bar_accent`, no `accent`: en claro, `acc
 - **Set:** Lucide (licencia ISC, https://lucide.dev), trazo de 2 px, esquinas redondeadas, cuadrícula de 24. Se copian solo los trazos que se usan; nada se descarga en ejecución. Crédito en `docs/design/CREDITOS.md`.
 - **Central:** `Icons` dibuja cada uno como `SVGPath` con trazo del color del texto (`-sg-ink`, `-sg-ink-2` o `-sg-accent`), en 16, 20 o 24 px.
 - **Juez:** `res/drawable/ic_*.xml` (vectores con `strokeWidth` 2 y `strokeLineCap` round), tintados por tema.
-- **Lista v5:** calendario (Evento), usuarios (Jueces), actividad (En vivo), trofeo (Resultado), archivo (Bitácora), casa (Inicio), sol/luna (tema), ayuda, información (aviso), palomita, equis, más/menos, mas-horizontal (⋯), play (iniciar pelea), reloj (calificando), deshacer (corregida), alerta, wifi / wifi apagado, flecha derecha (enviar), agarradera (arrastrar), código QR.
+- **Central (nombre en Lucide → uso):** `calendar` Evento · `users` Jueces · `activity` En vivo · `trophy` Resultado · `file-text` Bitácora · `house` Inicio · `sun` / `moon` tema · `circle-question-mark` ayuda · `info` aviso "Qué sigue" · `check` paso terminado y "Enviada" · `x` terminar pelea · `plus` / `minus` stepper · `ellipsis` menú ⋯ · `play` iniciar pelea · `clock` "Calificando…" · `rotate-ccw` "Corregida" · `circle-alert` errores (círculo con línea y punto, los trazos de `info` invertidos) · `grip-vertical` arrastrar en la cartelera · `pencil` editar esquinas · `skip-forward` saltar pelea · `trash` quitar pelea · `arrow-up` / `arrow-down` subir y bajar · `qr-code` lugar en Jueces · `wifi-off` juez sin conexión.
+- **Juez (nombre en Lucide → uso):** `plus` / `minus` botones de puntos · `check` palomita de "Round enviado" · `arrow-right` enviar · `wifi` / `wifi-off` chip de conexión · `circle-question-mark` ayuda · `qr-code` escanear · `clock` espera de aprobación · `rotate-ccw` corregir tarjeta · `circle-alert` errores · `info` aviso.
 - **Nunca:** emoji como ícono, íconos rellenos de color, los guantes del logo como ícono de acción.
 
 ## 4. Tendencias: qué se adopta y por qué
