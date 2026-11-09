@@ -49,7 +49,7 @@ public final class ResultScreen {
         pdf.setOnAction(e -> save(stage, status, "pdf", export.pdf(sheet), sheet));
         var csv = Ui.secondary("Exportar CSV");
         csv.setOnAction(e -> save(stage, status, "csv", export.csvBytes(sheet), sheet));
-        var close = Ui.secondary("Cerrar");
+        var close = Ui.secondary("Cerrar ventana"); // "Cerrar pelea" y "Cerrar round" son otra cosa
         close.setOnAction(e -> stage.close());
         var actions = new HBox(12, pdf, csv, close, status);
         actions.setAlignment(Pos.CENTER_LEFT);
@@ -57,7 +57,9 @@ public final class ResultScreen {
         var body = body(sheet);
         var root = new BorderPane(body);
         root.getStyleClass().add("app-root");
-        root.setTop(new VBox(16, Ui.brand(), Ui.next("Exporta el resultado o cierra esta ventana.")));
+        // Spec 005: el mismo título que su sección, como las demás pantallas.
+        root.setTop(new VBox(16, Ui.brand(), Ui.screenTitle("Resultado"),
+                Ui.next("Exporta el resultado o cierra esta ventana.")));
         root.setBottom(actions);
         BorderPane.setMargin(body, new Insets(24, 0, 24, 0));
         root.setPadding(new Insets(40));

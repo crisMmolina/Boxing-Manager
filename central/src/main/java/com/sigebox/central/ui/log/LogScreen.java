@@ -39,7 +39,8 @@ public final class LogScreen {
     private record Filter(String fight, String type) {
     }
 
-    private record Snapshot(Filter filter, List<EventoBitacora> rows, List<String> fights, List<String> types) {
+    private record Snapshot(Filter filter, List<EventoBitacora> rows, List<String> fights, List<String> types,
+            java.util.Map<String, String> nombres) {
     }
 
     private LogScreen() {
@@ -78,7 +79,21 @@ public final class LogScreen {
         });
         var table = new TableView<EventoBitacora>();
         table.getColumns().add(column("Hora", e -> TIME.format(Instant.ofEpochMilli(e.horaMs()))));
-        table.getColumns().add(column("Pelea", e -> e.peleaId() == null ? LogQuery.GLOBAL : e.peleaId()));
+        // Spec 005: la pelea se nombra por su lugar y sus esquinas; el id interno no se muestra.
+        var nombres = new AtomicReference<java.util.Map<String, String>>(java.util.Map.of());
+        table.getColumns().add(column("Pelea", e -> LogQuery.nombre(nombres.get(), e.peleaId())));
+        table.getColumns().get(0).setMinWidth(96); // la hora completa, sin "…"
+        fight.setConverter(new StringConverter<>() { // muestra el nombre; el valor sigue siendo el id
+            @Override
+            public String toString(String id) {
+                return ALL.equals(id) ? ALL : LogQuery.nombre(nombres.get(), id);
+            }
+
+            @Override
+            public String fromString(String text) {
+                return text;
+            }
+        });
         table.getColumns().add(column("Tipo", e -> Labels.evento(e.tipo())));
         table.getColumns().add(column("Detalle",
                 e -> Labels.mensaje(e.tipo(), e.detalle()).replace("función ", "evento ")));
@@ -98,12 +113,14 @@ public final class LogScreen {
         var filter = new AtomicReference<>(new Filter(null, null));
         var live = LiveRefresh.watch(root, reads, () -> {
             var f = filter.get();
-            return new Snapshot(f, query.find(f.fight(), f.type(), LogQuery.DEFAULT_LIMIT), query.fights(), query.types());
+            return new Snapshot(f, query.find(f.fight(), f.type(), LogQuery.DEFAULT_LIMIT), query.fights(), query.types(),
+                    query.nombres());
         }, s -> {
+            nombres.set(s.nombres());
             sync(fight, s.fights());
             sync(type, s.types());
             show(table, s.rows());
-            count.setText(s.rows().size() + " eventos"
+            count.setText(s.rows().size() + " registros"
                     + (s.rows().size() == LogQuery.DEFAULT_LIMIT ? " (los más recientes)" : ""));
             LiveRefresh.swap(slot, List.of(table));
         });
