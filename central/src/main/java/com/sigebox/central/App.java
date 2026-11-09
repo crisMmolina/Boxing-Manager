@@ -22,11 +22,12 @@ import com.sigebox.central.ui.inicio.InicioScreen;
 import com.sigebox.central.ui.inicio.Nav;
 import com.sigebox.central.ui.log.LogQuery;
 import com.sigebox.central.ui.log.LogScreen;
+import com.sigebox.central.ui.result.ResultScreen;
 import com.sigebox.central.ui.result.ResultStepScreen;
 import com.sigebox.central.ui.rounds.RoundsScreen;
 import com.sigebox.central.ui.setup.SetupScreen;
 import com.sigebox.central.ui.splash.Splash;
-import com.sigebox.central.ui.termination.TerminationScreen;
+import com.sigebox.central.ui.termination.TerminarEnVivo;
 import com.sigebox.central.ui.terms.TermsGate;
 import com.sigebox.central.ui.terms.TermsScreen;
 import com.sigebox.central.ui.theme.StepsBar;
@@ -153,15 +154,22 @@ public final class App {
                     () -> show(screens, root, content, RoundsScreen.ID));
             setup.register(screens, SetupScreen.ID, "Pelea");
             setup.register(screens, JUECES, "Jueces");
+            var results = ResultService.forHub(db, hub);
+            var export = new ExportService();
+            // Spec 005: terminar en En vivo cierra la pelea y lleva a Resultado con su hoja (ya no hay pelea activa).
+            var terminar = new TerminarEnVivo(TerminationService.forHub(db, hub), results, TerminarEnVivo.DIALOGS,
+                    closed -> {
+                        show(screens, root, content, ResultStepScreen.ID);
+                        ResultScreen.show(scene.getWindow(), results.sheet(closed), export);
+                    });
             RoundsScreen.register(screens, RoundService.forHub(db, hub), fightId,
-                    () -> show(screens, root, content, ResultStepScreen.ID));
+                    () -> show(screens, root, content, ResultStepScreen.ID), terminar);
             FuncionScreen.register(screens, flow, () -> show(screens, root, content, JUECES));
-            ResultStepScreen.register(screens, ResultService.forHub(db, hub), new ExportService(), fightId,
+            ResultStepScreen.register(screens, results, export, fightId,
                     flow::peek, () -> {
                         flow.start();
                         show(screens, root, content, JUECES);
                     });
-            TerminationScreen.register(screens, TerminationService.forHub(db, hub), fightId);
             LogScreen.register(screens, new LogQuery(db));
             var current = new String[1];
             screens.onChange(s -> {

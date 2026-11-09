@@ -10,6 +10,7 @@ import com.sigebox.core.model.Esquina;
 import com.sigebox.core.model.EstadoPelea;
 import com.sigebox.core.model.EstadoRound;
 import com.sigebox.core.model.MotivoTerminacion;
+import com.sigebox.core.model.Resultado;
 import com.sigebox.core.model.Round;
 import com.sigebox.core.model.Terminacion;
 import java.util.EnumSet;
@@ -141,6 +142,49 @@ public final class TerminationService {
         });
         fightEnded.accept(fightId, in.motivo());
         return terminacion;
+    }
+
+    /** Round y tiempo ("m:ss") de una terminación desde En vivo. */
+    public record Punto(int round, String tiempo) {}
+
+    /** Si la pelea se puede terminar ahora: en curso y sin terminación. */
+    public synchronized boolean sePuedeTerminar(String fightId) {
+        return peleas.find(fightId).map(p -> p.estado() == EstadoPelea.EN_CURSO).orElse(false)
+                && terminaciones.find(fightId).isEmpty();
+    }
+
+    /**
+     * Dónde se termina la pelea si se termina ahora (spec 005): el round abierto con el tiempo que lleva; sin round
+     * abierto, el siguiente al último cerrado a 0:00. Ese round no cuenta en {@code ResultCalculator}, así el último
+     * cerrado sí cuenta y no se pierde ninguna tarjeta (decisión de DSK-036).
+     */
+    public synchronized Punto punto(String fightId) {
+        var pelea = peleas.find(fightId).orElseThrow(() -> new IllegalArgumentException("pelea desconocida"));
+        var all = rounds.byPelea(fightId);
+        var open = all.stream().filter(r -> r.estado() == EstadoRound.ABIERTO).findFirst();
+        if (open.isPresent()) {
+            var r = open.get();
+            long ms = r.abiertoEnMs() == null ? 0 : Math.max(0, clock.getAsLong() - r.abiertoEnMs());
+            long s = Math.min(ms / 1000, 59 * 60 + 59);
+            return new Punto(r.numero(), String.format(java.util.Locale.ROOT, "%d:%02d", s / 60, s % 60));
+        }
+        int lastClosed = all.stream().filter(r -> r.estado() == EstadoRound.CERRADO).mapToInt(Round::numero).max()
+                .orElse(0);
+        return new Punto(Math.min(pelea.rounds(), lastClosed + 1), "0:00");
+    }
+
+    /**
+     * Termina desde En vivo (spec 005): solo el motivo, más la esquina o la razón si el motivo las pide; round y
+     * tiempo salen de {@link #punto}. Después cierra la pelea con su resultado, como "Cerrar pelea", y los teléfonos
+     * reciben {@code FIGHT_ENDED} y {@code FIGHT_CLOSED} (y {@code EVENT_ENDED} si era la última).
+     */
+    public Resultado terminarYCerrar(String fightId, MotivoTerminacion motivo, String textoOtro, Esquina ganadora,
+            ResultService resultados) {
+        synchronized (this) {
+            var p = punto(fightId);
+            terminate(fightId, new Input(motivo, textoOtro, ganadora, p.round(), p.tiempo(), null), CONFIRM_WORD);
+        }
+        return resultados.close(fightId);
     }
 
     /** Texto opcional: sin espacios sobrantes, null si vacío, sin saltos ni caracteres de control. */
