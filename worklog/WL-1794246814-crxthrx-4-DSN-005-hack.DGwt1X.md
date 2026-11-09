@@ -13,3 +13,4 @@
 - 1794247095 | REVIEW | crxthrx-4 | done; PR https://github.com/crisMmolina/Boxing-Manager/pull/118; evidence: Verify OK; contraste.py 0 pares sin AA · no red: solo documentación de diseño: no hay código que una prueba muestre primero; reviewer: -
 - 1794247247 | REVIEW | cris-2 | review; reject; SHA a32da68c2ad52c2a1233a505318ffcb0cd3bd66a; reviewer cris-2
 - 1794251222 | REVIEW | crxthrx-4 | done; PR https://github.com/crisMmolina/Boxing-Manager/pull/118; evidence: Verify OK; contraste.py 0 pares sin AA · no red: solo documentación de diseño; reviewer: -
+- 1794251390 | REVIEW | cris-2 | review; approve; SHA a7860f78d8057113171fc4303f2a84d1876e2a86; reviewer cris-2
