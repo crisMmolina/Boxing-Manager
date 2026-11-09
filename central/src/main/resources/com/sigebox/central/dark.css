@@ -25,4 +25,17 @@
     -sg-disconnected: #B9B3A8;
     -sg-skeleton: #36332E;
     -sg-shadow: transparent;
+    /* v5 (DESIGN v5 §3.8) */
+    -sg-nav: #0A0A09;
+    -sg-nav-ink: #B9B3A8;
+    -sg-nav-ink-dim: #8F897E;
+    -sg-nav-active: #2A2418;
+    -sg-success-soft: #16301F;
+    -sg-success-ink: #7FE0A2;
+    -sg-pending-ink: #E9C978;
+    -sg-ink-3: #8F897E;
+    -sg-ring-track: #24221F;
+    -sg-callout-bg: #1A1917;
+    -sg-callout-ink: #F5F3EE;
+    -sg-menu-shadow: rgba(0, 0, 0, 0.5);
 }
