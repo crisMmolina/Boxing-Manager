@@ -306,6 +306,39 @@ class JudgeHubCodeTest {
     }
 
     @Test
+    void alReenviarElJoinYaAprobadoLlegaElState() throws Exception {
+        var phone = new Phone("A-1");
+        var c = open();
+        send(c, phone.join(F, 1, tokens.issue(F, 1), c.nonce()));
+        assertTrue(hub.approve(F, 1));
+        var again = open();
+        send(again, phone.join(F, 1, tokens.issue(F, 1), again.nonce()));
+        int approved = -1;
+        for (int i = 0; i < again.sent.size(); i++) {
+            if (again.sent.get(i) instanceof JoinApproved) { approved = i; }
+        }
+        assertTrue(approved > 0, "llega JOIN_APPROVED");
+        assertInstanceOf(State.class, again.sent.get(approved - 1),
+                "sin STATE la tarjeta final automática no sabe pelea ni rounds");
+    }
+
+    @Test
+    void alAprobarLlegaElStateSinReconectar() throws Exception {
+        var c = open();
+        send(c, new Phone("A-1").join(F, 1, tokens.issue(F, 1), c.nonce()));
+        assertTrue(hub.approve(F, 1));
+        int approved = -1;
+        for (int i = 0; i < c.sent.size(); i++) {
+            if (c.sent.get(i) instanceof JoinApproved) {
+                approved = i;
+            }
+        }
+        assertTrue(approved > 0, "llega JOIN_APPROVED");
+        assertInstanceOf(State.class, c.sent.get(approved - 1),
+                "justo antes del JOIN_APPROVED llega STATE para salir del esqueleto");
+    }
+
+    @Test
     void eventEndedQueMandaUnTelefonoSeRechaza() throws Exception {
         var c = open();
         send(c, new Phone("A-1").join(F, 1, tokens.issue(F, 1), c.nonce()));

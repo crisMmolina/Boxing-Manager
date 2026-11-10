@@ -302,6 +302,7 @@ public final class JudgeHub implements AutoCloseable, FightService.Puerta {
         log.append(fightId, "JOIN_APPROVED", "lugar " + seat);
         if (holder != null) {
             holder.approved = true;
+            send(holder, state(holder)); // sin esto el teléfono se queda en el esqueleto hasta reconectar
             send(holder, approvedMessage(pelea, seat, lugar.nombre()));
             events.onJudgeConnected(fightId, seat);
         }
@@ -546,6 +547,7 @@ public final class JudgeHub implements AutoCloseable, FightService.Puerta {
             } else if (lugar.aprobadoEnMs() != null) {
                 bind(s, fightId, seat);
                 markApprovedAndConnected(s, lugar);
+                send(s, state(s)); // la tarjeta final automática necesita pelea y rounds
                 send(s, approvedMessage(pelea, seat, lugar.nombre()));
             } else {
                 bind(s, fightId, seat); // el teléfono reenvía el JOIN tras reconectar; no se consulta el token
