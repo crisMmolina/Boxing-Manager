@@ -1426,6 +1426,22 @@ En Windows (zoe) los comandos `Verify` se corren en Git Bash.
 - **Verify:** `central/gradlew -p central test`
 - **Next step:** prueba de la ventana de resultado con el encabezado v5
 
+## DSK-046 · Follow-up de DSK-040: STATE al aprobar y al reenviar un JOIN aprobado
+
+- **Type:** fix
+- **Priority:** P0
+- **Estimate:** 1 h
+- **Rubric / Spec:** spec 005 §En vivo
+- **Depends on:** DSK-040
+- **Paths:** central/src/main/java/com/sigebox/central/server/JudgeHub.java, central/src/test/java/com/sigebox/central/server/JudgeHubCodeTest.java
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - Al aprobar un juez, el teléfono recibe `STATE` antes de `JOIN_APPROVED` sin reconectar (prueba)
+  - Un `JOIN` de un lugar ya aprobado recibe `STATE` antes de `JOIN_APPROVED` (prueba)
+  - Con eso el teléfono sale del esqueleto y manda la tarjeta final automática al terminar la pelea
+- **Verify:** `central/gradlew -p central test`
+- **Next step:** PR con las dos pruebas en verde
+
 ## AND-022 · Juez v5: tokens, íconos, chip de conexión y movimiento
 
 - **Type:** feature
