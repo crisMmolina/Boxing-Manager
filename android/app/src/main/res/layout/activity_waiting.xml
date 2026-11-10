@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Esperando aprobación (DESIGN.md v2 §6.3): la huella corta en grande para compararla con la central. -->
+<!-- Esperando aprobación (DESIGN.md v2 §6.3): la huella corta en grande para compararla con la central.
+     v5 (AND-024): barra con chip de conexión y estado ilustrado con la insignia del reloj. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
@@ -7,7 +8,7 @@
     android:orientation="vertical"
     android:padding="@dimen/screen_margin">
 
-    <include layout="@layout/view_top_bar_brand" />
+    <include layout="@layout/view_top_bar" />
 
     <Space
         android:layout_width="match_parent"
@@ -24,14 +25,21 @@
             android:gravity="center_horizontal"
             android:orientation="vertical">
 
-            <com.google.android.material.loadingindicator.LoadingIndicator
-                android:id="@+id/waiting_loading"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/waiting_badge"
+                style="@style/Widget.Sigebox.Badge"
+                android:layout_width="112dp"
+                android:layout_height="112dp"
                 android:layout_gravity="center_horizontal"
-                android:layout_marginBottom="12dp"
-                android:importantForAccessibility="no"
-                app:indicatorColor="@color/accent" />
+                android:layout_marginBottom="16dp">
+
+                <ImageView
+                    android:id="@+id/waiting_badge_icon"
+                    style="@style/Widget.Sigebox.Badge.Icon"
+                    android:src="@drawable/ic_clock"
+                    android:tag="clock"
+                    app:tint="@color/pending_ink" />
+            </com.google.android.material.card.MaterialCardView>
 
             <TextView
                 android:id="@+id/waiting_status"

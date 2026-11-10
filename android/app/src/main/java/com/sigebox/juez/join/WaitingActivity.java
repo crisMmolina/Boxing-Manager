@@ -62,6 +62,10 @@ public class WaitingActivity extends AppCompatActivity {
     }
 
     private void render(ConnectionState state) {
+        // v5 (AND-024): el chip de la barra dice si hay conexión con la central mientras se espera la aprobación.
+        boolean linked = state.status != ConnectionState.Status.DISCONNECTED;
+        com.sigebox.juez.ui.TopBar.bind(getWindow().getDecorView(), linked,
+                getString(linked ? R.string.status_connected : R.string.status_disconnected));
         TextView status = findViewById(R.id.waiting_status);
         status.setText(WaitingText.forState(state));
         boolean rejected = state.status == ConnectionState.Status.REJECTED;

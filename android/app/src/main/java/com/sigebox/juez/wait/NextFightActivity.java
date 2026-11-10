@@ -81,6 +81,7 @@ public final class NextFightActivity extends AppCompatActivity {
         if (ended) {
             // La sesión ya se borró: esta pantalla no toca la conexión.
             findViewById(R.id.next_fight_loading).setVisibility(View.GONE);
+            showEndedBadge();
             ((TextView) findViewById(R.id.next_fight_title)).setText(R.string.next_fight_event_ended);
             ((TextView) findViewById(R.id.next_fight_support)).setText(R.string.next_fight_event_ended_support);
             View back = findViewById(R.id.next_fight_back);
@@ -114,6 +115,17 @@ public final class NextFightActivity extends AppCompatActivity {
     private void showCorners(NextFight next) {
         corners.setText(getString(R.string.next_fight_corners, next.redCorner(), next.blueCorner()));
         corners.setVisibility(View.VISIBLE);
+    }
+
+    /** El evento terminó: la insignia pasa del reloj a la palomita sobre el verde tenue (DESIGN v5 §3.8). */
+    private void showEndedBadge() {
+        var badge = (com.google.android.material.card.MaterialCardView) findViewById(R.id.next_fight_badge);
+        badge.setCardBackgroundColor(androidx.core.content.ContextCompat.getColor(this, R.color.success_soft));
+        var icon = (android.widget.ImageView) findViewById(R.id.next_fight_badge_icon);
+        icon.setImageResource(R.drawable.ic_check);
+        icon.setImageTintList(android.content.res.ColorStateList.valueOf(
+                androidx.core.content.ContextCompat.getColor(this, R.color.success_ink)));
+        icon.setTag("check");
     }
 
     private void backToJoin() {

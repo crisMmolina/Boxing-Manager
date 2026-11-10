@@ -24,10 +24,27 @@
             android:gravity="center_horizontal"
             android:orientation="vertical">
 
+            <!-- v5 (AND-024): estado ilustrado; el reloj cambia a palomita cuando el evento terminó. -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/next_fight_badge"
+                style="@style/Widget.Sigebox.Badge"
+                android:layout_width="112dp"
+                android:layout_height="112dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="16dp">
+
+                <ImageView
+                    android:id="@+id/next_fight_badge_icon"
+                    style="@style/Widget.Sigebox.Badge.Icon"
+                    android:src="@drawable/ic_clock"
+                    android:tag="clock"
+                    app:tint="@color/pending_ink" />
+            </com.google.android.material.card.MaterialCardView>
+
             <com.google.android.material.loadingindicator.LoadingIndicator
                 android:id="@+id/next_fight_loading"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginBottom="12dp"
                 android:importantForAccessibility="no"

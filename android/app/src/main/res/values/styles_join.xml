@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Estilos v5 de Unirse, Espera y Siguiente pelea (AND-024, DESIGN v5 §6): estado ilustrado con insignia redonda. -->
+<resources>
+    <!-- Insignia de 112 dp: círculo tenue con el ícono del estado (reloj al esperar, palomita al terminar). -->
+    <style name="Widget.Sigebox.Badge" parent="Widget.Material3.CardView.Filled">
+        <item name="cardCornerRadius">56dp</item>
+        <item name="cardElevation">0dp</item>
+        <item name="strokeWidth">0dp</item>
+        <item name="cardBackgroundColor">@color/accent_soft</item>
+    </style>
+
+    <style name="Widget.Sigebox.Badge.Icon" parent="">
+        <item name="android:layout_width">56dp</item>
+        <item name="android:layout_height">56dp</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:importantForAccessibility">no</item>
+    </style>
+</resources>
