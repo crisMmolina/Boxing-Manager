@@ -14,7 +14,7 @@ import javafx.scene.layout.HBox;
  * centro y, a la derecha, enlaces secundarios, el "?" de ayuda de conexión y el botón de tema. El paso o enlace
  * de la pantalla visible lleva fondo dorado; nunca hay más de uno activo.
  */
-public final class StepsBar extends HBox implements StepsBar.NavBar {
+public final class StepsBar extends HBox implements PageHeader.NavBar {
 
     /** Un paso o enlace: id de pantalla y texto. */
     public record Item(String id, String label) {}
@@ -85,21 +85,5 @@ public final class StepsBar extends HBox implements StepsBar.NavBar {
     /** Ids de los pasos en orden (para pruebas y atajos). */
     public List<String> stepIds() {
         return List.copyOf(steps.keySet());
-    }
-
-    /** Navegación de la central: la barra superior ({@link StepsBar}) o la lateral v5 ({@link SideNav}). */
-    public interface NavBar {
-
-        /** Marca el paso o enlace de la pantalla visible. */
-        void select(String id);
-
-        /** Dentro de un evento muestra sus pasos; fuera, solo los fijos y {@code keepLink}. */
-        void showEvent(boolean inEvent, String keepLink);
-
-        /** Id del paso o enlace activo, o {@code null}. */
-        String currentId();
-
-        /** Ids de los pasos en orden. */
-        List<String> stepIds();
     }
 }
