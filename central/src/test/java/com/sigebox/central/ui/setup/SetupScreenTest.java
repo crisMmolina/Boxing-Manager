@@ -116,4 +116,24 @@ class SetupScreenTest {
         long codes = shown.stream().filter(t -> t.matches("\\d{3} \\d{3}")).count();
         assertTrue(codes == 2, "un código de 6 números por lugar: " + shown);
     }
+
+    @Test
+    void cadaLugarEsUnaTarjetaConCodigoGrandeQrYChip() throws Exception {
+        fights.create("Rojo", "Azul", 3, 2);
+        var root = open("Lugar 2");
+        var cards = FxTest.onFx(() -> all(root).stream()
+                .filter(n -> n.getStyleClass().contains("seat-card")).toList());
+        assertTrue(cards.size() == 2, "una tarjeta por lugar: " + cards.size());
+        for (var card : cards) {
+            var nodes = FxTest.onFx(() -> all(card));
+            var shown = FxTest.onFx(() -> texts(card));
+            assertTrue(nodes.stream().anyMatch(n -> n.getStyleClass().contains("chip")), "chip de estado: " + shown);
+            assertTrue(shown.contains("Sin conectar"), shown.toString());
+            assertTrue(nodes.stream().anyMatch(n -> n.getStyleClass().contains("seat-code")
+                    && n instanceof Labeled l && l.getText().matches("\\d{3} \\d{3}")), "código grande: " + shown);
+            assertTrue(nodes.stream().anyMatch(n -> n instanceof javafx.scene.image.ImageView
+                    && n.getStyleClass().contains("seat-qr")), "QR sobre blanco: " + shown);
+            assertTrue(shown.stream().anyMatch(t -> t.startsWith("Lugar ")), shown.toString());
+        }
+    }
 }

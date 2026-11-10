@@ -111,7 +111,15 @@ public final class InicioScreen {
     private List<Node> rows(List<InicioQuery.Evento> eventos) {
         var out = new ArrayList<Node>();
         if (eventos.isEmpty()) {
-            out.add(Ui.card(Ui.body("Aún no hay eventos."), Ui.support("Crea el primero con \"Nuevo evento\".")));
+            // DESIGN v5: estado vacío dibujado, con el ícono del evento en una insignia.
+            var badge = new javafx.scene.layout.StackPane(com.sigebox.central.ui.theme.Icons.icon("calendar", 48));
+            badge.getStyleClass().add("empty-badge");
+            badge.setMinSize(96, 96);
+            badge.setMaxSize(96, 96);
+            var empty = Ui.card(badge, Ui.body("Aún no hay eventos.")); // el aviso "Qué sigue" ya dice cómo empezar
+            empty.setAlignment(Pos.CENTER);
+            empty.getStyleClass().add("empty-state");
+            out.add(empty);
         }
         for (var ev : eventos) {
             out.add(row(ev));
@@ -124,10 +132,23 @@ public final class InicioScreen {
         name.setStyle("-fx-font-weight: 600; -fx-font-size: 16px;");
         var top = new HBox(12, name, Ui.grow(), Ui.support(ev.fecha()));
         top.setAlignment(Pos.CENTER_LEFT);
-        var bottom = new HBox(12, Ui.support(ev.resumen()), Ui.grow(), Ui.support(ev.ultimo() ? "En curso ›" : "›"));
-        var content = Ui.card(top, bottom);
+        // "Actual": el último evento, el único que se edita (spec 005); no dice si hay una pelea en curso.
+        var state = ev.ultimo() ? Ui.chip("Actual", "pending", null) : Ui.support("");
+        var bottom = new HBox(12, Ui.support(ev.resumen()), Ui.grow(), state, Ui.support("›"));
+        bottom.setAlignment(Pos.CENTER_LEFT);
+        // DESIGN v5: tarjeta de evento con su ícono a la izquierda; se eleva al pasar el mouse.
+        var icon = new javafx.scene.layout.StackPane(com.sigebox.central.ui.theme.Icons.icon("calendar", 20));
+        icon.getStyleClass().add("event-icon");
+        icon.setMinSize(44, 44);
+        icon.setMaxSize(44, 44);
+        var text = new VBox(4, top, bottom);
+        HBox.setHgrow(text, javafx.scene.layout.Priority.ALWAYS);
+        var line = new HBox(16, icon, text);
+        line.setAlignment(Pos.CENTER_LEFT);
+        var content = Ui.card(line);
         content.setPadding(new javafx.geometry.Insets(16, 20, 16, 20));
         content.setSpacing(4);
+        com.sigebox.central.ui.theme.Motion.lift(content);
         var b = new Button();
         b.getStyleClass().setAll("event-row");
         b.setGraphic(content);

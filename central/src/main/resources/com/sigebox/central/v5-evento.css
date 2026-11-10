@@ -1,1 +1,27 @@
 /* SIGEBOX · Central v5 (docs/DESIGN.md v5). Estilos de Inicio y Evento (DSK-043). Se importa desde app.css. */
+
+/* §5.15 Cartelera en lista: una línea por pelea; al pasar el mouse se marca la fila */
+.cartelera-row {
+    -fx-background-radius: 16px;
+    -fx-padding: 10px 14px 10px 14px;
+}
+
+.cartelera-row:hover {
+    -fx-background-color: -sg-surface-2;
+}
+
+/* Inicio: ícono del evento y estado vacío dibujado */
+.event-icon,
+.empty-badge {
+    -fx-background-color: -sg-surface-2;
+    -fx-background-radius: 12px;
+}
+
+.empty-badge {
+    -fx-background-radius: 999px;
+}
+
+.empty-state {
+    -fx-padding: 32px;
+    -fx-spacing: 10px;
+}

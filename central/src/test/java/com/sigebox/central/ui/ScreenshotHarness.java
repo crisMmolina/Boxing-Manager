@@ -14,12 +14,14 @@ import com.sigebox.central.service.FightService;
 import com.sigebox.central.service.ResultService;
 import com.sigebox.central.service.RoundService;
 import com.sigebox.central.service.TerminationService;
+import com.sigebox.central.ui.LiveRefresh;
 import com.sigebox.central.ui.log.LogQuery;
 import com.sigebox.central.ui.log.LogScreen;
 import com.sigebox.central.ui.result.ResultScreen;
 import com.sigebox.central.ui.result.ResultStepScreen;
 import com.sigebox.central.ui.rounds.RoundsScreen;
 import com.sigebox.central.ui.setup.SetupScreen;
+import com.sigebox.central.ui.termination.TerminarEnVivo;
 import com.sigebox.central.ui.termination.TerminationScreen;
 import com.sigebox.central.ui.terms.TermsGate;
 import com.sigebox.central.ui.terms.TermsScreen;
@@ -105,10 +107,12 @@ class ScreenshotHarness {
             String suffix = mode == Theme.Mode.LIGHT ? "claro" : "oscuro";
             capture(out, "01-terminos-" + suffix, TermsScreen.ID,
                     s -> TermsScreen.register(s, new TermsGate(setupDb), () -> { }));
-            capture(out, "02-pelea-" + suffix, "setup",
-                    s -> new SetupScreen(fights, setupHub, 8765, () -> { }).register(s, "setup", "Pelea"));
+            capture(out, "02-pelea-" + suffix, "judges",
+                    s -> new SetupScreen(fights, setupHub, 8765, () -> { }, LiveRefresh.DIRECT).register(s, "judges", "Jueces"));
             capture(out, "03-en-vivo-" + suffix, RoundsScreen.ID,
-                    s -> RoundsScreen.register(s, RoundService.forHub(liveDb, liveHub), () -> f, () -> { }));
+                    s -> RoundsScreen.register(s, RoundService.forHub(liveDb, liveHub), () -> f, () -> { },
+                            new TerminarEnVivo(TerminationService.forHub(liveDb, liveHub),
+                                    ResultService.forHub(liveDb, liveHub), TerminarEnVivo.DIALOGS, x -> { })));
             capture(out, "04-terminacion-" + suffix, TerminationScreen.ID,
                     s -> TerminationScreen.register(s, TerminationService.forHub(liveDb, liveHub), () -> f));
             capture(out, "06-bitacora-" + suffix, LogScreen.ID, s -> LogScreen.register(s, new LogQuery(liveDb)));

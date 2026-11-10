@@ -124,4 +124,37 @@ class RoundsScreenTest {
                 .filter(n -> n instanceof javafx.scene.control.Button).map(n -> ((Labeled) n).getText()).toList());
         assertEquals(List.of("Cerrar round 2"), buttons);
     }
+
+    private static List<Node> withClass(List<Node> nodes, String styleClass) {
+        return nodes.stream().filter(n -> n.getStyleClass().contains(styleClass)).toList();
+    }
+
+    @Test
+    void ringShowsCardsReceivedOfJudges() throws Exception {
+        var rings = FxTest.onFx(() -> withClass(all(RoundsScreen.build(service, () -> F)), "cards-ring").stream()
+                .map(RoundsScreenTest::texts).toList());
+        assertEquals(1, rings.size(), "un anillo: " + rings);
+        assertTrue(rings.getFirst().contains("1/2"), rings.toString());
+        assertTrue(rings.getFirst().contains("tarjetas"), rings.toString());
+    }
+
+    @Test
+    void oneSegmentPerRoundClosedCurrentFuture() throws Exception {
+        var segs = FxTest.onFx(() -> withClass(all(RoundsScreen.build(service, () -> F)), "round-segment").stream()
+                .map(n -> n.getStyleClass().contains("done") ? "done"
+                        : n.getStyleClass().contains("current") ? "current"
+                        : n.getStyleClass().contains("future") ? "future" : "?")
+                .toList());
+        assertEquals(List.of("done", "current", "future"), segs);
+    }
+
+    @Test
+    void oneJudgeCardPerSeatWithInitialsAndRoundState() throws Exception {
+        var cards = FxTest.onFx(() -> withClass(all(RoundsScreen.build(service, () -> F)), "judge-card").stream()
+                .map(RoundsScreenTest::texts).toList());
+        assertEquals(2, cards.size(), cards.toString());
+        assertTrue(cards.get(0).containsAll(List.of("A", "Ana", "Juez 1", "Enviada")), cards.toString());
+        assertTrue(cards.get(1).containsAll(List.of("ML", "María López", "Juez 2", "Calificando…")),
+                cards.toString());
+    }
 }
