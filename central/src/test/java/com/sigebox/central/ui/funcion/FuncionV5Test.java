@@ -144,7 +144,8 @@ class FuncionV5Test {
 
         var items = FxTest.onFx(() -> menu(root, 2).orElseThrow().getItems().stream()
                 .map(MenuItem::getText).filter(t -> t != null).toList());
-        assertEquals(List.of("Cambiar rounds y jueces", "Subir", "Bajar", "Saltar pelea", "Quitar de la cartelera"),
+        assertEquals(List.of("Editar esquinas", "Cambiar rounds y jueces", "Subir", "Bajar", "Saltar pelea",
+                "Quitar de la cartelera"),
                 items);
         assertTrue(FxTest.onFx(() -> all(root).stream().noneMatch(n -> n instanceof Button b
                 && List.of("Subir", "Bajar", "Saltar", "Quitar").contains(b.getText()))), "sin botones sueltos");
@@ -167,6 +168,49 @@ class FuncionV5Test {
             return null;
         });
         assertEquals(List.of("Eli", "Caro"), funciones.cartelera(id).stream().map(Fila::roja).toList());
+    }
+
+    @Test
+    void lasEsquinasYLosRoundsSeCambianDesdeElMenu() throws Exception {
+        var id = evento();
+        var screens = new Screens<Node>();
+        var ask = new FuncionScreen.Ask() {
+            @Override
+            public Optional<int[]> roundsJueces(Fila fila) {
+                return Optional.of(new int[] {6, 2});
+            }
+
+            @Override
+            public Optional<String[]> esquinas(Fila fila) {
+                return Optional.of(new String[] {"Alma", "Brisa"});
+            }
+        };
+        var screen = new FuncionScreen(new FuncionFlow(funciones, new FuncionQuery(db)), () -> { }, ask);
+        var root = FxTest.onFx(() -> {
+            var node = screen.build();
+            scenes.add(new Scene(new StackPane(node), 1280, 800));
+            return node;
+        });
+
+        FxTest.onFx(() -> {
+            fire(menu(root, 1).orElseThrow(), "Editar esquinas");
+            return null;
+        });
+        var again = FxTest.onFx(() -> {
+            var node = screen.build();
+            scenes.add(new Scene(new StackPane(node), 1280, 800));
+            return node;
+        });
+        FxTest.onFx(() -> {
+            fire(menu(again, 2).orElseThrow(), "Cambiar rounds y jueces");
+            return null;
+        });
+
+        var filas = funciones.cartelera(id);
+        assertEquals(List.of("Alma", "Brisa"), List.of(filas.get(0).roja(), filas.get(0).azul()));
+        assertEquals(List.of(6, 2), List.of(filas.get(1).rounds(), filas.get(1).jueces()));
+        assertTrue(FxTest.onFx(() -> all(again).stream().noneMatch(n -> n instanceof javafx.scene.control.TextField
+                && "Alma".equals(((javafx.scene.control.TextField) n).getText()))), "los nombres ya no son campos");
     }
 
     @Test

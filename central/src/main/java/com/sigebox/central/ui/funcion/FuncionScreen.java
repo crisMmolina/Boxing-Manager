@@ -165,7 +165,7 @@ public final class FuncionScreen {
             list.getChildren().add(Ui.support("Todavía no hay peleas. Agrega la primera abajo."));
         }
         var cartelera = Ui.card(new HBox(12, Ui.cardTitle("Cartelera"), Ui.grow(), Ui.support(FuncionView.resumen(rows))),
-                list, add(id, status, refresh), footer(rows, status, refresh, nextText));
+                list, add(id, status, refresh));
         cartelera.setSpacing(12);
         return new VBox(16, base, cartelera);
     }
@@ -174,7 +174,7 @@ public final class FuncionScreen {
         var service = flow.service();
         var number = Ui.numeral(String.valueOf(r.orden()), "neutral");
         number.setMinWidth(36);
-        HBox names = FuncionView.editable(r) ? editableNames(id, r, status, refresh, renamed) : fixedNames(r);
+        HBox names = fixedNames(r); // DESIGN v5 §5.15: una línea; los nombres se editan desde el menú ⋯
         names.setMinWidth(380);
         names.setPrefWidth(380);
 
@@ -188,11 +188,16 @@ public final class FuncionScreen {
         meta.setWrapText(true);
 
         var row = new HBox(16, number, names, meta, Ui.grow(), chip);
+        row.setMinHeight(56);
         row.getStyleClass().add("cartelera-row");
         row.setAlignment(Pos.CENTER_LEFT);
         if (FuncionView.editable(r)) {
             var menu = new ActionMenu("Más acciones de la pelea " + r.orden());
-            menu.add("Cambiar rounds y jueces", () -> ask.ask(r).ifPresent(v -> act(status, refresh, () -> {
+            menu.add("Editar esquinas", () -> ask.esquinas(r).ifPresent(v -> act(status, refresh, () -> {
+                service.renombrar(id, r.orden(), v[0], v[1]);
+                return "Pelea " + r.orden() + ": " + v[0].strip() + " vs " + v[1].strip() + ".";
+            })));
+            menu.add("Cambiar rounds y jueces", () -> ask.roundsJueces(r).ifPresent(v -> act(status, refresh, () -> {
                 service.cambiar(id, r.orden(), v[0], v[1]);
                 return "Pelea " + r.orden() + ": " + FuncionView.detalle(v[0], v[1]) + ".";
             })));
@@ -215,6 +220,10 @@ public final class FuncionScreen {
                 return "Pelea " + r.orden() + " quitada.";
             }));
             row.getChildren().add(menu);
+        } else {
+            var slot = new javafx.scene.layout.Region(); // el lugar del ⋯: los chips quedan alineados
+            slot.setMinWidth(36);
+            row.getChildren().add(slot);
         }
         Motion.lift(row);
         return row;
@@ -236,55 +245,6 @@ public final class FuncionScreen {
         return box;
     }
 
-    /** Los nombres de una pelea que no ha empezado: se guardan con Enter o al salir del campo. */
-    private HBox editableNames(String id, Fila r, Label status, Runnable refresh, Runnable renamed) {
-        var red = new TextField(r.roja());
-        var blue = new TextField(r.azul());
-        red.setPromptText("Ej. Ana Pérez");
-        blue.setPromptText("Ej. Bea Ruiz");
-        red.setAccessibleText("Esquina roja de la pelea " + r.orden());
-        blue.setAccessibleText("Esquina azul de la pelea " + r.orden());
-        // Lo último enviado tal como se escribió: un nombre recortado al guardar no se reenvía en cada salida.
-        String[] saved = {r.roja(), r.azul()};
-        Runnable save = () -> {
-            var roja = red.getText();
-            var azul = blue.getText();
-            if (roja.equals(saved[0]) && azul.equals(saved[1])) {
-                return;
-            }
-            try {
-                flow.service().renombrar(id, r.orden(), roja, azul);
-            } catch (RuntimeException ex) {
-                status.setText(ex.getMessage());
-                refresh.run(); // vuelve a lo guardado
-                return;
-            }
-            // Sin redibujar: el clic que quitó el foco debe llegar al botón que lo recibió.
-            saved[0] = roja;
-            saved[1] = azul;
-            status.setText("");
-            renamed.run();
-        };
-        for (var field : List.of(red, blue)) {
-            field.setOnAction(e -> save.run());
-            field.focusedProperty().addListener((o, was, now) -> {
-                if (!now && field.getScene() != null) { // al redibujar, el campo ya salió de la pantalla
-                    save.run();
-                }
-            });
-        }
-        // Una línea: "● roja  vs  ● azul", cada campo con su etiqueta arriba (DESIGN v4 §5.4).
-        var redField = Ui.field("Esquina roja", red);
-        var blueField = Ui.field("Esquina azul", blue);
-        HBox.setHgrow(redField, Priority.ALWAYS);
-        HBox.setHgrow(blueField, Priority.ALWAYS);
-        var vs = Ui.support("vs");
-        vs.setMinWidth(javafx.scene.layout.Region.USE_PREF_SIZE); // "vs" en una línea
-        var box = new HBox(8, Ui.cornerDot(true), redField, vs, Ui.cornerDot(false), blueField);
-        box.setAlignment(Pos.BOTTOM_LEFT);
-        HBox.setMargin(vs, new javafx.geometry.Insets(0, 0, 12, 0));
-        return box;
-    }
 
     private Node add(String id, Label status, Runnable refresh) {
         var red = new TextField();
@@ -311,8 +271,10 @@ public final class FuncionScreen {
     private static HBox cornerField(boolean isRed, String label, String example, TextField input) {
         var field = Ui.field(label, example, input);
         HBox.setHgrow(field, Priority.ALWAYS);
-        var box = new HBox(8, Ui.cornerDot(isRed), field);
+        var dot = Ui.cornerDot(isRed);
+        var box = new HBox(8, dot, field);
         box.setAlignment(Pos.BOTTOM_LEFT);
+        HBox.setMargin(dot, new javafx.geometry.Insets(0, 0, 17, 0)); // a media altura del campo
         return box;
     }
 
@@ -327,19 +289,6 @@ public final class FuncionScreen {
                 : "No quedan peleas por iniciar.";
     }
 
-    private Node footer(List<Fila> rows, Label status, Runnable refresh, StringProperty nextText) {
-        var next = FuncionView.siguiente(rows);
-        var box = new HBox(12);
-        box.setAlignment(Pos.CENTER_LEFT);
-        if (next.isEmpty()) {
-            box.getChildren().add(Ui.support(rows.isEmpty() ? "" : "No quedan peleas por iniciar."));
-            return box;
-        }
-        // v5: el botón de iniciar vive en el encabezado; aquí queda lo que trae la siguiente pelea.
-        box.getChildren().addAll(Ui.grow(), Ui.support("Siguiente: pelea " + next.get().orden() + " · "
-                + FuncionView.detalle(next.get().rounds(), next.get().jueces())));
-        return box;
-    }
 
     /** "Siguiente pelea: Roja vs Azul", la acción principal del encabezado; sigue los nombres sin rehacerse. */
     private Button startButton(Fila next, Label status, Runnable refresh, StringProperty nextText) {
@@ -371,24 +320,49 @@ public final class FuncionScreen {
         return s;
     }
 
-    /** Pide rounds y jueces de una pelea; vacío si se cancela. Las pruebas pasan una respuesta fija. */
-    @FunctionalInterface
+    /** Pide los cambios de una pelea desde el menú ⋯. Las pruebas pasan respuestas fijas. */
     public interface Ask {
-        java.util.Optional<int[]> ask(Fila fila);
+        /** Rounds y jueces nuevos de {@code fila}; vacío si se cancela. */
+        java.util.Optional<int[]> roundsJueces(Fila fila);
+
+        /** Esquinas nuevas de {@code fila} (roja, azul); vacío si se cancela. */
+        java.util.Optional<String[]> esquinas(Fila fila);
     }
 
-    /** El diálogo de la app: dos steppers con los valores de la fila. */
-    public static final Ask DIALOGS = fila -> {
-        var rounds = stepper(1, 12, fila.rounds(), "Rounds de la pelea " + fila.orden());
-        var judges = stepper(1, 5, fila.jueces(), "Jueces de la pelea " + fila.orden());
-        var dialog = new javafx.scene.control.Dialog<javafx.scene.control.ButtonType>();
-        dialog.setTitle("Cambiar rounds y jueces");
-        dialog.setHeaderText("Pelea " + fila.orden() + ": " + fila.roja() + " vs " + fila.azul());
-        var save = new javafx.scene.control.ButtonType("Guardar", javafx.scene.control.ButtonBar.ButtonData.OK_DONE);
-        dialog.getDialogPane().getButtonTypes().addAll(javafx.scene.control.ButtonType.CANCEL, save);
-        dialog.getDialogPane().setContent(new HBox(24, Ui.field("Rounds", rounds), Ui.field("Jueces", judges)));
-        return dialog.showAndWait().filter(save::equals)
-                .map(b -> new int[] {rounds.getValue(), judges.getValue()});
+    /** Los diálogos de la app: esquinas con campos con etiqueta, y rounds y jueces con steppers. */
+    public static final Ask DIALOGS = new Ask() {
+        @Override
+        public java.util.Optional<int[]> roundsJueces(Fila fila) {
+            var rounds = stepper(1, 12, fila.rounds(), "Rounds de la pelea " + fila.orden());
+            var judges = stepper(1, 5, fila.jueces(), "Jueces de la pelea " + fila.orden());
+            var save = new javafx.scene.control.ButtonType("Guardar",
+                    javafx.scene.control.ButtonBar.ButtonData.OK_DONE);
+            var dialog = dialog("Cambiar rounds y jueces", fila, save,
+                    new HBox(24, Ui.field("Rounds", rounds), Ui.field("Jueces", judges)));
+            return dialog.showAndWait().filter(save::equals)
+                    .map(b -> new int[] {rounds.getValue(), judges.getValue()});
+        }
+
+        @Override
+        public java.util.Optional<String[]> esquinas(Fila fila) {
+            var red = new TextField(fila.roja());
+            var blue = new TextField(fila.azul());
+            var save = new javafx.scene.control.ButtonType("Guardar",
+                    javafx.scene.control.ButtonBar.ButtonData.OK_DONE);
+            var dialog = dialog("Editar esquinas", fila, save, new VBox(12,
+                    Ui.field("Esquina roja", "Ej. Ana Pérez", red), Ui.field("Esquina azul", "Ej. Bea Ruiz", blue)));
+            return dialog.showAndWait().filter(save::equals).map(b -> new String[] {red.getText(), blue.getText()});
+        }
+
+        private javafx.scene.control.Dialog<javafx.scene.control.ButtonType> dialog(String title, Fila fila,
+                javafx.scene.control.ButtonType save, Node content) {
+            var dialog = new javafx.scene.control.Dialog<javafx.scene.control.ButtonType>();
+            dialog.setTitle(title);
+            dialog.setHeaderText("Pelea " + fila.orden() + ": " + fila.roja() + " vs " + fila.azul());
+            dialog.getDialogPane().getButtonTypes().addAll(javafx.scene.control.ButtonType.CANCEL, save);
+            dialog.getDialogPane().setContent(content);
+            return dialog;
+        }
     };
 
     /** Ejecuta un cambio; muestra el mensaje o el error y vuelve a leer la cartelera guardada. */
