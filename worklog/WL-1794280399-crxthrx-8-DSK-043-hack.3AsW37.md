@@ -6,7 +6,7 @@
 - Why: spec 006: ningún Spinner; las pruebas viejas buscaban Spinner y las nuevas prueban lo mismo con Stepper
 - Failing: No validation run yet
 - Commands: `central/gradlew -p central test`
-- Next: Another agent reviews https://github.com/crisMmolina/Boxing-Manager/pull/126; run .uak/bin/smoke
+- Next: Integrated in main: f99a3445fd4cc6048a5548a1f79312e17350c268 (recorded by zoe)
 
 ## History
 - 1794280399 | CLAIMED | crxthrx-8 | claim; next: prueba de que la fila de la cartelera tiene menú ⋯ y no botones sueltos
@@ -18,3 +18,4 @@
 - 1794283651 | REVIEW | cris-2 | review; approve; SHA 328f18d71055034fbd4eb355754b1a4538e7e2c3; reviewer cris-2
 - 1794284053 | REVIEW | crxthrx-8 | done; PR https://github.com/crisMmolina/Boxing-Manager/pull/126; evidence: central test exit 0; smoke PRODUCT_PASS; capturas revisadas · existing tests changed with a human's approval (cris) · red at 13a1827:     org.opentest4j.AssertionFailedError at FuncionV5Test.java:114; reviewer: -
 - 1794284175 | REVIEW | cris-2 | review; approve; SHA 9ad47bcb365a05274782c6cfb1c55ca53e7c3d99; reviewer cris-2
+- 1794288602 | INTEGRATED | zoe | integrate; recorded by zoe; PR https://github.com/crisMmolina/Boxing-Manager/pull/126; merged f99a3445fd4cc6048a5548a1f79312e17350c268; proof ancestry
