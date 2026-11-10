@@ -11,3 +11,4 @@
 ## History
 - 1794284243 | CLAIMED | crxthrx-9 | claim; next: prueba de la ventana de resultado con el encabezado v5
 - 1794285492 | CLAIMED | crxthrx-9 | checkpoint; next: Correr suite completa y smoke en el último commit, abrir PR DSK-045, uak done --to cris-2, revisión de diseño con capturas (EventoScreenshots)
+- 1794285518 | AVAILABLE | crxthrx-9 | release; claim released by crxthrx-9; reason: -; summary kept
