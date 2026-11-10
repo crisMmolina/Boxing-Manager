@@ -82,8 +82,9 @@ public final class SetupScreen {
     Node build() {
         var status = Ui.support("");
         var left = new VBox(16, Skeleton.lines(3));
-        left.setPrefWidth(340);
-        left.setMinWidth(340);
+        // 260 + 24 + 3 × 240 + 2 × 16 = 1036: los 3 lugares caben en una fila dentro de 1100 px.
+        left.setPrefWidth(260);
+        left.setMinWidth(260);
         var seats = new FlowPane(16, 16, Skeleton.block(240, 200));
         seats.setPrefWrapLength(780); // sin esto el FlowPane pide una sola columna muy alta
         seats.setRowValignment(VPos.TOP); // tarjetas de distinta altura, alineadas arriba
@@ -157,8 +158,9 @@ public final class SetupScreen {
             case CONECTADO -> Ui.chip("Conectado", "success", "check");
             case SIN_CONEXION -> Ui.chip("Sin conexión", "neutral", "wifi-off");
         };
-        var head = new HBox(8, Ui.cardTitle("Lugar " + s.seat()), Ui.grow(), chip);
-        head.setAlignment(Pos.CENTER_LEFT);
+        // El chip va debajo del título: en 240 px no caben juntos sin cortarse.
+        var head = new VBox(6, Ui.cardTitle("Lugar " + s.seat()), chip);
+        head.setAlignment(Pos.TOP_LEFT);
         var card = Ui.card(head, Ui.support(who));
         card.getStyleClass().add("seat-card");
         card.setPrefWidth(240);

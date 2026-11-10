@@ -102,7 +102,8 @@ public final class RoundsScreen {
             Supplier<String> fightId, Runnable onFinish, TerminarEnVivo terminar) {
         var title = Ui.screenTitle("En vivo");
         var judges = new FlowPane(12, 12);
-        var cards = Ui.card(Ui.cardTitle("Jueces"), judges);
+        // Sección, no tarjeta: las tarjetas de juez no van dentro de otra tarjeta (v5).
+        var cards = new VBox(12, Ui.cardTitle("Jueces"), judges);
         var track = new Arc(88, 88, 82, 82, 90, 360);
         track.setType(ArcType.OPEN);
         track.getStyleClass().add("ring-track");
@@ -296,20 +297,24 @@ public final class RoundsScreen {
             var who = "Juez " + j.seat();
             var name = new Label(j.name() == null ? who : j.name());
             name.getStyleClass().add("judge-name");
-            var head = new HBox(10, Ui.avatar(name.getText()), new VBox(2, name, Ui.support(who)));
+            boolean cellSent = current != null && i < current.cells().size() && isSent(current.cells().get(i));
+            Node chip;
+            if (!j.connected()) {
+                chip = Ui.chip("Sin conexión", "neutral", "wifi-off");
+            } else if (cellSent) {
+                chip = Ui.chip("Enviada", "success", "check");
+            } else if (current != null && current.estado() == EstadoRound.ABIERTO) {
+                chip = Ui.chip("Calificando…", "pending", "clock");
+            } else {
+                chip = Ui.chip("En espera", "neutral", null);
+            }
+            // Avatar y nombre a la izquierda, el estado a la derecha (DESIGN v5 En vivo).
+            var head = new HBox(10, Ui.avatar(name.getText()), new VBox(2, name, Ui.support(who)), Ui.grow(), chip);
             head.setAlignment(Pos.CENTER_LEFT);
             var card = new VBox(8, head);
             card.getStyleClass().add("judge-card");
-            boolean cellSent = current != null && i < current.cells().size() && isSent(current.cells().get(i));
             if (!j.connected()) {
-                card.getChildren().addAll(Ui.chip("Sin conexión", "neutral", "wifi-off"),
-                        HelpButton.connection(false, who));
-            } else if (cellSent) {
-                card.getChildren().add(Ui.chip("Enviada", "success", "check"));
-            } else if (current != null && current.estado() == EstadoRound.ABIERTO) {
-                card.getChildren().add(Ui.chip("Calificando…", "pending", "clock"));
-            } else {
-                card.getChildren().add(Ui.chip("En espera", "neutral", null));
+                card.getChildren().add(HelpButton.connection(false, who));
             }
             judges.getChildren().add(card);
         }

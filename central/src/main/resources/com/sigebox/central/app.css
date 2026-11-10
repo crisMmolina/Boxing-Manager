@@ -404,12 +404,12 @@
 .round-segment {
     -fx-background-color: -sg-line;
     -fx-background-radius: 999px;
-    -fx-min-height: 6px;
-    -fx-max-height: 6px;
+    -fx-min-height: 8px;
+    -fx-max-height: 8px;
 }
 
 .round-segment.done {
-    -fx-background-color: -sg-ink-2;
+    -fx-background-color: -sg-ink; /* el verde es solo el punto de conexión */
 }
 
 .round-segment.current {

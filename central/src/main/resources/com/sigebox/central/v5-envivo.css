@@ -9,7 +9,7 @@
 .round-segment { -fx-pref-width: 40; -fx-pref-height: 8; -fx-min-height: 8; -fx-max-height: 8; -fx-background-radius: 4; }
 .round-segment.done { -fx-background-color: -sg-connected; }
 .round-segment.current { -fx-background-color: -sg-accent; }
-.round-segment.future { -fx-background-color: -sg-ring-track; }
+.round-segment.future { -fx-background-color: -sg-line; }
 
 .judge-card { -fx-background-color: -sg-surface; -fx-border-color: -sg-line; -fx-border-radius: 12; -fx-background-radius: 12; -fx-padding: 16; -fx-pref-width: 240; }
 .judge-name { -fx-font-family: "Inter"; -fx-font-weight: 600; -fx-font-size: 15px; -fx-text-fill: -sg-ink; }
