@@ -110,3 +110,4 @@ Why: a reversible option after 15 min keeps work moving.
 - 1794283387 | allow | cris | test change: DSK-043 | Why: spec
 - 1794283550 | deadline decision/DSK-043-1794280974/1794281874 | REVERSIBLE_AND_LOG | Option: Reemplazar FuncionAddRowTest.laBaseDelEventoTieneRoundsYJuecesQueSeCambian y FuncionPreparadaRowTest.bajarLosJuecesDelEventoBajaLaPeleaEnJueces por FuncionV5Test (Stepper) e InicioTest.nuevoEventoFormCreatesTheEventWithLabeledFields por InicioV5Test (Stepper); Why: spec 006: ningún Spinner; las pruebas viejas buscaban Spinner y las nuevas prueban lo mismo con Stepper; no money, accounts, publishing or scope expansion.
 - 1794285492 | DSK-045 | conteo solo en content() para no romper ResultStepScreenTest; palabras clave del chip en minúsculas por LabelsTest | Why: pruebas existentes leen el total final y escanean mayúsculas
+- 1794286955 | DSK-044 | app.css/harness fuera de Paths los decide un humano | Why: las pantallas los necesitan
