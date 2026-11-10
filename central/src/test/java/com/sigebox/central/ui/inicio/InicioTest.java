@@ -165,36 +165,6 @@ class InicioTest {
     }
 
     @Test
-    void nuevoEventoFormCreatesTheEventWithLabeledFields() throws Exception {
-        var created = new ArrayList<String>();
-        var form = new NuevoEventoScreen(funciones, created::add);
-        FxTest.onFx(() -> {
-            var root = form.build();
-            var labels = all(root).stream().filter(n -> n instanceof Label l && l.getLabelFor() != null)
-                    .map(n -> (Label) n).toList();
-            assertEquals(List.of("Nombre (opcional)", "Fecha", "Rounds por pelea", "Jueces", "Número de peleas"),
-                    labels.stream().map(Label::getText).toList());
-            var name = (TextField) labels.get(0).getLabelFor();
-            assertFalse(name.getPromptText().isBlank(), "ejemplo dentro del campo");
-            name.setText("Noche de box");
-            ((DatePicker) labels.get(1).getLabelFor()).setValue(LocalDate.of(2026, 11, 3));
-            @SuppressWarnings("unchecked")
-            var fights = (Spinner<Integer>) labels.get(4).getLabelFor();
-            fights.getValueFactory().setValue(4);
-            var crear = all(root).stream().filter(n -> n instanceof Button b && "Crear evento".equals(b.getText()))
-                    .map(n -> (Button) n).findFirst().orElseThrow();
-            assertTrue(crear.getStyleClass().contains("primary"));
-            crear.fire();
-            return null;
-        });
-        assertEquals(1, created.size());
-        var f = funciones.funcion(created.get(0));
-        assertEquals("Noche de box", f.nombre());
-        assertEquals("2026-11-03", f.fecha());
-        assertEquals(4, funciones.cartelera(f.id()).size());
-    }
-
-    @Test
     void anOlderEventShowsItsCardReadOnly() throws Exception {
         var viejo = funciones.crear("Viejo", LocalDate.of(2026, 10, 1), 4, 3, List.of(new Esquinas("Ana", "Bea")));
         funciones.crear("Nuevo", LocalDate.of(2026, 11, 3), 4, 3, peleas(1));

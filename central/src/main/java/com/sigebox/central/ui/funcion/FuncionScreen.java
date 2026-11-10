@@ -4,6 +4,11 @@ import com.sigebox.central.service.FuncionService;
 import com.sigebox.central.service.FuncionService.Esquinas;
 import com.sigebox.central.service.FuncionService.Fila;
 import com.sigebox.central.ui.Screens;
+import com.sigebox.central.ui.theme.ActionMenu;
+import com.sigebox.central.ui.theme.Icons;
+import com.sigebox.central.ui.theme.Motion;
+import com.sigebox.central.ui.theme.PageHeader;
+import com.sigebox.central.ui.theme.Stepper;
 import com.sigebox.central.ui.theme.Ui;
 import java.time.LocalDate;
 import java.util.Collections;
@@ -18,7 +23,6 @@ import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
-import javafx.scene.control.Spinner;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -36,11 +40,18 @@ public final class FuncionScreen {
 
     private final FuncionFlow flow;
     private final Runnable onStarted;
+    private final Ask ask;
 
     /** @param onStarted se llama al iniciar la siguiente pelea (lleva a emparejar jueces) */
     public FuncionScreen(FuncionFlow flow, Runnable onStarted) {
+        this(flow, onStarted, DIALOGS);
+    }
+
+    /** Con {@code ask} para "Cambiar rounds y jueces" (las pruebas pasan una respuesta fija). */
+    public FuncionScreen(FuncionFlow flow, Runnable onStarted, Ask ask) {
         this.flow = flow;
         this.onStarted = onStarted;
+        this.ask = ask;
     }
 
     public static void register(Screens<Node> screens, FuncionFlow flow, Runnable onStarted) {
@@ -52,7 +63,10 @@ public final class FuncionScreen {
         var status = Ui.support("");
         var body = new VBox(16);
         var next = Ui.next("Crea el evento.");
-        var root = new VBox(16, Ui.screenTitle("Evento"), next, body, status);
+        // DESIGN v5 §5.12: encabezado con el evento como contexto y la siguiente pelea como acción principal.
+        var header = new PageHeader("Evento");
+        var root = new VBox(16, header, next, body, status);
+        root.getStyleClass().add("evento-v5");
 
         String[] signature = {null};
         Runnable[] draw = new Runnable[1];
@@ -73,7 +87,11 @@ public final class FuncionScreen {
             }
             signature[0] = sig;
             Ui.next(next, nextStep(id, rows));
-            body.getChildren().setAll(id == null ? create(status, refresh) : show(id, rows, status, refresh, synced));
+            if (id == null) {
+                header.context(null).action(null);
+            }
+            body.getChildren().setAll(id == null ? create(status, refresh)
+                    : show(id, rows, status, refresh, synced, header));
         };
 
         var timer = new Timeline(new KeyFrame(Duration.seconds(1), e -> draw[0].run()));
@@ -93,9 +111,9 @@ public final class FuncionScreen {
         name.setPromptText("Ej. Velada de mayo");
         var date = new DatePicker(LocalDate.now());
         date.setPromptText("Ej. 01/05/2026");
-        var rounds = new Spinner<Integer>(1, 12, 10);
-        var judges = new Spinner<Integer>(1, 5, 3);
-        var fights = new Spinner<Integer>(1, FuncionService.MAX_PELEAS, 1);
+        var rounds = stepper(1, 12, 10, "Rounds");
+        var judges = stepper(1, 5, 3, "Jueces");
+        var fights = stepper(1, FuncionService.MAX_PELEAS, 1, "Peleas");
         var create = Ui.primary("Crear evento");
         create.setOnAction(e -> act(status, refresh, () -> {
             flow.service().crear(name.getText(), date.getValue(), rounds.getValue(), judges.getValue(),
@@ -106,12 +124,13 @@ public final class FuncionScreen {
                 Ui.support("La configuración base sirve para todas las peleas; cada una puede cambiarla antes de "
                         + "empezar."),
                 new HBox(12, Ui.field("Nombre del evento", name), Ui.field("Fecha", date)),
-                new HBox(12, Ui.field("Rounds", rounds), Ui.field("Jueces", judges), Ui.field("Peleas", fights)),
+                new HBox(12, limited("Rounds", rounds, 1, 12), limited("Jueces", judges, 1, 5), limited("Peleas", fights, 1, FuncionService.MAX_PELEAS)),
                 create);
     }
 
-    private Node show(String id, List<Fila> rows, Label status, Runnable refresh, Runnable synced) {
+    private Node show(String id, List<Fila> rows, Label status, Runnable refresh, Runnable synced, PageHeader header) {
         var f = flow.service().funcion(id);
+        header.context(FuncionView.nombre(f) + " · " + f.fecha());
         // El botón de iniciar muestra los nombres: se actualiza sin rehacerlo, por si lo están presionando.
         var nextText = new SimpleStringProperty("");
         Runnable renamed = () -> {
@@ -120,24 +139,22 @@ public final class FuncionScreen {
                     .ifPresent(nextText::set);
         };
         // Spec 005: rounds y jueces del evento se pueden cambiar después de crearlo; aplica a las peleas sin empezar.
-        var baseRounds = new Spinner<Integer>(1, 12, f.baseRounds());
-        var baseJudges = new Spinner<Integer>(1, 5, f.baseJueces());
-        baseRounds.setPrefWidth(110);
-        baseJudges.setPrefWidth(110);
-        baseRounds.setAccessibleText("Rounds del evento");
-        baseJudges.setAccessibleText("Jueces del evento");
+        var baseRounds = stepper(1, 12, f.baseRounds(), "Rounds del evento");
+        var baseJudges = stepper(1, 5, f.baseJueces(), "Jueces del evento");
         baseRounds.valueProperty().addListener((o, a, b) -> act(status, refresh, () -> {
-            flow.service().cambiarEvento(id, b, null);
+            flow.service().cambiarEvento(id, b.intValue(), null);
             return "Rounds del evento: " + b + ". Cambian las peleas que no han empezado.";
         }));
         baseJudges.valueProperty().addListener((o, a, b) -> act(status, refresh, () -> {
-            flow.service().cambiarEvento(id, null, b);
+            flow.service().cambiarEvento(id, null, b.intValue());
             return "Jueces del evento: " + b + ". Cambian las peleas que no han empezado.";
         }));
-        var base = Ui.card(Ui.cardTitle("Base"), new HBox(40, Ui.field("Evento", Ui.body(FuncionView.nombre(f))),
-                Ui.field("Fecha", Ui.body(f.fecha())), Ui.field("Rounds", baseRounds), Ui.field("Jueces", baseJudges)),
+        var base = Ui.card(Ui.cardTitle("Base del evento"),
+                new HBox(24, limited("Rounds por pelea", baseRounds, 1, 12), limited("Jueces por pelea", baseJudges, 1, 5)),
                 Ui.support("Cambiar la base cambia todas las peleas que no han empezado; las demás quedan igual."));
         base.setSpacing(8);
+        var startNext = FuncionView.siguiente(rows).map(n -> startButton(n, status, refresh, nextText)).orElse(null);
+        header.action(startNext);
 
         var list = new VBox(8);
         for (var r : rows) {
@@ -156,81 +173,70 @@ public final class FuncionScreen {
         var service = flow.service();
         var number = Ui.numeral(String.valueOf(r.orden()), "neutral");
         number.setMinWidth(36);
-        var names = FuncionView.editable(r) ? editableNames(id, r, status, refresh, renamed) : fixedNames(r);
-        names.setMinWidth(200);
-        names.setPrefWidth(200);
+        HBox names = FuncionView.editable(r) ? editableNames(id, r, status, refresh, renamed) : fixedNames(r);
+        names.setMinWidth(380);
+        names.setPrefWidth(380);
 
-        var pill = Ui.pill(FuncionView.estado(r.estado()));
-        pill.setMinWidth(javafx.scene.layout.Region.USE_PREF_SIZE);
+        // DESIGN v5 §5.15: una línea por pelea; el estado como chip y las acciones en el menú ⋯.
+        var chip = Ui.chip(FuncionView.estado(r.estado()), chipVariant(r), null);
+        chip.setMinWidth(javafx.scene.layout.Region.USE_PREF_SIZE);
+        var meta = Ui.support(FuncionView.detalle(r.rounds(), r.jueces())
+                + (r.preparada() ? " · en Jueces: sigue la base hasta el round 1 (sus jueces solo bajan)"
+                        : r.cambiada() ? " · propia" : ""));
+        meta.setMinWidth(150);
+        meta.setWrapText(true);
 
-        var row = new HBox(12, number, names);
+        var row = new HBox(16, number, names, meta, Ui.grow(), chip);
+        row.getStyleClass().add("cartelera-row");
         row.setAlignment(Pos.CENTER_LEFT);
         if (FuncionView.editable(r)) {
-            var rounds = new Spinner<Integer>(1, 12, r.rounds());
-            var judges = new Spinner<Integer>(1, 5, r.jueces());
-            rounds.setPrefWidth(110);
-            judges.setPrefWidth(110);
-            rounds.setAccessibleText("Rounds de la pelea " + r.orden());
-            judges.setAccessibleText("Jueces de la pelea " + r.orden());
-            rounds.valueProperty().addListener((o, a, b) -> act(status, refresh, () -> {
-                service.cambiar(id, r.orden(), b, null);
-                return "";
-            }));
-            judges.valueProperty().addListener((o, a, b) -> act(status, refresh, () -> {
-                service.cambiar(id, r.orden(), null, b);
-                return "";
-            }));
-            var up = Ui.secondary("Subir");
-            up.setVisible(r.orden() > 1); // la primera no puede subir; el hueco mantiene las columnas
-            up.setOnAction(e -> act(status, refresh, () -> {
+            var menu = new ActionMenu("Más acciones de la pelea " + r.orden());
+            menu.add("Cambiar rounds y jueces", () -> ask.ask(r).ifPresent(v -> act(status, refresh, () -> {
+                service.cambiar(id, r.orden(), v[0], v[1]);
+                return "Pelea " + r.orden() + ": " + FuncionView.detalle(v[0], v[1]) + ".";
+            })));
+            var up = menu.add("Subir", () -> act(status, refresh, () -> {
                 service.mover(id, r.orden(), r.orden() - 1);
                 return "";
             }));
-            var down = Ui.secondary("Bajar");
-            down.setOnAction(e -> act(status, refresh, () -> {
+            up.setDisable(r.orden() == 1); // la primera no puede subir
+            menu.add("Bajar", () -> act(status, refresh, () -> {
                 service.mover(id, r.orden(), r.orden() + 1);
                 return "";
             }));
-            var skip = Ui.secondary("Saltar");
-            skip.setOnAction(e -> act(status, refresh, () -> {
+            menu.add("Saltar pelea", () -> act(status, refresh, () -> {
                 service.saltar(id, r.orden());
                 return "Pelea " + r.orden() + " saltada. Queda en la cartelera.";
             }));
-            var remove = Ui.secondary("Quitar");
-            remove.setOnAction(e -> act(status, refresh, () -> {
+            menu.separator();
+            menu.add("Quitar de la cartelera", () -> act(status, refresh, () -> {
                 service.quitar(id, r.orden());
                 return "Pelea " + r.orden() + " quitada.";
             }));
-            for (var b : new Button[] {up, down, skip, remove}) {
-                b.setAccessibleText(b.getText() + " la pelea " + r.orden());
-                b.setMinWidth(javafx.scene.layout.Region.USE_PREF_SIZE); // sin "…" en el texto
-            }
-            row.getChildren().addAll(Ui.field("Rounds", rounds), Ui.field("Jueces", judges), Ui.grow(), pill, up, down,
-                    skip, remove);
-        } else if (r.preparada()) {
-            // DSK-040: la pelea que espera en Jueces sigue la base del evento hasta abrir el round 1.
-            var detail = Ui.support(FuncionView.detalle(r.rounds(), r.jueces())
-                    + " · en Jueces: sigue la base hasta el round 1 (sus jueces solo bajan)");
-            detail.setWrapText(true);
-            row.getChildren().addAll(detail, Ui.grow(), pill);
-        } else {
-            var detail = Ui.support(FuncionView.detalle(r.rounds(), r.jueces()) + (r.cambiada() ? " · cambiada" : ""));
-            row.getChildren().addAll(detail, Ui.grow(), pill);
+            row.getChildren().add(menu);
         }
-        row.setPadding(new javafx.geometry.Insets(6, 0, 6, 0));
+        Motion.lift(row);
         return row;
     }
 
-    private static VBox fixedNames(Fila r) {
-        var red = new HBox(6, Ui.cornerDot(true), Ui.body(r.roja()));
-        red.setAlignment(Pos.CENTER_LEFT);
-        var blue = new HBox(6, Ui.cornerDot(false), Ui.body(r.azul()));
-        blue.setAlignment(Pos.CENTER_LEFT);
-        return new VBox(2, red, blue);
+    /** Chip del estado de una fila: cerrada en verde, en curso en dorado, las demás neutras. */
+    private static String chipVariant(Fila r) {
+        return switch (r.estado()) {
+            case CERRADA -> "success";
+            case EN_CURSO -> "pending";
+            default -> "neutral";
+        };
+    }
+
+    private static HBox fixedNames(Fila r) {
+        var box = new HBox(8, Ui.cornerDot(true), Ui.body(r.roja()), Ui.support("vs"), Ui.cornerDot(false),
+                Ui.body(r.azul()));
+        box.setAlignment(Pos.CENTER_LEFT);
+        return box;
     }
 
     /** Los nombres de una pelea que no ha empezado: se guardan con Enter o al salir del campo. */
-    private VBox editableNames(String id, Fila r, Label status, Runnable refresh, Runnable renamed) {
+    private HBox editableNames(String id, Fila r, Label status, Runnable refresh, Runnable renamed) {
         var red = new TextField(r.roja());
         var blue = new TextField(r.azul());
         red.setPromptText("Ej. Ana Pérez");
@@ -266,7 +272,16 @@ public final class FuncionScreen {
                 }
             });
         }
-        return new VBox(4, Ui.field("Esquina roja", red), Ui.field("Esquina azul", blue));
+        // Una línea: "● roja  vs  ● azul", cada campo con su etiqueta arriba (DESIGN v4 §5.4).
+        var redField = Ui.field("Esquina roja", red);
+        var blueField = Ui.field("Esquina azul", blue);
+        HBox.setHgrow(redField, Priority.ALWAYS);
+        HBox.setHgrow(blueField, Priority.ALWAYS);
+        var vs = Ui.support("vs");
+        var box = new HBox(8, Ui.cornerDot(true), redField, vs, Ui.cornerDot(false), blueField);
+        box.setAlignment(Pos.BOTTOM_LEFT);
+        HBox.setMargin(vs, new javafx.geometry.Insets(0, 0, 12, 0));
+        return box;
     }
 
     private Node add(String id, Label status, Runnable refresh) {
@@ -318,18 +333,61 @@ public final class FuncionScreen {
             box.getChildren().add(Ui.support(rows.isEmpty() ? "" : "No quedan peleas por iniciar."));
             return box;
         }
-        nextText.set(FuncionView.siguienteTexto(next.get()));
+        // v5: el botón de iniciar vive en el encabezado; aquí queda lo que trae la siguiente pelea.
+        box.getChildren().addAll(Ui.grow(), Ui.support("Siguiente: pelea " + next.get().orden() + " · "
+                + FuncionView.detalle(next.get().rounds(), next.get().jueces())));
+        return box;
+    }
+
+    /** "Siguiente pelea: Roja vs Azul", la acción principal del encabezado; sigue los nombres sin rehacerse. */
+    private Button startButton(Fila next, Label status, Runnable refresh, StringProperty nextText) {
+        nextText.set(FuncionView.siguienteTexto(next));
         var start = Ui.primary(nextText.get());
         start.textProperty().bind(nextText);
+        var play = Icons.icon("play", 16);
+        play.getStyleClass().add("on-primary");
+        start.setGraphic(play);
         start.setOnAction(e -> act(status, refresh, () -> {
             flow.start();
             onStarted.run();
             return "";
         }));
-        box.getChildren().addAll(Ui.grow(), Ui.support(FuncionView.detalle(next.get().rounds(), next.get().jueces())),
-                start);
-        return box;
+        return start;
     }
+
+    /** Stepper v5 (DESIGN v5 §5.14) con el nombre que dice el lector de pantalla. */
+    /** El stepper con su etiqueta y, en cada límite, por qué su botón está apagado (spec 003). */
+    private static javafx.scene.layout.VBox limited(String label, Stepper s, int min, int max) {
+        var low = Ui.why("Mínimo " + min + ".", s.minusButton());
+        var high = Ui.why("Máximo " + max + ".", s.plusButton());
+        return new javafx.scene.layout.VBox(4, Ui.field(label, s), low, high);
+    }
+
+    private static Stepper stepper(int min, int max, int value, String name) {
+        var s = new Stepper(min, max, value);
+        s.setName(name);
+        return s;
+    }
+
+    /** Pide rounds y jueces de una pelea; vacío si se cancela. Las pruebas pasan una respuesta fija. */
+    @FunctionalInterface
+    public interface Ask {
+        java.util.Optional<int[]> ask(Fila fila);
+    }
+
+    /** El diálogo de la app: dos steppers con los valores de la fila. */
+    public static final Ask DIALOGS = fila -> {
+        var rounds = stepper(1, 12, fila.rounds(), "Rounds de la pelea " + fila.orden());
+        var judges = stepper(1, 5, fila.jueces(), "Jueces de la pelea " + fila.orden());
+        var dialog = new javafx.scene.control.Dialog<javafx.scene.control.ButtonType>();
+        dialog.setTitle("Cambiar rounds y jueces");
+        dialog.setHeaderText("Pelea " + fila.orden() + ": " + fila.roja() + " vs " + fila.azul());
+        var save = new javafx.scene.control.ButtonType("Guardar", javafx.scene.control.ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(javafx.scene.control.ButtonType.CANCEL, save);
+        dialog.getDialogPane().setContent(new HBox(24, Ui.field("Rounds", rounds), Ui.field("Jueces", judges)));
+        return dialog.showAndWait().filter(save::equals)
+                .map(b -> new int[] {rounds.getValue(), judges.getValue()});
+    };
 
     /** Ejecuta un cambio; muestra el mensaje o el error y vuelve a leer la cartelera guardada. */
     private static void act(Label status, Runnable refresh, java.util.function.Supplier<String> change) {
