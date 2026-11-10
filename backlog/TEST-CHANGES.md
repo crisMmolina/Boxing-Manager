@@ -1,0 +1,5 @@
+# Existing tests a human allowed to change (uak allow --tests)
+
+Append-only. Format: - ID | epoch | human | reason. Why: a test is a spec; changing one is a human decision.
+
+- DSK-043 | 1794283387 | cris | spec

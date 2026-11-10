@@ -107,3 +107,4 @@ Why: a reversible option after 15 min keeps work moving.
 - 1794246814 | deadline decision/DSK-039-1794240546/1794241446 | REVERSIBLE_AND_LOG | Option: Corrige la anterior: 'Nuevo evento' abre el formulario (y es su título) y 'Crear evento' lo crea, en Inicio y en Evento; no se cambia. Inicio fuera del evento no muestra la barra: su título 'Eventos' queda; Why: son dos acciones distintas, cada una con un solo nombre; InicioTest las fija; no money, accounts, publishing or scope expansion.
 - 1794274560 | deadline lease/AND-022/1794266521 | REQUIRES_RECOVERY | Claim kept; read the summary and use release --expired --read-summary. No work is deleted.
 - 1794274560 | deadline lease/DSK-041/1794266657 | REQUIRES_RECOVERY | Claim kept; read the summary and use release --expired --read-summary. No work is deleted.
+- 1794283387 | allow | cris | test change: DSK-043 | Why: spec

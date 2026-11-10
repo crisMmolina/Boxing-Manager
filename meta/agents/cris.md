@@ -8,3 +8,4 @@ Sessions: 1
 Last-Checkpoint: 0
 Last-Session: stable
 Updated: 1793773800
+Role: human
