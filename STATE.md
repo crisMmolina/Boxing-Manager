@@ -1,7 +1,7 @@
 # STATE
 
 Phase: execution
-Updated: 1794285300
+Updated: 1794285492
 AVAILABLE: -
 CLAIMED: DSK-044 DSK-045 
 BLOCKED: -
@@ -14,15 +14,15 @@ AND-023 | REVIEW | crxthrx-5 | until 1794366964
 AND-024 | REVIEW | crxthrx-7 | until 1794367137
 DSK-043 | REVIEW | crxthrx-8 | until 1794370453
 DSK-044 | CLAIMED | zoe-1 | until 1794295185
-DSK-045 | CLAIMED | crxthrx-9 | until 1794298643
+DSK-045 | CLAIMED | crxthrx-9 | until 1794299892
 
 Blockers: BLOCKED tasks; use status --task ID --summary.
 Current decisions (last 5):
-- 1794246814 | deadline decision/DSK-039-1794240546/1794241446 | REVERSIBLE_AND_LOG | Option: Corrige la anterior: 'Nuevo evento' abre el formulario (y es su título) y 'Crear even
 - 1794274560 | deadline lease/AND-022/1794266521 | REQUIRES_RECOVERY | Claim kept; read the summary and use release --expired --read-summary. No work is deleted.
 - 1794274560 | deadline lease/DSK-041/1794266657 | REQUIRES_RECOVERY | Claim kept; read the summary and use release --expired --read-summary. No work is deleted.
 - 1794283387 | allow | cris | test change: DSK-043 | Why: spec
 - 1794283550 | deadline decision/DSK-043-1794280974/1794281874 | REVERSIBLE_AND_LOG | Option: Reemplazar FuncionAddRowTest.laBaseDelEventoTieneRoundsYJuecesQueSeCambian y FuncionPr
+- 1794285492 | DSK-045 | conteo solo en content() para no romper ResultStepScreenTest; palabras clave del chip en minúsculas por LabelsTest | Why: pruebas existentes leen el total
 
 Global next step: available P0; else review PRs, tests, demo, rehearsal.
 Why: bounded snapshot to resume without rereading history.

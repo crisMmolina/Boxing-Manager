@@ -1,11 +1,11 @@
 # crxthrx-9
 Agent: crxthrx-9
 Started: 1794284243
-Events: 1
-Events-Since-Checkpoint: 1
-Checkpoints: 0
+Events: 2
+Events-Since-Checkpoint: 0
+Checkpoints: 1
 Sessions: 1
-Last-Checkpoint: 0
+Last-Checkpoint: 1794285492
 Human: CrXThrx
 Last-Session: crxthrx-9-1794284240
-Updated: 1794284243
+Updated: 1794285492
