@@ -13,7 +13,7 @@ import com.sigebox.juez.R;
 import com.sigebox.juez.help.ConnectionHelp;
 
 /**
- * Barra superior: punto de conexión + "Juez N" (o "Sin conexión" al unirse) y el "?" de ayuda de conexión, siempre
+ * Barra superior: "Juez N", el chip de conexión (DESIGN.md v5 §5.17) y el "?" de ayuda de conexión, siempre
  * visible y destacado en dorado mientras no hay conexión (DESIGN.md v4 §5.8).
  */
 public final class TopBar {
@@ -22,14 +22,19 @@ public final class TopBar {
     }
 
     public static void bind(View screen, boolean connected, String text) {
-        View dot = screen.findViewById(R.id.top_dot);
-        dot.setBackgroundResource(connected ? R.drawable.dot_connected : R.drawable.dot_disconnected);
-        ((TextView) screen.findViewById(R.id.top_pill_text)).setText(text);
         var ctx = screen.getContext();
-        View pill = screen.findViewById(R.id.top_pill);
-        pill.setContentDescription(
+        ConnectionChip chip = screen.findViewById(R.id.top_pill);
+        chip.setConnected(connected);
+        chip.setOnHelpListener(v -> ConnectionHelp.show(v.getContext(), false));
+        // El chip ya dice Conectado o Sin conexión: "Juez N" solo se muestra cuando aporta algo.
+        TextView judge = screen.findViewById(R.id.top_judge);
+        boolean repeatsState = text.equals(ctx.getString(R.string.status_connected))
+                || text.equals(ctx.getString(R.string.status_disconnected));
+        judge.setText(text);
+        judge.setVisibility(repeatsState ? View.GONE : View.VISIBLE);
+        chip.setContentDescription(
                 text + ", " + ctx.getString(connected ? R.string.a11y_connected : R.string.a11y_disconnected));
-        bindHelp((ViewGroup) pill.getParent(), connected);
+        bindHelp((ViewGroup) chip.getParent(), connected);
     }
 
     private static void bindHelp(ViewGroup bar, boolean connected) {

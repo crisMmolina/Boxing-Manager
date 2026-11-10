@@ -31,4 +31,21 @@
     <dimen name="skeleton_line_radius">6dp</dimen>
     <dimen name="skeleton_dot">12dp</dimen>
     <dimen name="skeleton_card_height">196dp</dimen>
+    <!-- v5 (DESIGN.md §3.8): radios 8 / 12 / 16 / 20. -->
+    <dimen name="r_sm">8dp</dimen>
+    <dimen name="r_md">12dp</dimen>
+    <dimen name="r_lg">16dp</dimen>
+    <dimen name="r_xl">20dp</dimen>
+    <!-- §5.17 Chip de conexión: cápsula de 28 dp con punto de 7 dp. -->
+    <dimen name="chip_height">28dp</dimen>
+    <dimen name="chip_dot">7dp</dimen>
+    <!-- v5 §3.7: tokens de movimiento en ms (mismos nombres que la central). -->
+    <integer name="motion_fast">120</integer>
+    <integer name="motion_base">180</integer>
+    <integer name="motion_enter">220</integer>
+    <integer name="motion_number">200</integer>
+    <integer name="motion_check">380</integer>
+    <integer name="motion_pulse">1800</integer>
+    <!-- Movimiento reducido: solo fundidos de hasta 150 ms. -->
+    <integer name="motion_reduced">150</integer>
 </resources>

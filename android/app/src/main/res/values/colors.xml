@@ -30,6 +30,18 @@
     <color name="connected">#027A35</color>
     <color name="disconnected">#57534C</color>
     <color name="skeleton">#E9E6DF</color>
+    <!-- v5 (DESIGN.md §3.8): mismos nombres que la central. Contrastes en §3.8. -->
+    <color name="success_soft">#E3F3E8</color>
+    <color name="success_ink">#027A35</color>
+    <color name="pending_ink">#5C431E</color>
+    <!-- Texto terciario: solo texto grande o componente en claro (3.47:1). -->
+    <color name="ink_3">#8F897E</color>
+    <!-- Pista del anillo y segmentos sin usar (decorativo). -->
+    <color name="ring_track">#E9E6DF</color>
+    <color name="nav">#111110</color>
+    <color name="nav_ink">#B9B3A8</color>
+    <color name="nav_ink_dim">#8F897E</color>
+    <color name="nav_active">#2A2418</color>
     <!-- Los colores exactos de guantes-colgando.svg: solo el logo, nunca la interfaz. -->
     <color name="logo_negro">#000000</color>
     <color name="logo_rojo">#FF1800</color>
