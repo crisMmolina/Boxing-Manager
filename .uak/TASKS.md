@@ -1491,3 +1491,21 @@ En Windows (zoe) los comandos `Verify` se corren en Git Bash.
   - Capturas claro y oscuro revisadas por un crítico de diseño
 - **Verify:** `android/gradlew -p android :app:testDebugUnitTest`
 - **Next step:** prueba de la pantalla de espera con el chip de conexión
+
+## DSK-047 · Follow-up de DSK-044: detalles de Jueces y En vivo
+
+- **Type:** fix
+- **Priority:** P2
+- **Estimate:** 2 h
+- **Rubric / Spec:** spec 006 §Central
+- **Depends on:** DSK-044
+- **Paths:** central/src/main/java/com/sigebox/central/ui/setup/, central/src/main/java/com/sigebox/central/ui/rounds/, central/src/main/java/com/sigebox/central/ui/termination/, central/src/main/resources/com/sigebox/central/v5-envivo.css, central/src/test/java/com/sigebox/central/ui/setup/, central/src/test/java/com/sigebox/central/ui/rounds/, central/src/test/java/com/sigebox/central/ui/termination/
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - Jueces: las tarjetas de lugar llenan el ancho de la fila (prueba)
+  - Jueces: el aviso "Falta que se conecten N jueces." va centrado
+  - En vivo: "Sin conectar" usa el ícono wifi-off (prueba)
+  - En vivo: sin el espacio vacío bajo "Terminar pelea" en Acciones
+  - Capturas claro y oscuro revisadas por un crítico de diseño
+- **Verify:** `central/gradlew -p central test`
+- **Next step:** prueba de que "Sin conectar" muestra el ícono wifi-off
