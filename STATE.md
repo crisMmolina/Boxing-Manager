@@ -1,7 +1,7 @@
 # STATE
 
 Phase: execution
-Updated: 1794287022
+Updated: 1794288005
 AVAILABLE: DSK-045 
 CLAIMED: -
 BLOCKED: -
@@ -17,11 +17,11 @@ DSK-044 | REVIEW | zoe-1 | until 1794373355
 
 Blockers: BLOCKED tasks; use status --task ID --summary.
 Current decisions (last 5):
-- 1794274560 | deadline lease/DSK-041/1794266657 | REQUIRES_RECOVERY | Claim kept; read the summary and use release --expired --read-summary. No work is deleted.
 - 1794283387 | allow | cris | test change: DSK-043 | Why: spec
 - 1794283550 | deadline decision/DSK-043-1794280974/1794281874 | REVERSIBLE_AND_LOG | Option: Reemplazar FuncionAddRowTest.laBaseDelEventoTieneRoundsYJuecesQueSeCambian y FuncionPr
 - 1794285492 | DSK-045 | conteo solo en content() para no romper ResultStepScreenTest; palabras clave del chip en minúsculas por LabelsTest | Why: pruebas existentes leen el total
 - 1794286955 | DSK-044 | app.css/harness fuera de Paths los decide un humano | Why: las pantallas los necesitan
+- 1794288005 | deadline decision/DSK-044-1794286979/1794287879 | BLOCKED_OTHER_TASK | Option: app.css y ScreenshotHarness quedan en el PR fuera de Paths; Why: app.css trae tokens v
 
 Global next step: available P0; else review PRs, tests, demo, rehearsal.
 Why: bounded snapshot to resume without rereading history.
