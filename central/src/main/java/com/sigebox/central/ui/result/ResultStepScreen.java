@@ -62,7 +62,8 @@ public final class ResultStepScreen {
         var card = Ui.card();
         card.setMaxWidth(860);
         var nextLine = Ui.next("Ve a Evento para ver cómo va.");
-        var root = new VBox(16, Ui.screenTitle("Resultado"), nextLine, card, status);
+        var header = new com.sigebox.central.ui.theme.PageHeader("Resultado"); // DESIGN v5 §5.12
+        var root = new VBox(16, header, nextLine, card, status);
 
         // Solo se reconstruye si cambió lo que se ve: así el botón sigue pulsable entre lecturas.
         String[] shown = new String[1];
@@ -90,6 +91,7 @@ public final class ResultStepScreen {
             boolean canClose = service.canClose(f);
             var missing = service.missingFinalCards(f);
             var sheet = service.scoreSheet(f);
+            sheet.ifPresent(s -> header.fight(s.pelea().esquinaRoja(), s.pelea().esquinaAzul()));
             if (!changed(shown, String.join("|", f, String.valueOf(ended), String.valueOf(closed),
                     String.valueOf(canClose), missing.toString(), sheet.map(ResultStepScreen::scores).orElse("")))) {
                 return;

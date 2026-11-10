@@ -70,7 +70,7 @@ public final class TermsScreen {
 
         var card = Ui.card(scroll, agree, new HBox(12, accept, decline), Ui.why("Marca la casilla para continuar.", accept));
         card.setMaxWidth(800);
-        var root = new VBox(16, Ui.screenTitle("Antes de empezar"),
+        var root = new VBox(16, new com.sigebox.central.ui.theme.PageHeader("Antes de empezar") /* DESIGN v5 §5.12 */,
                 Ui.next("Lee los términos y marca la casilla para continuar."), card);
         return root;
     }

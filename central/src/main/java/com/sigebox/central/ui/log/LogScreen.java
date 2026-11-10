@@ -82,7 +82,8 @@ public final class LogScreen {
         // Spec 005: la pelea se nombra por su lugar y sus esquinas; el id interno no se muestra.
         var nombres = new AtomicReference<java.util.Map<String, String>>(java.util.Map.of());
         table.getColumns().add(column("Pelea", e -> LogQuery.nombre(nombres.get(), e.peleaId())));
-        table.getColumns().get(0).setMinWidth(96); // la hora completa, sin "…"
+        table.getColumns().get(0).setMinWidth(190); // fecha y hora completas, sin "…"
+        table.getColumns().get(1).setMinWidth(280); // "Pelea N · Roja vs Azul" completo; Detalle toma el resto
         fight.setConverter(new StringConverter<>() { // muestra el nombre; el valor sigue siendo el id
             @Override
             public String toString(String id) {
@@ -94,7 +95,17 @@ public final class LogScreen {
                 return text;
             }
         });
-        table.getColumns().add(column("Tipo", e -> Labels.evento(e.tipo())));
+        var tipo = column("Tipo", e -> e.tipo());
+        tipo.setCellFactory(c -> new javafx.scene.control.TableCell<>() { // DESIGN v5: el tipo como chip
+            @Override
+            protected void updateItem(String code, boolean empty) {
+                super.updateItem(code, empty);
+                setText(null);
+                setGraphic(empty || code == null ? null : typeChip(code));
+            }
+        });
+        tipo.setMinWidth(170); // el chip completo ("Tarjeta de round", "Pelea terminada")
+        table.getColumns().add(tipo);
         table.getColumns().add(column("Detalle",
                 e -> Labels.mensaje(e.tipo(), e.detalle()).replace("función ", "evento ")));
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
@@ -107,7 +118,7 @@ public final class LogScreen {
         filters.setAlignment(javafx.geometry.Pos.BOTTOM_LEFT);
         var card = Ui.card(filters, slot);
         VBox.setVgrow(card, Priority.ALWAYS);
-        var root = new VBox(16, Ui.screenTitle("Bitácora"),
+        var root = new VBox(16, new com.sigebox.central.ui.theme.PageHeader("Bitácora"),
                 Ui.next("Filtra por pelea o tipo para revisar lo ocurrido."), card);
 
         var filter = new AtomicReference<>(new Filter(null, null));
@@ -173,6 +184,23 @@ public final class LogScreen {
     /** Etiqueta del filtro de tipo: "Todos" o la etiqueta en español del código guardado. */
     static String typeLabel(String code) {
         return code == null || ALL.equals(code) ? ALL : Labels.evento(code);
+    }
+
+    /** El tipo de un evento como chip: verde lo que salió bien, dorado lo que espera, neutro lo demás. */
+    static javafx.scene.control.Label typeChip(String code) {
+        return Ui.chip(Labels.evento(code), typeVariant(code), null);
+    }
+
+    static String typeVariant(String code) {
+        var c = code.toLowerCase(java.util.Locale.ROOT); // en minúsculas: no son tipos de evento (LabelsTest)
+        if (c.contains("approved") || c.contains("closed") || c.contains("connected") && !c.contains("dis")
+                || c.endsWith("_sent") || c.contains("received") || c.contains("accepted")) {
+            return "success";
+        }
+        if (c.contains("requested") || c.contains("pending") || c.contains("opened") || c.contains("wait")) {
+            return "pending";
+        }
+        return "neutral";
     }
 
     private static TableColumn<EventoBitacora, String> column(String title,

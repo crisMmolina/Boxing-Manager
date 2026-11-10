@@ -57,9 +57,11 @@ public final class ResultScreen {
         var body = body(sheet);
         var root = new BorderPane(body);
         root.getStyleClass().add("app-root");
-        // Spec 005: el mismo título que su sección, como las demás pantallas.
-        root.setTop(new VBox(16, Ui.brand(), Ui.screenTitle("Resultado"),
-                Ui.next("Exporta el resultado o cierra esta ventana.")));
+        // DESIGN v5 §5.12: el encabezado de la sección con la pelea como contexto; los totales entran contando.
+        var header = new com.sigebox.central.ui.theme.PageHeader("Resultado")
+                .fight(sheet.pelea().esquinaRoja(), sheet.pelea().esquinaAzul());
+        root.setTop(new VBox(16, Ui.brand(), header, Ui.next("Exporta el resultado o cierra esta ventana.")));
+        CountUp.playAll(body);
         root.setBottom(actions);
         BorderPane.setMargin(body, new Insets(24, 0, 24, 0));
         root.setPadding(new Insets(40));
@@ -78,8 +80,11 @@ public final class ResultScreen {
         judges.setPrefWidth(440);
         judges.setMinWidth(440);
         for (var row : sheet.rows()) {
-            var total = new HBox(8, Ui.numeral(String.valueOf(row.totalRed()), "red"), Ui.numeral("–", "neutral"),
-                    Ui.numeral(String.valueOf(row.totalBlue()), "blue"));
+            var red = Ui.numeral(String.valueOf(row.totalRed()), "red");
+            var blue = Ui.numeral(String.valueOf(row.totalBlue()), "blue");
+            red.getStyleClass().add("judge-total");
+            blue.getStyleClass().add("judge-total");
+            var total = new HBox(8, red, Ui.numeral("–", "neutral"), blue);
             total.getChildren().forEach(n -> n.getStyleClass().add("big"));
             total.setAlignment(Pos.CENTER_LEFT);
             var card = Ui.card(Ui.cardTitle("Juez " + row.seat() + (row.name() == null ? "" : " · " + row.name())),
