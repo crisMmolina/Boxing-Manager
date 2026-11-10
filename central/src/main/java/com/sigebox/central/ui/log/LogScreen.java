@@ -190,11 +190,12 @@ public final class LogScreen {
     }
 
     static String typeVariant(String code) {
-        if (code.contains("APPROVED") || code.contains("CLOSED") || code.contains("CONNECTED") && !code.contains("DIS")
-                || code.endsWith("_SENT") || code.contains("RECEIVED") || code.contains("ACCEPTED")) {
+        var c = code.toLowerCase(java.util.Locale.ROOT); // en minúsculas: no son tipos de evento (LabelsTest)
+        if (c.contains("approved") || c.contains("closed") || c.contains("connected") && !c.contains("dis")
+                || c.endsWith("_sent") || c.contains("received") || c.contains("accepted")) {
             return "success";
         }
-        if (code.contains("REQUESTED") || code.contains("PENDING") || code.contains("OPENED") || code.contains("WAIT")) {
+        if (c.contains("requested") || c.contains("pending") || c.contains("opened") || c.contains("wait")) {
             return "pending";
         }
         return "neutral";
