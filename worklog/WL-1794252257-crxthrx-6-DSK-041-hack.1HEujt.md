@@ -11,3 +11,4 @@
 ## History
 - 1794252257 | CLAIMED | crxthrx-6 | claim; next: prueba de `Stepper` con rango y teclado
 - 1794275282 | REVIEW | crxthrx-6 | done; PR https://github.com/crisMmolina/Boxing-Manager/pull/120; evidence: V5ComponentsTest 14; central test verde salvo LiveFightTest intermitente (rerun verde); smoke PRODUCT_PASS · red at fbc4134:     org.opentest4j.AssertionFailedError at V5ComponentsTest.java:179; reviewer: -
+- 1794275466 | REVIEW | cris-2 | review; approve; SHA 4e3cc6e501c3070b9643ed7e18b98a11d15c0f9e; reviewer cris-2
