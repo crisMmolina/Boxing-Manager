@@ -79,6 +79,12 @@ public final class Ui {
     /** La línea "Qué sigue" de una pantalla (spec 003 §Sin capacitación). */
     public static Label next(String text) {
         var l = label("", "next-step");
+        l.getStyleClass().add("callout"); // DESIGN v5 §5.13: aviso con ícono
+        var icon = Icons.icon("info", 18);
+        icon.getStyleClass().add("accent");
+        l.setGraphic(icon);
+        l.setGraphicTextGap(10);
+        l.setMaxWidth(Double.MAX_VALUE);
         l.setWrapText(true);
         next(l, text);
         return l;
@@ -189,6 +195,45 @@ public final class Ui {
         var seq = new SequentialTransition(in, new PauseTransition(Duration.seconds(4)), out);
         seq.setOnFinished(e -> host.getChildren().remove(l));
         seq.play();
+    }
+
+    /**
+     * Chip de estado (DESIGN v5 §5.16): {@code variant} = "success", "pending" o "neutral"; {@code icon} es un nombre
+     * de {@link Icons} o {@code null}.
+     */
+    public static Label chip(String text, String variant, String icon) {
+        var l = label(text, "chip");
+        l.getStyleClass().add(variant);
+        if (icon != null) {
+            var g = Icons.icon(icon, 14);
+            g.getStyleClass().add(variant);
+            l.setGraphic(g);
+            l.setGraphicTextGap(6);
+        }
+        return l;
+    }
+
+    /** Iniciales de un nombre: la primera letra de las dos primeras palabras ("Ana López" → "AL"); "?" sin nombre. */
+    public static String initials(String name) {
+        if (name == null || name.isBlank()) {
+            return "?";
+        }
+        var words = name.strip().split("\\s+");
+        var sb = new StringBuilder();
+        for (int i = 0; i < Math.min(2, words.length); i++) {
+            sb.appendCodePoint(Character.toUpperCase(words[i].codePointAt(0)));
+        }
+        return sb.toString();
+    }
+
+    /** Avatar de 36 px con las iniciales de {@code name} (DESIGN v5 §5.16). */
+    public static StackPane avatar(String name) {
+        var box = new StackPane(label(initials(name), "avatar-initials"));
+        box.getStyleClass().add("avatar");
+        box.setMinSize(36, 36);
+        box.setPrefSize(36, 36);
+        box.setMaxSize(36, 36);
+        return box;
     }
 
     private static Label label(String text, String styleClass) {
