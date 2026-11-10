@@ -23,6 +23,8 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
 /**
@@ -147,28 +149,38 @@ public final class SetupScreen {
     }
 
     private Node seatCard(String fightId, FightService.Seat s, Label status) {
-        boolean connected = s.state() == FightService.SeatState.CONECTADO;
         var who = "Juez " + s.seat();
-        var head = new HBox(8, Ui.cardTitle(who), Ui.grow(), Ui.dot(connected, who));
+        var chip = switch (s.state()) {
+            case SIN_CONECTAR -> Ui.chip("Sin conectar", "neutral", "qr-code");
+            case RECHAZADO -> Ui.chip("Rechazado", "neutral", null);
+            case ESPERANDO_APROBACION -> Ui.chip("Esperando aprobación", "pending", "clock");
+            case CONECTADO -> Ui.chip("Conectado", "success", "check");
+            case SIN_CONEXION -> Ui.chip("Sin conexión", "neutral", "wifi-off");
+        };
+        var head = new HBox(8, Ui.cardTitle("Lugar " + s.seat()), Ui.grow(), chip);
         head.setAlignment(Pos.CENTER_LEFT);
-        var card = Ui.card(head);
+        var card = Ui.card(head, Ui.support(who));
+        card.getStyleClass().add("seat-card");
         card.setPrefWidth(240);
         card.setMinWidth(220);
         switch (s.state()) {
             case SIN_CONECTAR, RECHAZADO -> {
                 var inv = invitations.computeIfAbsent(key(fightId, s.seat()),
                         k -> fights.invite(fightId, s.seat(), host(), port));
-                var code = Ui.numeral(spaced(inv.code()), "neutral");
+                var code = new Label(spaced(inv.code()));
+                code.getStyleClass().add("seat-code");
                 code.setAccessibleText("Código " + String.join(" ", inv.code().split("")));
                 var again = Ui.secondary("Nuevo código");
                 again.setOnAction(e -> {
                     invitations.put(key(fightId, s.seat()), fights.invite(fightId, s.seat(), host(), port));
                     status.setText("Nuevo código para el juez " + s.seat() + ". El anterior ya no sirve.");
                 });
-                if (s.state() == FightService.SeatState.RECHAZADO) {
-                    card.getChildren().add(Ui.support("Rechazado"));
-                }
-                card.getChildren().addAll(qr(inv.qrUri()), code, again);
+                var qr = qr(inv.qrUri());
+                qr.getStyleClass().add("seat-qr");
+                var qrBox = new StackPane(qr);
+                qrBox.getStyleClass().add("seat-qr-box");
+                qrBox.setMaxWidth(Region.USE_PREF_SIZE);
+                card.getChildren().addAll(qrBox, code, again);
             }
             case ESPERANDO_APROBACION -> {
                 var approve = Ui.primary("Aprobar");

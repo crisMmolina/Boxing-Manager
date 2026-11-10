@@ -11,9 +11,9 @@ import java.util.function.Supplier;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
-import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -21,10 +21,15 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.shape.Arc;
+import javafx.scene.shape.ArcType;
 import javafx.util.Duration;
 
 /**
@@ -46,8 +51,6 @@ public final class RoundsScreen {
 
     private static final Duration REFRESH = Duration.millis(500);
 
-    /** Con más rounds futuros que estos, se agrupan en una fila "Pendientes". */
-    private static final int FUTURE_ROWS = 3;
 
     private RoundsScreen() {
     }
@@ -98,10 +101,27 @@ public final class RoundsScreen {
     static Node build(RoundService service, DescuentoService descuentos, DescuentosPanel.Ask ask,
             Supplier<String> fightId, Runnable onFinish, TerminarEnVivo terminar) {
         var title = Ui.screenTitle("En vivo");
-        var grid = new GridPane();
-        grid.setHgap(8);
-        grid.setVgap(4);
-        var cards = Ui.card(Ui.cardTitle("Tarjetas"), grid);
+        var judges = new FlowPane(12, 12);
+        var cards = Ui.card(Ui.cardTitle("Jueces"), judges);
+        var track = new Arc(88, 88, 82, 82, 90, 360);
+        track.setType(ArcType.OPEN);
+        track.getStyleClass().add("ring-track");
+        var ringArc = new Arc(88, 88, 82, 82, 90, 0);
+        ringArc.setType(ArcType.OPEN);
+        ringArc.getStyleClass().add("ring-arc");
+        var ringCount = new Label();
+        ringCount.getStyleClass().add("ring-count");
+        var ringLabel = new Label("tarjetas");
+        ringLabel.getStyleClass().add("ring-label");
+        var ringText = new VBox(0, ringCount, ringLabel);
+        ringText.setAlignment(Pos.CENTER);
+        var ring = new StackPane(new Group(track, ringArc), ringText);
+        ring.getStyleClass().add("cards-ring");
+        ring.setPrefSize(176, 176);
+        ring.setMinSize(176, 176);
+        ring.setMaxSize(176, 176);
+        var segments = new HBox(6);
+        segments.getStyleClass().add("round-segments");
 
 
         var roundTitle = Ui.statBig("");
@@ -111,7 +131,10 @@ public final class RoundsScreen {
         action.setId(PRIMARY_ID);
         action.setMaxWidth(Double.MAX_VALUE);
         var status = Ui.support("");
-        var hero = Ui.card(roundTitle, pill, sent);
+        var heroText = new VBox(8, roundTitle, pill, sent, segments);
+        var heroRow = new HBox(24, ring, heroText);
+        heroRow.setAlignment(Pos.CENTER_LEFT);
+        var hero = Ui.card(heroRow);
         hero.getStyleClass().add("hero");
         var next = Ui.next(NO_FIGHT);
         var why = Ui.why("Inicia una pelea desde Evento para abrir rounds.", action);
@@ -134,7 +157,9 @@ public final class RoundsScreen {
                 drawn[0] = null;
                 Ui.next(next, NO_FIGHT);
                 action.setText("Abrir round");
-                grid.getChildren().clear();
+                judges.getChildren().clear();
+                segments.getChildren().clear();
+                ring.setVisible(false);
                 action.setDisable(true);
                 why.setText("Inicia una pelea desde Evento para abrir rounds.");
                 end.setDisable(true);
@@ -146,7 +171,7 @@ public final class RoundsScreen {
             var live = service.live(f);
             if (!live.equals(drawn[0])) {
                 drawn[0] = live;
-                fillGrid(grid, live);
+                fillLive(live, judges, ring, ringArc, ringCount, segments);
                 fillControl(live, roundTitle, pill, sent, action, next, why);
             }
             end.setDisable(terminar == null || !terminar.disponible(f));
@@ -241,61 +266,58 @@ public final class RoundsScreen {
         return bento;
     }
 
-    private static void fillGrid(GridPane grid, RoundService.Live live) {
-        grid.getChildren().clear();
-        grid.getColumnConstraints().clear();
-        grid.getColumnConstraints().add(new ColumnConstraints(72));
-        for (int i = 0; i < live.judges().size(); i++) {
-            var c = new ColumnConstraints();
-            c.setHgrow(Priority.ALWAYS);
-            c.setHalignment(HPos.CENTER);
-            grid.getColumnConstraints().add(c);
-        }
-
-        grid.add(Ui.support("Round"), 0, 0);
-        int col = 1;
-        for (var j : live.judges()) {
-            var who = "Juez " + j.seat();
-            var head = new HBox(6, Ui.dot(j.connected(), who), Ui.body(j.name() == null ? who : who + " · " + j.name()));
-            head.setAlignment(Pos.CENTER);
-            grid.add(j.connected() ? head : new VBox(4, head, HelpButton.connection(false, who)), col++, 0);
-        }
-
-        int line = 1;
-        int lastShown = live.rows().size();
-        long future = live.rows().stream().filter(r -> r.estado() == EstadoRound.PENDIENTE).count();
-        if (future > FUTURE_ROWS) {
-            lastShown -= (int) future;
-        }
-        for (var row : live.rows().subList(0, lastShown)) {
-            boolean open = row.estado() == EstadoRound.ABIERTO;
-            grid.add(cell(Ui.body(String.valueOf(row.round())), open), 0, line);
-            col = 1;
-            for (var c : row.cells()) {
-                grid.add(cell(score(c), open), col++, line);
+    private static void fillLive(RoundService.Live live, FlowPane judges, StackPane ring, Arc ringArc, Label ringCount,
+            HBox segments) {
+        ring.setVisible(true);
+        int n = live.judges().size();
+        var current = live.rows().stream().filter(r -> r.round() == live.current()).findFirst().orElse(null);
+        int sent = 0;
+        if (current != null) {
+            for (var c : current.cells()) {
+                if (isSent(c)) {
+                    sent++;
+                }
             }
-            line++;
         }
-        if (lastShown < live.rows().size()) {
-            int from = lastShown + 1;
-            grid.add(Ui.support("Pendientes: rounds " + from + "–" + live.rows().size()), 0, line++,
-                    live.judges().size() + 1, 1);
+        ringCount.setText(sent + "/" + n);
+        ringArc.setLength(-360.0 * sent / Math.max(n, 1));
+
+        segments.getChildren().clear();
+        for (var row : live.rows()) {
+            var seg = new Region();
+            seg.getStyleClass().addAll("round-segment", row.round() == live.current() ? "current"
+                    : row.estado() == EstadoRound.PENDIENTE ? "future" : "done");
+            segments.getChildren().add(seg);
+        }
+
+        judges.getChildren().clear();
+        for (int i = 0; i < n; i++) {
+            var j = live.judges().get(i);
+            var who = "Juez " + j.seat();
+            var name = new Label(j.name() == null ? who : j.name());
+            name.getStyleClass().add("judge-name");
+            var head = new HBox(10, Ui.avatar(name.getText()), new VBox(2, name, Ui.support(who)));
+            head.setAlignment(Pos.CENTER_LEFT);
+            var card = new VBox(8, head);
+            card.getStyleClass().add("judge-card");
+            boolean cellSent = current != null && i < current.cells().size() && isSent(current.cells().get(i));
+            if (!j.connected()) {
+                card.getChildren().addAll(Ui.chip("Sin conexión", "neutral", "wifi-off"),
+                        HelpButton.connection(false, who));
+            } else if (cellSent) {
+                card.getChildren().add(Ui.chip("Enviada", "success", "check"));
+            } else if (current != null && current.estado() == EstadoRound.ABIERTO) {
+                card.getChildren().add(Ui.chip("Calificando…", "pending", "clock"));
+            } else {
+                card.getChildren().add(Ui.chip("En espera", "neutral", null));
+            }
+            judges.getChildren().add(card);
         }
     }
 
-    private static Node score(RoundService.Cell c) {
-        return Ui.support(c.casilla() == null ? "—" : texto(c.casilla()));
-    }
-
-    private static Node cell(Node content, boolean open) {
-        var box = new HBox(content);
-        box.setAlignment(Pos.CENTER);
-        box.setPadding(new Insets(6, 8, 6, 8));
-        box.setMaxWidth(Double.MAX_VALUE);
-        if (open) {
-            box.getStyleClass().add("open-row");
-        }
-        return box;
+    private static boolean isSent(RoundService.Cell c) {
+        return c.casilla() == RoundService.Casilla.ENVIADO || c.casilla() == RoundService.Casilla.TARDIO
+                || c.casilla() == RoundService.Casilla.CORREGIDO;
     }
 
     /**
