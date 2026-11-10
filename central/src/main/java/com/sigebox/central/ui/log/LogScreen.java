@@ -82,7 +82,8 @@ public final class LogScreen {
         // Spec 005: la pelea se nombra por su lugar y sus esquinas; el id interno no se muestra.
         var nombres = new AtomicReference<java.util.Map<String, String>>(java.util.Map.of());
         table.getColumns().add(column("Pelea", e -> LogQuery.nombre(nombres.get(), e.peleaId())));
-        table.getColumns().get(0).setMinWidth(160); // fecha y hora completas, sin "…"
+        table.getColumns().get(0).setMinWidth(190); // fecha y hora completas, sin "…"
+        table.getColumns().get(1).setMinWidth(280); // "Pelea N · Roja vs Azul" completo; Detalle toma el resto
         fight.setConverter(new StringConverter<>() { // muestra el nombre; el valor sigue siendo el id
             @Override
             public String toString(String id) {
