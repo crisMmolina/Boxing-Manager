@@ -1,6 +1,7 @@
 package com.sigebox.central;
 
 import com.sigebox.central.db.Database;
+import com.sigebox.core.model.EstadoRound;
 import com.sigebox.central.db.PeleaRepository;
 import com.sigebox.central.db.RecoveryService;
 import com.sigebox.central.export.ExportService;
@@ -30,7 +31,7 @@ import com.sigebox.central.ui.splash.Splash;
 import com.sigebox.central.ui.termination.TerminarEnVivo;
 import com.sigebox.central.ui.terms.TermsGate;
 import com.sigebox.central.ui.terms.TermsScreen;
-import com.sigebox.central.ui.theme.StepsBar;
+import com.sigebox.central.ui.theme.SideNav;
 import com.sigebox.central.ui.theme.Theme;
 import com.sigebox.central.ui.theme.Ui;
 import java.util.function.Supplier;
@@ -140,8 +141,8 @@ public final class App {
             var root = new BorderPane();
             root.getStyleClass().add("app-root");
             var screens = new Screens<Node>();
-            var bar = new StepsBar(Nav.STEPS, Nav.LINKS, id -> show(screens, root, content, id));
-            root.setTop(bar);
+            var bar = new SideNav(Nav.STEPS, Nav.LINKS, RoundsScreen.ID, id -> show(screens, root, content, id));
+            root.setLeft(bar);
             root.setCenter(content);
 
             TermsScreen.register(screens, gate, () -> show(screens, root, content, InicioScreen.ID));
@@ -163,7 +164,8 @@ public final class App {
                         show(screens, root, content, ResultStepScreen.ID);
                         ResultScreen.show(scene.getWindow(), results.sheet(closed), export);
                     });
-            RoundsScreen.register(screens, RoundService.forHub(db, hub), fightId,
+            var rounds = RoundService.forHub(db, hub);
+            RoundsScreen.register(screens, rounds, fightId,
                     () -> show(screens, root, content, ResultStepScreen.ID), terminar);
             FuncionScreen.register(screens, flow, () -> show(screens, root, content, JUECES));
             ResultStepScreen.register(screens, results, export, fightId,
@@ -177,6 +179,7 @@ public final class App {
                 current[0] = s.id();
                 Nav.apply(bar, s.id()); // spec 005: Inicio sin barra del evento
                 bar.setDisable(TermsScreen.ID.equals(s.id()));
+                refreshNav(bar, s.id(), flow, service, rounds, fightId);
             });
 
             show(screens, root, content, firstScreen(gate));
@@ -194,6 +197,26 @@ public final class App {
             }
         }
 
+        /** Spec 006: avance del evento ("2 de 5"), pasos hechos con ✓ y punto en vivo si hay un round abierto. */
+        private static void refreshNav(SideNav bar, String id, FuncionFlow flow, FuncionService service,
+                RoundService rounds, Supplier<String> fightId) {
+            try {
+                var fid = flow.funcionId();
+                if (fid.isPresent()) {
+                    var p = Nav.progress(service.cartelera(fid.get()));
+                    bar.showProgress(service.funcion(fid.get()).nombre(), p[0], p[1]);
+                } else {
+                    bar.showProgress(null, 0, 0);
+                }
+                bar.markDone(Nav.doneBefore(id));
+                var fight = fightId.get();
+                bar.setLive(fight != null
+                        && rounds.live(fight).rows().stream().anyMatch(r -> r.estado() == EstadoRound.ABIERTO));
+            } catch (RuntimeException e) {
+                bar.showProgress(null, 0, 0); // la barra nunca tumba la navegación
+            }
+        }
+
         private static void show(Screens<Node> screens, BorderPane root, StackPane content, String id) {
             var node = screens.show(id);
             // Columna centrada de hasta 1100 px, alineada arriba y con desplazamiento si no cabe.
@@ -207,7 +230,7 @@ public final class App {
             var scroll = new javafx.scene.control.ScrollPane(page);
             scroll.setFitToWidth(true);
             scroll.setHbarPolicy(javafx.scene.control.ScrollPane.ScrollBarPolicy.NEVER);
-            content.getChildren().setAll(scroll);
+            Nav.swap(content, scroll);
         }
 
         @Override

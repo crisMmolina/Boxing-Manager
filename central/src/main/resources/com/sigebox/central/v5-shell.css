@@ -1,1 +1,31 @@
 /* SIGEBOX · Central v5 (docs/DESIGN.md v5). Estilos de barra lateral, encabezado y transición (DSK-042). Se importa desde app.css. */
+
+.side-nav {
+    -fx-background-color: -sg-nav;
+    -fx-pref-width: 232px;
+    -fx-min-width: 232px;
+    -fx-padding: 20px 12px 16px 12px;
+    -fx-spacing: 16px;
+}
+.side-event { -fx-padding: 8px 10px; -fx-background-color: -sg-nav-active; -fx-background-radius: 8px; }
+.side-event-name { -fx-text-fill: -sg-nav-ink; -fx-font-weight: bold; }
+.side-event-progress { -fx-text-fill: -sg-nav-ink-dim; -fx-font-size: 12px; }
+.side-step, .side-link {
+    -fx-background-color: transparent;
+    -fx-background-radius: 8px;
+    -fx-text-fill: -sg-nav-ink-dim;
+    -fx-padding: 8px 10px;
+    -fx-graphic-text-gap: 10px;
+    -fx-cursor: hand;
+}
+.side-step:hover, .side-link:hover { -fx-background-color: -sg-nav-active; -fx-text-fill: -sg-nav-ink; }
+.side-step.current, .side-link.current { -fx-background-color: -sg-nav-active; -fx-text-fill: -sg-nav-ink; -fx-font-weight: bold; }
+.side-step.done { -fx-text-fill: -sg-nav-ink; }
+.side-check { -fx-fill: -sg-connected; -fx-stroke: -sg-connected; }
+.side-live { -fx-padding: 0 8px; }
+.live-dot { -fx-fill: -sg-red; }
+.live-ring { -fx-fill: -sg-red; -fx-opacity: 0.4; }
+.side-bottom { -fx-border-color: -sg-nav-active transparent transparent transparent; -fx-border-width: 1px 0 0 0; -fx-padding: 12px 0 0 0; }
+
+.page-header { -fx-padding: 0 0 16px 0; -fx-alignment: center-left; -fx-spacing: 12px; }
+.page-context { -fx-text-fill: -sg-ink-2; -fx-font-size: 13px; }
