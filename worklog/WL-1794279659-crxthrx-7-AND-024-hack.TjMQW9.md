@@ -11,3 +11,4 @@
 ## History
 - 1794279659 | CLAIMED | crxthrx-7 | claim; next: prueba de la pantalla de espera con el chip de conexión
 - 1794280737 | REVIEW | crxthrx-7 | done; PR https://github.com/crisMmolina/Boxing-Manager/pull/125; evidence: testDebugUnitTest+assembleDebug exit 0 (199); smoke PRODUCT_PASS · red at 13a1827:     java.lang.AssertionError: ícono de QR en Escanear · red at 13a1827:     java.lang.AssertionError: ícono de QR en Escanear; reviewer: -
+- 1794281183 | REVIEW | cris-2 | review; approve; SHA 23511aeb3eaf1d49e58e1f3fa9b3bb8e03d99dae; reviewer cris-2
