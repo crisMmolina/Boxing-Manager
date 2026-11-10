@@ -1,1 +1,18 @@
 /* SIGEBOX · Central v5 (docs/DESIGN.md v5). Estilos de Jueces y En vivo (DSK-044). Se importa desde app.css. */
+
+.ring-track, .ring-arc { -fx-stroke-width: 12; -fx-stroke-line-cap: round; -fx-fill: transparent; }
+.ring-track { -fx-stroke: -sg-ring-track; }
+.ring-arc { -fx-stroke: -sg-accent; }
+.ring-count { -fx-font-family: "Barlow Condensed"; -fx-font-weight: 800; -fx-font-size: 56px; -fx-text-fill: -sg-ink; }
+.ring-label { -fx-text-fill: -sg-ink-3; }
+
+.round-segment { -fx-pref-width: 40; -fx-pref-height: 8; -fx-min-height: 8; -fx-max-height: 8; -fx-background-radius: 4; }
+.round-segment.done { -fx-background-color: -sg-connected; }
+.round-segment.current { -fx-background-color: -sg-accent; }
+.round-segment.future { -fx-background-color: -sg-line; }
+
+.judge-card { -fx-background-color: -sg-surface; -fx-border-color: -sg-line; -fx-border-radius: 12; -fx-background-radius: 12; -fx-padding: 16; -fx-pref-width: 240; -fx-min-width: 240; }
+.judge-name { -fx-font-family: "Inter"; -fx-font-weight: 600; -fx-font-size: 15px; -fx-text-fill: -sg-ink; }
+
+.seat-code { -fx-font-family: "Barlow Condensed"; -fx-font-weight: 800; -fx-font-size: 28px; -fx-text-fill: -sg-ink; }
+.seat-qr-box { -fx-background-color: white; -fx-padding: 8; -fx-background-radius: 8; }

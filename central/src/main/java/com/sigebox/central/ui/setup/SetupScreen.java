@@ -23,6 +23,8 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
 /**
@@ -80,8 +82,9 @@ public final class SetupScreen {
     Node build() {
         var status = Ui.support("");
         var left = new VBox(16, Skeleton.lines(3));
-        left.setPrefWidth(340);
-        left.setMinWidth(340);
+        // 260 + 24 + 3 × 240 + 2 × 16 = 1036: los 3 lugares caben en una fila dentro de 1100 px.
+        left.setPrefWidth(260);
+        left.setMinWidth(260);
         var seats = new FlowPane(16, 16, Skeleton.block(240, 200));
         seats.setPrefWrapLength(780); // sin esto el FlowPane pide una sola columna muy alta
         seats.setRowValignment(VPos.TOP); // tarjetas de distinta altura, alineadas arriba
@@ -147,28 +150,39 @@ public final class SetupScreen {
     }
 
     private Node seatCard(String fightId, FightService.Seat s, Label status) {
-        boolean connected = s.state() == FightService.SeatState.CONECTADO;
         var who = "Juez " + s.seat();
-        var head = new HBox(8, Ui.cardTitle(who), Ui.grow(), Ui.dot(connected, who));
-        head.setAlignment(Pos.CENTER_LEFT);
-        var card = Ui.card(head);
+        var chip = switch (s.state()) {
+            case SIN_CONECTAR -> Ui.chip("Sin conectar", "neutral", "qr-code");
+            case RECHAZADO -> Ui.chip("Rechazado", "neutral", null);
+            case ESPERANDO_APROBACION -> Ui.chip("Esperando aprobación", "pending", "clock");
+            case CONECTADO -> Ui.chip("Conectado", "success", "check");
+            case SIN_CONEXION -> Ui.chip("Sin conexión", "neutral", "wifi-off");
+        };
+        // El chip va debajo del título: en 240 px no caben juntos sin cortarse.
+        var head = new VBox(6, Ui.cardTitle("Lugar " + s.seat()), chip);
+        head.setAlignment(Pos.TOP_LEFT);
+        var card = Ui.card(head, Ui.support(who));
+        card.getStyleClass().add("seat-card");
         card.setPrefWidth(240);
         card.setMinWidth(220);
         switch (s.state()) {
             case SIN_CONECTAR, RECHAZADO -> {
                 var inv = invitations.computeIfAbsent(key(fightId, s.seat()),
                         k -> fights.invite(fightId, s.seat(), host(), port));
-                var code = Ui.numeral(spaced(inv.code()), "neutral");
+                var code = new Label(spaced(inv.code()));
+                code.getStyleClass().add("seat-code");
                 code.setAccessibleText("Código " + String.join(" ", inv.code().split("")));
                 var again = Ui.secondary("Nuevo código");
                 again.setOnAction(e -> {
                     invitations.put(key(fightId, s.seat()), fights.invite(fightId, s.seat(), host(), port));
                     status.setText("Nuevo código para el juez " + s.seat() + ". El anterior ya no sirve.");
                 });
-                if (s.state() == FightService.SeatState.RECHAZADO) {
-                    card.getChildren().add(Ui.support("Rechazado"));
-                }
-                card.getChildren().addAll(qr(inv.qrUri()), code, again);
+                var qr = qr(inv.qrUri());
+                qr.getStyleClass().add("seat-qr");
+                var qrBox = new StackPane(qr);
+                qrBox.getStyleClass().add("seat-qr-box");
+                qrBox.setMaxWidth(Region.USE_PREF_SIZE);
+                card.getChildren().addAll(qrBox, code, again);
             }
             case ESPERANDO_APROBACION -> {
                 var approve = Ui.primary("Aprobar");
@@ -209,7 +223,10 @@ public final class SetupScreen {
         var why = Ui.why("Falta que se conecte" + (pending == 1 ? " 1 juez." : "n " + pending + " jueces."), start);
         var address = new HBox(8, Ui.field("Dirección para los jueces", choose), Ui.support(":" + port));
         address.setAlignment(Pos.BOTTOM_LEFT);
-        return new HBox(16, address, Ui.grow(), why, start);
+        var row = new HBox(16, address, Ui.grow(), why, start);
+        row.setAlignment(Pos.BOTTOM_LEFT); // texto, campo y botón sobre la misma línea de abajo
+        HBox.setHgrow(row, Priority.ALWAYS); // el botón va al borde derecho
+        return row;
     }
 
     private String host() {
