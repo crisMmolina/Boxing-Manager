@@ -21,7 +21,6 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.ColumnConstraints;
-import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -101,7 +100,9 @@ public final class RoundsScreen {
     static Node build(RoundService service, DescuentoService descuentos, DescuentosPanel.Ask ask,
             Supplier<String> fightId, Runnable onFinish, TerminarEnVivo terminar) {
         var title = Ui.screenTitle("En vivo");
-        var judges = new FlowPane(12, 12);
+        // Fila que reparte el ancho: las tarjetas crecen y no cortan nombre ni estado.
+        var judges = new HBox(12);
+        judges.setFillHeight(false); // cada tarjeta mide lo que trae, sin hueco abajo
         // Sección, no tarjeta: las tarjetas de juez no van dentro de otra tarjeta (v5).
         var cards = new VBox(12, Ui.cardTitle("Jueces"), judges);
         var track = new Arc(88, 88, 82, 82, 90, 360);
@@ -267,7 +268,7 @@ public final class RoundsScreen {
         return bento;
     }
 
-    private static void fillLive(RoundService.Live live, FlowPane judges, StackPane ring, Arc ringArc, Label ringCount,
+    private static void fillLive(RoundService.Live live, HBox judges, StackPane ring, Arc ringArc, Label ringCount,
             HBox segments) {
         ring.setVisible(true);
         int n = live.judges().size();
@@ -309,10 +310,18 @@ public final class RoundsScreen {
                 chip = Ui.chip("En espera", "neutral", null);
             }
             // Avatar y nombre a la izquierda, el estado a la derecha (DESIGN v5 En vivo).
-            var head = new HBox(10, Ui.avatar(name.getText()), new VBox(2, name, Ui.support(who)), Ui.grow(), chip);
+            if (chip instanceof Region r) {
+                r.setMinWidth(Region.USE_PREF_SIZE); // el estado nunca se corta
+            }
+            var seatRow = new HBox(6, Ui.dot(j.connected(), who), Ui.support(who));
+            seatRow.setAlignment(Pos.CENTER_LEFT);
+            var head = new HBox(10, Ui.avatar(name.getText()), new VBox(2, name, seatRow), Ui.grow(), chip);
             head.setAlignment(Pos.CENTER_LEFT);
             var card = new VBox(8, head);
             card.getStyleClass().add("judge-card");
+            card.setMaxWidth(Double.MAX_VALUE);
+            card.setMaxHeight(Region.USE_PREF_SIZE);
+            HBox.setHgrow(card, Priority.ALWAYS);
             if (!j.connected()) {
                 card.getChildren().add(HelpButton.connection(false, who));
             }

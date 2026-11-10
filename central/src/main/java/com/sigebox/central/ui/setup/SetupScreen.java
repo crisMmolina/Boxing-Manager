@@ -223,7 +223,10 @@ public final class SetupScreen {
         var why = Ui.why("Falta que se conecte" + (pending == 1 ? " 1 juez." : "n " + pending + " jueces."), start);
         var address = new HBox(8, Ui.field("Dirección para los jueces", choose), Ui.support(":" + port));
         address.setAlignment(Pos.BOTTOM_LEFT);
-        return new HBox(16, address, Ui.grow(), why, start);
+        var row = new HBox(16, address, Ui.grow(), why, start);
+        row.setAlignment(Pos.BOTTOM_LEFT); // texto, campo y botón sobre la misma línea de abajo
+        HBox.setHgrow(row, Priority.ALWAYS); // el botón va al borde derecho
+        return row;
     }
 
     private String host() {

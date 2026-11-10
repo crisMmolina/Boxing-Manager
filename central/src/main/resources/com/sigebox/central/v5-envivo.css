@@ -11,7 +11,7 @@
 .round-segment.current { -fx-background-color: -sg-accent; }
 .round-segment.future { -fx-background-color: -sg-line; }
 
-.judge-card { -fx-background-color: -sg-surface; -fx-border-color: -sg-line; -fx-border-radius: 12; -fx-background-radius: 12; -fx-padding: 16; -fx-pref-width: 240; }
+.judge-card { -fx-background-color: -sg-surface; -fx-border-color: -sg-line; -fx-border-radius: 12; -fx-background-radius: 12; -fx-padding: 16; -fx-pref-width: 240; -fx-min-width: 240; }
 .judge-name { -fx-font-family: "Inter"; -fx-font-weight: 600; -fx-font-size: 15px; -fx-text-fill: -sg-ink; }
 
 .seat-code { -fx-font-family: "Barlow Condensed"; -fx-font-weight: 800; -fx-font-size: 28px; -fx-text-fill: -sg-ink; }
