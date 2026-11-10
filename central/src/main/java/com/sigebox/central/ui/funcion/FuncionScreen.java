@@ -130,7 +130,8 @@ public final class FuncionScreen {
 
     private Node show(String id, List<Fila> rows, Label status, Runnable refresh, Runnable synced, PageHeader header) {
         var f = flow.service().funcion(id);
-        header.context(FuncionView.nombre(f) + " · " + f.fecha());
+        var nombre = FuncionView.nombre(f); // sin nombre ya es "Evento <fecha>": no se repite la fecha
+        header.context(nombre.contains(f.fecha()) ? nombre : nombre + " · " + f.fecha());
         // El botón de iniciar muestra los nombres: se actualiza sin rehacerlo, por si lo están presionando.
         var nextText = new SimpleStringProperty("");
         Runnable renamed = () -> {
@@ -278,6 +279,7 @@ public final class FuncionScreen {
         HBox.setHgrow(redField, Priority.ALWAYS);
         HBox.setHgrow(blueField, Priority.ALWAYS);
         var vs = Ui.support("vs");
+        vs.setMinWidth(javafx.scene.layout.Region.USE_PREF_SIZE); // "vs" en una línea
         var box = new HBox(8, Ui.cornerDot(true), redField, vs, Ui.cornerDot(false), blueField);
         box.setAlignment(Pos.BOTTOM_LEFT);
         HBox.setMargin(vs, new javafx.geometry.Insets(0, 0, 12, 0));
