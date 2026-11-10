@@ -47,7 +47,10 @@
                     style="@style/Widget.Sigebox.Button.Primary"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/join_scan" />
+                    android:text="@string/join_scan"
+                    app:icon="@drawable/ic_qr_code"
+                    app:iconGravity="textStart"
+                    app:iconTint="@color/on_primary" />
 
                 <TextView
                     style="@style/Text.Sigebox.Support"
@@ -130,10 +133,13 @@
                     android:layout_height="wrap_content">
 
                     <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/join_host_layout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         app:hintEnabled="false"
-                        app:placeholderText="@string/join_host_example">
+                        app:placeholderText="@string/join_host_example"
+                        app:startIconDrawable="@drawable/ic_wifi"
+                        app:startIconTint="@color/ink_2">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@id/join_host"
