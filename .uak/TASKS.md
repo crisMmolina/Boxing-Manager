@@ -1509,3 +1509,18 @@ En Windows (zoe) los comandos `Verify` se corren en Git Bash.
   - Capturas claro y oscuro revisadas por un crítico de diseño
 - **Verify:** `central/gradlew -p central test`
 - **Next step:** prueba de que "Sin conectar" muestra el ícono wifi-off
+
+## DSK-048 · Follow-up de DSK-043: FuncionV5Test depende de la fecha de hoy
+
+- **Type:** fix
+- **Priority:** P0
+- **Estimate:** 0.25 d
+- **Rubric / Spec:** spec 006 §Central
+- **Depends on:** DSK-043
+- **Paths:** central/src/test/java/com/sigebox/central/ui/funcion/FuncionV5Test.java
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - `FuncionV5Test.elEncabezadoLlevaElEventoYLaSiguientePeleaComoAccionPrincipal` compara el contexto con la fecha guardada del evento, no con un literal (el evento se crea con la fecha de hoy y la prueba falla desde el 2026-11-10) (prueba)
+  - Cambiar la prueba existente lo autoriza un humano (`uak allow DSK-048 --tests`)
+- **Verify:** `central/gradlew -p central test --tests com.sigebox.central.ui.funcion.FuncionV5Test`
+- **Next step:** usar `funciones.funcion(id).fecha()` en la aserción
