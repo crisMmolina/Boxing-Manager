@@ -1,7 +1,7 @@
 # STATE
 
 Phase: execution
-Updated: 1794277156
+Updated: 1794277365
 AVAILABLE: DSK-043 DSK-044 DSK-045 AND-023 AND-024 
 CLAIMED: -
 BLOCKED: -
@@ -11,7 +11,7 @@ CANCELLED: -
 
 Claims (first 24; status --task ID shows detail):
 AND-022 | REVIEW | crxthrx-5 | until 1794361482
-DSK-042 | REVIEW | zoe-1 | until 1794362751
+DSK-042 | REVIEW | zoe-1 | until 1794363765
 
 Blockers: BLOCKED tasks; use status --task ID --summary.
 Current decisions (last 5):
