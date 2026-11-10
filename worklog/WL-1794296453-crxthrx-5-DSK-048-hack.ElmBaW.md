@@ -1,12 +1,13 @@
 # worklog/WL-1794296453-crxthrx-5-DSK-048-hack.ElmBaW.md · DSK-048
 
 ## Live summary
-- Done: Claim created; implementation pending
+- Done: FuncionV5Test exit 0; smoke PRODUCT_PASS; allow --tests de cris · existing tests changed with a human's approval (cris) · red at 20a7d91:     org.opentest4j.AssertionFailedError at FuncionV5Test.java:224
 - Decision: Own branch and worktree
 - Why: Parallel work without touching the main checkout
 - Failing: No validation run yet
 - Commands: `central/gradlew -p central test --tests com.sigebox.central.ui.funcion.FuncionV5Test`
-- Next: usar `funciones.funcion(id).fecha()` en la aserción
+- Next: Another agent reviews https://github.com/crisMmolina/Boxing-Manager/pull/130; run .uak/bin/smoke
 
 ## History
 - 1794296453 | CLAIMED | crxthrx-5 | claim; next: usar `funciones.funcion(id).fecha()` en la aserción
+- 1794296846 | REVIEW | crxthrx-5 | done; PR https://github.com/crisMmolina/Boxing-Manager/pull/130; evidence: FuncionV5Test exit 0; smoke PRODUCT_PASS; allow --tests de cris · existing tests changed with a human's approval (cris) · red at 20a7d91:     org.opentest4j.AssertionFailedError at FuncionV5Test.java:224; reviewer: -
