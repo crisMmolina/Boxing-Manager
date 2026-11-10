@@ -33,6 +33,8 @@ public final class Screen {
             extendBar(activity, content, bar);
         }
         applyInsets(root);
+        // v5 §3.7: eje compartido X al entrar y salir; con la escala de animación en 0, solo un fundido corto.
+        Motion.sharedAxis(activity);
     }
 
     /** La barra negra llega a los bordes y sigue bajo la barra de estado, con íconos claros. */

@@ -1,4 +1,6 @@
 <resources>
     <!-- Solo el nombre de la app. Los textos de cada pantalla van en strings_<feature>.xml (DESIGN.md §5 y §8). -->
     <string name="app_name">SIGEBOX Juez</string>
+    <!-- Chip de conexión de la barra (DESIGN.md v5 §5.17); "Conectado" y "Sin conexión" están en strings_join.xml. -->
+    <string name="chip_help_action">Ver cómo reconectar</string>
 </resources>

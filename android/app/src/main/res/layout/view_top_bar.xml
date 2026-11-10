@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Barra superior: marca a la izquierda y píldora con el punto de conexión a la derecha (DESIGN.md v2 §6). -->
+<!-- Barra superior: marca a la izquierda; "Juez N" y el chip de conexión a la derecha (DESIGN.md v5 §5.17 y §6). -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/top_bar"
     android:layout_width="match_parent"
@@ -28,34 +28,44 @@
         style="@style/Text.Sigebox.Brand.Bar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-                android:layout_weight="1"
+        android:layout_weight="1"
+        android:ellipsize="end"
+        android:maxLines="1"
         android:text="@string/app_name" />
 
-    <LinearLayout
-        android:id="@+id/top_pill"
+    <!-- "Juez N" en la barra; se oculta cuando el texto solo repetiría el estado del chip. -->
+    <TextView
+        android:id="@+id/top_judge"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@drawable/pill"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingStart="12dp"
-        android:paddingTop="6dp"
-        android:paddingEnd="14dp"
-        android:paddingBottom="6dp">
+        android:layout_marginStart="@dimen/gap_small"
+        android:layout_marginEnd="@dimen/gap_small"
+        android:fontFamily="@font/inter_semibold"
+        android:maxLines="1"
+        android:textColor="@color/on_bar_2"
+        android:textSize="14sp"
+        android:visibility="gone" />
+
+    <!-- v5 §5.17: chip de conexión. Conectado = punto que late sobre success_soft; Sin conexión = anillo sobre surface_2. -->
+    <com.sigebox.juez.ui.ConnectionChip
+        android:id="@+id/top_pill"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
 
         <View
             android:id="@+id/top_dot"
-            android:layout_width="@dimen/dot"
-            android:layout_height="@dimen/dot"
+            android:layout_width="@dimen/chip_dot"
+            android:layout_height="@dimen/chip_dot"
             android:background="@drawable/dot_disconnected" />
 
         <TextView
             android:id="@+id/top_pill_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="6dp"
             android:fontFamily="@font/inter_semibold"
+            android:maxLines="1"
             android:textColor="@color/ink"
-            android:textSize="14sp" />
-    </LinearLayout>
+            android:textSize="13sp" />
+    </com.sigebox.juez.ui.ConnectionChip>
 </LinearLayout>

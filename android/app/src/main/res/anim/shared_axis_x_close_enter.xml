@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Eje compartido X (como MaterialSharedAxis X), al volver, la anterior entra desde la izquierda (DESIGN.md v5 §3.7, ≤ 300 ms). -->
+<set xmlns:android="http://schemas.android.com/apk/res/android"
+    android:duration="@integer/motion_enter"
+    android:interpolator="@anim/motion_curve"
+    android:shareInterpolator="true">
+    <translate
+        android:fromXDelta="-8%"
+        android:toXDelta="0%" />
+    <alpha
+        android:fromAlpha="0"
+        android:toAlpha="1" />
+</set>
