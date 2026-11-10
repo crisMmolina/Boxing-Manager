@@ -1,14 +1,15 @@
 # worklog/WL-1794252257-crxthrx-6-DSK-041-hack.1HEujt.md · DSK-041
 
 ## Live summary
-- Done: V5ComponentsTest 14; central test verde salvo LiveFightTest intermitente (rerun verde); smoke PRODUCT_PASS · red at fbc4134:     org.opentest4j.AssertionFailedError at V5ComponentsTest.java:179
+- Done: human merge
 - Decision: Own branch and worktree
 - Why: Parallel work without touching the main checkout
 - Failing: No validation run yet
 - Commands: `central/gradlew -p central test`
-- Next: Another agent reviews https://github.com/crisMmolina/Boxing-Manager/pull/120; run .uak/bin/smoke
+- Next: Integrated in main: c4bbff7f91c76b15c6a10131a840083825bb6aed; claim next P0
 
 ## History
 - 1794252257 | CLAIMED | crxthrx-6 | claim; next: prueba de `Stepper` con rango y teclado
 - 1794275282 | REVIEW | crxthrx-6 | done; PR https://github.com/crisMmolina/Boxing-Manager/pull/120; evidence: V5ComponentsTest 14; central test verde salvo LiveFightTest intermitente (rerun verde); smoke PRODUCT_PASS · red at fbc4134:     org.opentest4j.AssertionFailedError at V5ComponentsTest.java:179; reviewer: -
 - 1794275466 | REVIEW | cris-2 | review; approve; SHA 4e3cc6e501c3070b9643ed7e18b98a11d15c0f9e; reviewer cris-2
+- 1794275949 | INTEGRATED | crxthrx-6 | done; PR https://github.com/crisMmolina/Boxing-Manager/pull/120; evidence: human merge; reviewer: cris-2
