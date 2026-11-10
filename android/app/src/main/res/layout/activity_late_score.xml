@@ -36,6 +36,11 @@
                 android:layout_height="wrap_content" />
         </LinearLayout>
 
+        <!-- v5 §5.16: segmentos de rounds; el actual es el round tardío. -->
+        <LinearLayout
+            android:id="@+id/late_progress"
+            style="@style/Widget.Sigebox.RoundSegments" />
+
         <TextView
             style="@style/Text.Sigebox.Support"
             android:layout_width="match_parent"

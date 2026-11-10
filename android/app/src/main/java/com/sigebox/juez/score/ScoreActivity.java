@@ -23,9 +23,7 @@ import com.sigebox.core.protocol.NextFight;
 import com.sigebox.core.protocol.State;
 import com.sigebox.juez.net.JudgeRuntime;
 import com.sigebox.juez.ui.ConfirmSheet;
-import com.sigebox.juez.ui.CornerCard;
 import com.sigebox.juez.ui.ErrorText;
-import com.sigebox.juez.ui.RoundProgress;
 import com.sigebox.juez.ui.Screen;
 import com.sigebox.juez.ui.TopBar;
 import java.util.Map;
@@ -33,8 +31,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * Puntuar (DESIGN.md v2 §6.4): una tarjeta por esquina con − y +, el número en grande y una hoja de
- * confirmación antes de enviar. Nunca muestra totales ni ganador.
+ * Puntuar (DESIGN.md v2 §6.4 y v5 §6): segmentos de rounds, una tarjeta por esquina con − y + y el número que rueda,
+ * una hoja de confirmación antes de enviar y, tras el ACK, "Round N enviado". Nunca muestra totales ni ganador.
  */
 public class ScoreActivity extends AppCompatActivity {
     /** La captura tardía la crea AND-006; se abre por nombre para no depender de ella. */
@@ -46,8 +44,9 @@ public class ScoreActivity extends AppCompatActivity {
     private ScoreViewModel vm;
     private JudgeConnection connection;
     private SigeboxDatabase database;
-    private CornerCard red;
-    private CornerCard blue;
+    private CornerScore red;
+    private CornerScore blue;
+    private SentPanel sentPanel;
     private boolean wasOpen;
 
     private com.sigebox.juez.ui.CornerNames cornerNames;
@@ -92,11 +91,12 @@ public class ScoreActivity extends AppCompatActivity {
             }
         }).get(ScoreViewModel.class);
 
-        red = new CornerCard(findViewById(R.id.score_red_card), true, d -> vm.adjust(ScoreUi.Corner.RED, d));
-        blue = new CornerCard(findViewById(R.id.score_blue_card), false, d -> vm.adjust(ScoreUi.Corner.BLUE, d));
+        red = new CornerScore(findViewById(R.id.score_red_card), true, d -> vm.adjust(ScoreUi.Corner.RED, d));
+        blue = new CornerScore(findViewById(R.id.score_blue_card), false, d -> vm.adjust(ScoreUi.Corner.BLUE, d));
+        // "Round N enviado" con "Corregir esta tarjeta": el mismo flujo de corrección (v5 §6).
+        sentPanel = new SentPanel(findViewById(R.id.score_root), vm::startCorrection);
         cornerNames = new com.sigebox.juez.ui.CornerNames(this);
         findViewById(R.id.score_send).setOnClickListener(v -> confirm());
-        findViewById(R.id.score_correct).setOnClickListener(v -> vm.startCorrection());
         vm.ui().observe(this, this::render);
         connection.state().observe(this, vm::onConnection);
     }
@@ -163,7 +163,8 @@ public class ScoreActivity extends AppCompatActivity {
             round.setText(R.string.score_title_waiting);
         }
         renderStatus(ui);
-        RoundProgress.bind(findViewById(R.id.score_progress), rounds, ui.round, ui.card != null);
+        RoundSegments.bind(findViewById(R.id.score_progress), rounds, ui.round, ui.card != null);
+        boolean sentShown = sentPanel.bind(ui, rounds);
 
         boolean input = ui.inputEnabled();
         boolean opened = input && !wasOpen;
@@ -187,8 +188,7 @@ public class ScoreActivity extends AppCompatActivity {
         } else {
             send.setText(R.string.score_send);
         }
-        findViewById(R.id.score_correct).setVisibility(ui.canCorrect ? View.VISIBLE : View.GONE);
-        renderMessage(ui, online);
+        renderMessage(ui, online, sentShown);
 
         if (ui.lateRound != null) {
             vm.lateHandled();
@@ -235,13 +235,16 @@ public class ScoreActivity extends AppCompatActivity {
         pill.setText(text);
     }
 
-    private void renderMessage(ScoreUi ui, boolean online) {
+    /** @param sentShown "Round N enviado" ya dice qué esperar: aquí solo errores y sin conexión. */
+    private void renderMessage(ScoreUi ui, boolean online, boolean sentShown) {
         TextView message = findViewById(R.id.score_message);
         String text = null;
         if (ui.lastError != null) {
             text = getString(ErrorText.of(ui.lastError));
         } else if (!online && ui.seat > 0) {
             text = getString(R.string.score_offline);
+        } else if (sentShown) {
+            text = null;
         } else if (!ui.roundOpen && ui.round == 0) {
             text = getString(R.string.score_waiting_start);
         } else if (!ui.roundOpen && ui.card != null) {

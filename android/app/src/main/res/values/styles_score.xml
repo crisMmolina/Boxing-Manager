@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Puntuar, Round enviado y Round tardío (DESIGN.md v5 §5.16 y §6). Solo tokens de colors.xml. -->
+<resources>
+    <!-- Franja izquierda de 6 dp de la esquina; el color lo pone CornerScore. Decorativa. -->
+    <style name="Widget.Sigebox.CornerStripe" parent="">
+        <item name="android:layout_width">6dp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:importantForAccessibility">no</item>
+    </style>
+
+    <!-- Fila de segmentos de rounds (§5.16): los segmentos los crea RoundSegments. -->
+    <style name="Widget.Sigebox.RoundSegments" parent="">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">12dp</item>
+        <item name="android:orientation">horizontal</item>
+    </style>
+
+    <!-- Palomita de "Round N enviado": círculo success_soft y trazo success_ink (§3.8). -->
+    <style name="Widget.Sigebox.SentCheck" parent="">
+        <item name="android:layout_width">88dp</item>
+        <item name="android:layout_height">88dp</item>
+        <item name="android:layout_marginTop">28dp</item>
+        <item name="android:importantForAccessibility">no</item>
+    </style>
+
+    <style name="Text.Sigebox.SentTitle" parent="">
+        <item name="android:fontFamily">@font/barlow_condensed_extrabold</item>
+        <item name="android:textSize">40sp</item>
+        <item name="android:textColor">@color/ink</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+    <!-- Número de la tarjeta enviada: más chico que el de puntuar, en el color numeral de la esquina. -->
+    <style name="Text.Sigebox.SentNumber" parent="Text.Sigebox.Number">
+        <item name="android:textSize">56sp</item>
+    </style>
+
+    <!-- Etiqueta pequeña en mayúsculas: ink_2 porque ink_3 no pasa como texto chico en claro (§3.8). -->
+    <style name="Text.Sigebox.SentLabel" parent="">
+        <item name="android:fontFamily">@font/inter_semibold</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:letterSpacing">0.08</item>
+        <item name="android:textColor">@color/ink_2</item>
+    </style>
+</resources>

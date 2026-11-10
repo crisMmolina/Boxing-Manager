@@ -37,6 +37,13 @@
     <string name="score_waiting_next">Espera con la app abierta a que abran el siguiente round.</string>
     <string name="score_offline">Sin conexión. Tus puntos se guardan y se envían al reconectar.</string>
 
+    <!-- v5 §6: "Round N enviado" tras el ACK. Solo la tarjeta propia, nunca totales (principio 3). -->
+    <string name="sent_support_next">La central lo recibió. Espera a que abra el round %1$d.</string>
+    <string name="sent_support_last">La central lo recibió. Era el último round: espera a que la mesa cierre la pelea.</string>
+    <string name="sent_card_label">Tu tarjeta</string>
+    <string name="sent_card_a11y">Tu tarjeta del round %1$d: roja %2$d, azul %3$d</string>
+    <string name="sent_correct">Corregir esta tarjeta</string>
+
     <string name="confirm_title">¿Enviar este round?</string>
     <string name="confirm_send">Enviar</string>
     <string name="confirm_review">Revisar</string>

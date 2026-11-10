@@ -31,7 +31,8 @@ import com.sigebox.juez.score.ScoreActivity;
 import com.sigebox.juez.score.ScoreUi;
 import com.sigebox.juez.score.ScoreViewModel;
 import com.sigebox.juez.ui.ConfirmSheet;
-import com.sigebox.juez.ui.CornerCard;
+import com.sigebox.juez.score.CornerScore;
+import com.sigebox.juez.score.RoundSegments;
 import com.sigebox.juez.ui.ErrorText;
 import com.sigebox.juez.ui.Screen;
 import com.sigebox.juez.ui.TopBar;
@@ -53,8 +54,8 @@ public class LateScoreActivity extends AppCompatActivity {
     private JudgeConnection connection;
     private SigeboxDatabase database;
     private int round;
-    private CornerCard red;
-    private CornerCard blue;
+    private CornerScore red;
+    private CornerScore blue;
 
     private com.sigebox.juez.ui.CornerNames cornerNames;
     private volatile String currentFightId;
@@ -103,8 +104,8 @@ public class LateScoreActivity extends AppCompatActivity {
         }).get(ScoreViewModel.class);
 
         ((TextView) findViewById(R.id.late_title)).setText(getString(R.string.late_title, round));
-        red = new CornerCard(findViewById(R.id.late_red_card), true, d -> vm.adjust(ScoreUi.Corner.RED, d));
-        blue = new CornerCard(findViewById(R.id.late_blue_card), false, d -> vm.adjust(ScoreUi.Corner.BLUE, d));
+        red = new CornerScore(findViewById(R.id.late_red_card), true, d -> vm.adjust(ScoreUi.Corner.RED, d));
+        blue = new CornerScore(findViewById(R.id.late_blue_card), false, d -> vm.adjust(ScoreUi.Corner.BLUE, d));
         cornerNames = new com.sigebox.juez.ui.CornerNames(this);
         findViewById(R.id.late_send).setOnClickListener(v -> confirm());
         vm.ui().observe(this, this::render);
@@ -152,6 +153,10 @@ public class LateScoreActivity extends AppCompatActivity {
         boolean online = ui.connection == com.sigebox.juez.net.ConnectionState.Status.CONNECTED;
         TopBar.bind(findViewById(R.id.late_root), online,
                 ui.seat > 0 ? getString(R.string.score_judge, ui.seat) : getString(R.string.status_disconnected));
+        // v5 §5.16: el round tardío es el actual de los segmentos.
+        Integer rounds = ui.rounds != null ? ui.rounds
+                : currentFightId == null ? null : cornerNames.rounds(currentFightId);
+        RoundSegments.bind(findViewById(R.id.late_progress), rounds, round, ui.card != null);
         boolean input = ui.inputEnabled();
         Integer r = ui.card != null ? ui.card.red : ui.red;
         Integer b = ui.card != null ? ui.card.blue : ui.blue;
