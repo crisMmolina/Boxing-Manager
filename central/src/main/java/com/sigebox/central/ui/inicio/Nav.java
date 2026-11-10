@@ -5,7 +5,7 @@ import com.sigebox.central.ui.log.LogScreen;
 import com.sigebox.central.ui.result.ResultStepScreen;
 import com.sigebox.central.ui.rounds.RoundsScreen;
 import com.sigebox.central.ui.terms.TermsScreen;
-import com.sigebox.central.ui.theme.NavBar;
+import com.sigebox.central.ui.theme.StepsBar.NavBar;
 import com.sigebox.central.ui.theme.StepsBar;
 import com.sigebox.central.service.FuncionService;
 import com.sigebox.central.ui.theme.Motion;

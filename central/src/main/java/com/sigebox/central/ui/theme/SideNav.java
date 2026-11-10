@@ -21,7 +21,7 @@ import javafx.scene.shape.Circle;
  * ícono; los pasos terminados llevan ✓ y En vivo un punto que late mientras hay un round abierto. Abajo, los enlaces
  * (Bitácora, Inicio), el "?" de ayuda y el tema. Misma API que {@link StepsBar}: {@link #select} y {@link #showEvent}.
  */
-public final class SideNav extends VBox implements NavBar {
+public final class SideNav extends VBox implements StepsBar.NavBar {
 
     /** Ícono de cada paso conocido; un paso sin ícono no lleva ninguno. */
     private static final Map<String, String> ICONS = Map.of(
