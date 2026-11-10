@@ -157,4 +157,18 @@ class RoundsScreenTest {
         assertTrue(cards.get(1).containsAll(List.of("ML", "María López", "Juez 2", "Calificando…")),
                 cards.toString());
     }
+
+    @Test
+    void accionesNoDejaEspacioVacioBajoSusBotones() throws Exception {
+        var blanks = FxTest.onFx(() -> {
+            var nodes = all(RoundsScreen.build(service, () -> F));
+            var card = nodes.stream().filter(n -> n.getStyleClass().contains("card") && n instanceof Parent p
+                    && p.getChildrenUnmodifiable().stream().anyMatch(c -> c instanceof Labeled l
+                            && "Acciones".equals(l.getText()))).map(n -> (Parent) n).findFirst().orElseThrow();
+            return card.getChildrenUnmodifiable().stream().filter(c -> c.isManaged() && c instanceof Labeled l
+                    && !(c instanceof javafx.scene.control.Button) && (l.getText() == null || l.getText().isBlank()))
+                    .count();
+        });
+        assertEquals(0L, blanks, "un texto vacío en Acciones deja un hueco");
+    }
 }

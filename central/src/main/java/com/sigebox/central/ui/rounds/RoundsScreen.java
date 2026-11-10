@@ -133,6 +133,9 @@ public final class RoundsScreen {
         action.setId(PRIMARY_ID);
         action.setMaxWidth(Double.MAX_VALUE);
         var status = Ui.support("");
+        // Sin texto no ocupa lugar: no deja un hueco bajo los botones de Acciones.
+        status.managedProperty().bind(status.textProperty().isNotEmpty());
+        status.visibleProperty().bind(status.textProperty().isNotEmpty());
         var heroText = new VBox(8, roundTitle, pill, sent, segments);
         var heroRow = new HBox(24, ring, heroText);
         heroRow.setAlignment(Pos.CENTER_LEFT);

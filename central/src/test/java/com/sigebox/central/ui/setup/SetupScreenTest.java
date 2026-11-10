@@ -136,4 +136,60 @@ class SetupScreenTest {
             assertTrue(shown.stream().anyMatch(t -> t.startsWith("Lugar ")), shown.toString());
         }
     }
+
+    private static List<String> paths(Node node) {
+        return all(node).stream().filter(n -> n instanceof javafx.scene.shape.SVGPath)
+                .map(n -> ((javafx.scene.shape.SVGPath) n).getContent()).toList();
+    }
+
+    private static void layout(Node root) {
+        var top = root.getScene().getRoot();
+        top.applyCss();
+        top.layout();
+    }
+
+    @Test
+    void sinConectarUsaElIconoWifiOff() throws Exception {
+        fights.create("Rojo", "Azul", 3, 2);
+        var root = open("Lugar 2");
+        var chips = FxTest.onFx(() -> all(root).stream()
+                .filter(n -> n instanceof Labeled l && "Sin conectar".equals(l.getText()))
+                .map(n -> paths(((Labeled) n).getGraphic())).toList());
+        var wifiOff = FxTest.onFx(() -> paths(com.sigebox.central.ui.theme.Icons.icon("wifi-off", 14)));
+        assertFalse(chips.isEmpty(), "hay chips Sin conectar");
+        for (var chip : chips) {
+            assertTrue(chip.equals(wifiOff), "Sin conectar usa wifi-off: " + chip);
+        }
+    }
+
+    @Test
+    void lasTarjetasDeLugarLlenanElAnchoDeLaFila() throws Exception {
+        fights.create("Rojo", "Azul", 3, 2);
+        var root = open("Lugar 2");
+        var gap = FxTest.onFx(() -> {
+            layout(root);
+            var cards = all(root).stream().filter(n -> n.getStyleClass().contains("seat-card")).toList();
+            var row = (javafx.scene.layout.Region) cards.get(0).getParent();
+            double used = cards.stream().mapToDouble(c -> c.getLayoutBounds().getWidth()).sum()
+                    + 16 * (cards.size() - 1);
+            return row.getWidth() - row.snappedLeftInset() - row.snappedRightInset() - used;
+        });
+        assertTrue(Math.abs(gap) <= 2, "las tarjetas llenan la fila; sobran " + gap + " px");
+    }
+
+    @Test
+    void elAvisoDeJuecesPendientesVaCentrado() throws Exception {
+        fights.create("Rojo", "Azul", 3, 2);
+        var root = open("Falta que se conecten");
+        var sides = FxTest.onFx(() -> {
+            layout(root);
+            var why = all(root).stream().filter(n -> n instanceof Labeled l && l.getText() != null
+                    && l.getText().startsWith("Falta que se conecte")).findFirst().orElseThrow();
+            var row = (javafx.scene.layout.Region) why.getParent();
+            double mid = why.getBoundsInParent().getCenterX();
+            return new double[] {mid, row.getWidth() / 2};
+        });
+        assertTrue(Math.abs(sides[0] - sides[1]) <= 2,
+                "el aviso va al centro de la fila: " + sides[0] + " vs " + sides[1]);
+    }
 }
