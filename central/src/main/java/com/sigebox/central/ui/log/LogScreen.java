@@ -94,7 +94,16 @@ public final class LogScreen {
                 return text;
             }
         });
-        table.getColumns().add(column("Tipo", e -> Labels.evento(e.tipo())));
+        var tipo = column("Tipo", e -> e.tipo());
+        tipo.setCellFactory(c -> new javafx.scene.control.TableCell<>() { // DESIGN v5: el tipo como chip
+            @Override
+            protected void updateItem(String code, boolean empty) {
+                super.updateItem(code, empty);
+                setText(null);
+                setGraphic(empty || code == null ? null : typeChip(code));
+            }
+        });
+        table.getColumns().add(tipo);
         table.getColumns().add(column("Detalle",
                 e -> Labels.mensaje(e.tipo(), e.detalle()).replace("función ", "evento ")));
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
@@ -107,7 +116,7 @@ public final class LogScreen {
         filters.setAlignment(javafx.geometry.Pos.BOTTOM_LEFT);
         var card = Ui.card(filters, slot);
         VBox.setVgrow(card, Priority.ALWAYS);
-        var root = new VBox(16, Ui.screenTitle("Bitácora"),
+        var root = new VBox(16, new com.sigebox.central.ui.theme.PageHeader("Bitácora"),
                 Ui.next("Filtra por pelea o tipo para revisar lo ocurrido."), card);
 
         var filter = new AtomicReference<>(new Filter(null, null));
@@ -173,6 +182,22 @@ public final class LogScreen {
     /** Etiqueta del filtro de tipo: "Todos" o la etiqueta en español del código guardado. */
     static String typeLabel(String code) {
         return code == null || ALL.equals(code) ? ALL : Labels.evento(code);
+    }
+
+    /** El tipo de un evento como chip: verde lo que salió bien, dorado lo que espera, neutro lo demás. */
+    static javafx.scene.control.Label typeChip(String code) {
+        return Ui.chip(Labels.evento(code), typeVariant(code), null);
+    }
+
+    static String typeVariant(String code) {
+        if (code.contains("APPROVED") || code.contains("CLOSED") || code.contains("CONNECTED") && !code.contains("DIS")
+                || code.endsWith("_SENT") || code.contains("RECEIVED") || code.contains("ACCEPTED")) {
+            return "success";
+        }
+        if (code.contains("REQUESTED") || code.contains("PENDING") || code.contains("OPENED") || code.contains("WAIT")) {
+            return "pending";
+        }
+        return "neutral";
     }
 
     private static TableColumn<EventoBitacora, String> column(String title,
