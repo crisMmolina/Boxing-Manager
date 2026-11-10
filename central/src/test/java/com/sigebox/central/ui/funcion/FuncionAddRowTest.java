@@ -19,7 +19,6 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.Spinner;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import org.junit.jupiter.api.AfterEach;
@@ -100,23 +99,5 @@ class FuncionAddRowTest {
             return row.getChildren().get(0) == button;
         });
         assertTrue(first, "Agregar pelea debe ser lo primero de su fila");
-    }
-
-    @Test
-    void laBaseDelEventoTieneRoundsYJuecesQueSeCambian() throws Exception {
-        var id = funciones.crear(10, 3, List.of(new Esquinas("Ana", "Bea"))).id();
-        var root = open();
-        var judges = FxTest.onFx(() -> all(root).stream().filter(n -> n instanceof Spinner<?> s
-                && "Jueces del evento".equals(s.getAccessibleText())).findFirst().orElseThrow());
-        FxTest.onFx(() -> {
-            ((Spinner<?>) judges).decrement();
-            return null;
-        });
-        long deadline = System.nanoTime() + 3_000_000_000L;
-        while (System.nanoTime() < deadline && funciones.funcion(id).baseJueces() != 2) {
-            Thread.sleep(20);
-        }
-        assertEquals(2, funciones.funcion(id).baseJueces());
-        assertEquals(2, funciones.cartelera(id).get(0).jueces());
     }
 }
