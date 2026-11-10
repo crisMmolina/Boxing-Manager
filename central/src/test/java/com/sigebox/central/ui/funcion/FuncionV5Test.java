@@ -215,13 +215,14 @@ class FuncionV5Test {
 
     @Test
     void elEncabezadoLlevaElEventoYLaSiguientePeleaComoAccionPrincipal() throws Exception {
-        evento();
+        var id = evento();
         var root = open();
 
         var header = FxTest.onFx(() -> all(root).stream().filter(n -> n instanceof PageHeader)
                 .map(PageHeader.class::cast).findFirst().orElseThrow());
         assertEquals("Evento", header.titleText());
-        assertTrue(header.contextText().contains("2026-11-09"), header.contextText());
+        // La fecha guardada del evento (se crea con la de hoy), no un literal: la prueba no caduca (DSK-048).
+        assertTrue(header.contextText().contains(funciones.funcion(id).fecha()), header.contextText());
         var action = (Button) header.actionNode();
         assertEquals("Siguiente pelea: Ana vs Bea", action.getText());
         assertTrue(action.getStyleClass().contains("primary"));
