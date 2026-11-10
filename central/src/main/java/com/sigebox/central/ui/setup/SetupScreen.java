@@ -14,13 +14,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import javafx.collections.FXCollections;
 import javafx.geometry.Pos;
-import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
-import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -85,9 +83,9 @@ public final class SetupScreen {
         // 260 + 24 + 3 × 240 + 2 × 16 = 1036: los 3 lugares caben en una fila dentro de 1100 px.
         left.setPrefWidth(260);
         left.setMinWidth(260);
-        var seats = new FlowPane(16, 16, Skeleton.block(240, 200));
-        seats.setPrefWrapLength(780); // sin esto el FlowPane pide una sola columna muy alta
-        seats.setRowValignment(VPos.TOP); // tarjetas de distinta altura, alineadas arriba
+        // Las tarjetas se reparten todo el ancho de la fila, alineadas arriba.
+        var seats = new HBox(16, Skeleton.block(240, 200));
+        seats.setAlignment(Pos.TOP_LEFT);
         HBox.setHgrow(seats, Priority.ALWAYS);
         var footer = new HBox(16);
         footer.setAlignment(Pos.CENTER_LEFT);
@@ -152,7 +150,7 @@ public final class SetupScreen {
     private Node seatCard(String fightId, FightService.Seat s, Label status) {
         var who = "Juez " + s.seat();
         var chip = switch (s.state()) {
-            case SIN_CONECTAR -> Ui.chip("Sin conectar", "neutral", "qr-code");
+            case SIN_CONECTAR -> Ui.chip("Sin conectar", "neutral", "wifi-off");
             case RECHAZADO -> Ui.chip("Rechazado", "neutral", null);
             case ESPERANDO_APROBACION -> Ui.chip("Esperando aprobación", "pending", "clock");
             case CONECTADO -> Ui.chip("Conectado", "success", "check");
@@ -165,6 +163,8 @@ public final class SetupScreen {
         card.getStyleClass().add("seat-card");
         card.setPrefWidth(240);
         card.setMinWidth(220);
+        card.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(card, Priority.ALWAYS); // llena el ancho de la fila
         switch (s.state()) {
             case SIN_CONECTAR, RECHAZADO -> {
                 var inv = invitations.computeIfAbsent(key(fightId, s.seat()),
@@ -223,8 +223,12 @@ public final class SetupScreen {
         var why = Ui.why("Falta que se conecte" + (pending == 1 ? " 1 juez." : "n " + pending + " jueces."), start);
         var address = new HBox(8, Ui.field("Dirección para los jueces", choose), Ui.support(":" + port));
         address.setAlignment(Pos.BOTTOM_LEFT);
-        var row = new HBox(16, address, Ui.grow(), why, start);
-        row.setAlignment(Pos.BOTTOM_LEFT); // texto, campo y botón sobre la misma línea de abajo
+        var sides = new HBox(16, address, Ui.grow(), start);
+        sides.setAlignment(Pos.BOTTOM_LEFT); // campo y botón sobre la misma línea de abajo
+        sides.setPickOnBounds(false);
+        // El aviso va al centro de la fila, sin importar el ancho del campo o del botón.
+        var row = new StackPane(sides, why);
+        StackPane.setAlignment(why, Pos.BOTTOM_CENTER);
         HBox.setHgrow(row, Priority.ALWAYS); // el botón va al borde derecho
         return row;
     }
