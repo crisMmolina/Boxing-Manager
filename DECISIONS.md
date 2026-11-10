@@ -112,3 +112,4 @@ Why: a reversible option after 15 min keeps work moving.
 - 1794285492 | DSK-045 | conteo solo en content() para no romper ResultStepScreenTest; palabras clave del chip en minúsculas por LabelsTest | Why: pruebas existentes leen el total final y escanean mayúsculas
 - 1794286955 | DSK-044 | app.css/harness fuera de Paths los decide un humano | Why: las pantallas los necesitan
 - 1794288005 | deadline decision/DSK-044-1794286979/1794287879 | BLOCKED_OTHER_TASK | Option: app.css y ScreenshotHarness quedan en el PR fuera de Paths; Why: app.css trae tokens v5 que usan las pantallas; el harness registra las capturas 02/03; un humano decide en el merge gate; no money, accounts, publishing or scope expansion.
+- 1794296440 | allow | cris | test change: DSK-048 | Why: FuncionV5Test
