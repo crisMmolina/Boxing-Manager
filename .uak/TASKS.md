@@ -1384,7 +1384,7 @@ En Windows (zoe) los comandos `Verify` se corren en Git Bash.
 - **Estimate:** 1 d
 - **Rubric / Spec:** spec 006 §Central
 - **Depends on:** DSK-042
-- **Paths:** central/src/main/java/com/sigebox/central/ui/inicio/InicioScreen.java, central/src/main/java/com/sigebox/central/ui/inicio/NuevoEventoScreen.java, central/src/main/java/com/sigebox/central/ui/inicio/CarteleraScreen.java, central/src/main/java/com/sigebox/central/ui/funcion/, central/src/main/resources/com/sigebox/central/v5-evento.css, central/src/test/java/com/sigebox/central/ui/funcion/, central/src/test/java/com/sigebox/central/ui/inicio/InicioV5Test.java
+- **Paths:** central/src/main/java/com/sigebox/central/ui/inicio/InicioScreen.java, central/src/main/java/com/sigebox/central/ui/inicio/NuevoEventoScreen.java, central/src/main/java/com/sigebox/central/ui/inicio/CarteleraScreen.java, central/src/main/java/com/sigebox/central/ui/funcion/, central/src/main/resources/com/sigebox/central/v5-evento.css, central/src/test/java/com/sigebox/central/ui/funcion/, central/src/test/java/com/sigebox/central/ui/inicio/InicioV5Test.java, central/src/test/java/com/sigebox/central/ui/inicio/InicioTest.java
 - **Freeze-Allowed:** no
 - **Acceptance:**
   - Cartelera como lista: número, esquinas con punto de color, rounds, jueces, estado y menú ⋯ con todas las acciones de hoy (prueba)
