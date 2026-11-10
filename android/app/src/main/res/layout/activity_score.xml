@@ -132,12 +132,108 @@
                     android:layout_height="wrap_content" />
             </LinearLayout>
 
+            <!-- v5 §5.16: un segmento por round (cerrado, actual, futuro). -->
             <LinearLayout
                 android:id="@+id/score_progress"
+                style="@style/Widget.Sigebox.RoundSegments" />
+
+            <!-- v5 §6, Round enviado: aparece tras el ACK en lugar de las tarjetas de puntuar. Solo la tarjeta
+                 propia, sin totales ni ganador (principio 3). -->
+            <LinearLayout
+                android:id="@+id/score_sent_panel"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:orientation="horizontal" />
+                android:accessibilityLiveRegion="polite"
+                android:gravity="center_horizontal"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <com.sigebox.juez.score.SentCheck
+                    android:id="@+id/score_sent_check"
+                    style="@style/Widget.Sigebox.SentCheck" />
+
+                <TextView
+                    android:id="@+id/score_sent_title"
+                    style="@style/Text.Sigebox.SentTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp" />
+
+                <TextView
+                    android:id="@+id/score_sent_support"
+                    style="@style/Text.Sigebox.Body"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center"
+                    android:textColor="@color/ink_2" />
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/score_sent_card"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:focusable="true">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:importantForAccessibility="noHideDescendants"
+                        android:orientation="vertical">
+
+                        <TextView
+                            style="@style/Text.Sigebox.SentLabel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/sent_card_label" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:id="@+id/score_sent_red_label"
+                                style="@style/Text.Sigebox.Pill"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:background="@drawable/pill_red"
+                                android:text="@string/corner_red"
+                                android:textColor="@color/on_red" />
+
+                            <TextView
+                                android:id="@+id/score_sent_red"
+                                style="@style/Text.Sigebox.SentNumber"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="12dp"
+                                android:layout_weight="1"
+                                android:textColor="@color/red_numeral" />
+
+                            <TextView
+                                android:id="@+id/score_sent_blue"
+                                style="@style/Text.Sigebox.SentNumber"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginEnd="12dp"
+                                android:layout_weight="1"
+                                android:gravity="end"
+                                android:textColor="@color/blue_numeral" />
+
+                            <TextView
+                                android:id="@+id/score_sent_blue_label"
+                                style="@style/Text.Sigebox.Pill"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:background="@drawable/pill_blue"
+                                android:text="@string/corner_blue"
+                                android:textColor="@color/on_blue" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
 
             <include
                 android:id="@+id/score_red_card"
@@ -174,7 +270,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
-                android:text="@string/score_correct"
+                android:text="@string/sent_correct"
+                app:icon="@drawable/ic_rotate_ccw"
+                app:iconGravity="textStart"
                 android:visibility="gone" />
 
             <com.google.android.material.button.MaterialButton
