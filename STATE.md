@@ -1,7 +1,7 @@
 # STATE
 
 Phase: execution
-Updated: 1794283522
+Updated: 1794283550
 AVAILABLE: DSK-045 
 CLAIMED: DSK-044 
 BLOCKED: -
@@ -17,11 +17,11 @@ DSK-044 | CLAIMED | zoe-1 | until 1794295185
 
 Blockers: BLOCKED tasks; use status --task ID --summary.
 Current decisions (last 5):
-- 1794246814 | deadline decision/DSK-039-1794240486/1794241386 | REVERSIBLE_AND_LOG | Option: Crear un evento se llama 'Crear evento' en todos lados (botón de Inicio, título y bo
 - 1794246814 | deadline decision/DSK-039-1794240546/1794241446 | REVERSIBLE_AND_LOG | Option: Corrige la anterior: 'Nuevo evento' abre el formulario (y es su título) y 'Crear even
 - 1794274560 | deadline lease/AND-022/1794266521 | REQUIRES_RECOVERY | Claim kept; read the summary and use release --expired --read-summary. No work is deleted.
 - 1794274560 | deadline lease/DSK-041/1794266657 | REQUIRES_RECOVERY | Claim kept; read the summary and use release --expired --read-summary. No work is deleted.
 - 1794283387 | allow | cris | test change: DSK-043 | Why: spec
+- 1794283550 | deadline decision/DSK-043-1794280974/1794281874 | REVERSIBLE_AND_LOG | Option: Reemplazar FuncionAddRowTest.laBaseDelEventoTieneRoundsYJuecesQueSeCambian y FuncionPr
 
 Global next step: available P0; else review PRs, tests, demo, rehearsal.
 Why: bounded snapshot to resume without rereading history.

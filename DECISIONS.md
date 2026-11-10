@@ -108,3 +108,4 @@ Why: a reversible option after 15 min keeps work moving.
 - 1794274560 | deadline lease/AND-022/1794266521 | REQUIRES_RECOVERY | Claim kept; read the summary and use release --expired --read-summary. No work is deleted.
 - 1794274560 | deadline lease/DSK-041/1794266657 | REQUIRES_RECOVERY | Claim kept; read the summary and use release --expired --read-summary. No work is deleted.
 - 1794283387 | allow | cris | test change: DSK-043 | Why: spec
+- 1794283550 | deadline decision/DSK-043-1794280974/1794281874 | REVERSIBLE_AND_LOG | Option: Reemplazar FuncionAddRowTest.laBaseDelEventoTieneRoundsYJuecesQueSeCambian y FuncionPreparadaRowTest.bajarLosJuecesDelEventoBajaLaPeleaEnJueces por FuncionV5Test (Stepper) e InicioTest.nuevoEventoFormCreatesTheEventWithLabeledFields por InicioV5Test (Stepper); Why: spec 006: ningún Spinner; las pruebas viejas buscaban Spinner y las nuevas prueban lo mismo con Stepper; no money, accounts, publishing or scope expansion.
