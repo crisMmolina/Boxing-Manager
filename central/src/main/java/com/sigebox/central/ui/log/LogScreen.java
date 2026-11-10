@@ -104,6 +104,7 @@ public final class LogScreen {
                 setGraphic(empty || code == null ? null : typeChip(code));
             }
         });
+        tipo.setMinWidth(170); // el chip completo ("Tarjeta de round", "Pelea terminada")
         table.getColumns().add(tipo);
         table.getColumns().add(column("Detalle",
                 e -> Labels.mensaje(e.tipo(), e.detalle()).replace("función ", "evento ")));
