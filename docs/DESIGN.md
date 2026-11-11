@@ -89,20 +89,20 @@ Ninguna pantalla usa valores sueltos.
 | `surface_2` | `#F2F0EB` | `#24221F` | Tarjeta elevada, hoja inferior, fila del round abierto, botón secundario |
 | `line` | `#E3DFD7` | `#34312C` | Divisores (decorativo) |
 | `ink` | `#111110` | `#F5F3EE` | Texto principal, etiquetas de campo, íconos, borde de error |
-| `ink_2` | `#57534C` | `#E8E4DC` | Texto de apoyo, ejemplo dentro del campo (placeholder), estados |
+| `ink_2` | `#57534C` | `#B9B3A8` | Texto de apoyo, ejemplo dentro del campo (placeholder), estados |
 | `field_border` | `#8C877D` | `#7D776D` | Borde de 1 px del campo en reposo |
 | `primary` / `on_primary` | `#111110` / `#FFFFFF` | `#D4AF5A` / `#111110` | Botón principal |
 | `accent` | `#7A5A2A` | `#D4AF5A` | Foco, paso activo, progreso, selección, enlaces |
 | `accent_soft` | `#F3E7CF` | `#3A3020` | Fondo de la fila o tarjeta seleccionada (con texto `ink`) |
 | `bar` / `on_bar` | `#111110` / `#F7F5F0` | `#0E0E0C` / `#F5F3EE` | Barra superior negra y su texto |
-| `on_bar_2` | `#B9B3A8` | `#E8E4DC` | Pasos inactivos y texto secundario en la barra |
+| `on_bar_2` | `#B9B3A8` | `#B9B3A8` | Pasos inactivos y texto secundario en la barra |
 | `bar_accent` | `#C9A35E` | `#D4AF5A` | SIGEBOX, filete y línea del paso activo en la barra |
 | `red` / `on_red` | `#9F2241` / `#FFFFFF` | `#E58A9D` / `#111110` | **Solo** esquina roja: píldora, botón + |
 | `red_numeral` | `#9F2241` | `#E58A9D` | Números de la esquina roja |
 | `blue` / `on_blue` | `#266CB4` / `#FFFFFF` | `#8CB8EE` / `#111110` | **Solo** esquina azul |
 | `blue_numeral` | `#266CB4` | `#8CB8EE` | Números de la esquina azul |
 | `connected` | `#027A35` | `#4CC97A` | Punto **lleno** de conectado |
-| `disconnected` | `#57534C` | `#E8E4DC` | **Anillo** vacío de sin conexión |
+| `disconnected` | `#57534C` | `#B9B3A8` | **Anillo** vacío de sin conexión |
 | `skeleton` | `#E9E6DF` | `#36332E` | Bloques de *skeleton* (decorativo, sin texto) |
 
 ### 3.2 Contraste AA medido
@@ -248,12 +248,12 @@ Se suman a los de §3.1, con los mismos nombres en las dos apps (`nav_ink_dim` �
 | Token | Claro | Oscuro | Uso |
 |---|---|---|---|
 | `nav` | `#111110` | `#0A0A09` | Fondo de la barra lateral (central) |
-| `nav_ink` | `#B9B3A8` | `#E8E4DC` | Pasos y enlaces de la barra lateral |
-| `nav_ink_dim` | `#8F897E` | `#D3CEC4` | Pasos que aún no se pueden usar |
+| `nav_ink` | `#B9B3A8` | `#B9B3A8` | Pasos y enlaces de la barra lateral |
+| `nav_ink_dim` | `#8F897E` | `#8F897E` | Pasos que aún no se pueden usar |
 | `nav_active` | `#2A2418` | `#2A2418` | Fondo del paso actual, con franja interior de 3 px `bar_accent` |
 | `success_soft` / `success_ink` | `#E3F3E8` / `#027A35` | `#16301F` / `#7FE0A2` | Chip "Enviada", "Conectado", ✓ |
 | `pending_ink` | `#5C431E` | `#E9C978` | Chip "Calificando…", "Pendiente", sobre `accent_soft` |
-| `ink_3` | `#8F897E` | `#D3CEC4` | Texto terciario: etiquetas en mayúsculas pequeñas, hora |
+| `ink_3` | `#8F897E` | `#8F897E` | Texto terciario: etiquetas en mayúsculas pequeñas, hora |
 | `ring_track` | `#E9E6DF` | `#24221F` | Pista del anillo y segmentos aún sin usar (decorativo) |
 
 **Radios:** `r_sm` 8 (chips cuadrados, celdas), `r_md` 12 (botones, campos, aviso), `r_lg` 16 (filas, tarjetas de juez, stepper), `r_xl` 20 (tarjetas y bloques bento). Píldoras y avatares en cápsula. **Espaciado:** la rejilla de 4 de §3.5 sigue; el contenido de la central lleva 40 px a los lados y 28 arriba, con un ancho máximo de 1180 px.
