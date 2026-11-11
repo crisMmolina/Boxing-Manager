@@ -142,4 +142,31 @@ class ExportServiceTest {
         assertTrue(text.contains("Ganador"), text);
         assertTrue(text.contains("38-37"), text);
     }
+
+    @Test
+    void pdfTieneMembreteSigeboxConLogoYDatosDeLaPelea() throws Exception {
+        var reader = new PdfReader(export.pdf(sheet));
+        var text = new PdfTextExtractor(reader).getTextFromPage(1);
+        var p = sheet.pelea();
+        assertTrue(text.contains("SIGEBOX"), text);
+        assertTrue(text.contains("Pelea " + p.id()), text);
+        assertTrue(text.contains(p.fecha()), text);
+        assertTrue(text.contains("Roja"), text);
+        assertTrue(text.contains("Azul"), text);
+        var content = new String(reader.getPageContent(1), StandardCharsets.ISO_8859_1);
+        long curvas = content.lines().filter(l -> l.endsWith(" c")).count();
+        assertTrue(curvas > 50, "el logo de los guantes va dibujado como vector; curvas: " + curvas);
+    }
+
+    @Test
+    void pdfTienePieConFirmasFechaDeGeneracionYPagina() throws Exception {
+        var reader = new PdfReader(export.pdf(sheet));
+        var text = new PdfTextExtractor(reader).getTextFromPage(1);
+        for (var row : sheet.rows()) {
+            assertTrue(text.contains("Juez " + row.seat()), text);
+        }
+        assertTrue(text.contains("Supervisor"), text);
+        assertTrue(text.contains("Generado"), text);
+        assertTrue(text.contains("Página 1"), text);
+    }
 }
