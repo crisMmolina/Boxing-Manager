@@ -29,3 +29,10 @@
 
 .page-header { -fx-padding: 0 0 16px 0; -fx-alignment: center-left; -fx-spacing: 12px; }
 .page-context { -fx-text-fill: -sg-ink-2; -fx-font-size: 13px; }
+
+/* La barra lateral es negra en los dos temas: marca e íconos con tinta de barra, nunca -sg-ink (en claro sería negro sobre negro). */
+.side-nav .brand-name { -fx-text-fill: -sg-bar-accent; }
+.side-nav .icon-shape { -fx-stroke: -sg-nav-ink-dim; }
+.side-nav .side-step:hover .icon-shape, .side-nav .side-step.current .icon-shape, .side-nav .side-step.done .icon-shape,
+.side-nav .side-link:hover .icon-shape, .side-nav .side-link.current .icon-shape { -fx-stroke: -sg-nav-ink; }
+.side-nav .side-check .icon-shape { -fx-stroke: -sg-connected; }

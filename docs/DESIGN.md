@@ -30,7 +30,7 @@ Se conserva de la v4: negro, blanco y dorado; rojo y azul solo para las esquinas
 
 | v3 | v4 |
 |---|---|
-| Fondo crema «cantera» `#F7F4EF` y noche cálida `#14120F` | **Blanco** casi puro `#FAF9F6` con tarjetas `#FFFFFF`, y **negro** `#0E0E0C`. Menos beige, más contraste: se lee como blanco y negro |
+| Fondo crema «cantera» `#F7F4EF` y noche cálida `#14120F` | **Blanco** puro `#FFFFFF` con tarjetas `#FFFFFF`, y **negro** `#0E0E0C`. Menos beige, más contraste: se lee como blanco y negro |
 | Dorado solo en detalles finos | El dorado sube de rango: **marca** (barra negra con SIGEBOX en dorado), paso activo, foco, selección y, en tema oscuro, el **botón principal**. Sigue sin aparecer en bloques de fondo grandes ni junto a una esquina |
 | Barra superior del color del fondo | **Barra superior negra en los dos temas**, con un filete dorado de 1 px abajo. Es la firma visual de las dos apps |
 | Marca: la palabra SIGEBOX | Logo de **guantes rojos** (ilustración de licencia libre, §3.6) + la palabra SIGEBOX |
@@ -64,7 +64,7 @@ Se conserva de la v3: Barlow Condensed recta e Inter; guinda y azul de la CDMX s
 
 Inspirado en el cinturón de campeonato y la tarjeta impresa del juez: papel blanco, tinta negra y un filete dorado.
 
-- **Tema claro.** Fondo blanco cálido `#FAF9F6`, tarjetas blancas `#FFFFFF` con sombra suave, texto casi negro `#111110`. Botón principal negro.
+- **Tema claro.** Fondo blanco puro `#FFFFFF`, tarjetas blancas `#FFFFFF` con sombra suave, texto casi negro `#111110`. Botón principal negro.
 - **Tema oscuro.** Fondo negro `#0E0E0C`, tarjetas de carbón `#1A1917` y `#24221F`, texto marfil. Botón principal **dorado** con texto negro: en la arena oscura el dorado es lo que se ve primero.
 - **En los dos temas:**
   - **Barra superior negra** (`bar`) con el logo y SIGEBOX en Barlow Condensed 700 dorado (`bar_accent`), y un filete dorado de 1 px en el borde inferior.
@@ -84,26 +84,26 @@ Ninguna pantalla usa valores sueltos.
 
 | Token | Claro | Oscuro | Uso |
 |---|---|---|---|
-| `bg` | `#FAF9F6` | `#0E0E0C` | Fondo de pantalla |
+| `bg` | `#FFFFFF` | `#0E0E0C` | Fondo de pantalla |
 | `surface` | `#FFFFFF` | `#1A1917` | Tarjetas y **fondo de los campos** |
-| `surface_2` | `#F2F0EB` | `#24221F` | Tarjeta elevada, hoja inferior, fila del round abierto, botón secundario |
-| `line` | `#E3DFD7` | `#34312C` | Divisores (decorativo) |
+| `surface_2` | `#F4F4F5` | `#24221F` | Tarjeta elevada, hoja inferior, fila del round abierto, botón secundario |
+| `line` | `#E4E4E7` | `#34312C` | Divisores (decorativo) |
 | `ink` | `#111110` | `#F5F3EE` | Texto principal, etiquetas de campo, íconos, borde de error |
-| `ink_2` | `#57534C` | `#B9B3A8` | Texto de apoyo, ejemplo dentro del campo (placeholder), estados |
+| `ink_2` | `#57534C` | `#E8E4DC` | Texto de apoyo, ejemplo dentro del campo (placeholder), estados |
 | `field_border` | `#8C877D` | `#7D776D` | Borde de 1 px del campo en reposo |
 | `primary` / `on_primary` | `#111110` / `#FFFFFF` | `#D4AF5A` / `#111110` | Botón principal |
 | `accent` | `#7A5A2A` | `#D4AF5A` | Foco, paso activo, progreso, selección, enlaces |
-| `accent_soft` | `#F3E7CF` | `#3A3020` | Fondo de la fila o tarjeta seleccionada (con texto `ink`) |
+| `accent_soft` | `#F4F4F5` | `#3A3020` | Fondo de la fila o tarjeta seleccionada (con texto `ink`) |
 | `bar` / `on_bar` | `#111110` / `#F7F5F0` | `#0E0E0C` / `#F5F3EE` | Barra superior negra y su texto |
-| `on_bar_2` | `#B9B3A8` | `#B9B3A8` | Pasos inactivos y texto secundario en la barra |
+| `on_bar_2` | `#B9B3A8` | `#E8E4DC` | Pasos inactivos y texto secundario en la barra |
 | `bar_accent` | `#C9A35E` | `#D4AF5A` | SIGEBOX, filete y línea del paso activo en la barra |
 | `red` / `on_red` | `#9F2241` / `#FFFFFF` | `#E58A9D` / `#111110` | **Solo** esquina roja: píldora, botón + |
 | `red_numeral` | `#9F2241` | `#E58A9D` | Números de la esquina roja |
 | `blue` / `on_blue` | `#266CB4` / `#FFFFFF` | `#8CB8EE` / `#111110` | **Solo** esquina azul |
 | `blue_numeral` | `#266CB4` | `#8CB8EE` | Números de la esquina azul |
 | `connected` | `#027A35` | `#4CC97A` | Punto **lleno** de conectado |
-| `disconnected` | `#57534C` | `#B9B3A8` | **Anillo** vacío de sin conexión |
-| `skeleton` | `#E9E6DF` | `#36332E` | Bloques de *skeleton* (decorativo, sin texto) |
+| `disconnected` | `#57534C` | `#E8E4DC` | **Anillo** vacío de sin conexión |
+| `skeleton` | `#E4E4E7` | `#36332E` | Bloques de *skeleton* (decorativo, sin texto) |
 
 ### 3.2 Contraste AA medido
 
@@ -248,13 +248,13 @@ Se suman a los de §3.1, con los mismos nombres en las dos apps (`nav_ink_dim` �
 | Token | Claro | Oscuro | Uso |
 |---|---|---|---|
 | `nav` | `#111110` | `#0A0A09` | Fondo de la barra lateral (central) |
-| `nav_ink` | `#B9B3A8` | `#B9B3A8` | Pasos y enlaces de la barra lateral |
-| `nav_ink_dim` | `#8F897E` | `#8F897E` | Pasos que aún no se pueden usar |
+| `nav_ink` | `#E8E4DC` | `#E8E4DC` | Pasos y enlaces de la barra lateral |
+| `nav_ink_dim` | `#D3CEC4` | `#D3CEC4` | Pasos que aún no se pueden usar |
 | `nav_active` | `#2A2418` | `#2A2418` | Fondo del paso actual, con franja interior de 3 px `bar_accent` |
 | `success_soft` / `success_ink` | `#E3F3E8` / `#027A35` | `#16301F` / `#7FE0A2` | Chip "Enviada", "Conectado", ✓ |
 | `pending_ink` | `#5C431E` | `#E9C978` | Chip "Calificando…", "Pendiente", sobre `accent_soft` |
-| `ink_3` | `#8F897E` | `#8F897E` | Texto terciario: etiquetas en mayúsculas pequeñas, hora |
-| `ring_track` | `#E9E6DF` | `#24221F` | Pista del anillo y segmentos aún sin usar (decorativo) |
+| `ink_3` | `#8F897E` | `#D3CEC4` | Texto terciario: etiquetas en mayúsculas pequeñas, hora |
+| `ring_track` | `#E4E4E7` | `#24221F` | Pista del anillo y segmentos aún sin usar (decorativo) |
 
 **Radios:** `r_sm` 8 (chips cuadrados, celdas), `r_md` 12 (botones, campos, aviso), `r_lg` 16 (filas, tarjetas de juez, stepper), `r_xl` 20 (tarjetas y bloques bento). Píldoras y avatares en cápsula. **Espaciado:** la rejilla de 4 de §3.5 sigue; el contenido de la central lleva 40 px a los lados y 28 arriba, con un ancho máximo de 1180 px.
 
@@ -264,8 +264,8 @@ Se suman a los de §3.1, con los mismos nombres en las dos apps (`nav_ink_dim` �
 |---|---|---|
 | `success_ink` sobre `success_soft` | 4.76 | 8.86 |
 | `pending_ink` sobre `accent_soft` | 7.53 | 8.06 |
-| `nav_ink` sobre `nav` | 9.07 | 9.50 |
-| `nav_ink_dim` sobre `nav` | 5.44 | 5.70 |
+| `nav_ink` sobre `nav` | 14.90 | 15.62 |
+| `nav_ink_dim` sobre `nav` | 12.05 | 12.63 |
 | `on_bar` sobre `nav_active` | 14.13 | 13.88 |
 | `bar_accent` sobre `nav_active` (texto e ícono del paso actual) | 6.51 | 7.39 |
 | `ink_3` sobre `surface` (solo texto grande o componente) | 3.47 | 5.06 |
@@ -452,7 +452,7 @@ Código                         ← etiqueta: Inter 600, ink, siempre visible
 Contexto en `ink_2` 13 (miga de pan, o "Pelea 3 de 5 · Roja vs Azul" con los nombres en su color numeral), título Barlow 800 40 igual a su sección, chip de estado opcional y, a la derecha, la acción principal (y a lo más una secundaria).
 
 ### 5.13 Aviso "Qué sigue" (las dos, v5)
-Ícono de información 18 + **"Qué sigue:"** en `ink` 600 + la instrucción. Claro: fondo `accent_soft`, texto `#3D2E14`. Oscuro: fondo `surface`, borde 1 px `line`. Radio `r_md`. Una por pantalla, siempre debajo del encabezado.
+Ícono de información 18 + **"Qué sigue:"** en `ink` 600 + la instrucción. Claro: fondo `accent_soft`, texto `ink`. Oscuro: fondo `surface`, borde 1 px `line`. Radio `r_md`. Una por pantalla, siempre debajo del encabezado.
 
 ### 5.14 Stepper (central, v5)
 `[ − ]  4  [ + ]` en una cápsula `surface_2` de radio `r_md`, botones de 36 px, valor en Barlow 800 24 con cifras tabulares. Flechas ↑/↓ y las teclas + y − cambian el valor; en el límite el botón se apaga. Reemplaza a todo `Spinner`.
