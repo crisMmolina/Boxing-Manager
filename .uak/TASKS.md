@@ -1524,3 +1524,90 @@ En Windows (zoe) los comandos `Verify` se corren en Git Bash.
   - Cambiar la prueba existente lo autoriza un humano (`uak allow DSK-048 --tests`)
 - **Verify:** `central/gradlew -p central test --tests com.sigebox.central.ui.funcion.FuncionV5Test`
 - **Next step:** usar `funciones.funcion(id).fecha()` en la aserción
+
+## DSK-049 · Nuevo evento: el nombre sin texto de ejemplo
+
+- **Type:** feature
+- **Priority:** P2
+- **Estimate:** 0.25 d
+- **Rubric / Spec:** spec 006 §Central
+- **Depends on:** none
+- **Paths:** central/src/main/java/com/sigebox/central/ui/inicio/NuevoEventoScreen.java, central/src/test/java/com/sigebox/central/ui/inicio/
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - El campo "Nombre (opcional)" de Nuevo evento no muestra el texto de ejemplo "Noche de box Iztapalapa": el prompt queda vacío (prueba)
+  - Crear un evento sin nombre sigue funcionando igual (prueba)
+  - Capturas claro y oscuro revisadas por un crítico de diseño
+- **Verify:** `central/gradlew -p central test`
+- **Next step:** prueba de que el TextField del nombre tiene promptText vacío
+
+## AND-025 · Unirme a la pelea: el nombre sin texto de ejemplo
+
+- **Type:** feature
+- **Priority:** P2
+- **Estimate:** 0.25 d
+- **Rubric / Spec:** spec 006 §App
+- **Depends on:** none
+- **Paths:** android/app/src/main/res/layout/activity_join.xml, android/app/src/main/res/values/strings_join.xml, android/app/src/test/java/com/sigebox/juez/
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - En "Unirme a la pelea" el campo Nombre no muestra el placeholder "María López" (se quita `app:placeholderText` y el string `join_name_example`) (prueba)
+  - Los ejemplos de Código (123456) e IP de la central se quedan: guían el formato
+  - Capturas claro y oscuro revisadas por un crítico de diseño
+- **Verify:** `android/gradlew -p android :app:testDebugUnitTest`
+- **Next step:** prueba Robolectric de que `join_name` no tiene placeholder
+
+## DSK-050 · Tema oscuro: textos grises legibles y logo
+
+- **Type:** fix
+- **Priority:** P1
+- **Estimate:** 0.5 d
+- **Rubric / Spec:** spec 006 §Central, DESIGN v5 §3.8
+- **Depends on:** none
+- **Paths:** central/src/main/resources/com/sigebox/central/dark.css, central/src/main/resources/com/sigebox/central/v5-*.css, central/src/main/java/com/sigebox/central/ui/theme/Logo.java, central/src/main/java/com/sigebox/central/ui/theme/SideNav.java, central/src/test/java/com/sigebox/central/ui/theme/
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - En tema oscuro los textos secundarios (`-sg-ink-2`, `-sg-ink-3`, `-sg-nav-ink`, `-sg-nav-ink-dim`, `-sg-on-bar-2`) pasan a blanco o casi blanco y cumplen contraste ≥ 7:1 sobre `-sg-bg` y `-sg-surface` (prueba)
+  - Ningún CSS v5 fija un gris a mano que ignore los tokens del tema oscuro (prueba)
+  - El logo se ve bien sobre fondo negro: sus trazos oscuros no se pierden (variante oscura del SVG o contorno claro) (prueba)
+  - El tema claro no cambia
+  - Capturas oscuro de Inicio, Nuevo evento, Cartelera, En vivo y Resultado revisadas por un crítico de diseño
+- **Verify:** `central/gradlew -p central test`
+- **Next step:** prueba de contraste de los tokens de dark.css en ThemeTest
+
+## DSK-051 · Plantilla del PDF de resultados
+
+- **Type:** feature
+- **Priority:** P1
+- **Estimate:** 1 d
+- **Rubric / Spec:** spec 006 §Central, docs/DESIGN.md
+- **Depends on:** none
+- **Paths:** central/src/main/java/com/sigebox/central/export/, central/src/main/resources/com/sigebox/central/export/, central/src/test/java/com/sigebox/central/export/
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - El PDF sale de una plantilla con encabezado (logo, nombre y fecha del evento, número de pelea), bloque de resultado (ganador, método, decisión) y tabla de tarjetas por juez y round (prueba)
+  - Pie con firmas de jueces y supervisor, fecha y hora de generación y número de página (prueba)
+  - Colores de esquina rojo/azul y tipografía de DESIGN; legible impreso en blanco y negro
+  - Los números siguen saliendo de `ResultSheet` (ResultCalculator); la plantilla no calcula nada (prueba)
+  - Las pruebas de ExportService existentes siguen verdes
+  - Captura del PDF de la pelea de referencia revisada por un crítico de diseño
+- **Verify:** `central/gradlew -p central test --tests 'com.sigebox.central.export.*'`
+- **Next step:** boceto de la plantilla y prueba de que el PDF lleva encabezado y pie
+
+## DSK-052 · Plantilla de Excel de resultados (.xlsx)
+
+- **Type:** feature
+- **Priority:** P1
+- **Estimate:** 1 d
+- **Rubric / Spec:** spec 006 §Central
+- **Depends on:** none
+- **Paths:** central/build.gradle.kts, central/src/main/java/com/sigebox/central/export/, central/src/main/java/com/sigebox/central/ui/result/ResultScreen.java, central/src/test/java/com/sigebox/central/export/
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - Resultado exporta un .xlsx desde una plantilla: hoja Resumen (evento, pelea, ganador, método) y hoja Tarjetas (juez × round con totales) (prueba)
+  - Encabezados con formato, columnas con ancho fijo, fila de títulos congelada, esquinas en rojo/azul (prueba)
+  - Los números salen de `ResultSheet`, igual que el CSV y el PDF (prueba)
+  - El CSV actual se conserva
+  - La dependencia nueva (p. ej. Apache POI o fastexcel) la aprueba un humano antes de agregarla
+- **Verify:** `central/gradlew -p central test --tests 'com.sigebox.central.export.*'`
+- **Next step:** decidir la librería con el humano y prueba de que el .xlsx trae las dos hojas
