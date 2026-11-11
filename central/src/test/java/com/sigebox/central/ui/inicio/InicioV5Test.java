@@ -1,7 +1,6 @@
 package com.sigebox.central.ui.inicio;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.sigebox.central.db.Database;
@@ -78,7 +77,7 @@ class InicioV5Test {
             assertEquals(List.of("Nombre (opcional)", "Fecha", "Rounds por pelea", "Jueces", "Número de peleas"),
                     labels.stream().map(Label::getText).toList());
             var name = (TextField) labels.get(0).getLabelFor();
-            assertFalse(name.getPromptText().isBlank(), "ejemplo dentro del campo");
+            assertTrue(name.getPromptText() == null || name.getPromptText().isEmpty(), "sin texto de ejemplo");
             name.setText("Noche de box");
             ((DatePicker) labels.get(1).getLabelFor()).setValue(LocalDate.of(2026, 11, 3));
             var fights = (Stepper) labels.get(4).getLabelFor();
@@ -94,5 +93,23 @@ class InicioV5Test {
         assertEquals("Noche de box", f.nombre());
         assertEquals("2026-11-03", f.fecha());
         assertEquals(4, funciones.cartelera(f.id()).size());
+    }
+
+    @Test
+    void nuevoEventoSinNombreSigueCreandoElEvento() throws Exception {
+        var created = new ArrayList<String>();
+        var form = new NuevoEventoScreen(funciones, created::add);
+        FxTest.onFx(() -> {
+            var root = form.build();
+            var name = all(root).stream().filter(n -> n instanceof Label l && "Nombre (opcional)".equals(l.getText()))
+                    .map(n -> (TextField) ((Label) n).getLabelFor()).findFirst().orElseThrow();
+            assertTrue(name.getPromptText() == null || name.getPromptText().isEmpty(), "sin texto de ejemplo");
+            assertTrue(name.getText().isEmpty());
+            all(root).stream().filter(n -> n instanceof Button b && "Crear evento".equals(b.getText()))
+                    .map(n -> (Button) n).findFirst().orElseThrow().fire();
+            return null;
+        });
+        assertEquals(1, created.size());
+        assertEquals(1, funciones.cartelera(created.get(0)).size());
     }
 }

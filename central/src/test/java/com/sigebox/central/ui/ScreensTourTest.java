@@ -219,9 +219,14 @@ class ScreensTourTest {
         var nodes = new ArrayList<Node>();
         walk(root, nodes);
         Set<Node> labelled = Collections.newSetFromMap(new IdentityHashMap<>());
+        // DSK-049: el nombre opcional de Nuevo evento va sin texto de ejemplo (decisión de la humana).
+        Set<Node> exampleFree = Collections.newSetFromMap(new IdentityHashMap<>());
         for (var n : nodes) {
             if (n instanceof Label l && l.getLabelFor() != null) {
                 labelled.add(l.getLabelFor());
+                if ("nuevo-evento".equals(id) && "Nombre (opcional)".equals(l.getText())) {
+                    exampleFree.add(l.getLabelFor());
+                }
             }
         }
         boolean next = false;
@@ -229,7 +234,8 @@ class ScreensTourTest {
             if (isField(n) && !labelled.contains(n)) {
                 unlabeled.add(where + ": " + describe(n));
             }
-            if (isField(n) && n instanceof TextInputControl t && t.isEditable() && blank(t.getPromptText())) {
+            if (isField(n) && n instanceof TextInputControl t && t.isEditable() && blank(t.getPromptText())
+                    && !exampleFree.contains(n)) {
                 noExample.add(where + ": " + describe(n));
             }
             if (n instanceof Label l && l.getStyleClass().contains("next-step") && l.getText().startsWith("Qué sigue: ")

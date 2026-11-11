@@ -50,7 +50,7 @@ public final class NuevoEventoScreen {
             }
         });
         var card = Ui.card(Ui.cardTitle("Datos del evento"),
-                Ui.field("Nombre (opcional)", "Noche de box Iztapalapa", name),
+                Ui.field("Nombre (opcional)", name),
                 Ui.field("Fecha", date),
                 new HBox(12, limited("Rounds por pelea", rounds, 1, 12), limited("Jueces", judges, 1, 5),
                         limited("Número de peleas", fights, 1, FuncionService.MAX_PELEAS)),
