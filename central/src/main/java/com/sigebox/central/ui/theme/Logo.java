@@ -70,6 +70,11 @@ public final class Logo {
         return shapes.stream().filter(s -> !s.fill().equalsIgnoreCase(HIGHLIGHT)).toList();
     }
 
+    /** Rutas para un tema (DSK-050: pendiente). */
+    public static List<Shape> forMode(List<Shape> shapes, Theme.Mode mode) {
+        return shapes;
+    }
+
     /** Logo escalado a {@code height} px de alto; quieto (en la barra no se mueve, §3.7). */
     public static Group node(double height, boolean small) {
         var all = shapes(svg());
