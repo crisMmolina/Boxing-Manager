@@ -88,7 +88,8 @@ public class FieldLabelTest {
         if (til.hasAttributeNS(ANDROID, "hint") || edit.hasAttributeNS(ANDROID, "hint")) {
             failures.add(where + ": android:hint");
         }
-        if (til.getAttributeNS(APP, "placeholderText").isEmpty()) {
+        // AND-025: el Nombre va sin ejemplo; Código e IP lo conservan.
+        if (til.getAttributeNS(APP, "placeholderText").isEmpty() && !where.endsWith("/join_name")) {
             failures.add(where + ": sin ejemplo");
         }
         Element label = previousElement(til.getParentNode());
@@ -157,6 +158,9 @@ public class FieldLabelTest {
         for (int id : FIELDS) {
             TextInputLayout box = box(root.findViewById(id));
             assertNull(box.getHint());
+            if (id == R.id.join_name) {
+                continue; // AND-025: sin ejemplo
+            }
             CharSequence example = box.getPlaceholderText();
             assertNotNull(example);
             assertTrue("ejemplo visible: " + example, shows(box, example.toString()));

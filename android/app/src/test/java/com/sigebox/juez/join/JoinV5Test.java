@@ -2,6 +2,7 @@ package com.sigebox.juez.join;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
@@ -46,5 +47,15 @@ public class JoinV5Test {
         assertNotNull("ícono de QR en Escanear", scan.getIcon());
         TextInputLayout host = root.findViewById(R.id.join_host_layout);
         assertNotNull("ícono en el campo de IP", host.getStartIconDrawable());
+    }
+
+    @Test
+    public void elNombreNoMuestraTextoDeEjemplo() {
+        View root = inflate(R.layout.activity_join);
+
+        TextInputLayout name = (TextInputLayout) root.findViewById(R.id.join_name).getParent().getParent();
+        assertNull("AND-025: el Nombre va sin placeholder", name.getPlaceholderText());
+        TextInputLayout code = (TextInputLayout) root.findViewById(R.id.join_code).getParent().getParent();
+        assertNotNull("el ejemplo del Código se queda", code.getPlaceholderText());
     }
 }
