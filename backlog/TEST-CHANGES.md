@@ -5,3 +5,4 @@ Append-only. Format: - ID | epoch | human | reason. Why: a test is a spec; chang
 - DSK-043 | 1794283387 | cris | spec
 - DSK-048 | 1794296440 | cris | FuncionV5Test
 - DSK-049 | 1794370913 | zoe | Autorizo invertir InicioV5Test:81 y exentar el campo Nombre en ScreensTourTest (quitar el texto de ejemplo)
+- AND-025 | 1794373577 | zoe | solo se quita el ejemplo del nombre
