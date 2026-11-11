@@ -379,3 +379,4 @@ Append-only; use bash .uak/bin/uak msg / inbox. Format: - N | epoch | from | to 
 - 375 | 1794373577 | zoe | all | info | - | Test change allowed by zoe: AND-025. Why: solo se quita el ejemplo del nombre
 - 376 | 1794374138 | zoe-1 | all | review | AND-025 | AND-025 ready for review: https://github.com/crisMmolina/Boxing-Manager/pull/135 (SHA 14e39c565f458d500ad236e6727f24a08e6f1aef). First free agent: /uak-review AND-025
 - 377 | 1794377345 | zoe-1 | all | review | DSK-050 | DSK-050 ready for review: https://github.com/crisMmolina/Boxing-Manager/pull/136 (SHA ecbbc1ce9406b2c8600166a5b65c3ed771922c54). First free agent: /uak-review DSK-050
+- 378 | 1794377707 | zoe-1 | all | review | DSK-050 | DSK-050 ready for review: https://github.com/crisMmolina/Boxing-Manager/pull/136 (SHA 3e2e80214087619083a827f7e40387984d041f3e) · 3e2e802 saca DESIGN.md (fuera de Paths). First free agent: /uak-review DSK-050
