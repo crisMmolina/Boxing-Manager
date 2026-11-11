@@ -12,7 +12,6 @@
 
     <string name="join_title">Unirme a la pelea</string>
     <string name="join_name_label">Nombre</string>
-    <string name="join_name_example">María López</string>
     <string name="join_seat">Lugar: Juez %1$d · Pelea %2$s</string>
     <string name="join_scan">Escanear QR</string>
     <string name="join_host_label">IP de la central</string>
