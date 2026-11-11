@@ -282,6 +282,48 @@ def gh_contract(r):
     return {"scope": "API contract mocked; no authenticated GitHub request", "cases": actual}
 
 
+def tip_equals_base_integration(r):
+    """A claim taken after the work landed on the branch records Task-Base == tip; a real merge must still register."""
+    scratch = r.scratch / "tip-eq-base"
+    repo = scratch / "repo"; proof = scratch / "proof"
+    repo.mkdir(parents=True); proof.mkdir(); (proof / "tasks").mkdir()
+    def commit(name, text, *args):
+        (repo / name).write_text(text, encoding="utf-8")
+        r.g(repo, "add", name)
+        r.g(repo, "-c", "user.name=t", "-c", "user.email=t@t", "commit", "-q", "-m", name, *args)
+        return r.g(repo, "rev-parse", "HEAD").stdout.strip()
+    r.g(repo, "init", "-q"); r.g(repo, "symbolic-ref", "HEAD", "refs/heads/main")
+    base = commit("base.txt", "base\n")
+    r.g(repo, "checkout", "-q", "-b", "task")
+    tip = commit("task.txt", "task\n")
+    r.g(repo, "checkout", "-q", "main")
+    commit("other.txt", "other\n")
+    r.g(repo, "-c", "user.name=t", "-c", "user.email=t@t", "merge", "-q", "--no-ff", "-m", "merge", "task")
+    merged = r.g(repo, "rev-parse", "HEAD").stdout.strip()
+    r.g(repo, "update-ref", "refs/uak/base", merged)
+    stray = commit("stray.txt", "stray\n")
+    r.g(repo, "update-ref", "refs/uak/base", merged)
+    harness = scratch / "harness.sh"
+    harness.write_text("#!/usr/bin/env bash\nset -u\n"
+        "field() { sed -n \"s/^$2: //p\" \"$1\" | head -n 1; }\n"
+        "source \"$PACKAGE/.uak/bin/lib/review-merge.sh\"\n"
+        "TX=$REPO; TXROOT=$PROOF; RECORD=$PROOF/tasks/HACK-001.md; ATTEMPT=1; RM_REVIEW_MODE=\n"
+        "printf 'Task-Base: %s\\n' \"$TASK_BASE\" > \"$RECORD\"\n"
+        "integrated_check \"$TIP\" \"$MERGED\"; rc=$?\n"
+        "echo \"$rc|$RM_PROOF|$RM_REASON\"; exit \"$rc\"\n", encoding="utf-8")
+    def check(task_base, tip_sha, merged_sha):
+        return r.run([r.bash, harness.as_posix()], env={"PACKAGE": r.package.as_posix(), "REPO": repo.as_posix(),
+            "PROOF": proof.as_posix(), "TASK_BASE": task_base, "TIP": tip_sha, "MERGED": merged_sha}, allowed=None)
+    ok = check(tip, tip, merged)
+    expect(ok.returncode == 0, "tip == Task-Base with a real merge must integrate: " + ok.stdout + ok.stderr)
+    empty = check(base, base, merged)
+    expect(empty.returncode == 1, "a tip with nothing past the fork must stay rejected: " + empty.stdout)
+    outside = check(tip, tip, stray)
+    expect(outside.returncode == 1 and "not integrated" in outside.stdout,
+           "a merge outside the base must stay rejected: " + outside.stdout)
+    return {"tip_eq_base_merged": ok.stdout.strip(), "empty": empty.returncode, "outside_base": outside.returncode}
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--package", type=Path, default=Path(__file__).resolve().parents[2])
@@ -296,7 +338,8 @@ def main():
     hashes = {name: hashlib.sha256((runner.package / name).read_bytes()).hexdigest() for name in production}
     result = {"scope": "Local real Git, four merge processes, gh API mocked", "source_sha256": hashes,
               "results": [], "failures": 0}
-    for test in (review_gates, concurrent_merges, gate_and_lease, squash_registration, gh_contract):
+    for test in (review_gates, concurrent_merges, gate_and_lease, squash_registration, gh_contract,
+                 tip_equals_base_integration):
         started = time.monotonic()
         try:
             evidence = test(runner)

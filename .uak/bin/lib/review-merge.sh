@@ -336,7 +336,16 @@ integrated_check() {
       RM_REASON='GitHub does not show this COMMIT as a merged PR result'; return 1;
     }
   fi
-  [ -n "$task_base" ] && [ "$tip" != "$task_base" ] || { RM_REASON='TIP equals base; nothing implemented'; return 1; }
+  if [ -z "$task_base" ] || [ "$tip" = "$task_base" ]; then
+    # Claimed with the work already on the branch: accept only a real merge
+    # of TIP into COMMIT (TIP reaches COMMIT but not its first parent).
+    git -C "$TX" merge-base --is-ancestor "$merged" refs/uak/base || { RM_REASON='COMMIT not integrated in the remote base'; return 1; }
+    if git -C "$TX" merge-base --is-ancestor "$tip" "$merged" \
+      && ! git -C "$TX" merge-base --is-ancestor "$tip" "$merged^1" 2>/dev/null; then
+      RM_PROOF=ancestry; return 0
+    fi
+    RM_REASON='TIP equals base; nothing implemented'; return 1
+  fi
   git -C "$TX" diff --quiet "$task_base" "$tip" && { RM_REASON='The task has no diff against its base'; return 1; }
   git -C "$TX" merge-base --is-ancestor "$merged" refs/uak/base || { RM_REASON='COMMIT not integrated in the remote base'; return 1; }
   if git -C "$TX" merge-base --is-ancestor "$tip" "$merged"; then RM_PROOF=ancestry; return 0; fi
