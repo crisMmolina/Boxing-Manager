@@ -114,3 +114,4 @@ Why: a reversible option after 15 min keeps work moving.
 - 1794288005 | deadline decision/DSK-044-1794286979/1794287879 | BLOCKED_OTHER_TASK | Option: app.css y ScreenshotHarness quedan en el PR fuera de Paths; Why: app.css trae tokens v5 que usan las pantallas; el harness registra las capturas 02/03; un humano decide en el merge gate; no money, accounts, publishing or scope expansion.
 - 1794296440 | allow | cris | test change: DSK-048 | Why: FuncionV5Test
 - 1794365925 | deadline decision/DSK-046-1794346371/1794347271 | REVERSIBLE_AND_LOG | Option: dar por integrada en f99a3445 (PR 122); Why: Task-Base igual a Task-Tip: se reclamó con el código ya hecho; aprobada por zoe-rev; no money, accounts, publishing or scope expansion.
+- 1794370913 | allow | zoe | test change: DSK-049 | Why: Autorizo invertir InicioV5Test:81 y exentar el campo Nombre en ScreensTourTest (quitar el texto de ejemplo)
