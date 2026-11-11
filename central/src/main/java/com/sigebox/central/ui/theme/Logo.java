@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 import javafx.scene.Group;
+import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.SVGPath;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -16,7 +18,7 @@ import org.w3c.dom.Element;
 /**
  * Logo de guantes rojos colgando (DESIGN v4 §3.6, CC0, créditos en {@code docs/design/CREDITOS.md}). JavaFX no
  * carga SVG, así que se leen las rutas del archivo empaquetado y se dibujan como {@link SVGPath} con sus propios
- * colores: el logo no usa tokens del tema ni se recolorea.
+ * colores. En el tema oscuro el trazo negro pasa a marfil para que se vea sobre el fondo (DSK-050).
  */
 public final class Logo {
 
@@ -25,6 +27,10 @@ public final class Logo {
 
     /** Brillos de los guantes: se quitan en la versión chica (≤ 32 px). */
     static final String HIGHLIGHT = "#fff7f9";
+
+    /** Contorno negro del SVG y su color en el tema oscuro (≥ 3:1 sobre el fondo, DSK-050). */
+    static final String OUTLINE = "#000000";
+    static final String OUTLINE_DARK = "#E8E4DC";
 
     private static final Pattern FILL = Pattern.compile("(?:^|;)\\s*fill:\\s*(#[0-9A-Fa-f]{6})");
 
@@ -70,9 +76,31 @@ public final class Logo {
         return shapes.stream().filter(s -> !s.fill().equalsIgnoreCase(HIGHLIGHT)).toList();
     }
 
-    /** Rutas para un tema (DSK-050: pendiente). */
+    /** Rutas para un tema: en oscuro el contorno negro pasa a marfil; en claro no cambia nada. */
     public static List<Shape> forMode(List<Shape> shapes, Theme.Mode mode) {
-        return shapes;
+        if (mode != Theme.Mode.DARK) {
+            return shapes;
+        }
+        return shapes.stream().map(s -> new Shape(s.d(), fill(s.fill(), mode))).toList();
+    }
+
+    private static String fill(String original, Theme.Mode mode) {
+        return mode == Theme.Mode.DARK && original.equalsIgnoreCase(OUTLINE) ? OUTLINE_DARK : original;
+    }
+
+    /** Recolorea los logos ya dibujados bajo {@code root} al cambiar de tema (cada ruta guarda su relleno original). */
+    public static void recolor(Node root, Theme.Mode mode) {
+        for (var logo : root.lookupAll(".logo")) {
+            paint(logo, mode);
+        }
+    }
+
+    private static void paint(Node n, Theme.Mode mode) {
+        if (n instanceof SVGPath p && p.getUserData() instanceof String original) {
+            p.setFill(Color.web(fill(original, mode)));
+        } else if (n instanceof Parent parent) {
+            parent.getChildrenUnmodifiable().forEach(c -> paint(c, mode));
+        }
     }
 
     /** Logo escalado a {@code height} px de alto; quieto (en la barra no se mueve, §3.7). */
@@ -82,7 +110,8 @@ public final class Logo {
         for (var s : small ? small(all) : all) {
             var p = new SVGPath();
             p.setContent(s.d());
-            p.setFill(Color.web(s.fill()));
+            p.setUserData(s.fill());
+            p.setFill(Color.web(fill(s.fill(), Theme.mode())));
             art.getChildren().add(p);
         }
         var bounds = art.getLayoutBounds();

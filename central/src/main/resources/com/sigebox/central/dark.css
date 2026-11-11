@@ -5,7 +5,7 @@
     -sg-surface-2: #24221F;
     -sg-line: #34312C;
     -sg-ink: #F5F3EE;
-    -sg-ink-2: #B9B3A8;
+    -sg-ink-2: #E8E4DC;
     -sg-field-border: #7D776D;
     -sg-primary: #D4AF5A;
     -sg-on-primary: #111110;
@@ -13,7 +13,7 @@
     -sg-accent-soft: #3A3020;
     -sg-bar: #0E0E0C;
     -sg-on-bar: #F5F3EE;
-    -sg-on-bar-2: #B9B3A8;
+    -sg-on-bar-2: #E8E4DC;
     -sg-bar-accent: #D4AF5A;
     -sg-red: #E58A9D;
     -sg-on-red: #111110;
@@ -22,18 +22,18 @@
     -sg-on-blue: #111110;
     -sg-blue-numeral: #8CB8EE;
     -sg-connected: #4CC97A;
-    -sg-disconnected: #B9B3A8;
+    -sg-disconnected: #E8E4DC;
     -sg-skeleton: #36332E;
     -sg-shadow: transparent;
     /* v5 (DESIGN v5 §3.8) */
     -sg-nav: #0A0A09;
-    -sg-nav-ink: #B9B3A8;
-    -sg-nav-ink-dim: #8F897E;
+    -sg-nav-ink: #E8E4DC;
+    -sg-nav-ink-dim: #D3CEC4;
     -sg-nav-active: #2A2418;
     -sg-success-soft: #16301F;
     -sg-success-ink: #7FE0A2;
     -sg-pending-ink: #E9C978;
-    -sg-ink-3: #8F897E;
+    -sg-ink-3: #D3CEC4;
     -sg-ring-track: #24221F;
     -sg-callout-bg: #1A1917;
     -sg-callout-ink: #F5F3EE;

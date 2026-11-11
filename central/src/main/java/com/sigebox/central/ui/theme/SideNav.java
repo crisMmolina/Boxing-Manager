@@ -96,7 +96,11 @@ public final class SideNav extends VBox implements PageHeader.NavBar {
         }
         var theme = new Button(Theme.mode().toggleLabel());
         theme.getStyleClass().setAll("side-link", "theme-toggle");
-        theme.setOnAction(e -> theme.setText(Theme.toggle().toggleLabel()));
+        theme.setOnAction(e -> {
+            var mode = Theme.toggle();
+            Logo.recolor(getScene() != null ? getScene().getRoot() : this, mode);
+            theme.setText(mode.toggleLabel());
+        });
         var tools = new HBox(4, HelpButton.bar(), theme);
         tools.setAlignment(Pos.CENTER_LEFT);
         bottom.getChildren().add(tools);
