@@ -116,3 +116,4 @@ Why: a reversible option after 15 min keeps work moving.
 - 1794365925 | deadline decision/DSK-046-1794346371/1794347271 | REVERSIBLE_AND_LOG | Option: dar por integrada en f99a3445 (PR 122); Why: Task-Base igual a Task-Tip: se reclamó con el código ya hecho; aprobada por zoe-rev; no money, accounts, publishing or scope expansion.
 - 1794370913 | allow | zoe | test change: DSK-049 | Why: Autorizo invertir InicioV5Test:81 y exentar el campo Nombre en ScreensTourTest (quitar el texto de ejemplo)
 - 1794373577 | allow | zoe | test change: AND-025 | Why: solo se quita el ejemplo del nombre
+- 1794427512 | deadline lease/DSK-051/1794426525 | REQUIRES_RECOVERY | Claim kept; read the summary and use release --expired --read-summary. No work is deleted.
