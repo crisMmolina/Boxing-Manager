@@ -60,7 +60,7 @@ public final class ResultScreen {
         // DESIGN v5 §5.12: el encabezado de la sección con la pelea como contexto; los totales entran contando.
         var header = new com.sigebox.central.ui.theme.PageHeader("Resultado")
                 .fight(sheet.pelea().esquinaRoja(), sheet.pelea().esquinaAzul());
-        root.setTop(new VBox(16, Ui.brand(), header, Ui.next("Exporta el resultado o cierra esta ventana.")));
+        root.setTop(new VBox(16, Ui.brand(false), header, Ui.next("Exporta el resultado o cierra esta ventana.")));
         CountUp.playAll(body);
         root.setBottom(actions);
         BorderPane.setMargin(body, new Insets(24, 0, 24, 0));

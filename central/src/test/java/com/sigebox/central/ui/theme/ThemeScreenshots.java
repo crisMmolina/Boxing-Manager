@@ -59,7 +59,7 @@ class ThemeScreenshots {
         var code = new TextField();
         var form = Ui.card(Ui.cardTitle("Nuevo evento"),
                 Ui.field("Nombre (opcional)", "Noche de box Iztapalapa", name),
-                Ui.field("Código", "123456", code),
+                Ui.field("Código", code),
                 Ui.support("6 dígitos, te lo da la mesa."),
                 new HBox(12, Ui.primary("Crear evento"), Ui.secondary("Cancelar")));
         var judges = Ui.card(Ui.cardTitle("Jueces"),

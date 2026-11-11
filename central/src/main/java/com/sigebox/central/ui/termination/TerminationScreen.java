@@ -5,6 +5,7 @@ import com.sigebox.central.ui.Labels;
 import com.sigebox.central.ui.LiveRefresh;
 import com.sigebox.central.ui.Screens;
 import com.sigebox.central.ui.theme.Skeleton;
+import com.sigebox.central.ui.theme.Theme;
 import com.sigebox.central.ui.theme.Ui;
 import com.sigebox.core.model.Esquina;
 import com.sigebox.core.model.MotivoTerminacion;
@@ -87,10 +88,11 @@ public final class TerminationScreen {
             var warn = new Alert(Alert.AlertType.CONFIRMATION, "¿Terminar la pelea por "
                     + TerminationService.label(input.motivo()) + " en el round " + input.round() + "?",
                     ButtonType.CANCEL, ButtonType.OK);
+            Theme.dialog(warn);
             if (warn.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) {
                 return;
             }
-            var word = new TextInputDialog();
+            var word = Theme.dialog(new TextInputDialog());
             word.setHeaderText("Escribe " + TerminationService.CONFIRM_WORD + " para confirmar");
             word.showAndWait().ifPresent(text -> {
                 try {

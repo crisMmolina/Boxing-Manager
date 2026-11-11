@@ -70,7 +70,7 @@ public final class Ui {
         return box;
     }
 
-    /** Campo con etiqueta arriba y un valor de ejemplo real dentro ("María López", "123456"), que no repite la etiqueta. */
+    /** Campo con etiqueta arriba y un valor de ejemplo real dentro ("Ej. 1:30"), que no repite la etiqueta. */
     public static VBox field(String label, String example, TextInputControl control) {
         control.setPromptText(example);
         return field(label, control);
@@ -168,9 +168,14 @@ public final class Ui {
         return r;
     }
 
-    /** Marca (§3.6): guantes de 28 px + SIGEBOX en Barlow Condensed dorado, separados 8 px. */
+    /** Marca (§3.6) para la barra negra: guantes de 28 px + SIGEBOX en Barlow Condensed dorado, separados 8 px. */
     public static HBox brand() {
-        var box = new HBox(8, Logo.node(28, true), label("SIGEBOX", "brand-name"));
+        return brand(true);
+    }
+
+    /** Marca; {@code onDark} = va sobre la barra negra, si no, sobre el fondo de la página y sigue al tema. */
+    public static HBox brand(boolean onDark) {
+        var box = new HBox(8, Logo.node(28, true, onDark), label("SIGEBOX", "brand-name"));
         box.getStyleClass().add("brand");
         box.setAlignment(Pos.CENTER_LEFT);
         return box;

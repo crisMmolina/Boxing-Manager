@@ -26,7 +26,6 @@
     <string name="join_error_seat">El lugar va de 1 a 5</string>
     <string name="join_error_code">El código tiene 6 dígitos</string>
     <string name="join_code_label">Código</string>
-    <string name="join_code_example">123456</string>
     <string name="join_code_unknown">Ese código no es válido. Pídele a la mesa el código de tu lugar.</string>
     <string name="join_looking">Buscando tu lugar…</string>
     <string name="join_lookup_timeout">No encontramos la central. Revisa la IP y que estés en el mismo Wi‑Fi.</string>

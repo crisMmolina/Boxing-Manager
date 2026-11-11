@@ -2,6 +2,7 @@ package com.sigebox.central.ui.rounds;
 
 import com.sigebox.central.service.DescuentoService;
 import com.sigebox.central.ui.Labels;
+import com.sigebox.central.ui.theme.Theme;
 import com.sigebox.central.ui.theme.Ui;
 import com.sigebox.core.model.Descuento;
 import com.sigebox.core.model.Esquina;
@@ -41,7 +42,7 @@ final class DescuentosPanel {
     static final Ask DIALOGS = new Ask() {
         @Override
         public Optional<Integer> round(String pregunta, List<Integer> rounds, int actual) {
-            var dialog = new ChoiceDialog<>(actual, rounds);
+            var dialog = Theme.dialog(new ChoiceDialog<>(actual, rounds));
             dialog.setTitle("Descuento");
             dialog.setHeaderText(pregunta);
             dialog.setContentText("Round");
@@ -50,7 +51,7 @@ final class DescuentosPanel {
 
         @Override
         public Optional<String> motivo(String pregunta) {
-            var dialog = new TextInputDialog();
+            var dialog = Theme.dialog(new TextInputDialog());
             dialog.setTitle("Anular descuento");
             dialog.setHeaderText(pregunta);
             dialog.setContentText("Motivo");

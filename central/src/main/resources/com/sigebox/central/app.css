@@ -20,6 +20,10 @@
     -fx-base: -sg-surface;
     -fx-control-inner-background: -sg-surface;
     -fx-text-base-color: -sg-ink;
+    /* modena deriva el color de los Label sin clase de estos tres; sin ellos el texto queda blanco o gris al cambiar de tema */
+    -fx-background: -sg-bg;
+    -fx-text-background-color: -sg-ink;
+    -fx-text-inner-color: -sg-ink;
 }
 
 .app-root {

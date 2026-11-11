@@ -3,6 +3,7 @@ package com.sigebox.central.ui.termination;
 import com.sigebox.central.service.ResultService;
 import com.sigebox.central.service.TerminationService;
 import com.sigebox.central.ui.Labels;
+import com.sigebox.central.ui.theme.Theme;
 import com.sigebox.central.ui.theme.Ui;
 import com.sigebox.core.model.Esquina;
 import com.sigebox.core.model.MotivoTerminacion;
@@ -75,7 +76,7 @@ public final class TerminarEnVivo {
         esquina.setButtonCell(new NameCell<>(Labels::of));
         var otro = new TextField();
 
-        var dialog = new Dialog<ButtonType>();
+        var dialog = Theme.dialog(new Dialog<ButtonType>());
         dialog.initOwner(owner);
         dialog.setTitle("Terminar pelea");
         dialog.setHeaderText("Se termina en el round " + punto.round() + " (" + punto.tiempo()
@@ -104,6 +105,7 @@ public final class TerminarEnVivo {
         var confirm = new Alert(Alert.AlertType.CONFIRMATION, "¿Terminar la pelea por " + TerminationService.label(m)
                 + " en el round " + punto.round() + "? Se cierra con su resultado y no se puede deshacer.",
                 ButtonType.CANCEL, ButtonType.OK);
+        Theme.dialog(confirm);
         confirm.initOwner(owner);
         if (confirm.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) {
             return Optional.empty();

@@ -103,9 +103,7 @@
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:hintEnabled="false"
-                        app:placeholderTextAppearance="@style/Text.Sigebox.FieldCode"
-                        app:placeholderText="@string/join_code_example">
+                        app:hintEnabled="false">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@id/join_code"
