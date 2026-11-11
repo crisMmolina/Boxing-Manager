@@ -56,6 +56,6 @@ public class JoinV5Test {
         TextInputLayout name = (TextInputLayout) root.findViewById(R.id.join_name).getParent().getParent();
         assertNull("AND-025: el Nombre va sin placeholder", name.getPlaceholderText());
         TextInputLayout code = (TextInputLayout) root.findViewById(R.id.join_code).getParent().getParent();
-        assertNotNull("el ejemplo del Código se queda", code.getPlaceholderText());
+        assertNull("el Código va sin ejemplo", code.getPlaceholderText());
     }
 }

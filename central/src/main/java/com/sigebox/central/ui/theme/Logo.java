@@ -88,10 +88,13 @@ public final class Logo {
         return mode == Theme.Mode.DARK && original.equalsIgnoreCase(OUTLINE) ? OUTLINE_DARK : original;
     }
 
+    /** Clase del logo que va sobre la barra negra (igual en los dos temas): su contorno siempre es marfil. */
+    static final String ON_DARK = "logo-on-dark";
+
     /** Recolorea los logos ya dibujados bajo {@code root} al cambiar de tema (cada ruta guarda su relleno original). */
     public static void recolor(Node root, Theme.Mode mode) {
         for (var logo : root.lookupAll(".logo")) {
-            paint(logo, mode);
+            paint(logo, logo.getStyleClass().contains(ON_DARK) ? Theme.Mode.DARK : mode);
         }
     }
 
@@ -103,15 +106,21 @@ public final class Logo {
         }
     }
 
-    /** Logo escalado a {@code height} px de alto; quieto (en la barra no se mueve, §3.7). */
+    /** Logo escalado a {@code height} px de alto; quieto (en la barra no se mueve, §3.7). Sigue al tema. */
     public static Group node(double height, boolean small) {
+        return node(height, small, false);
+    }
+
+    /** Como {@link #node(double, boolean)}; con {@code onDark} el contorno es marfil en los dos temas (barra negra). */
+    public static Group node(double height, boolean small, boolean onDark) {
+        var mode = onDark ? Theme.Mode.DARK : Theme.mode();
         var all = shapes(svg());
         var art = new Group();
         for (var s : small ? small(all) : all) {
             var p = new SVGPath();
             p.setContent(s.d());
             p.setUserData(s.fill());
-            p.setFill(Color.web(fill(s.fill(), Theme.mode())));
+            p.setFill(Color.web(fill(s.fill(), mode)));
             art.getChildren().add(p);
         }
         var bounds = art.getLayoutBounds();
@@ -121,6 +130,9 @@ public final class Logo {
         // El escalado de JavaFX es desde el centro; Group externo para que el tamaño en el layout sea el escalado.
         var logo = new Group(art);
         logo.getStyleClass().add("logo");
+        if (onDark) {
+            logo.getStyleClass().add(ON_DARK);
+        }
         logo.setMouseTransparent(true);
         logo.setAccessibleText("Logo de SIGEBOX: guantes de box");
         return logo;

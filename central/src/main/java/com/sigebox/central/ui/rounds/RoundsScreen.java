@@ -5,6 +5,7 @@ import com.sigebox.central.service.RoundService;
 import com.sigebox.central.ui.Screens;
 import com.sigebox.central.ui.help.HelpButton;
 import com.sigebox.central.ui.termination.TerminarEnVivo;
+import com.sigebox.central.ui.theme.Theme;
 import com.sigebox.central.ui.theme.Ui;
 import com.sigebox.core.model.EstadoRound;
 import java.util.function.Supplier;
@@ -207,12 +208,12 @@ public final class RoundsScreen {
                 return;
             }
             // Doble confirmación: aviso + escribir la palabra.
-            var warn = new Alert(Alert.AlertType.CONFIRMATION,
-                    "Faltan los jueces " + missing + ". ¿Cerrar el round igual?", ButtonType.CANCEL, ButtonType.OK);
+            var warn = Theme.dialog(new Alert(Alert.AlertType.CONFIRMATION,
+                    "Faltan los jueces " + missing + ". ¿Cerrar el round igual?", ButtonType.CANCEL, ButtonType.OK));
             if (warn.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) {
                 return;
             }
-            var word = new TextInputDialog();
+            var word = Theme.dialog(new TextInputDialog());
             word.setHeaderText("Escribe " + RoundService.CONFIRM_WORD + " para cerrar el round " + n);
             word.showAndWait().ifPresent(text -> run(status, () -> service.closeRound(f, n, text), refresh));
         });

@@ -5,6 +5,7 @@ import java.util.List;
 import javafx.application.ColorScheme;
 import javafx.application.Platform;
 import javafx.scene.Scene;
+import javafx.scene.control.Dialog;
 import javafx.scene.text.Font;
 
 /**
@@ -135,6 +136,12 @@ public final class Theme {
         }
     }
 
+    /** Pone el tema actual en un diálogo (sus ventanas no heredan la hoja de la escena); devuelve el mismo diálogo. */
+    public static <D extends Dialog<?>> D dialog(D d) {
+        d.getDialogPane().getStylesheets().setAll(stylesheets(mode));
+        return d;
+    }
+
     /** Cambia al otro tema en todas las escenas abiertas; devuelve el nuevo. */
     public static Mode toggle() {
         mode = mode.toggled();
@@ -142,6 +149,9 @@ public final class Theme {
             SCENES.removeIf(s -> s.getWindow() != null && !s.getWindow().isShowing());
             for (var s : SCENES) {
                 s.getStylesheets().setAll(stylesheets(mode));
+                if (s.getRoot() != null) {
+                    Logo.recolor(s.getRoot(), mode);
+                }
             }
         }
         return mode;

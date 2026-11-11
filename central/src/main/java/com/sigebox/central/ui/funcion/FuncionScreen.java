@@ -9,6 +9,7 @@ import com.sigebox.central.ui.theme.Icons;
 import com.sigebox.central.ui.theme.Motion;
 import com.sigebox.central.ui.theme.PageHeader;
 import com.sigebox.central.ui.theme.Stepper;
+import com.sigebox.central.ui.theme.Theme;
 import com.sigebox.central.ui.theme.Ui;
 import java.time.LocalDate;
 import java.util.Collections;
@@ -356,7 +357,7 @@ public final class FuncionScreen {
 
         private javafx.scene.control.Dialog<javafx.scene.control.ButtonType> dialog(String title, Fila fila,
                 javafx.scene.control.ButtonType save, Node content) {
-            var dialog = new javafx.scene.control.Dialog<javafx.scene.control.ButtonType>();
+            var dialog = Theme.dialog(new javafx.scene.control.Dialog<javafx.scene.control.ButtonType>());
             dialog.setTitle(title);
             dialog.setHeaderText("Pelea " + fila.orden() + ": " + fila.roja() + " vs " + fila.azul());
             dialog.getDialogPane().getButtonTypes().addAll(javafx.scene.control.ButtonType.CANCEL, save);
