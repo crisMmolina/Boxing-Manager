@@ -49,9 +49,11 @@ public final class ResultScreen {
         pdf.setOnAction(e -> save(stage, status, "pdf", export.pdf(sheet), sheet));
         var csv = Ui.secondary("Exportar CSV");
         csv.setOnAction(e -> save(stage, status, "csv", export.csvBytes(sheet), sheet));
+        var xlsx = Ui.secondary("Exportar Excel");
+        xlsx.setOnAction(e -> save(stage, status, "xlsx", export.xlsx(sheet), sheet));
         var close = Ui.secondary("Cerrar ventana"); // "Cerrar pelea" y "Cerrar round" son otra cosa
         close.setOnAction(e -> stage.close());
-        var actions = new HBox(12, pdf, csv, close, status);
+        var actions = new HBox(12, pdf, csv, xlsx, close, status);
         actions.setAlignment(Pos.CENTER_LEFT);
 
         var body = body(sheet);

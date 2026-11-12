@@ -47,11 +47,13 @@ dependencies {
     implementation("com.google.zxing:core:$zxingVersion")
     implementation("com.google.zxing:javase:$zxingVersion")
     implementation("com.github.librepdf:openpdf:$openpdfVersion")
+    implementation("org.dhatim:fastexcel:0.20.2") // DSK-052: .xlsx de resultados; aprobada por el humano
     runtimeOnly("org.slf4j:slf4j-simple:$slf4jVersion")
 
     testImplementation(project(":judge-sim")) // QA-001: jueces simulados contra el servidor real
     testImplementation(platform("org.junit:junit-bom:$junitVersion"))
     testImplementation("org.junit.jupiter:junit-jupiter")
+    testImplementation("org.dhatim:fastexcel-reader:0.20.2")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
