@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import org.dhatim.fastexcel.Workbook;
 import org.dhatim.fastexcel.Worksheet;
+import org.openpdf.text.Chunk;
 import org.openpdf.text.Document;
 import org.openpdf.text.Element;
 import org.openpdf.text.Font;
@@ -20,6 +21,7 @@ import org.openpdf.text.Phrase;
 import org.openpdf.text.pdf.ColumnText;
 import org.openpdf.text.pdf.PdfContentByte;
 import org.openpdf.text.pdf.PdfPCell;
+import org.openpdf.text.pdf.PdfPCellEvent;
 import org.openpdf.text.pdf.PdfPTable;
 import org.openpdf.text.pdf.PdfPageEventHelper;
 import org.openpdf.text.pdf.PdfWriter;
@@ -188,6 +190,9 @@ public final class ExportService {
     private static final Color RED = new Color(0x9F, 0x22, 0x41);
     private static final Color BLUE = new Color(0x26, 0x6C, 0xB4);
     private static final Color MUTED = new Color(0x5C, 0x5A, 0x55);
+    /** Tintes claros de cada esquina (≈10 % sobre blanco) para sombrear sin tapar el texto negro. */
+    private static final Color RED_TINT = new Color(0xF4, 0xE5, 0xE8);
+    private static final Color BLUE_TINT = new Color(0xE5, 0xED, 0xF6);
     private static final float MARGIN = 36;
     private static final float HEADER_H = 64;
     private static final float FOOTER_H = 92;
@@ -244,10 +249,14 @@ public final class ExportService {
             cell(table, String.valueOf(row.seat()), normal);
             cell(table, row.name() == null ? "" : row.name(), normal);
             for (var c : row.cells()) {
-                cell(table, c.red() == null ? "—" : c.red() + "–" + c.blue(), normal);
+                score(table, c.red(), c.blue(), normal.getSize(), false);
             }
-            cell(table, row.totalRed() + "–" + row.totalBlue(), bold);
-            cell(table, row.winner(), normal);
+            score(table, row.totalRed(), row.totalBlue(), bold.getSize(), true);
+            var winner = cell(table, row.winner(), normal);
+            var t = tint(row.winner());
+            if (t != null) {
+                winner.setBackgroundColor(t);
+            }
         }
         doc.add(table);
         if (!sheet.descuentos().isEmpty()) {
@@ -290,6 +299,7 @@ public final class ExportService {
         cell.setBorder(align == Element.ALIGN_LEFT ? Rectangle.LEFT : Rectangle.RIGHT);
         cell.setBorderWidth(6);
         cell.setBorderColor(color);
+        cell.setBackgroundColor(color == RED ? RED_TINT : BLUE_TINT);
         cell.setPaddingLeft(10);
         cell.setPaddingRight(10);
         cell.setPaddingBottom(8);
@@ -376,11 +386,54 @@ public final class ExportService {
         return text.replace('–', '-').replace('—', '-');
     }
 
-    private static void cell(PdfPTable table, String text, Font font) {
+    private static PdfPCell cell(PdfPTable table, String text, Font font) {
         var cell = new PdfPCell(new Phrase(pdfText(text), font));
         cell.setHorizontalAlignment(Element.ALIGN_CENTER);
         cell.setPadding(5);
         table.addCell(cell);
+        return cell;
+    }
+
+    /**
+     * Una puntuación "roja-azul": mitad izquierda con el tinte rojo y mitad derecha con el azul, y cada
+     * número en el color de su esquina. Se sigue leyendo (y copiando) como "39-37".
+     */
+    private static void score(PdfPTable table, Integer red, Integer blue, float size, boolean bold) {
+        if (red == null) {
+            cell(table, "—", FontFactory.getFont(FontFactory.HELVETICA, size, Color.BLACK));
+            return;
+        }
+        var face = bold ? FontFactory.HELVETICA_BOLD : FontFactory.HELVETICA;
+        var phrase = new Phrase();
+        phrase.add(new Chunk(String.valueOf(red), FontFactory.getFont(face, size, RED)));
+        phrase.add(new Chunk("-", FontFactory.getFont(face, size, MUTED)));
+        phrase.add(new Chunk(String.valueOf(blue), FontFactory.getFont(face, size, BLUE)));
+        var cell = new PdfPCell(phrase);
+        cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+        cell.setPadding(5);
+        cell.setCellEvent(MITADES);
+        table.addCell(cell);
+    }
+
+    /** Pinta el fondo de la celda en dos mitades, roja y azul, debajo del texto y del borde. */
+    private static final PdfPCellEvent MITADES = (cell, pos, canvases) -> {
+        var cb = canvases[PdfPTable.BACKGROUNDCANVAS];
+        float mid = (pos.getLeft() + pos.getRight()) / 2;
+        cb.saveState();
+        cb.setColorFill(RED_TINT);
+        cb.rectangle(pos.getLeft(), pos.getBottom(), mid - pos.getLeft(), pos.getHeight());
+        cb.fill();
+        cb.setColorFill(BLUE_TINT);
+        cb.rectangle(mid, pos.getBottom(), pos.getRight() - mid, pos.getHeight());
+        cb.fill();
+        cb.restoreState();
+    };
+
+    private static Color tint(String esquina) {
+        if ("Roja".equals(esquina)) {
+            return RED_TINT;
+        }
+        return "Azul".equals(esquina) ? BLUE_TINT : null;
     }
 
     private static void line(StringBuilder out, String... values) {
