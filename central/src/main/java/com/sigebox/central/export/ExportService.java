@@ -7,6 +7,8 @@ import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import org.dhatim.fastexcel.Workbook;
+import org.dhatim.fastexcel.Worksheet;
 import org.openpdf.text.Document;
 import org.openpdf.text.Element;
 import org.openpdf.text.Font;
@@ -77,6 +79,105 @@ public final class ExportService {
             line(out, cells.toArray(String[]::new));
         }
         return out.toString();
+    }
+
+    /** Excel (.xlsx): hoja Resumen y hoja Tarjetas, con los mismos números que el CSV y el PDF. */
+    public byte[] xlsx(ResultSheet sheet) {
+        var out = new ByteArrayOutputStream();
+        try {
+            var wb = new Workbook(out, "SIGEBOX", "1.0");
+            summarySheet(wb.newWorksheet("Resumen"), sheet);
+            cardsSheet(wb.newWorksheet("Tarjetas"), sheet);
+            wb.finish();
+        } catch (java.io.IOException e) {
+            throw new java.io.UncheckedIOException(e);
+        }
+        return out.toByteArray();
+    }
+
+    /** ARGB de las esquinas para la plantilla de Excel (mismos tonos que RED/BLUE). */
+    private static final String XLSX_RED = "FF9F2241";
+    private static final String XLSX_BLUE = "FF266CB4";
+    private static final String XLSX_HEAD = "FFE8E6E1";
+
+    private static void summarySheet(Worksheet ws, ResultSheet sheet) {
+        var p = sheet.pelea();
+        var r = sheet.resultado();
+        var rows = new java.util.ArrayList<String[]>();
+        rows.add(new String[] {"Evento", "SIGEBOX"});
+        rows.add(new String[] {"Pelea", p.id()});
+        rows.add(new String[] {"Fecha", p.fecha()});
+        rows.add(new String[] {"Esquina roja", p.esquinaRoja()});
+        rows.add(new String[] {"Esquina azul", p.esquinaAzul()});
+        rows.add(new String[] {"Ganador", r.ganador() == null ? "" : Labels.of(r.ganador())});
+        rows.add(new String[] {"Método", r.tipo() == null ? "" : Labels.of(r.tipo())});
+        rows.add(new String[] {"Resultado", sheet.headline()});
+        if (sheet.terminacion() != null) {
+            var t = sheet.terminacion();
+            rows.add(new String[] {"Terminación", Labels.of(t.motivo()) + " · round " + t.round()
+                    + (t.tiempo() == null ? "" : " · " + t.tiempo())
+                    + (t.textoOtro() == null ? "" : " · " + t.textoOtro())});
+        }
+        for (var d : sheet.descuentos()) {
+            rows.add(new String[] {"Descuento", "round " + d.round() + " · " + Labels.of(d.esquina())
+                    + " -" + d.puntos()});
+        }
+        for (int i = 0; i < rows.size(); i++) {
+            ws.value(i, 0, rows.get(i)[0]);
+            ws.value(i, 1, rows.get(i)[1] == null ? "" : rows.get(i)[1]);
+            ws.style(i, 0).bold().set();
+        }
+        ws.width(0, 16);
+        ws.width(1, 48);
+    }
+
+    private static void cardsSheet(Worksheet ws, ResultSheet sheet) {
+        int rounds = sheet.pelea().rounds();
+        int col = 0;
+        head(ws, col++, "Juez", XLSX_HEAD, 8);
+        head(ws, col++, "Nombre", XLSX_HEAD, 24);
+        for (int n = 1; n <= rounds; n++) {
+            head(ws, col++, "R" + n + " Roja", XLSX_RED, 9);
+            head(ws, col++, "R" + n + " Azul", XLSX_BLUE, 9);
+        }
+        int totalRed = col;
+        head(ws, col++, "Total Roja", XLSX_RED, 11);
+        head(ws, col++, "Total Azul", XLSX_BLUE, 11);
+        head(ws, col, "Ganador", XLSX_HEAD, 11);
+        ws.freezePane(0, 1);
+
+        int r = 1;
+        for (var row : sheet.rows()) {
+            ws.value(r, 0, row.seat());
+            ws.value(r, 1, row.name() == null ? "" : row.name());
+            for (var c : row.cells()) {
+                int at = 2 + (c.round() - 1) * 2;
+                if (c.red() != null) {
+                    ws.value(r, at, c.red());
+                }
+                if (c.blue() != null) {
+                    ws.value(r, at + 1, c.blue());
+                }
+            }
+            ws.value(r, totalRed, row.totalRed());
+            ws.value(r, totalRed + 1, row.totalBlue());
+            ws.value(r, totalRed + 2, row.winner());
+            ws.range(r, totalRed, r, totalRed + 2).style().bold().set();
+            r++;
+        }
+        if (r > 1) {
+            ws.range(1, 0, r - 1, totalRed + 1).style().horizontalAlignment("center").set();
+        }
+    }
+
+    private static void head(Worksheet ws, int col, String text, String fill, double width) {
+        ws.value(0, col, text);
+        var style = ws.style(0, col).bold().fillColor(fill).horizontalAlignment("center");
+        if (!XLSX_HEAD.equals(fill)) {
+            style.fontColor("FFFFFFFF");
+        }
+        style.set();
+        ws.width(col, width);
     }
 
     public byte[] csvBytes(ResultSheet sheet) {
