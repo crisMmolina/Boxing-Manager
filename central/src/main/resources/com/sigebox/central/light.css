@@ -1,16 +1,16 @@
-/* SIGEBOX · Central. Tokens de color del tema claro, blanco con dorado (docs/DESIGN.md v4 §3.1). Solo colores. */
+/* SIGEBOX · Central. Tokens de color del tema claro, blanco puro con dorado (docs/DESIGN.md v4 §3.1). Solo colores. */
 .root {
-    -sg-bg: #FAF9F6;
+    -sg-bg: #FFFFFF;
     -sg-surface: #FFFFFF;
-    -sg-surface-2: #F2F0EB;
-    -sg-line: #E3DFD7;
+    -sg-surface-2: #F4F4F5;
+    -sg-line: #E4E4E7;
     -sg-ink: #111110;
     -sg-ink-2: #57534C;
     -sg-field-border: #8C877D;
     -sg-primary: #111110;
     -sg-on-primary: #FFFFFF;
     -sg-accent: #7A5A2A;
-    -sg-accent-soft: #F3E7CF;
+    -sg-accent-soft: #F4F4F5;
     -sg-bar: #111110;
     -sg-on-bar: #F7F5F0;
     -sg-on-bar-2: #B9B3A8;
@@ -23,19 +23,19 @@
     -sg-blue-numeral: #266CB4;
     -sg-connected: #027A35;
     -sg-disconnected: #57534C;
-    -sg-skeleton: #E9E6DF;
+    -sg-skeleton: #E4E4E7;
     -sg-shadow: rgba(17, 17, 16, 0.08);
     /* v5 (DESIGN v5 §3.8) */
     -sg-nav: #111110;
-    -sg-nav-ink: #B9B3A8;
-    -sg-nav-ink-dim: #8F897E;
+    -sg-nav-ink: #E8E4DC;
+    -sg-nav-ink-dim: #D3CEC4;
     -sg-nav-active: #2A2418;
     -sg-success-soft: #E3F3E8;
     -sg-success-ink: #027A35;
     -sg-pending-ink: #5C431E;
     -sg-ink-3: #8F897E;
-    -sg-ring-track: #E9E6DF;
-    -sg-callout-bg: #F3E7CF;
-    -sg-callout-ink: #3D2E14;
+    -sg-ring-track: #E4E4E7;
+    -sg-callout-bg: #F4F4F5;
+    -sg-callout-ink: #111110;
     -sg-menu-shadow: rgba(17, 17, 16, 0.14);
 }
