@@ -169,4 +169,35 @@ class ExportServiceTest {
         assertTrue(text.contains("Generado"), text);
         assertTrue(text.contains("Página 1"), text);
     }
+
+    /** Cuántas veces el contenido de la página rellena con el color {@code rgb} (±1 por redondeo). */
+    private static long fills(String content, int rgb) {
+        int[] want = {(rgb >> 16) & 0xFF, (rgb >> 8) & 0xFF, rgb & 0xFF};
+        var m = java.util.regex.Pattern.compile("([0-9.]+) ([0-9.]+) ([0-9.]+) rg").matcher(content);
+        long n = 0;
+        while (m.find()) {
+            boolean same = true;
+            for (int i = 0; i < 3; i++) {
+                same &= Math.abs(Math.round(Float.parseFloat(m.group(i + 1)) * 255) - want[i]) <= 1;
+            }
+            if (same) {
+                n++;
+            }
+        }
+        return n;
+    }
+
+    @Test
+    void pdfSombreaCadaEsquina() throws Exception {
+        var reader = new PdfReader(export.pdf(sheet));
+        var content = new String(reader.getPageContent(1), StandardCharsets.ISO_8859_1);
+        var text = new PdfTextExtractor(reader).getTextFromPage(1);
+        reader.close();
+        long celdas = (long) sheet.rows().size() * (sheet.pelea().rounds() + 1);
+        assertTrue(fills(content, 0xF4E5E8) >= celdas, "sombreado rojo en cada puntuación y total");
+        assertTrue(fills(content, 0xE5EDF6) >= celdas, "sombreado azul en cada puntuación y total");
+        assertTrue(fills(content, 0x9F2241) >= celdas, "puntos de la roja en guinda");
+        assertTrue(fills(content, 0x266CB4) >= celdas, "puntos de la azul en azul");
+        assertTrue(text.contains("39-37") && text.contains("37-39"), text);
+    }
 }
