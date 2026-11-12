@@ -174,7 +174,7 @@ public final class ExportService {
         ws.value(0, col, text);
         var style = ws.style(0, col).bold().fillColor(fill).horizontalAlignment("center");
         if (!XLSX_HEAD.equals(fill)) {
-            style.fontColor("FFFFFFFF");
+            style.fontColor(org.dhatim.fastexcel.Color.WHITE);
         }
         style.set();
         ws.width(col, width);
