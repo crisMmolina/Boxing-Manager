@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- v6: la acción principal sobre arena es dorada (el único acento); deshabilitada, la superficie de la fila. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:color="@android:color/transparent" android:state_enabled="false" />
+    <item android:color="@color/ring_current" />
+</selector>

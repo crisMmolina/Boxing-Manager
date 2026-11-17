@@ -52,7 +52,7 @@
     <dimen name="pill_height">56dp</dimen>
     <dimen name="pill_radius">28dp</dimen>
     <dimen name="corner_row_button">56dp</dimen>
-    <dimen name="corner_row_number">104sp</dimen>
-    <dimen name="round_ring_size">208dp</dimen>
-    <dimen name="round_ring_stroke">10dp</dimen>
+    <dimen name="corner_row_number">112sp</dimen>
+    <dimen name="round_ring_size">136dp</dimen>
+    <dimen name="round_ring_stroke">8dp</dimen>
 </resources>

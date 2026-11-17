@@ -64,4 +64,7 @@
     <color name="ring_done">#4CC27A</color>
     <color name="ring_current">#D4AF5A</color>
     <color name="ring_pending">#2E2B27</color>
+    <!-- Palomita de Round enviado sobre arena: círculo verde oscuro y trazo verde claro. -->
+    <color name="arena_success">#16301F</color>
+    <color name="arena_success_ink">#7FE0A2</color>
 </resources>
