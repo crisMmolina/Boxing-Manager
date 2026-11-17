@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- v6: deshabilitada, "Enviar round" se ve como contorno (todavía falta calificar); habilitada, dorada sin borde. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:color="@color/arena_line" android:state_enabled="false" />
+    <item android:color="@color/ring_current" />
+</selector>

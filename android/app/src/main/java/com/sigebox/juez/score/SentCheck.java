@@ -36,9 +36,12 @@ public class SentCheck extends View {
     public SentCheck(Context context, AttributeSet attrs) {
         super(context, attrs);
         circle.setStyle(Paint.Style.FILL);
-        circle.setColor(ContextCompat.getColor(context, R.color.success_soft));
+        // v6: sobre arena (tag "arena") el círculo es verde oscuro, no menta (spec 007).
+        boolean arena = attrs != null && "arena".equals(
+                attrs.getAttributeValue("http://schemas.android.com/apk/res/android", "tag"));
+        circle.setColor(ContextCompat.getColor(context, arena ? R.color.arena_success : R.color.success_soft));
         stroke.setStyle(Paint.Style.STROKE);
-        stroke.setColor(ContextCompat.getColor(context, R.color.success_ink));
+        stroke.setColor(ContextCompat.getColor(context, arena ? R.color.arena_success_ink : R.color.success_ink));
         stroke.setStrokeWidth(STROKE_DP * getResources().getDisplayMetrics().density);
         stroke.setStrokeCap(Paint.Cap.ROUND);
         stroke.setStrokeJoin(Paint.Join.ROUND);
