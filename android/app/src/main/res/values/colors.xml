@@ -48,4 +48,20 @@
     <color name="logo_claro">#FFF7F9</color>
     <!-- Sustituye el borde en reposo de Material: el borde con foco sale de boxStrokeColor (§5.4). -->
     <color name="mtrl_textinput_default_box_stroke_color">@color/field_border</color>
+    <!-- v6 «Esquina» (spec 007): superficie arena negra en los dos temas para Puntuar, Round enviado y
+         Round tardío. Contrastes: ContrastV6Test. No hay copia en values-night: arena es igual en los dos. -->
+    <color name="arena">#0B0B0A</color>
+    <color name="arena_2">#1A1917</color>
+    <color name="arena_line">#6E685E</color>
+    <!-- Contorno de los botones − y + sobre la fila (3:1 o más). -->
+    <color name="arena_control">#8F897E</color>
+    <color name="on_arena">#F7F5F0</color>
+    <color name="on_arena_2">#B9B3A8</color>
+    <!-- Número de cada esquina sobre arena: el guinda y el azul de las píldoras no llegan a 4.5 sobre negro. -->
+    <color name="arena_red">#F08AA0</color>
+    <color name="arena_blue">#8CB8EE</color>
+    <!-- Anillo de rounds: cerrados, actual (dorado, el único acento) y pendientes (decorativo). -->
+    <color name="ring_done">#4CC27A</color>
+    <color name="ring_current">#D4AF5A</color>
+    <color name="ring_pending">#2E2B27</color>
 </resources>
