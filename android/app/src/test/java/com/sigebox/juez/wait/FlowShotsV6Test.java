@@ -54,6 +54,9 @@ public class FlowShotsV6Test {
     public void setUp() throws Exception {
         assumeTrue("sin SIGEBOX_SCREENSHOTS", DIR != null && !DIR.isEmpty());
         Application app = RuntimeEnvironment.getApplication();
+        // Como el arnés general: estado final sin animaciones (reducir movimiento).
+        android.provider.Settings.Global.putFloat(app.getContentResolver(),
+                android.provider.Settings.Global.ANIMATOR_DURATION_SCALE, 0f);
         db = Room.inMemoryDatabaseBuilder(app, SigeboxDatabase.class).allowMainThreadQueries().build();
         connection = ConnectionTestAccess.newConnection(db);
         NextFightActivity.connections = context -> connection;

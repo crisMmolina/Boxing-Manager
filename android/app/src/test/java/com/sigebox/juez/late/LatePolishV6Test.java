@@ -1,5 +1,6 @@
 package com.sigebox.juez.late;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import android.app.Activity;
@@ -28,6 +29,9 @@ public class LatePolishV6Test {
         Context themed = new ContextThemeWrapper(activity, R.style.Theme_Sigebox);
         FrameLayout parent = new FrameLayout(themed);
         View root = LayoutInflater.from(themed).inflate(R.layout.activity_late_score, parent, false);
+        android.widget.TextView status = root.findViewById(R.id.late_status);
+        assertEquals("chip de estado igual en claro y oscuro",
+                androidx.core.content.ContextCompat.getColor(themed, R.color.on_arena_2), status.getCurrentTextColor());
         View number = root.findViewById(R.id.late_ring_number);
         assertTrue("el número del anillo repite el título", number == null || number.getVisibility() == View.GONE);
     }

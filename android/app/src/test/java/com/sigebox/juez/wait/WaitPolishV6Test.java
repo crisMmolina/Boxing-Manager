@@ -67,6 +67,17 @@ public class WaitPolishV6Test {
         assertTrue(back.getMinHeight() >= 56 * dp - 1);
     }
 
+    /** Con "reducir movimiento" el indicador de carga queda quieto y parece un glifo roto: se oculta. */
+    @Test
+    public void sinAnimacionesNoSeVeElIndicadorDeCarga() {
+        Application app = RuntimeEnvironment.getApplication();
+        android.provider.Settings.Global.putFloat(app.getContentResolver(),
+                android.provider.Settings.Global.ANIMATOR_DURATION_SCALE, 0f);
+        NextFightActivity activity = Robolectric.buildActivity(NextFightActivity.class,
+                new Intent(app, NextFightActivity.class)).setup().get();
+        assertEquals(View.GONE, activity.findViewById(R.id.next_fight_loading).getVisibility());
+    }
+
     @Test
     public void sinChipLasPildorasRojaYAzulQuedanSeparadas() {
         Activity host = Robolectric.buildActivity(Activity.class).setup().get();

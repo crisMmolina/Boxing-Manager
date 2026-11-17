@@ -90,6 +90,10 @@ public final class NextFightActivity extends AppCompatActivity {
             fillBack((com.google.android.material.button.MaterialButton) back);
         } else {
             connection = connections.apply(this);
+            // AND-031: con "reducir movimiento" el indicador quedaría quieto como una mancha; el reloj ya dice que se espera.
+            if (com.sigebox.juez.ui.Motion.animationsOff(this)) {
+                findViewById(R.id.next_fight_loading).setVisibility(View.GONE);
+            }
         }
     }
 
