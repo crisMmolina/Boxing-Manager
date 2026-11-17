@@ -58,7 +58,10 @@ public final class CornerCard {
                 : (red ? R.color.red_numeral : R.color.blue_numeral));
         value.setTextColor(valueColor);
         if (arena) {
+            // El rojo/azul del tema claro no llega a 3:1 sobre arena_2: el "+" toma el tono claro e ícono oscuro.
             plus.setStrokeWidth(0);
+            plus.setBackgroundTintList(ColorStateList.valueOf(valueColor));
+            plus.setIconTint(ColorStateList.valueOf(ContextCompat.getColor(ctx, R.color.arena)));
         }
         flattenOnPress(minus);
         flattenOnPress(plus);

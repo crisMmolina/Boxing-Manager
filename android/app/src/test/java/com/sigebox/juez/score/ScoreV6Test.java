@@ -200,6 +200,22 @@ public class ScoreV6Test {
                 ((TextView) root.findViewById(R.id.score_blue_card).findViewById(R.id.corner_value)).getCurrentTextColor());
     }
 
+    /** design-critic: en claro el "+" rojo (#9F2241) sobre arena_2 quedaba en 1,6:1; sobre arena usa el tono claro. */
+    @Test
+    public void elMasDeCadaEsquinaUsaSuColorDeArenaConIconoOscuro() {
+        View root = inflate(R.layout.activity_score);
+        new CornerScore(root.findViewById(R.id.score_red_card), true, d -> { }).bind(9, true);
+        new CornerScore(root.findViewById(R.id.score_blue_card), false, d -> { }).bind(9, true);
+        com.google.android.material.button.MaterialButton redPlus =
+                root.findViewById(R.id.score_red_card).findViewById(R.id.corner_plus);
+        com.google.android.material.button.MaterialButton bluePlus =
+                root.findViewById(R.id.score_blue_card).findViewById(R.id.corner_plus);
+        assertEquals(color(R.color.arena_red), redPlus.getBackgroundTintList().getDefaultColor());
+        assertEquals(color(R.color.arena_blue), bluePlus.getBackgroundTintList().getDefaultColor());
+        assertEquals(color(R.color.arena), redPlus.getIconTint().getDefaultColor());
+        assertEquals(color(R.color.arena), bluePlus.getIconTint().getDefaultColor());
+    }
+
     // --- Enviar ---
 
     @Test
