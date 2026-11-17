@@ -1668,7 +1668,7 @@ En Windows (zoe) los comandos `Verify` se corren en Git Bash.
 - **Estimate:** 1 d
 - **Rubric / Spec:** spec 007 §Acceptance (Puntuar)
 - **Depends on:** AND-027
-- **Paths:** android/app/src/main/res/layout/activity_score.xml, android/app/src/main/res/layout/view_corner_row.xml, android/app/src/main/java/com/sigebox/juez/ui/RoundRing.java, android/app/src/main/java/com/sigebox/juez/score/, android/app/src/main/res/values/strings_score.xml, android/app/src/test/java/com/sigebox/juez/score/, android/app/src/test/java/com/sigebox/juez/ui/
+- **Paths:** android/app/src/main/res/layout/activity_score.xml, android/app/src/main/res/layout/view_corner_row.xml, android/app/src/main/res/drawable/arena_row.xml, android/app/src/main/res/color/pill_arena_bg.xml, android/app/src/main/res/color/pill_arena_text.xml, android/app/src/main/res/values/styles_v6.xml, android/app/src/main/res/values/dimens.xml, android/app/src/main/java/com/sigebox/juez/ui/RoundRing.java, android/app/src/main/java/com/sigebox/juez/ui/CornerCard.java, android/app/src/main/java/com/sigebox/juez/score/, android/app/src/main/res/values/strings_score.xml, android/app/src/test/java/com/sigebox/juez/score/, android/app/src/test/java/com/sigebox/juez/ui/
 - **Freeze-Allowed:** no
 - **Acceptance:**
   - Puntuar se pinta sobre `arena` en claro y oscuro (prueba)
