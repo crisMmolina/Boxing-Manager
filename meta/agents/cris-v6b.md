@@ -1,0 +1,11 @@
+# cris-v6b
+Agent: cris-v6b
+Started: 1794938840
+Events: 1
+Events-Since-Checkpoint: 1
+Checkpoints: 0
+Sessions: 1
+Last-Checkpoint: 0
+Human: cris
+Last-Session: cris-v6b-1794938840
+Updated: 1794938840
