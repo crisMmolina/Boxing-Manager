@@ -1714,3 +1714,23 @@ En Windows (zoe) los comandos `Verify` se corren en Git Bash.
   - Capturas claro y oscuro revisadas por design-critic
 - **Verify:** `android/gradlew -p android :app:testDebugUnitTest`
 - **Next step:** prueba de que `join_scan` usa el estilo píldora llena
+
+## AND-031 · Pulido v6: notas P2 de design-critic
+
+- **Type:** feature
+- **Priority:** P2
+- **Estimate:** 1 d
+- **Rubric / Spec:** spec 007 §Acceptance (notas P2 de design-critic en .uak-shots/AND-027..030/critic.txt)
+- **Depends on:** AND-029, AND-030
+- **Paths:** android/app/src/main/res/layout/, android/app/src/main/res/drawable/, android/app/src/main/res/values/styles_v6.xml, android/app/src/main/res/values/strings_score.xml, android/app/src/main/java/com/sigebox/juez/ui/CornerCard.java, android/app/src/main/java/com/sigebox/juez/ui/ConnectionChip.java, android/app/src/main/java/com/sigebox/juez/ui/BrandText.java, android/app/src/main/java/com/sigebox/juez/score/, android/app/src/main/java/com/sigebox/juez/late/, android/app/src/test/java/com/sigebox/juez/
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - Las capturas incluyen Puntuar y Round tardío con puntos (10 / 9) y la píldora dorada de Enviar habilitada, en claro y oscuro
+  - Sin boxeador, cada fila de esquina no repite "Roja"/"Azul": el nombre se oculta si es igual a la etiqueta (prueba)
+  - Round tardío no repite el número del round entre título, etiqueta y anillo (prueba)
+  - Los chips "Round abierto" y "Sin conexión" sobre arena tienen el mismo color en claro y oscuro (prueba)
+  - El botón deshabilitado de Términos pasa 3:1 de contraste; "Volver a Unirse" en fin de evento es píldora llena; el "?" de Unirse va en contorno (prueba)
+  - En Esperando sin chip de rounds, las píldoras Roja y Azul quedan separadas al menos 8 dp (prueba)
+  - Las pruebas actuales siguen verdes sin tocarse; capturas claro y oscuro revisadas por design-critic
+- **Verify:** `android/gradlew -p android :app:testDebugUnitTest`
+- **Next step:** prueba de que la fila de esquina oculta el nombre cuando es igual a la etiqueta
