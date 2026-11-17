@@ -1651,13 +1651,13 @@ En Windows (zoe) los comandos `Verify` se corren en Git Bash.
 - **Estimate:** 0.5 d
 - **Rubric / Spec:** spec 007 §Tendencias, plan 007 §Aditivo
 - **Depends on:** AND-026
-- **Paths:** android/app/src/main/res/values/colors.xml, android/app/src/main/res/values-night/colors.xml, android/app/src/main/res/values/themes.xml, android/app/src/main/res/values/styles_v6.xml, android/app/src/main/res/values/dimens.xml, android/app/src/main/java/com/sigebox/juez/ui/TopBar.java, android/app/src/test/java/com/sigebox/juez/ui/
+- **Paths:** android/app/src/main/res/values/colors.xml, android/app/src/main/res/values-night/colors.xml, android/app/src/main/res/values/themes.xml, android/app/src/main/res/values/styles_v6.xml, android/app/src/main/res/values/dimens.xml, android/app/src/main/java/com/sigebox/juez/ui/TopBar.java, android/app/src/main/java/com/sigebox/juez/ui/BrandText.java, android/app/src/main/res/layout/view_top_bar.xml, android/app/src/main/res/layout/view_top_bar_brand.xml, android/app/src/test/java/com/sigebox/juez/ui/
 - **Freeze-Allowed:** no
 - **Acceptance:**
   - Tokens nuevos `arena`, `arena_2`, `arena_line`, `on_arena`, `on_arena_2`, `ring_done`, `ring_current`, `ring_pending` en claro y oscuro; sus pares de texto pasan AA (prueba nueva `ContrastV6Test`)
   - Ningún token v4/v5 cambia de valor: `ThemeV4Test`, `ThemeV5Test` y `ContrastV4Test` siguen verdes sin tocarse
   - Estilos `Widget.Sigebox.Pill` (llena) y `Widget.Sigebox.Pill.Outline` con alto ≥ 56 dp y radio completo (prueba)
-  - La marca "SIGEBOX" de la barra lleva inclinación leve; la barra conserva logo y dorado (`TopBarV4Test` verde)
+  - La marca "SIGEBOX" de la barra lleva inclinación leve y a 390 dp se lee completa (hoy se corta en "SIGEBO…"); la barra conserva logo y dorado (`TopBarV4Test` verde)
 - **Verify:** `android/gradlew -p android :app:testDebugUnitTest`
 - **Next step:** `ContrastV6Test` con los pares arena y su prueba roja
 
