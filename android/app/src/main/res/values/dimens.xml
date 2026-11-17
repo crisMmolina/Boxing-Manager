@@ -48,4 +48,11 @@
     <integer name="motion_pulse">1800</integer>
     <!-- Movimiento reducido: solo fundidos de hasta 150 ms. -->
     <integer name="motion_reduced">150</integer>
+    <!-- v6 (spec 007): píldoras de 56 dp con radio completo; filas de esquina y anillo de Puntuar. -->
+    <dimen name="pill_height">56dp</dimen>
+    <dimen name="pill_radius">28dp</dimen>
+    <dimen name="corner_row_button">56dp</dimen>
+    <dimen name="corner_row_number">104sp</dimen>
+    <dimen name="round_ring_size">208dp</dimen>
+    <dimen name="round_ring_stroke">10dp</dimen>
 </resources>

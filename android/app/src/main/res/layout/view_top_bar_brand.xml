@@ -24,9 +24,9 @@
         android:importantForAccessibility="no"
         android:src="@drawable/logo" />
 
-    <TextView
+    <com.sigebox.juez.ui.BrandText
         style="@style/Text.Sigebox.Brand.Bar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-                android:text="@string/app_name" />
+        android:text="@string/app_name" />
 </LinearLayout>
