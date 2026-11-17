@@ -57,6 +57,18 @@
                 android:layout_marginTop="8dp"
                 android:gravity="center" />
 
+            <!-- v6 (AND-030): la pelea a la que entra el juez, con las esquinas del código. -->
+            <include layout="@layout/view_fight_card" />
+
+            <TextView
+                android:id="@+id/fight_names"
+                style="@style/Text.Sigebox.CardTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center"
+                android:visibility="gone" />
+
             <TextView
                 style="@style/Text.Sigebox.Support"
                 android:layout_width="match_parent"

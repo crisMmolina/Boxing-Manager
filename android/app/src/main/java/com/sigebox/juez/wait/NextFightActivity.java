@@ -115,6 +115,7 @@ public final class NextFightActivity extends AppCompatActivity {
     private void showCorners(NextFight next) {
         corners.setText(getString(R.string.next_fight_corners, next.redCorner(), next.blueCorner()));
         corners.setVisibility(View.VISIBLE);
+        com.sigebox.juez.ui.FightCard.bind(getWindow().getDecorView(), next.redCorner(), next.blueCorner(), next.rounds());
     }
 
     /** El evento terminó: la insignia pasa del reloj a la palomita sobre el verde tenue (DESIGN v5 §3.8). */

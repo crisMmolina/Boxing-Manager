@@ -204,7 +204,7 @@ public class JoinActivity extends AppCompatActivity {
         }
         connection.join(request.uri, request.judgeName);
         if (request.uri.code() == null) {
-            openWaiting(request.uri.seat(), request.judgeName);
+            openWaiting(request.uri.seat(), request.judgeName, null, null); // QR sin código: aún sin esquinas
             return;
         }
         // Con el código, la pelea y el lugar los dice la central; se espera aquí para avisar si no es válido.
@@ -223,7 +223,7 @@ public class JoinActivity extends AppCompatActivity {
         looking = null;
         timeouts.removeCallbacks(lookupTimeout);
         if (message instanceof CodeInfo info) {
-            openWaiting(info.seat(), request.judgeName);
+            openWaiting(info.seat(), request.judgeName, info.redCorner(), info.blueCorner());
         } else {
             codeRejected = true;
         }
@@ -244,10 +244,12 @@ public class JoinActivity extends AppCompatActivity {
         return message instanceof CodeInfo info ? info.code() : ((CodeUnknown) message).code();
     }
 
-    private void openWaiting(int seat, String judgeName) {
+    private void openWaiting(int seat, String judgeName, String red, String blue) {
         startActivity(new Intent(this, WaitingActivity.class)
                 .putExtra(WaitingActivity.EXTRA_SEAT, seat)
-                .putExtra(WaitingActivity.EXTRA_NAME, judgeName));
+                .putExtra(WaitingActivity.EXTRA_NAME, judgeName)
+                .putExtra(WaitingActivity.EXTRA_RED, red)
+                .putExtra(WaitingActivity.EXTRA_BLUE, blue));
     }
 
     private static int messageFor(JoinRequest.Error error) {
