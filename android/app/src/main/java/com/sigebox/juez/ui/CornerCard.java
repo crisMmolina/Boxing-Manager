@@ -32,6 +32,8 @@ public final class CornerCard {
     private final TextView name;
     private final MaterialButton minus;
     private final MaterialButton plus;
+    private final boolean arena;
+    private final int valueColor;
 
     /** @param onAdjust recibe −1 o +1 */
     public CornerCard(View root, boolean red, IntConsumer onAdjust) {
@@ -50,10 +52,11 @@ public final class CornerCard {
         plus.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(ctx, red ? R.color.red : R.color.blue)));
         plus.setIconTint(ColorStateList.valueOf(onCorner));
         // v6: en la fila de arena (tag "arena") el número usa el tono claro de su esquina, que pasa AA sobre negro.
-        boolean arena = "arena".equals(root.getTag());
-        value.setTextColor(ContextCompat.getColor(ctx, arena
+        arena = "arena".equals(root.getTag());
+        valueColor = ContextCompat.getColor(ctx, arena
                 ? (red ? R.color.arena_red : R.color.arena_blue)
-                : (red ? R.color.red_numeral : R.color.blue_numeral)));
+                : (red ? R.color.red_numeral : R.color.blue_numeral));
+        value.setTextColor(valueColor);
         if (arena) {
             plus.setStrokeWidth(0);
         }
@@ -71,6 +74,10 @@ public final class CornerCard {
     /** Muestra {@code v} ("—" si es null) y habilita − y + según los límites 0–10. */
     public void bind(Integer v, boolean enabled) {
         value.setText(v == null ? root.getContext().getString(R.string.score_empty) : String.valueOf(v));
+        // v6: sobre arena el "—" sin calificar va apagado; el color de la esquina queda para el número.
+        if (arena) {
+            value.setTextColor(v == null ? ContextCompat.getColor(root.getContext(), R.color.arena_line) : valueColor);
+        }
         minus.setEnabled(enabled && v != null && v > 0);
         plus.setEnabled(enabled && (v == null || v < 10));
         minus.setAlpha(minus.isEnabled() ? 1f : 0.38f);

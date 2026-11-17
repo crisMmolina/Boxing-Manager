@@ -2,7 +2,7 @@
 <!-- v6 «Esquina» (spec 007): fila de esquina sobre arena, como las filas "valor · etiqueta · − +" de las apps de
      entrenamiento. Número grande a la izquierda con la etiqueta debajo, − y + circulares de 56 dp a la derecha.
      Mismos ids que view_corner_card: CornerScore y CornerCard la manejan igual; el tag "arena" les pide los colores
-     de arena. La barrita de color junto a la píldora es corner_stripe (CornerScore le pone el color). -->
+     de arena. corner_stripe existe para CornerScore pero va oculta: la píldora ya marca la esquina. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
@@ -40,7 +40,8 @@
                 android:id="@+id/corner_stripe"
                 android:layout_width="6dp"
                 android:layout_height="20dp"
-                android:layout_marginEnd="8dp" />
+                android:layout_marginEnd="8dp"
+                android:visibility="gone" />
 
             <TextView
                 android:id="@+id/corner_label"
