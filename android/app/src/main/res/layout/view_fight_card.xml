@@ -16,13 +16,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/pill_red"
+        android:layout_marginEnd="8dp"
         android:text="@string/corner_red"
         android:textColor="@color/on_red" />
 
     <TextView
         android:id="@+id/fight_rounds"
         style="@style/Text.Sigebox.Pill"
-        android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

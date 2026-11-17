@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Texto de la píldora principal (v6, AND-031): ink_2 sobre surface_2 al estar deshabilitada. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:color="@color/ink_2" android:state_enabled="false" />
+    <item android:color="@color/on_primary" />
+</selector>

@@ -36,7 +36,9 @@
                 android:id="@+id/late_status"
                 style="@style/Text.Sigebox.Pill"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:background="@drawable/pill_arena_chip"
+                android:textColor="@color/on_arena_2" />
         </LinearLayout>
 
         <!-- v5 §5.16: segmentos de rounds, ocultos en la v6 (los usan RoundSegments y sus pruebas). -->
@@ -59,6 +61,7 @@
 
             <TextView
                 android:id="@+id/late_ring_number"
+                android:visibility="gone"
                 style="@style/Text.Sigebox.RingNumber"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

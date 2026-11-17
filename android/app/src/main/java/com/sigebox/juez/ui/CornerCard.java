@@ -32,6 +32,7 @@ public final class CornerCard {
     private final TextView name;
     private final MaterialButton minus;
     private final MaterialButton plus;
+    private final TextView label;
     private final boolean arena;
     private final int valueColor;
 
@@ -44,7 +45,7 @@ public final class CornerCard {
         this.minus = root.findViewById(R.id.corner_minus);
         this.plus = root.findViewById(R.id.corner_plus);
         var ctx = root.getContext();
-        TextView label = root.findViewById(R.id.corner_label);
+        this.label = root.findViewById(R.id.corner_label);
         label.setText(red ? R.string.corner_red : R.string.corner_blue);
         label.setBackgroundResource(red ? R.drawable.pill_red : R.drawable.pill_blue);
         int onCorner = ContextCompat.getColor(ctx, red ? R.color.on_red : R.color.on_blue);
@@ -72,6 +73,10 @@ public final class CornerCard {
     /** Nombre del boxeador ({@code redCorner} / {@code blueCorner}); vacío hasta que la central lo manda. */
     public void setName(String boxer) {
         name.setText(boxer == null ? "" : boxer);
+        // AND-031: sin boxeador (o si el nombre es la misma etiqueta "Roja"/"Azul") no se repite la píldora.
+        boolean shown = boxer != null && !boxer.trim().isEmpty()
+                && !boxer.trim().equalsIgnoreCase(label.getText().toString().trim());
+        name.setVisibility(shown ? View.VISIBLE : View.GONE);
     }
 
     /** Muestra {@code v} ("—" si es null) y habilita − y + según los límites 0–10. */
