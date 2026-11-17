@@ -87,6 +87,7 @@ public final class NextFightActivity extends AppCompatActivity {
             View back = findViewById(R.id.next_fight_back);
             back.setVisibility(View.VISIBLE);
             back.setOnClickListener(view -> backToJoin());
+            fillBack((com.google.android.material.button.MaterialButton) back);
         } else {
             connection = connections.apply(this);
         }
@@ -116,6 +117,13 @@ public final class NextFightActivity extends AppCompatActivity {
         corners.setText(getString(R.string.next_fight_corners, next.redCorner(), next.blueCorner()));
         corners.setVisibility(View.VISIBLE);
         com.sigebox.juez.ui.FightCard.bind(getWindow().getDecorView(), next.redCorner(), next.blueCorner(), next.rounds());
+    }
+
+    /** AND-031: al terminar el evento "Volver a Unirse" es la única acción, así que va en píldora llena. */
+    private void fillBack(com.google.android.material.button.MaterialButton back) {
+        back.setStrokeWidth(0);
+        back.setBackgroundTintList(androidx.core.content.ContextCompat.getColorStateList(this, R.color.pill_bg));
+        back.setTextColor(androidx.core.content.ContextCompat.getColorStateList(this, R.color.pill_text));
     }
 
     /** El evento terminó: la insignia pasa del reloj a la palomita sobre el verde tenue (DESIGN v5 §3.8). */

@@ -132,7 +132,9 @@
                     android:id="@+id/score_status"
                     style="@style/Text.Sigebox.Pill"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/pill_arena_chip"
+                    android:textColor="@color/on_arena_2" />
             </LinearLayout>
 
             <!-- v5 §5.16: segmentos de rounds. En la v6 los reemplaza el anillo; se conservan ocultos porque

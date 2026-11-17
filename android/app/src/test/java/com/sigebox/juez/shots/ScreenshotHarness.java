@@ -122,10 +122,13 @@ public class ScreenshotHarness {
             capture("unirse-" + theme, () -> start(JoinActivity.class, new Intent()), failed);
             // WaitingActivity lee la llave del AndroidKeyStore, que Robolectric no tiene: queda fuera del arnés.
             capture("puntuar-" + theme, this::score, failed);
+            capture("puntuar-puntos-" + theme, this::scored, failed);
             capture("enviado-" + theme, this::sent, failed);
             freshSession();
             capture("tardio-" + theme, () -> start(LateScoreActivity.class, new Intent()
                     .putExtra(ScoreActivity.EXTRA_ROUND, 3)), failed);
+            freshSession();
+            capture("tardio-puntos-" + theme, this::lateScored, failed);
             capture("siguiente-" + theme, () -> start(NextFightActivity.class, new Intent()
                     .putExtra(NextFightActivity.EXTRA_JUDGE_NAME, "María López")), failed);
             capture("fin-evento-" + theme, () -> start(NextFightActivity.class, new Intent()
@@ -152,6 +155,24 @@ public class ScreenshotHarness {
     private Activity score() {
         Activity activity = start(ScoreActivity.class, new Intent());
         dispatch(state(EstadoRound.ABIERTO, 3));
+        return activity;
+    }
+
+    /** AND-031: Round 3 calificado 10–9, aún sin enviar: el número grande y la píldora dorada habilitada. */
+    private Activity scored() {
+        Activity activity = score();
+        activity.findViewById(R.id.score_red_card).findViewById(R.id.corner_plus).performClick();
+        activity.findViewById(R.id.score_blue_card).findViewById(R.id.corner_minus).performClick();
+        settle();
+        return activity;
+    }
+
+    /** AND-031: Round 3 tardío calificado 10–9, aún sin enviar. */
+    private Activity lateScored() {
+        Activity activity = start(LateScoreActivity.class, new Intent().putExtra(ScoreActivity.EXTRA_ROUND, 3));
+        activity.findViewById(R.id.late_red_card).findViewById(R.id.corner_plus).performClick();
+        activity.findViewById(R.id.late_blue_card).findViewById(R.id.corner_minus).performClick();
+        settle();
         return activity;
     }
 

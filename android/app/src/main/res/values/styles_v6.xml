@@ -6,6 +6,8 @@
         <item name="android:minHeight">@dimen/pill_height</item>
         <item name="cornerRadius">@dimen/pill_radius</item>
         <item name="android:textSize">18sp</item>
+        <item name="backgroundTint">@color/pill_bg</item>
+        <item name="android:textColor">@color/pill_text</item>
     </style>
 
     <style name="Widget.Sigebox.Pill.Outline" parent="Widget.Material3Expressive.Button.OutlinedButton">
