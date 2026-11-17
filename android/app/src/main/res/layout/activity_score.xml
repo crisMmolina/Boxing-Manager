@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Puntuar (DESIGN.md v4 §6.4): número grande con − y + por esquina. Nunca totales ni ganador. -->
+<!-- Puntuar (DESIGN.md v4 §6.4, v6 «Esquina» spec 007): sobre arena negra, "Round N de M" arriba a la
+     izquierda, el anillo de rounds con el round actual al centro, una fila por esquina y "Enviar round" dorado
+     abajo. Nunca totales ni ganador. -->
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/score_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/arena"
     android:clipToPadding="false"
     android:fillViewport="true">
 
@@ -110,7 +113,7 @@
 
                 <TextView
                     android:id="@+id/score_round"
-                    style="@style/Text.Sigebox.CardTitle"
+                    style="@style/Text.Sigebox.RingLabel"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1" />
@@ -132,10 +135,54 @@
                     android:layout_height="wrap_content" />
             </LinearLayout>
 
-            <!-- v5 §5.16: un segmento por round (cerrado, actual, futuro). -->
+            <!-- v5 §5.16: segmentos de rounds. En la v6 los reemplaza el anillo; se conservan ocultos porque
+                 RoundSegments y sus pruebas los siguen usando. -->
             <LinearLayout
                 android:id="@+id/score_progress"
-                style="@style/Widget.Sigebox.RoundSegments" />
+                style="@style/Widget.Sigebox.RoundSegments"
+                android:visibility="gone" />
+
+            <!-- v6: anillo de rounds con el round actual al centro. -->
+            <FrameLayout
+                android:id="@+id/score_ring_box"
+                android:layout_width="@dimen/round_ring_size"
+                android:layout_height="@dimen/round_ring_size"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="8dp"
+                android:focusable="true">
+
+                <com.sigebox.juez.ui.RoundRing
+                    android:id="@+id/score_ring"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center_horizontal"
+                    android:importantForAccessibility="noHideDescendants"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/Text.Sigebox.RingLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/ring_label" />
+
+                    <TextView
+                        android:id="@+id/score_ring_number"
+                        style="@style/Text.Sigebox.RingNumber"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+
+                    <TextView
+                        android:id="@+id/score_ring_of"
+                        style="@style/Text.Sigebox.RingLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+                </LinearLayout>
+            </FrameLayout>
 
             <!-- v5 §6, Round enviado: aparece tras el ACK en lugar de las tarjetas de puntuar. Solo la tarjeta
                  propia, sin totales ni ganador (principio 3). -->
@@ -157,7 +204,8 @@
                     style="@style/Text.Sigebox.SentTitle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp" />
+                    android:layout_marginTop="16dp"
+                    android:textColor="@color/on_arena" />
 
                 <TextView
                     android:id="@+id/score_sent_support"
@@ -166,14 +214,16 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:gravity="center"
-                    android:textColor="@color/ink_2" />
+                    android:textColor="@color/on_arena_2" />
 
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/score_sent_card"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="24dp"
-                    android:focusable="true">
+                    android:focusable="true"
+                    app:cardBackgroundColor="@color/arena_2"
+                    app:cardElevation="0dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -185,7 +235,8 @@
                             style="@style/Text.Sigebox.SentLabel"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/sent_card_label" />
+                            android:text="@string/sent_card_label"
+                            android:textColor="@color/on_arena_2" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -210,7 +261,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="12dp"
                                 android:layout_weight="1"
-                                android:textColor="@color/red_numeral" />
+                                android:textColor="@color/arena_red" />
 
                             <TextView
                                 android:id="@+id/score_sent_blue"
@@ -220,7 +271,7 @@
                                 android:layout_marginEnd="12dp"
                                 android:layout_weight="1"
                                 android:gravity="end"
-                                android:textColor="@color/blue_numeral" />
+                                android:textColor="@color/arena_blue" />
 
                             <TextView
                                 android:id="@+id/score_sent_blue_label"
@@ -237,21 +288,22 @@
 
             <include
                 android:id="@+id/score_red_card"
-                layout="@layout/view_corner_card"
+                layout="@layout/view_corner_row"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp" />
 
             <include
                 android:id="@+id/score_blue_card"
-                layout="@layout/view_corner_card"
+                layout="@layout/view_corner_row"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp" />
+                android:layout_marginTop="12dp" />
 
             <TextView
                 android:id="@+id/score_message"
                 style="@style/Text.Sigebox.Support"
+                android:textColor="@color/on_arena_2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
@@ -266,7 +318,7 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/score_correct"
-                style="@style/Widget.Sigebox.Button.Secondary"
+                style="@style/Widget.Sigebox.Pill.Outline.Arena"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
@@ -277,6 +329,7 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/score_send"
+                style="@style/Widget.Sigebox.Pill.Arena"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/score_send" />

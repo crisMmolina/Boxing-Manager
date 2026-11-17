@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- v6: fila de esquina sobre arena (radio 20, sin sombra ni borde). -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="@color/arena_2" />
+    <corners android:radius="20dp" />
+</shape>

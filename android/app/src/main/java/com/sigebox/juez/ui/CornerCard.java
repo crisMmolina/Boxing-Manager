@@ -49,7 +49,14 @@ public final class CornerCard {
         label.setTextColor(onCorner);
         plus.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(ctx, red ? R.color.red : R.color.blue)));
         plus.setIconTint(ColorStateList.valueOf(onCorner));
-        value.setTextColor(ContextCompat.getColor(ctx, red ? R.color.red_numeral : R.color.blue_numeral));
+        // v6: en la fila de arena (tag "arena") el número usa el tono claro de su esquina, que pasa AA sobre negro.
+        boolean arena = "arena".equals(root.getTag());
+        value.setTextColor(ContextCompat.getColor(ctx, arena
+                ? (red ? R.color.arena_red : R.color.arena_blue)
+                : (red ? R.color.red_numeral : R.color.blue_numeral)));
+        if (arena) {
+            plus.setStrokeWidth(0);
+        }
         flattenOnPress(minus);
         flattenOnPress(plus);
         minus.setOnClickListener(v -> tap(v, onAdjust, -1));
