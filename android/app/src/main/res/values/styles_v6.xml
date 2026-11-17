@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- v6 «Esquina» (spec 007, DESIGN.md v6). Píldoras de 56 dp: la llena es la única acción principal de la
+     pantalla; la de contorno, la secundaria. El rojo nunca es color de botón (DESIGN §1). -->
+<resources>
+    <style name="Widget.Sigebox.Pill" parent="Widget.Sigebox.Button.Primary">
+        <item name="android:minHeight">@dimen/pill_height</item>
+        <item name="cornerRadius">@dimen/pill_radius</item>
+        <item name="android:textSize">18sp</item>
+    </style>
+
+    <style name="Widget.Sigebox.Pill.Outline" parent="Widget.Material3Expressive.Button.OutlinedButton">
+        <item name="android:minHeight">@dimen/pill_height</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="cornerRadius">@dimen/pill_radius</item>
+        <item name="shapeAppearance">@style/Shape.Sigebox.Full</item>
+        <item name="strokeWidth">2dp</item>
+        <item name="strokeColor">@color/field_border</item>
+        <item name="android:textColor">@color/ink</item>
+        <item name="android:textSize">17sp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:fontFamily">@font/inter_bold</item>
+        <item name="android:letterSpacing">0</item>
+    </style>
+
+    <!-- Contorno sobre arena (Puntuar, Round enviado). -->
+    <style name="Widget.Sigebox.Pill.Outline.Arena">
+        <item name="strokeColor">@color/arena_line</item>
+        <item name="android:textColor">@color/on_arena</item>
+        <item name="iconTint">@color/on_arena</item>
+    </style>
+</resources>
