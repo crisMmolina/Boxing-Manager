@@ -1728,8 +1728,9 @@ En Windows (zoe) los comandos `Verify` se corren en Git Bash.
   - Las capturas incluyen Puntuar y Round tardío con puntos (10 / 9) y la píldora dorada de Enviar habilitada, en claro y oscuro
   - Sin boxeador, cada fila de esquina no repite "Roja"/"Azul": el nombre se oculta si es igual a la etiqueta (prueba)
   - Round tardío no repite el número del round entre título, etiqueta y anillo (prueba)
-  - Los chips "Round abierto" y "Sin conexión" sobre arena tienen el mismo color en claro y oscuro (prueba)
-  - El botón deshabilitado de Términos pasa 3:1 de contraste; "Volver a Unirse" en fin de evento es píldora llena; el "?" de Unirse va en contorno (prueba)
+  - Los chips de estado de Puntuar y Round tardío sobre arena tienen el mismo color en claro y oscuro (prueba)
+  - El botón deshabilitado de Términos pasa 3:1 de contraste; "Volver a Unirse" en fin de evento es píldora llena (prueba)
+  - Fuera de alcance (decisión de cris): el chip "Sin conexión" de la barra y el "?" siguen como v5, porque ConnectionChipTest y TopBarV4Test los fijan
   - En Esperando sin chip de rounds, las píldoras Roja y Azul quedan separadas al menos 8 dp (prueba)
   - Las pruebas actuales siguen verdes sin tocarse; capturas claro y oscuro revisadas por design-critic
 - **Verify:** `android/gradlew -p android :app:testDebugUnitTest`
