@@ -58,6 +58,9 @@
                 android:gravity="center"
                 android:text="@string/next_fight_title" />
 
+            <!-- v6 (AND-030): la siguiente pelea como tarjeta: esquinas en píldoras, rounds en chip y nombres debajo. -->
+            <include layout="@layout/view_fight_card" />
+
             <TextView
                 android:id="@+id/next_fight_corners"
                 style="@style/Text.Sigebox.Body"
@@ -85,7 +88,7 @@
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/next_fight_back"
-        style="@style/Widget.Sigebox.Button.Secondary"
+        style="@style/Widget.Sigebox.Pill.Outline"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/next_fight_back_to_join"

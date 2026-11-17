@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Tarjeta de pelea de Esperando y Siguiente pelea (AND-030, spec 007 v6 «Esquina»). -->
+<resources>
+    <plurals name="fight_rounds">
+        <item quantity="one">%d round</item>
+        <item quantity="other">%d rounds</item>
+    </plurals>
+    <string name="fight_card_a11y">Pelea: %1$s en la esquina roja contra %2$s en la azul</string>
+</resources>

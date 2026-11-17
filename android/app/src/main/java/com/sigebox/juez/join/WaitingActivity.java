@@ -19,6 +19,9 @@ import java.util.Locale;
 public class WaitingActivity extends AppCompatActivity {
     public static final String EXTRA_SEAT = "seat";
     public static final String EXTRA_NAME = "name";
+    /** Esquinas de CODE_INFO para la tarjeta de pelea (AND-030); pueden faltar. */
+    public static final String EXTRA_RED = "red";
+    public static final String EXTRA_BLUE = "blue";
     /** La pantalla de puntuación la crea AND-005; se abre por nombre para no depender de ella. */
     static final String SCORE_ACTIVITY = "com.sigebox.juez.score.ScoreActivity";
 
@@ -40,6 +43,8 @@ public class WaitingActivity extends AppCompatActivity {
         TextView seat = findViewById(R.id.waiting_seat);
         seat.setText(getString(R.string.waiting_seat,
                 getIntent().getIntExtra(EXTRA_SEAT, 0), getIntent().getStringExtra(EXTRA_NAME)));
+        com.sigebox.juez.ui.FightCard.bind(getWindow().getDecorView(),
+                getIntent().getStringExtra(EXTRA_RED), getIntent().getStringExtra(EXTRA_BLUE), null);
         TextView fingerprint = findViewById(R.id.waiting_fingerprint);
         fingerprint.setText(getString(R.string.waiting_fingerprint, shortFingerprint(new KeystoreSigner().deviceId())));
         Button cancel = findViewById(R.id.waiting_cancel);
