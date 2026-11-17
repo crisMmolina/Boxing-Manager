@@ -23,10 +23,48 @@
         <item name="android:letterSpacing">0</item>
     </style>
 
+    <!-- Píldora principal sobre arena: dorada con texto negro (Enviar round). -->
+    <style name="Widget.Sigebox.Pill.Arena">
+        <item name="backgroundTint">@color/pill_arena_bg</item>
+        <item name="android:textColor">@color/pill_arena_text</item>
+    </style>
+
     <!-- Contorno sobre arena (Puntuar, Round enviado). -->
     <style name="Widget.Sigebox.Pill.Outline.Arena">
         <item name="strokeColor">@color/arena_line</item>
         <item name="android:textColor">@color/on_arena</item>
         <item name="iconTint">@color/on_arena</item>
+    </style>
+
+    <!-- − y + de la fila de esquina: círculos de 56 dp con contorno sobre arena; CornerCard pinta el + del color
+         de la esquina. -->
+    <style name="Widget.Sigebox.Button.Round.Arena">
+        <item name="android:minWidth">@dimen/corner_row_button</item>
+        <item name="android:minHeight">@dimen/corner_row_button</item>
+        <item name="iconSize">26dp</item>
+        <item name="backgroundTint">@android:color/transparent</item>
+        <item name="strokeWidth">2dp</item>
+        <item name="strokeColor">@color/arena_control</item>
+        <item name="iconTint">@color/on_arena</item>
+    </style>
+
+    <!-- El número de la esquina en la fila: Barlow Condensed 800, más compacto que en la tarjeta v5. -->
+    <style name="Text.Sigebox.Number.Arena" parent="Text.Sigebox.Number">
+        <item name="android:textSize">@dimen/corner_row_number</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:lineSpacingMultiplier">0.9</item>
+    </style>
+
+    <style name="Text.Sigebox.RingNumber" parent="">
+        <item name="android:fontFamily">@font/barlow_condensed_extrabold</item>
+        <item name="android:textSize">72sp</item>
+        <item name="android:textColor">@color/on_arena</item>
+        <item name="android:includeFontPadding">false</item>
+    </style>
+
+    <style name="Text.Sigebox.RingLabel" parent="">
+        <item name="android:fontFamily">@font/inter_semibold</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:textColor">@color/on_arena_2</item>
     </style>
 </resources>

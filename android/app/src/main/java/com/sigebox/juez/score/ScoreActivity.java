@@ -164,6 +164,10 @@ public class ScoreActivity extends AppCompatActivity {
         }
         renderStatus(ui);
         RoundSegments.bind(findViewById(R.id.score_progress), rounds, ui.round, ui.card != null);
+        // v6: el anillo reemplaza a los segmentos en pantalla (spec 007); RoundSegments los vuelve visibles.
+        findViewById(R.id.score_progress).setVisibility(View.GONE);
+        ((com.sigebox.juez.ui.RoundRing) findViewById(R.id.score_ring)).bind(rounds, ui.round, ui.card != null);
+        com.sigebox.juez.ui.RoundRing.bindCenter(findViewById(R.id.score_root), rounds, ui.round);
         boolean sentShown = sentPanel.bind(ui, rounds);
 
         boolean input = ui.inputEnabled();
