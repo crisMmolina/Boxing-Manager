@@ -1611,3 +1611,106 @@ En Windows (zoe) los comandos `Verify` se corren en Git Bash.
   - La dependencia nueva (p. ej. Apache POI o fastexcel) la aprueba un humano antes de agregarla
 - **Verify:** `central/gradlew -p central test --tests 'com.sigebox.central.export.*'`
 - **Next step:** decidir la librería con el humano y prueba de que el .xlsx trae las dos hojas
+
+## AND-026 · Arnés de capturas de la app del juez
+
+- **Type:** setup
+- **Priority:** P0
+- **Estimate:** 0.5 d
+- **Rubric / Spec:** spec 007 §Acceptance (capturas)
+- **Depends on:** none
+- **Paths:** android/app/src/test/java/com/sigebox/juez/shots/, android/app/build.gradle.kts
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - Una prueba Robolectric con gráficos nativos abre Términos, Unirse, Esperando aprobación, Puntuar (round abierto), Round enviado, Round tardío y Siguiente pelea con estado falso y guarda un PNG de 390 × 844 dp por pantalla, en claro y oscuro, en la carpeta de `SIGEBOX_SCREENSHOTS` (prueba)
+  - Sin `SIGEBOX_SCREENSHOTS` la prueba se salta y CI no cambia
+  - Capturas "antes" de la v5 guardadas en `.uak-shots/AND-026/`
+- **Verify:** `android/gradlew -p android :app:testDebugUnitTest`
+- **Next step:** prueba que con `SIGEBOX_SCREENSHOTS` deja `score-claro.png` no vacío
+
+## DSN-006 · Guía v6 «Esquina» en DESIGN.md
+
+- **Type:** docs
+- **Priority:** P1
+- **Estimate:** 2 h
+- **Rubric / Spec:** spec 007
+- **Depends on:** none
+- **Paths:** docs/DESIGN.md
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - `docs/DESIGN.md` gana la sección v6: tokens arena con su tabla AA medida, fila de esquina, anillo de rounds, píldoras, marca inclinada y la tabla "se adopta / no se adopta" de la spec 007
+  - Deja escrito que el rojo y el azul siguen siendo solo de las esquinas (sin acento rojo) y que no hay barra de pestañas
+  - Lo de la v5 que no cambia se conserva
+- **Verify:** `grep -q "v6" docs/DESIGN.md`
+- **Next step:** escribir la sección v6 a partir de la spec 007
+
+## AND-027 · Tokens arena, píldoras y marca inclinada
+
+- **Type:** feature
+- **Priority:** P0
+- **Estimate:** 0.5 d
+- **Rubric / Spec:** spec 007 §Tendencias, plan 007 §Aditivo
+- **Depends on:** AND-026
+- **Paths:** android/app/src/main/res/values/colors.xml, android/app/src/main/res/values-night/colors.xml, android/app/src/main/res/values/themes.xml, android/app/src/main/res/values/styles_v6.xml, android/app/src/main/res/values/dimens.xml, android/app/src/main/java/com/sigebox/juez/ui/TopBar.java, android/app/src/test/java/com/sigebox/juez/ui/
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - Tokens nuevos `arena`, `arena_2`, `arena_line`, `on_arena`, `on_arena_2`, `ring_done`, `ring_current`, `ring_pending` en claro y oscuro; sus pares de texto pasan AA (prueba nueva `ContrastV6Test`)
+  - Ningún token v4/v5 cambia de valor: `ThemeV4Test`, `ThemeV5Test` y `ContrastV4Test` siguen verdes sin tocarse
+  - Estilos `Widget.Sigebox.Pill` (llena) y `Widget.Sigebox.Pill.Outline` con alto ≥ 56 dp y radio completo (prueba)
+  - La marca "SIGEBOX" de la barra lleva inclinación leve; la barra conserva logo y dorado (`TopBarV4Test` verde)
+- **Verify:** `android/gradlew -p android :app:testDebugUnitTest`
+- **Next step:** `ContrastV6Test` con los pares arena y su prueba roja
+
+## AND-028 · Puntuar v6: anillo de rounds y filas de esquina
+
+- **Type:** feature
+- **Priority:** P0
+- **Estimate:** 1 d
+- **Rubric / Spec:** spec 007 §Acceptance (Puntuar)
+- **Depends on:** AND-027
+- **Paths:** android/app/src/main/res/layout/activity_score.xml, android/app/src/main/res/layout/view_corner_row.xml, android/app/src/main/java/com/sigebox/juez/ui/RoundRing.java, android/app/src/main/java/com/sigebox/juez/score/, android/app/src/main/res/values/strings_score.xml, android/app/src/test/java/com/sigebox/juez/score/, android/app/src/test/java/com/sigebox/juez/ui/
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - Puntuar se pinta sobre `arena` en claro y oscuro (prueba)
+  - Un anillo con un segmento por round: cerrados `ring_done`, actual `ring_current`, futuros `ring_pending`; en su centro "Round N" y "de M" (prueba)
+  - Una fila por esquina: número ≥ 96 sp, etiqueta "Roja"/"Azul" con su píldora, − y + circulares ≥ 56 dp; Roja arriba (prueba)
+  - "Enviar round" es una píldora llena en el tercio inferior (prueba)
+  - Con reducir movimiento el anillo y el número cambian sin animación (prueba)
+  - Las pruebas actuales de `score/` siguen verdes sin tocarse: mismos ids, háptica, número que rueda y sin totales
+  - Capturas claro y oscuro en `.uak-shots/AND-028/` revisadas por design-critic contra `docs/DESIGN.md`
+- **Verify:** `android/gradlew -p android :app:testDebugUnitTest`
+- **Next step:** prueba de `RoundRing` con 12 rounds y el 3 abierto
+
+## AND-029 · Round enviado y Round tardío v6
+
+- **Type:** feature
+- **Priority:** P1
+- **Estimate:** 0.5 d
+- **Rubric / Spec:** spec 007 §Acceptance
+- **Depends on:** AND-028
+- **Paths:** android/app/src/main/res/layout/activity_score.xml, android/app/src/main/res/layout/activity_late_score.xml, android/app/src/main/java/com/sigebox/juez/score/SentPanel.java, android/app/src/main/java/com/sigebox/juez/late/, android/app/src/test/java/com/sigebox/juez/score/, android/app/src/test/java/com/sigebox/juez/late/
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - Round enviado y Round tardío usan `arena`, el anillo de rounds y la píldora (prueba)
+  - La palomita, "Round N enviado" y "Corregir esta tarjeta" siguen como hoy (pruebas actuales verdes)
+  - Capturas claro y oscuro revisadas por design-critic
+- **Verify:** `android/gradlew -p android :app:testDebugUnitTest`
+- **Next step:** prueba de que el panel enviado se pinta sobre `arena`
+
+## AND-030 · Unirse, Esperando, Siguiente pelea y Términos v6
+
+- **Type:** feature
+- **Priority:** P1
+- **Estimate:** 1 d
+- **Rubric / Spec:** spec 007 §Acceptance (misma familia)
+- **Depends on:** AND-027
+- **Paths:** android/app/src/main/res/layout/activity_join.xml, android/app/src/main/res/layout/activity_waiting.xml, android/app/src/main/res/layout/activity_next_fight.xml, android/app/src/main/res/layout/activity_terms.xml, android/app/src/main/res/values/styles_join.xml, android/app/src/test/java/com/sigebox/juez/join/, android/app/src/test/java/com/sigebox/juez/wait/, android/app/src/test/java/com/sigebox/juez/terms/
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - Cada pantalla tiene un título display, una sola acción principal en píldora llena y el resto en píldora de contorno (prueba)
+  - Unirse: "Escanear QR" es la principal y "Unirme" con los datos escritos la secundaria; sin cuadrícula de mosaicos
+  - Esperando y Siguiente pelea muestran la pelea como una tarjeta con las dos esquinas y el número de rounds en chip
+  - Las pruebas actuales de esas pantallas siguen verdes sin tocarse
+  - Capturas claro y oscuro revisadas por design-critic
+- **Verify:** `android/gradlew -p android :app:testDebugUnitTest`
+- **Next step:** prueba de que `join_scan` usa el estilo píldora llena
