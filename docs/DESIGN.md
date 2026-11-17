@@ -2,6 +2,7 @@
 
 Guía visual y de experiencia de las dos apps: la del juez (Android, `android/`) y la central (JavaFX, `central/`). Es la fuente de verdad visual para DSK-041 a DSK-045 y AND-022 a AND-024 (spec 006), y **reemplaza a la v4** (DSN-004). Lo que la v5 no cambia sigue como en la v4: los principios, la paleta base, las esquinas, la tipografía, el logo, los textos y la accesibilidad.
 
+- **v6 «Esquina» (solo el juez):** cris (2026-11-17), spec `docs/specs/007-rediseno-v6/`, referencias Heavy Bag Pro. Ver §13. La central sigue en v5.
 - **Pedido v5:** cris (2026-11-09), spec `docs/specs/006-rediseno-v5/spec.md`: «no está mal, pero se siente antiguo»; tendencias actuales, animaciones sencillas y mejor UX/UI. La dirección se aprobó con la maqueta «SIGEBOX v5 · Dirección visual».
 
 ## 0. Qué cambia respecto a la v4
@@ -602,3 +603,35 @@ Guinda `#9F2241` (Pantone 7420 C), azul `#266CB4` (285 C), verde `#027A35` (356 
 - [ ] Al abrir un round el teléfono muestra «—», no 10–10, y no deja enviar hasta tocar + o − en las dos esquinas.
 - [ ] Un juez nunca ve tarjetas de otro ni su total; la central no muestra totales ni ganador durante la pelea.
 - [ ] La central se opera con teclado y el foco es visible en los dos temas.
+
+## 13. v6 «Esquina» (app del juez)
+
+Spec 007. Aditiva: los tokens y pantallas v4/v5 que no se nombran aquí no cambian, ni sus pruebas.
+
+### 13.1 Qué se adopta de las referencias
+| De Heavy Bag Pro / tendencia | Se adopta | No se adopta | Por qué |
+|---|---|---|---|
+| Pantalla de round negra de borde a borde | Puntuar, Round enviado y Round tardío sobre `arena`, en los dos temas | Foto o 3D de fondo | Contraste en ringside |
+| Número enorme dentro de un anillo | Anillo de rounds con el round actual al centro | Cuenta regresiva | El reloj es de la central |
+| "Round 1/10" en la esquina | "Round N de M" arriba a la izquierda | Totales o marcador | Principio 3 |
+| Filas "valor · etiqueta · − +" | Fila por esquina: número 96 sp, píldora "Roja"/"Azul", − y + de 56 dp | Stepper pequeño | El pulgar llega; el número manda |
+| Botones píldora | Llena = la única acción principal; contorno = secundaria | Rojo como color de botón | El rojo es la esquina Roja |
+| Marca en itálica | Inclinación leve solo en "SIGEBOX" de la barra (`BrandText`) | Itálica en títulos | Un solo gesto deportivo |
+| Acento rojo, barra de pestañas, cuadrícula de mosaicos | **No** | — | Rojo = esquina; flujo lineal; tic del look generado |
+
+### 13.2 Tokens arena (iguales en claro y oscuro)
+| Token | Valor | Uso | Par AA (`ContrastV6Test`) |
+|---|---|---|---|
+| `arena` | `#0B0B0A` | Fondo de Puntuar | — |
+| `arena_2` | `#1A1917` | Filas de esquina, tarjeta enviada | — |
+| `on_arena` / `on_arena_2` | `#F7F5F0` / `#B9B3A8` | Texto principal / secundario | ≥ 4.5 sobre arena y arena_2 |
+| `arena_red` / `arena_blue` | `#F08AA0` / `#8CB8EE` | Número de cada esquina | ≥ 4.5 sobre arena y arena_2 |
+| `arena_line` / `arena_control` | `#6E685E` / `#8F897E` | Contorno de píldora / de − y + | ≥ 3 |
+| `ring_done` / `ring_current` / `ring_pending` | `#4CC27A` / `#D4AF5A` / `#2E2B27` | Arcos cerrados / actual / futuros | ≥ 3 (pendiente es decorativo) |
+
+### 13.3 Componentes
+- **Anillo de rounds (`RoundRing`, 168 dp, trazo 10 dp):** un arco por round con hueco de 6°, empieza arriba y gira a la derecha. El arco del round nuevo se dibuja en 300 ms; con reducir movimiento aparece completo. Decorativo: el centro ("Round", número en Barlow 800 72 sp, "de M") lleva la descripción para TalkBack. Los segmentos v5 siguen en el layout, ocultos.
+- **Fila de esquina (`view_corner_row`):** superficie `arena_2`, radio 20, sin borde ni sombra. Número arriba a la izquierda, debajo la barrita de color, la píldora y el nombre del boxeador; − (contorno) y + (lleno del color de la esquina) de 56 dp a la derecha. Mismos ids que la tarjeta v5.
+- **Píldoras (`Widget.Sigebox.Pill*`):** 56 dp, radio 28. Sobre arena la principal es dorada con texto negro (`Pill.Arena`) y la secundaria es de contorno (`Pill.Outline.Arena`).
+- **Barra:** la marca nunca se recorta a 390 dp; si falta espacio, cede "Juez N".
+
