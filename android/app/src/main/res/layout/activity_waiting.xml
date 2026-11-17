@@ -92,7 +92,7 @@
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/waiting_cancel"
-        style="@style/Widget.Sigebox.Button.Secondary"
+        style="@style/Widget.Sigebox.Pill.Outline"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/waiting_cancel" />
