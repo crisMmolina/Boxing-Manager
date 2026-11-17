@@ -104,6 +104,7 @@ public class LateScoreActivity extends AppCompatActivity {
         }).get(ScoreViewModel.class);
 
         ((TextView) findViewById(R.id.late_title)).setText(getString(R.string.late_title, round));
+        ((TextView) findViewById(R.id.late_ring_number)).setText(String.valueOf(round));
         red = new CornerScore(findViewById(R.id.late_red_card), true, d -> vm.adjust(ScoreUi.Corner.RED, d));
         blue = new CornerScore(findViewById(R.id.late_blue_card), false, d -> vm.adjust(ScoreUi.Corner.BLUE, d));
         cornerNames = new com.sigebox.juez.ui.CornerNames(this);
@@ -157,6 +158,9 @@ public class LateScoreActivity extends AppCompatActivity {
         Integer rounds = ui.rounds != null ? ui.rounds
                 : currentFightId == null ? null : cornerNames.rounds(currentFightId);
         RoundSegments.bind(findViewById(R.id.late_progress), rounds, round, ui.card != null);
+        // v6: el anillo reemplaza a los segmentos en pantalla (spec 007); RoundSegments los vuelve visibles.
+        findViewById(R.id.late_progress).setVisibility(android.view.View.GONE);
+        ((com.sigebox.juez.ui.RoundRing) findViewById(R.id.late_ring)).bind(rounds, round, ui.card != null);
         boolean input = ui.inputEnabled();
         Integer r = ui.card != null ? ui.card.red : ui.red;
         Integer b = ui.card != null ? ui.card.blue : ui.blue;
