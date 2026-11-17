@@ -1735,3 +1735,85 @@ En Windows (zoe) los comandos `Verify` se corren en Git Bash.
   - Las pruebas actuales siguen verdes sin tocarse; capturas claro y oscuro revisadas por design-critic
 - **Verify:** `android/gradlew -p android :app:testDebugUnitTest`
 - **Next step:** prueba de que la fila de esquina oculta el nombre cuando es igual a la etiqueta
+
+## DSK-053 · Cerrar pelea no congela la central y el resultado se puede reabrir
+
+- **Type:** bug
+- **Priority:** P0
+- **Estimate:** 0.5 d
+- **Rubric / Spec:** spec 008 §Resultado
+- **Depends on:** None
+- **Paths:** central/src/main/java/com/sigebox/central/ui/result/, central/src/main/java/com/sigebox/central/App.java, central/src/test/java/com/sigebox/central/ui/result/
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - La ventana de resultado no pide pantalla completa a una ventana con dueño en macOS: se abre maximizada; en Windows sigue a pantalla completa (prueba de la elección del modo)
+  - Una pelea cerrada muestra «Ver resultado» en Resultado, que abre la ventana con Exportar PDF, CSV y Excel (prueba)
+  - Las pruebas actuales de resultado siguen verdes sin tocarse
+- **Verify:** `central/gradlew -p central test --tests 'com.sigebox.central.ui.result.*'`
+- **Next step:** prueba de que en macOS el modo de la ventana de resultado es maximizada y no pantalla completa
+
+## AND-032 · El teléfono pregunta si la pelea sigue y deja salir sin perder tarjetas
+
+- **Type:** feature
+- **Priority:** P1
+- **Estimate:** 1 d
+- **Rubric / Spec:** spec 008 §Salida del teléfono
+- **Depends on:** None
+- **Paths:** android/app/src/main/java/com/sigebox/juez/net/, android/app/src/main/java/com/sigebox/juez/join/, android/app/src/main/java/com/sigebox/juez/score/, android/app/src/main/java/com/sigebox/juez/wait/, android/app/src/main/java/com/sigebox/juez/ui/, android/app/src/main/res/layout/, android/app/src/main/res/values/, android/app/src/test/java/com/sigebox/juez/
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - Tras 10 min sin mensajes de la central, en Esperando, Puntuar sin round abierto, Round enviado o Siguiente pelea, aparece «¿La pelea sigue?» con «Seguir esperando» y «Salir de la pelea» (prueba con reloj falso)
+  - Con un round abierto no aparece (prueba)
+  - Cualquier mensaje de la central reinicia la cuenta (prueba)
+  - Salir sin tarjetas pendientes desconecta, borra la sesión y vuelve a Unirme (prueba)
+  - Salir con tarjetas sin ACK dice cuántas, no las borra y las reenvía si el juez vuelve a unirse a esa pelea (prueba)
+  - Capturas claro y oscuro revisadas por design-critic
+- **Verify:** `android/gradlew -p android :app:testDebugUnitTest`
+- **Next step:** prueba con reloj falso de que a los 10 min sin mensajes aparece la pregunta
+
+## DSK-054 · La central se llama Box Central
+
+- **Type:** feature
+- **Priority:** P1
+- **Estimate:** 0.5 d
+- **Rubric / Spec:** spec 008 §Nombre
+- **Depends on:** DSK-053
+- **Paths:** central/src/main/java/com/sigebox/central/ui/, central/src/main/java/com/sigebox/central/export/, central/src/main/java/com/sigebox/central/App.java, central/src/main/resources/, central/build.gradle.kts, central/src/test/java/com/sigebox/central/
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - Marca de la barra, título de la ventana y encabezados de PDF, CSV y Excel dicen «Box Central» (prueba)
+  - El instalador se llama «Box Central» (`jpackage --name`)
+  - No cambian paquetes, el esquema `sigebox://`, ni la carpeta de datos (`%APPDATA%\SIGEBOX`, `~/.sigebox`) (prueba de la ruta)
+- **Verify:** `central/gradlew -p central build`
+- **Next step:** prueba de que la marca de la barra dice Box Central
+
+## AND-033 · La app del juez se llama Box Juez
+
+- **Type:** feature
+- **Priority:** P1
+- **Estimate:** 0.5 d
+- **Rubric / Spec:** spec 008 §Nombre
+- **Depends on:** AND-032
+- **Paths:** android/app/src/main/res/values/, android/app/src/main/java/com/sigebox/juez/ui/, android/app/src/test/java/com/sigebox/juez/
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - El nombre de la app, la marca de la barra, los términos y los textos dicen «Box Juez» o «Box Central» donde nombran a la central (prueba)
+  - La marca cabe junto a «Juez N», el chip y el «?» a 390 dp (prueba)
+  - No cambian paquetes, el esquema `sigebox://` ni las `SharedPreferences`
+  - Capturas claro y oscuro revisadas por design-critic
+- **Verify:** `android/gradlew -p android :app:testDebugUnitTest`
+- **Next step:** prueba de que app_name es Box Juez
+
+## DOC-002 · Docs con el nombre Box Central / Box Juez
+
+- **Type:** docs
+- **Priority:** P2
+- **Estimate:** 0.25 d
+- **Rubric / Spec:** spec 008 §Nombre
+- **Depends on:** DSK-054, AND-033
+- **Paths:** docs/runbook.md, docs/DESIGN.md, README.md, IDEA.md
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - Runbook, DESIGN, README e IDEA nombran Box Central y Box Juez; IDEA §0 registra el cambio con la decisión de cris
+- **Verify:** `grep -q "Box Central" docs/runbook.md`
+- **Next step:** reemplazar los nombres en el runbook
