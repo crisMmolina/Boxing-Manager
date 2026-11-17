@@ -44,7 +44,7 @@
                 <!-- Escanear QR es la acción principal (spec 004); el QR llena la IP y el código. -->
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/join_scan"
-                    style="@style/Widget.Sigebox.Button.Primary"
+                    style="@style/Widget.Sigebox.Pill"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/join_scan"
@@ -186,7 +186,7 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/join_submit"
-            style="@style/Widget.Sigebox.Button.Secondary"
+            style="@style/Widget.Sigebox.Pill.Outline"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"

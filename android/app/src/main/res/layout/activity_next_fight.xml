@@ -85,7 +85,7 @@
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/next_fight_back"
-        style="@style/Widget.Sigebox.Button.Secondary"
+        style="@style/Widget.Sigebox.Pill.Outline"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/next_fight_back_to_join"
