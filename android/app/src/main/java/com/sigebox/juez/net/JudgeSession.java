@@ -106,6 +106,12 @@ public final class JudgeSession {
         listener.onMessage(message);
     }
 
+    /** Durante la búsqueda por código: guarda el nonce sin mandar HELLO/JOIN del lugar guardado. */
+    public synchronized void rememberChallenge(Challenge challenge) {
+        nonce = challenge.nonce();
+        lastReceived = clock.now();
+    }
+
     /** Guarda el lugar del QR y manda {@code JOIN} en cuanto haya {@code CHALLENGE}. */
     public synchronized void join(JoinUri uri, String judgeName) {
         store.saveJoin(uri, judgeName);
