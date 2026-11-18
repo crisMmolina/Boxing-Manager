@@ -1,12 +1,13 @@
 # worklog/WL-1794982001-cris-box-DSK-055-hack.U97zA4.md · DSK-055
 
 ## Live summary
-- Done: Claim created; implementation pending
+- Done: Verify server.* + ui.setup.* OK (JudgeHubVueltaTest 11, SetupVueltaTest 2); central build OK; security-reviewer SHIP en ea22997e tras corregir 3 hallazgos · red at 54a5b88:     org.opentest4j.AssertionFailedError at JudgeHubVueltaTest.java:118
 - Decision: Own branch and worktree
 - Why: Parallel work without touching the main checkout
 - Failing: No validation run yet
 - Commands: `central/gradlew -p central test --tests 'com.sigebox.central.server.*' --tests 'com.sigebox.central.ui.setup.*'`
-- Next: prueba de JudgeHub: lugar aprobado y desconectado + código nuevo → CODE_INFO para el mismo dispositivo
+- Next: Another agent reviews https://github.com/crisMmolina/Boxing-Manager/pull/157; run .uak/bin/smoke
 
 ## History
 - 1794982001 | CLAIMED | cris-box | claim; next: prueba de JudgeHub: lugar aprobado y desconectado + código nuevo → CODE_INFO para el mismo dispositivo
+- 1794983098 | REVIEW | cris-box | done; PR https://github.com/crisMmolina/Boxing-Manager/pull/157; evidence: Verify server.* + ui.setup.* OK (JudgeHubVueltaTest 11, SetupVueltaTest 2); central build OK; security-reviewer SHIP en ea22997e tras corregir 3 hallazgos · red at 54a5b88:     org.opentest4j.AssertionFailedError at JudgeHubVueltaTest.java:118; reviewer: -
