@@ -136,6 +136,15 @@ public final class JudgeHub implements AutoCloseable, FightService.Puerta {
 
     private record SeatKey(String fightId, int seat) {}
 
+    /**
+     * Otro teléfono que pidió quedarse con un lugar ya aprobado usando su código de vuelta (DSK-055). Espera en
+     * memoria, sin tocar el registro del lugar, hasta que el operador lo cambie o lo rechace.
+     */
+    private record Candidate(Session session, String judgeName, String deviceId, String publicKey,
+            String fingerprint) {}
+
+    private final Map<SeatKey, Candidate> candidates = new HashMap<>();
+
     private final Database db;
     private final SeatTokens tokens;
     private final ServerEvents events;
@@ -270,6 +279,10 @@ public final class JudgeHub implements AutoCloseable, FightService.Puerta {
             return;
         }
         var key = new SeatKey(s.fightId, s.seat);
+        var candidate = candidates.get(key);
+        if (candidate != null && candidate.session() == s) {
+            candidates.remove(key);
+        }
         if (holders.get(key) == s) {
             holders.remove(key);
             if (s.approved) {
@@ -306,6 +319,55 @@ public final class JudgeHub implements AutoCloseable, FightService.Puerta {
             send(holder, approvedMessage(pelea, seat, lugar.nombre()));
             events.onJudgeConnected(fightId, seat);
         }
+        return true;
+    }
+
+    /** Huella corta del teléfono que pide quedarse con un lugar ya aprobado (DSK-055), si hay. */
+    public synchronized Optional<String> replacementFingerprint(String fightId, int seat) {
+        return Optional.ofNullable(candidates.get(new SeatKey(fightId, seat)))
+                .map(c -> FightService.shortFingerprint(c.fingerprint()));
+    }
+
+    /** Aprueba el cambio de teléfono del lugar. {@code false} si no hay cambio pendiente. */
+    public synchronized boolean approveReplacement(String fightId, int seat) {
+        var key = new SeatKey(fightId, seat);
+        var candidate = candidates.get(key);
+        var lugar = lugares.find(fightId, seat).orElse(null);
+        var pelea = peleas.find(fightId).orElse(null);
+        if (candidate == null || lugar == null || pelea == null || lugar.aprobadoEnMs() == null
+                || holders.containsKey(key)) {
+            return false;
+        }
+        candidates.remove(key);
+        var before = FightService.shortFingerprint(lugar.huellaCredencial());
+        var after = FightService.shortFingerprint(candidate.fingerprint());
+        var cambiado = new LugarJuez(fightId, seat, lugar.nombre(), candidate.deviceId(), candidate.fingerprint(),
+                EstadoConexion.CONECTADO, APPROVED_BY, clock.getAsLong());
+        db.inTransaction(c -> {
+            // La llave anterior deja de servir: su HELLO ya no coincide. Las tarjetas recibidas no cambian.
+            lugares.save(cambiado);
+            lugares.savePublicKey(fightId, seat, candidate.publicKey());
+            log.append(fightId, "JOIN_APPROVED", "lugar " + seat + " · teléfono cambiado: " + before + " → " + after);
+            return null;
+        });
+        var s = candidate.session();
+        bind(s, fightId, seat);
+        s.approved = true;
+        send(s, state(s));
+        send(s, approvedMessage(pelea, seat, lugar.nombre()));
+        events.onJudgeConnected(fightId, seat);
+        return true;
+    }
+
+    /** Rechaza el cambio de teléfono; el lugar sigue con el teléfono anterior. */
+    public synchronized boolean rejectReplacement(String fightId, int seat) {
+        var candidate = candidates.remove(new SeatKey(fightId, seat));
+        if (candidate == null) {
+            return false;
+        }
+        log.append(fightId, "JOIN_REJECTED", "lugar " + seat + " · cambio de teléfono");
+        send(candidate.session(), new JoinRejected(fightId, seat, JoinRejected.Reason.REJECTED));
+        drop(candidate.session(), 1000, "rejected");
         return true;
     }
 
@@ -477,10 +539,17 @@ public final class JudgeHub implements AutoCloseable, FightService.Puerta {
             return null;
         }
         var pelea = peleas.find(seat.fightId()).orElse(null);
-        if (pelea == null || pelea.estado() == EstadoPelea.CERRADA || seat.seat() > pelea.jueces()
-                || lugares.find(seat.fightId(), seat.seat()).filter(l -> l.conexion() != EstadoConexion.RECHAZADO)
-                        .isPresent()) {
+        if (pelea == null || pelea.estado() == EstadoPelea.CERRADA || seat.seat() > pelea.jueces()) {
             return null;
+        }
+        var lugar = lugares.find(seat.fightId(), seat.seat()).orElse(null);
+        if (lugar != null && lugar.conexion() != EstadoConexion.RECHAZADO) {
+            // Lugar registrado: solo con su código de vuelta, aprobado, sin conexión y sin otro cambio pendiente.
+            var key = new SeatKey(seat.fightId(), seat.seat());
+            if (lugar.aprobadoEnMs() == null || !tokens.rejoinOpen(seat.fightId(), seat.seat())
+                    || holders.containsKey(key) || candidates.containsKey(key)) {
+                return null;
+            }
         }
         return new CodeInfo(code, pelea.id(), seat.seat(), pelea.esquinaRoja(), pelea.esquinaAzul());
     }
@@ -541,7 +610,22 @@ public final class JudgeHub implements AutoCloseable, FightService.Puerta {
         if (lugar != null && storedKey != null && !reopened) {
             // Lugar ya registrado: nunca se reemplaza la llave.
             if (!sameDevice) {
-                rejectAndDrop(s, fightId, seat, JoinRejected.Reason.SEAT_TAKEN);
+                var key = new SeatKey(fightId, seat);
+                boolean replaceable = lugar.aprobadoEnMs() != null && lugar.conexion() != EstadoConexion.RECHAZADO
+                        && !holders.containsKey(key) && !candidates.containsKey(key);
+                if (replaceable && tokens.consumeRejoin(fightId, seat, m.token())) {
+                    // Otro teléfono con el código de vuelta: espera a que el operador lo cambie; la llave no cambia.
+                    s.authenticated = true;
+                    unauthenticated.remove(s.conn.id());
+                    s.fightId = fightId;
+                    s.seat = seat;
+                    candidates.put(key, new Candidate(s, m.judgeName(), m.deviceId(), m.publicKey(),
+                            DeviceProof.fingerprint(m.publicKey())));
+                    log.append(fightId, "JOIN_REQUESTED", "lugar " + seat + " · cambio de teléfono");
+                    send(s, new JoinPending(fightId, seat));
+                } else {
+                    rejectAndDrop(s, fightId, seat, JoinRejected.Reason.SEAT_TAKEN);
+                }
             } else if (lugar.conexion() == EstadoConexion.RECHAZADO) {
                 rejectAndDrop(s, fightId, seat, JoinRejected.Reason.REJECTED);
             } else if (lugar.aprobadoEnMs() != null) {
@@ -672,6 +756,14 @@ public final class JudgeHub implements AutoCloseable, FightService.Puerta {
             // Una conexión más nueva toma el lugar; la vieja se cierra sin marcar desconexión.
             sessions.remove(old.conn.id());
             old.conn.close(1000, "replaced");
+        }
+        // DSK-055: el teléfono ya está en su lugar; su código de vuelta y cualquier cambio pendiente sobran.
+        tokens.forgetRejoin(fightId, seat);
+        var candidate = candidates.get(new SeatKey(fightId, seat));
+        if (candidate != null && candidate.session() != s) {
+            candidates.remove(new SeatKey(fightId, seat));
+            send(candidate.session(), new JoinRejected(fightId, seat, JoinRejected.Reason.SEAT_TAKEN));
+            drop(candidate.session(), Conn.POLICY, "seat back");
         }
     }
 

@@ -44,14 +44,17 @@ public final class SetupScreen {
     private final Executor reads;
     /** Se escriben en el hilo de JavaFX y se leen en la lectura de fondo. */
     private final Map<String, FightService.Invitation> invitations = new ConcurrentHashMap<>();
+    /** Códigos de vuelta (DSK-055) por lugar; se emiten solo al pulsar «Nuevo código». */
+    private final Map<String, FightService.Invitation> rejoins = new ConcurrentHashMap<>();
     private volatile String host;
     /** Lleva a Evento (spec 005 §Jueces); sin él, la pantalla sin pelea no tiene botón. */
     private volatile Runnable toEvento;
 
     /** Lo que la pantalla dibuja; con otro valor se redibuja, con el mismo no se pierde el foco. */
     private record Snapshot(Pelea pelea, List<Integer> connected, List<FightService.Seat> seats,
-            List<FightService.Invitation> invitations, String host) {
-        static final Snapshot NO_FIGHT = new Snapshot(null, List.of(), List.of(), List.of(), null);
+            List<FightService.Invitation> invitations, String host, List<FightService.Invitation> rejoins,
+            Map<Integer, String> replacements) {
+        static final Snapshot NO_FIGHT = new Snapshot(null, List.of(), List.of(), List.of(), null, List.of(), Map.of());
     }
 
     public SetupScreen(FightService fights, JudgeHub hub, int port, Runnable onStart) {
@@ -134,7 +137,16 @@ public final class SetupScreen {
         }
         var id = active.get().id();
         var connected = hub.connectedSeats(id);
-        return new Snapshot(active.get(), connected, fights.seats(id, connected), List.copyOf(invitations.values()), host);
+        var seats = fights.seats(id, connected);
+        var replacements = new java.util.TreeMap<Integer, String>();
+        for (var seat : seats) {
+            if (seat.state() != FightService.SeatState.SIN_CONEXION) {
+                rejoins.remove(key(id, seat.seat())); // ya volvió o cambió: ese código no se vuelve a mostrar
+            }
+            hub.replacementFingerprint(id, seat.seat()).ifPresent(fp -> replacements.put(seat.seat(), fp));
+        }
+        return new Snapshot(active.get(), connected, seats, List.copyOf(invitations.values()), host,
+                List.copyOf(rejoins.values()), Map.copyOf(replacements));
     }
 
     /** La pelea que se empareja; los jueces solo usan el código de 6 números de su lugar (spec 005). */
@@ -201,7 +213,48 @@ public final class SetupScreen {
                         Ui.support("Compárala con la que muestra el teléfono del juez."), new VBox(8, approve, reject));
             }
             case CONECTADO -> card.getChildren().add(Ui.body(s.judgeName()));
-            case SIN_CONEXION -> card.getChildren().addAll(Ui.body(s.judgeName()), HelpButton.connection(false, who));
+            case SIN_CONEXION -> {
+                card.getChildren().addAll(Ui.body(s.judgeName()), HelpButton.connection(false, who));
+                var replacement = hub.replacementFingerprint(fightId, s.seat());
+                if (replacement.isPresent()) {
+                    // DSK-055: otro teléfono pide este lugar con el código de vuelta; el operador compara huellas.
+                    var change = Ui.primary("Cambiar teléfono");
+                    change.setOnAction(e -> {
+                        if (hub.approveReplacement(fightId, s.seat())) {
+                            status.setText("Teléfono cambiado para el juez " + s.seat() + ". El anterior ya no entra.");
+                        }
+                    });
+                    var keep = Ui.secondary("Rechazar");
+                    keep.setOnAction(e -> hub.rejectReplacement(fightId, s.seat()));
+                    change.setMaxWidth(Double.MAX_VALUE);
+                    keep.setMaxWidth(Double.MAX_VALUE);
+                    card.getChildren().addAll(
+                            Ui.field("Huella anterior", Ui.numeral(s.shortFingerprint() == null ? "—" : s.shortFingerprint(),
+                                    "neutral")),
+                            Ui.field("Huella nueva", Ui.numeral(replacement.get(), "neutral")),
+                            Ui.support("Otro teléfono pide este lugar. Compara la huella nueva con la del teléfono."),
+                            new VBox(8, change, keep));
+                    return card;
+                }
+                var inv = rejoins.get(key(fightId, s.seat()));
+                if (inv != null) {
+                    var code = new Label(spaced(inv.code()));
+                    code.getStyleClass().add("seat-code");
+                    code.setAccessibleText("Código " + String.join(" ", inv.code().split("")));
+                    var qr = qr(inv.qrUri());
+                    qr.getStyleClass().add("seat-qr");
+                    var qrBox = new StackPane(qr);
+                    qrBox.getStyleClass().add("seat-qr-box");
+                    qrBox.setMaxWidth(Region.USE_PREF_SIZE);
+                    card.getChildren().addAll(qrBox, code, Ui.support("El juez lo escribe para volver a su lugar."));
+                }
+                var again = Ui.secondary("Nuevo código");
+                again.setOnAction(e -> {
+                    rejoins.put(key(fightId, s.seat()), fights.reinvite(fightId, s.seat(), host(), port));
+                    status.setText("Código para que el juez " + s.seat() + " vuelva. El anterior ya no sirve.");
+                });
+                card.getChildren().add(again);
+            }
         }
         return card;
     }
