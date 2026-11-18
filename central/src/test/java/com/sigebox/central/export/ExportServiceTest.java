@@ -148,7 +148,7 @@ class ExportServiceTest {
         var reader = new PdfReader(export.pdf(sheet));
         var text = new PdfTextExtractor(reader).getTextFromPage(1);
         var p = sheet.pelea();
-        assertTrue(text.contains("SIGEBOX"), text);
+        assertTrue(text.contains("Box Central"), text);
         assertTrue(text.contains("Pelea " + p.id()), text);
         assertTrue(text.contains(p.fecha()), text);
         assertTrue(text.contains("Roja"), text);

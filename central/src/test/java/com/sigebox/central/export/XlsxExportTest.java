@@ -114,7 +114,7 @@ class XlsxExportTest {
         byte[] xlsx = export.xlsx(sheet);
 
         var resumen = rows(xlsx, "Resumen");
-        assertEquals("SIGEBOX", value(resumen, "Evento"));
+        assertEquals("Box Central", value(resumen, "Evento"));
         assertEquals(sheet.pelea().id(), value(resumen, "Pelea"));
         assertEquals("Roja", value(resumen, "Ganador"));
         assertEquals("Dividida", value(resumen, "Método"));

@@ -38,6 +38,7 @@ public final class ExportService {
     public String csv(ResultSheet sheet) {
         var p = sheet.pelea();
         var out = new StringBuilder(BOM);
+        line(out, "evento", "Box Central");
         line(out, "pelea", p.id());
         line(out, "fecha", p.fecha());
         line(out, "esquina roja", p.esquinaRoja());
@@ -87,7 +88,7 @@ public final class ExportService {
     public byte[] xlsx(ResultSheet sheet) {
         var out = new ByteArrayOutputStream();
         try {
-            var wb = new Workbook(out, "SIGEBOX", "1.0");
+            var wb = new Workbook(out, "Box Central", "1.0");
             summarySheet(wb.newWorksheet("Resumen"), sheet);
             cardsSheet(wb.newWorksheet("Tarjetas"), sheet);
             wb.finish();
@@ -106,7 +107,7 @@ public final class ExportService {
         var p = sheet.pelea();
         var r = sheet.resultado();
         var rows = new java.util.ArrayList<String[]>();
-        rows.add(new String[] {"Evento", "SIGEBOX"});
+        rows.add(new String[] {"Evento", "Box Central"});
         rows.add(new String[] {"Pelea", p.id()});
         rows.add(new String[] {"Fecha", p.fecha()});
         rows.add(new String[] {"Esquina roja", p.esquinaRoja()});
@@ -199,7 +200,7 @@ public final class ExportService {
     private static final DateTimeFormatter GENERADO = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     /**
-     * PDF con membrete SIGEBOX: logo de guantes (vector), pelea y fecha arriba; resultado con las
+     * PDF con membrete Box Central: logo de guantes (vector), pelea y fecha arriba; resultado con las
      * esquinas; la tarjeta de cada juez; y al pie las firmas, la fecha de generación y la página. Todos
      * los números salen de {@link ResultSheet}; la plantilla no calcula nada.
      */
@@ -210,7 +211,7 @@ public final class ExportService {
         var writer = PdfWriter.getInstance(doc, bytes);
         writer.setPageEvent(new Membrete(sheet, LocalDateTime.now().format(GENERADO)));
         doc.addTitle("Resultado " + p.esquinaRoja() + " vs " + p.esquinaAzul());
-        doc.addCreator("SIGEBOX Central");
+        doc.addCreator("Box Central");
         doc.open();
         var big = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 22);
         var normal = FontFactory.getFont(FontFactory.HELVETICA, 11);
@@ -306,7 +307,7 @@ public final class ExportService {
         return cell;
     }
 
-    /** Membrete y pie en cada página: logo, SIGEBOX, pelea y fecha; firmas, generación y página. */
+    /** Membrete y pie en cada página: logo, Box Central, pelea y fecha; firmas, generación y página. */
     private static final class Membrete extends PdfPageEventHelper {
         private final ResultSheet sheet;
         private final String generado;
@@ -329,7 +330,7 @@ public final class ExportService {
             float logoH = 46;
             logo.draw(cb, left, top - logoH, logoH, false);
             float textX = left + (float) logo.widthFor(logoH) + 10;
-            text(cb, "SIGEBOX", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 22), textX, top - 24, Element.ALIGN_LEFT);
+            text(cb, "Box Central", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 22), textX, top - 24, Element.ALIGN_LEFT);
             text(cb, "Hoja de resultado", FontFactory.getFont(FontFactory.HELVETICA, 10, MUTED), textX, top - 40,
                     Element.ALIGN_LEFT);
             text(cb, "Pelea " + p.id(), FontFactory.getFont(FontFactory.HELVETICA_BOLD, 16), right, top - 22,
@@ -365,7 +366,7 @@ public final class ExportService {
                 text(cb, firmas.get(i), FontFactory.getFont(FontFactory.HELVETICA_BOLD, 9), x + w / 2, lineY - 12,
                         Element.ALIGN_CENTER);
             }
-            text(cb, "Generado " + generado + " · SIGEBOX Central", small, left, MARGIN, Element.ALIGN_LEFT);
+            text(cb, "Generado " + generado + " · Box Central", small, left, MARGIN, Element.ALIGN_LEFT);
             text(cb, "Página " + writer.getPageNumber(), small, right, MARGIN, Element.ALIGN_RIGHT);
         }
 
