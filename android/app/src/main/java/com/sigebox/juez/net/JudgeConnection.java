@@ -198,7 +198,6 @@ public final class JudgeConnection {
                 notSeated = null;
             }
             if (uri.code() != null) {
-                store.clear(); // sin lugar guardado, el CHALLENGE no dispara un JOIN viejo
                 lookup = uri;
                 lookupName = judgeName;
                 lookupRetried = false;
@@ -272,8 +271,9 @@ public final class JudgeConnection {
         } catch (RuntimeException e) {
             return false;
         }
-        if (message instanceof Challenge) {
-            session.onText(text); // guarda el nonce; sin lugar guardado no manda nada
+        if (message instanceof Challenge challenge) {
+            // Solo el nonce: el lugar guardado no se toca ni manda HELLO/JOIN hasta CODE_INFO (AND-034).
+            session.rememberChallenge(challenge);
             sendLookup();
             return true;
         }
