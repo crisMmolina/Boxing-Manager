@@ -175,7 +175,7 @@ public final class Ui {
 
     /** Marca; {@code onDark} = va sobre la barra negra, si no, sobre el fondo de la página y sigue al tema. */
     public static HBox brand(boolean onDark) {
-        var box = new HBox(8, Logo.node(28, true, onDark), label("SIGEBOX", "brand-name"));
+        var box = new HBox(8, Logo.node(28, true, onDark), label("Box Central", "brand-name"));
         box.getStyleClass().add("brand");
         box.setAlignment(Pos.CENTER_LEFT);
         return box;

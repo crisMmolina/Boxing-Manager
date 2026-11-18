@@ -15,7 +15,7 @@ class SmokeTest {
 
     @Test
     void titleMatchesSpec() {
-        assertEquals("SIGEBOX · Central", App.TITLE);
+        assertEquals("Box Central", App.TITLE);
     }
 
     @Test

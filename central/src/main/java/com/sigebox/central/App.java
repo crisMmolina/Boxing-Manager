@@ -54,7 +54,7 @@ import javafx.stage.Stage;
  */
 public final class App {
 
-    public static final String TITLE = "SIGEBOX · Central";
+    public static final String TITLE = "Box Central";
 
     /** El paso "Jueces" muestra la misma pantalla de preparar la pelea (DESIGN v4 §7). */
     static final String JUECES = Nav.JUECES;

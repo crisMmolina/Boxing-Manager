@@ -86,7 +86,7 @@ val jpackage by tasks.registering(Exec::class) {
         commandLine(
             jdkBin.file("jpackage").asFile.absolutePath,
             "--type", installerType.get(),
-            "--name", "SIGEBOX Central",
+            "--name", "Box Central",
             "--app-version", project.version.toString(),
             "--vendor", "SIGEBOX",
             "--input", installDir.get().asFile.absolutePath,
