@@ -233,4 +233,56 @@ class JudgeHubVueltaTest {
         send(c, new Phone("B-2").join(F, 1, used, c.nonce()));
         assertEquals(JoinRejected.Reason.SEAT_TAKEN, assertInstanceOf(JoinRejected.class, c.last()).reason());
     }
+
+    /** Revisión de seguridad: un código de vuelta no se adivina probando JOIN tras JOIN. */
+    @Test
+    void cincoCodigosEquivocadosDeOtroTelefonoDescartanElCodigoDeVuelta() throws Exception {
+        approvedAndDisconnected();
+        var code = fights.reinvite(F, 1, HOST, 8765).code();
+        var intruso = new Phone("B-2");
+        for (int i = 0; i < SeatTokens.MAX_FAILURES; i++) {
+            var wrong = String.format("%06d", (Integer.parseInt(code) + 1 + i) % 1_000_000);
+            var c = open();
+            send(c, intruso.join(F, 1, wrong, c.nonce()));
+            assertEquals(JoinRejected.Reason.SEAT_TAKEN, assertInstanceOf(JoinRejected.class, c.last()).reason());
+        }
+
+        var c = open();
+        lookup(c, code);
+        assertInstanceOf(CodeUnknown.class, c.last(), "tras los intentos el código ya no sirve");
+        assertTrue(hub.replacementFingerprint(F, 1).isEmpty());
+    }
+
+    /** Revisión de seguridad: un candidato cuya conexión se cerró no queda pendiente ni se puede aprobar. */
+    @Test
+    void unCandidatoQueSeCaeNoQuedaPendiente() throws Exception {
+        approvedAndDisconnected();
+        var code = fights.reinvite(F, 1, HOST, 8765).code();
+        var nuevo = new Phone("B-2");
+        var c = open();
+        send(c, nuevo.join(F, 1, code, c.nonce()));
+        assertInstanceOf(JoinPending.class, c.last());
+
+        send(c, nuevo.join(F, 1, code, c.nonce())); // segundo JOIN en la misma conexión: se cierra
+        assertEquals(Conn.POLICY, c.closedWith);
+        assertTrue(hub.replacementFingerprint(F, 1).isEmpty());
+        assertFalse(hub.approveReplacement(F, 1));
+        assertEquals(phone.publicKey(), new LugarJuezRepository(db).publicKey(F, 1).orElseThrow());
+    }
+
+    /** Revisión de seguridad: al cerrar la pelea no queda ningún cambio de teléfono por aprobar. */
+    @Test
+    void alCerrarLaPeleaElCambioPendienteSeDescarta() throws Exception {
+        approvedAndDisconnected();
+        var code = fights.reinvite(F, 1, HOST, 8765).code();
+        var c = open();
+        send(c, new Phone("B-2").join(F, 1, code, c.nonce()));
+        assertInstanceOf(JoinPending.class, c.last());
+
+        new PeleaRepository(db).updateEstado(F, EstadoPelea.CERRADA);
+        assertFalse(hub.approveReplacement(F, 1), "pelea cerrada");
+        hub.fightClosed(F);
+        assertTrue(hub.replacementFingerprint(F, 1).isEmpty());
+        assertEquals(phone.publicKey(), new LugarJuezRepository(db).publicKey(F, 1).orElseThrow());
+    }
 }

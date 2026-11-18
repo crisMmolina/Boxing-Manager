@@ -334,8 +334,9 @@ public final class JudgeHub implements AutoCloseable, FightService.Puerta {
         var candidate = candidates.get(key);
         var lugar = lugares.find(fightId, seat).orElse(null);
         var pelea = peleas.find(fightId).orElse(null);
-        if (candidate == null || lugar == null || pelea == null || lugar.aprobadoEnMs() == null
-                || holders.containsKey(key)) {
+        if (candidate == null || lugar == null || pelea == null || pelea.estado() == EstadoPelea.CERRADA
+                || lugar.aprobadoEnMs() == null || holders.containsKey(key)
+                || sessions.get(candidate.session().conn.id()) != candidate.session()) {
             return false;
         }
         candidates.remove(key);
@@ -414,6 +415,17 @@ public final class JudgeHub implements AutoCloseable, FightService.Puerta {
      */
     public synchronized void fightClosed(String fightId) {
         tokens.forget(fightId);
+        // DSK-055: ningún cambio de teléfono queda por aprobar en una pelea cerrada.
+        candidates.entrySet().removeIf(e -> {
+            if (!e.getKey().fightId().equals(fightId)) {
+                return false;
+            }
+            var c = e.getValue().session();
+            send(c, new JoinRejected(fightId, e.getKey().seat(), JoinRejected.Reason.REJECTED));
+            sessions.remove(c.conn.id());
+            c.conn.close(1000, "fight closed");
+            return true;
+        });
         boolean lastOfEvent = lastOfEvent(fightId);
         for (var s : approvedSessions(fightId)) {
             send(s, new FightClosed(fightId));
@@ -935,6 +947,11 @@ public final class JudgeHub implements AutoCloseable, FightService.Puerta {
         unauthenticated.remove(s.conn.id());
         if (s.fightId != null) {
             holders.remove(new SeatKey(s.fightId, s.seat), s);
+            var key = new SeatKey(s.fightId, s.seat);
+            var candidate = candidates.get(key);
+            if (candidate != null && candidate.session() == s) {
+                candidates.remove(key); // un candidato que se cae no queda pendiente
+            }
         }
         s.conn.close(code, reason);
     }

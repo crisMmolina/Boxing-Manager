@@ -97,17 +97,21 @@ public final class SeatTokens {
     }
 
     /**
-     * Usa el código de vuelta si {@code token} es su token o su código. Un intento que no coincide no cuenta como
-     * fallo: el mismo teléfono reenvía su JOIN viejo al reconectar.
+     * Usa el código de vuelta si {@code token} es su token o su código. Solo lo usa otro teléfono (el mismo vuelve
+     * sin consultarlo), así que cada intento equivocado cuenta: tras {@link #MAX_FAILURES} el código se descarta y
+     * no se puede adivinar probando JOIN tras JOIN.
      */
     public synchronized boolean consumeRejoin(String fightId, int seat, String token) {
-        var entry = tokens.get(new Key(fightId, seat));
+        var key = new Key(fightId, seat);
+        var entry = tokens.get(key);
         if (entry == null || !entry.rejoin || entry.used) {
             return false;
         }
         boolean matches = equal(entry.token, token) | equal(entry.code, token);
         if (matches) {
             entry.used = true;
+        } else if (++entry.failures >= MAX_FAILURES) {
+            tokens.remove(key);
         }
         return matches;
     }
