@@ -109,6 +109,17 @@ public final class ResultStepScreen {
             card.getChildren().add(sheet.<Node>map(ResultTable::of)
                     .orElseGet(() -> Ui.support("Falta la tarjeta de algún round: los puntos aparecen al llegar.")));
             if (closed) {
+                // DSK-053: el resultado cerrado se vuelve a abrir para exportarlo cuando haga falta.
+                var view = Ui.primary("Ver resultado");
+                view.setId("ver-resultado");
+                view.setOnAction(e -> {
+                    try {
+                        show.accept(root, service.sheet(f));
+                    } catch (RuntimeException ex) {
+                        status.setText(ex.getMessage());
+                    }
+                });
+                card.getChildren().add(view);
                 return;
             }
             var close = Ui.primary("Cerrar pelea");
