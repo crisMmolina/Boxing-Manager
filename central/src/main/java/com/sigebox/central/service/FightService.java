@@ -217,6 +217,21 @@ public final class FightService {
                 new JoinUri(host, port, inv.code(), null).toUri());
     }
 
+    /**
+     * Código nuevo para que un juez aprobado vuelva a su lugar (DSK-055): el mismo teléfono entra sin aprobación y
+     * otro teléfono queda en espera de «Cambiar teléfono». El código anterior deja de servir.
+     */
+    public synchronized Invitation reinvite(String fightId, int seat, String host, int port) {
+        var lugar = lugares.find(fightId, seat).orElse(null);
+        if (lugar == null || lugar.aprobadoEnMs() == null || lugar.conexion() == EstadoConexion.RECHAZADO) {
+            throw new IllegalArgumentException("el lugar " + seat + " no tiene juez aprobado");
+        }
+        var inv = tokens.issueRejoin(fightId, seat);
+        log.append(fightId, "INVITATION_ISSUED", "lugar " + seat + " · código para volver");
+        return new Invitation(seat, new JoinUri(host, port, fightId, seat, inv.token(), null).toUri(), inv.code(),
+                new JoinUri(host, port, inv.code(), null).toUri());
+    }
+
     /** Estado de cada lugar, en orden; {@code connected} son los lugares con conexión abierta. */
     public synchronized List<Seat> seats(String fightId, List<Integer> connected) {
         var pelea = peleas.find(fightId).orElseThrow(() -> new IllegalArgumentException("pelea desconocida"));

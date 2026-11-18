@@ -38,12 +38,15 @@ public final class SeatTokens {
     private static final class Entry {
         final String token;
         final String code;
+        /** Código de vuelta (DSK-055): el único que abre un lugar ya registrado. */
+        final boolean rejoin;
         boolean used;
         int failures;
 
-        Entry(String token, String code) {
+        Entry(String token, String code, boolean rejoin) {
             this.token = token;
             this.code = code;
+            this.rejoin = rejoin;
         }
     }
 
@@ -65,6 +68,10 @@ public final class SeatTokens {
 
     /** Emite (o reemplaza) el token y el código del lugar; los anteriores dejan de servir. */
     public synchronized Invitation issueInvitation(String fightId, int seat) {
+        return issue(fightId, seat, false);
+    }
+
+    private Invitation issue(String fightId, int seat, boolean rejoin) {
         var bytes = new byte[16];
         random.nextBytes(bytes);
         var token = Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
@@ -74,8 +81,48 @@ public final class SeatTokens {
         do {
             code = String.format("%0" + CODE_LENGTH + "d", random.nextInt(1_000_000));
         } while (codeTaken(code));
-        tokens.put(key, new Entry(token, code));
+        tokens.put(key, new Entry(token, code, rejoin));
         return new Invitation(token, code);
+    }
+
+    /** Emite un código de vuelta para un lugar ya registrado (DSK-055); el anterior deja de servir. */
+    public synchronized Invitation issueRejoin(String fightId, int seat) {
+        return issue(fightId, seat, true);
+    }
+
+    /** {@code true} si el lugar tiene un código de vuelta sin usar. */
+    public synchronized boolean rejoinOpen(String fightId, int seat) {
+        var entry = tokens.get(new Key(fightId, seat));
+        return entry != null && entry.rejoin && !entry.used;
+    }
+
+    /**
+     * Usa el código de vuelta si {@code token} es su token o su código. Solo lo usa otro teléfono (el mismo vuelve
+     * sin consultarlo), así que cada intento equivocado cuenta: tras {@link #MAX_FAILURES} el código se descarta y
+     * no se puede adivinar probando JOIN tras JOIN.
+     */
+    public synchronized boolean consumeRejoin(String fightId, int seat, String token) {
+        var key = new Key(fightId, seat);
+        var entry = tokens.get(key);
+        if (entry == null || !entry.rejoin || entry.used) {
+            return false;
+        }
+        boolean matches = equal(entry.token, token) | equal(entry.code, token);
+        if (matches) {
+            entry.used = true;
+        } else if (++entry.failures >= MAX_FAILURES) {
+            tokens.remove(key);
+        }
+        return matches;
+    }
+
+    /** Descarta el código de vuelta del lugar (el teléfono ya volvió); una invitación normal sigue igual. */
+    public synchronized void forgetRejoin(String fightId, int seat) {
+        var key = new Key(fightId, seat);
+        var entry = tokens.get(key);
+        if (entry != null && entry.rejoin) {
+            tokens.remove(key);
+        }
     }
 
     /** Consume el token si coincide. */
