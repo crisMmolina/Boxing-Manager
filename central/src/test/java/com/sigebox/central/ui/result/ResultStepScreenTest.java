@@ -192,4 +192,24 @@ class ResultStepScreenTest {
         assertTrue(texts.contains("38"), texts.toString());
         assertNoWinner(texts);
     }
+
+    /** DSK-053: una pelea cerrada vuelve a abrir su resultado (Exportar PDF, CSV y Excel). */
+    @Test
+    void peleaCerradaMuestraVerResultadoQueAbreLaVentana() throws Exception {
+        ref.into(db, EstadoPelea.TERMINADA);
+        finalCards();
+        service.close(fight);
+
+        var root = FxTest.onFx(this::screen);
+        var texts = FxTest.onFx(() -> texts(root));
+        assertTrue(texts.contains("Ver resultado"), texts.toString());
+        FxTest.onFx(() -> {
+            ((Button) root.lookup("#ver-resultado")).fire();
+            return null;
+        });
+
+        assertEquals(1, shown.size());
+        assertEquals(fight, shown.get(0).pelea().id());
+        assertNoWinner(texts);
+    }
 }

@@ -29,6 +29,17 @@ public final class ResultScreen {
     private ResultScreen() {
     }
 
+    /** Cómo se abre la ventana de resultado. */
+    public enum Mode { PANTALLA_COMPLETA, MAXIMIZADA }
+
+    /** El modo para el sistema {@code osName} ({@code os.name}). */
+    static Mode modeFor(String osName) {
+        // macOS no deja poner a pantalla completa una ventana con dueño: JavaFX se queda en
+        // MacView._enterFullscreen y la interfaz se congela (spec 008, DSK-053).
+        return osName != null && osName.toLowerCase(java.util.Locale.ROOT).startsWith("mac")
+                ? Mode.MAXIMIZADA : Mode.PANTALLA_COMPLETA;
+    }
+
     public static Stage show(Window owner, ResultSheet sheet, ExportService export) {
         var stage = new Stage();
         stage.initOwner(owner);
@@ -36,8 +47,12 @@ public final class ResultScreen {
         var scene = new Scene(content(stage, sheet, export), 1280, 800);
         Theme.apply(scene);
         stage.setScene(scene);
-        stage.setFullScreenExitHint("Esc para salir de pantalla completa");
-        stage.setFullScreen(true);
+        if (modeFor(System.getProperty("os.name")) == Mode.MAXIMIZADA) {
+            stage.setMaximized(true);
+        } else {
+            stage.setFullScreenExitHint("Esc para salir de pantalla completa");
+            stage.setFullScreen(true);
+        }
         stage.show();
         return stage;
     }
