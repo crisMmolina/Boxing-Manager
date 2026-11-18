@@ -1758,7 +1758,7 @@ En Windows (zoe) los comandos `Verify` se corren en Git Bash.
 - **Priority:** P1
 - **Estimate:** 1 d
 - **Rubric / Spec:** spec 008 §Salida del teléfono
-- **Depends on:** None
+- **Depends on:** DSK-055, AND-034
 - **Paths:** android/app/src/main/java/com/sigebox/juez/net/, android/app/src/main/java/com/sigebox/juez/join/, android/app/src/main/java/com/sigebox/juez/score/, android/app/src/main/java/com/sigebox/juez/wait/, android/app/src/main/java/com/sigebox/juez/ui/, android/app/src/main/res/layout/, android/app/src/main/res/values/, android/app/src/test/java/com/sigebox/juez/
 - **Freeze-Allowed:** no
 - **Acceptance:**
@@ -1817,3 +1817,37 @@ En Windows (zoe) los comandos `Verify` se corren en Git Bash.
   - Runbook, DESIGN, README e IDEA nombran Box Central y Box Juez; IDEA §0 registra el cambio con la decisión de cris
 - **Verify:** `grep -q "Box Central" docs/runbook.md`
 - **Next step:** reemplazar los nombres en el runbook
+
+## DSK-055 · Un juez desconectado puede volver a su lugar con un código nuevo
+
+- **Type:** bug
+- **Priority:** P0
+- **Estimate:** 1 d
+- **Rubric / Spec:** spec 008 §Volver al lugar
+- **Depends on:** None
+- **Paths:** central/src/main/java/com/sigebox/central/server/, central/src/main/java/com/sigebox/central/ui/setup/, central/src/main/java/com/sigebox/central/service/, central/src/main/java/com/sigebox/central/db/, central/src/test/java/com/sigebox/central/server/, central/src/test/java/com/sigebox/central/ui/setup/, central/src/test/java/com/sigebox/central/service/
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - Un lugar aprobado y desconectado muestra «Nuevo código» con código y QR en Jueces; el código anterior deja de servir (prueba)
+  - El mismo teléfono con ese código recibe CODE_INFO y al JOIN vuelve aprobado a su lugar sin pedir aprobación (prueba)
+  - Otro teléfono con ese código queda en espera; «Cambiar teléfono» muestra las dos huellas, al aprobar reemplaza la llave, lo registra en la bitácora y el teléfono anterior ya no entra con HELLO (prueba)
+  - Un código viejo de un lugar registrado sigue respondiendo CODE_UNKNOWN (prueba)
+  - Revisión de security-reviewer (cambia quién puede tomar un lugar)
+- **Verify:** `central/gradlew -p central test --tests 'com.sigebox.central.server.*' --tests 'com.sigebox.central.ui.setup.*'`
+- **Next step:** prueba de JudgeHub: lugar aprobado y desconectado + código nuevo → CODE_INFO para el mismo dispositivo
+
+## AND-034 · Un código equivocado no borra el lugar guardado del teléfono
+
+- **Type:** bug
+- **Priority:** P0
+- **Estimate:** 0.5 d
+- **Rubric / Spec:** spec 008 §Volver al lugar
+- **Depends on:** None
+- **Paths:** android/app/src/main/java/com/sigebox/juez/net/, android/app/src/main/java/com/sigebox/juez/data/, android/app/src/main/java/com/sigebox/juez/join/, android/app/src/test/java/com/sigebox/juez/net/, android/app/src/test/java/com/sigebox/juez/join/
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - Unirse con código no borra el lugar guardado hasta recibir CODE_INFO (prueba)
+  - Con CODE_UNKNOWN el teléfono conserva el lugar anterior y su Outbox, y Unirme dice que el código no sirve (prueba)
+  - Con CODE_INFO de la misma pelea y lugar, las tarjetas sin ACK se reenvían tras el JOIN (prueba)
+- **Verify:** `android/gradlew -p android :app:testDebugUnitTest --tests 'com.sigebox.juez.net.*' --tests 'com.sigebox.juez.join.*'`
+- **Next step:** prueba de JudgeConnection: join con código + CODE_UNKNOWN deja el SessionStore como estaba
