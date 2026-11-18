@@ -51,6 +51,7 @@ public class ScoreActivity extends AppCompatActivity {
 
     private com.sigebox.juez.ui.CornerNames cornerNames;
     private volatile String currentFightId;
+    private com.sigebox.juez.ui.StillThereDialog stillThere;
 
     private final JudgeListener listener = new JudgeListener() {
         @Override
@@ -99,12 +100,17 @@ public class ScoreActivity extends AppCompatActivity {
         findViewById(R.id.score_send).setOnClickListener(v -> confirm());
         vm.ui().observe(this, this::render);
         connection.state().observe(this, vm::onConnection);
+        stillThere = new com.sigebox.juez.ui.StillThereDialog(this, () -> {
+            ScoreUi ui = vm.ui().getValue();
+            return ui != null && ui.roundOpen;
+        });
     }
 
     @Override
     protected void onStart() {
         super.onStart();
         connection.addListener(listener);
+        stillThere.start();
         io.execute(() -> {
             SessionEntity session = database.sessionDao().load();
             if (session == null) {
@@ -125,6 +131,7 @@ public class ScoreActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         connection.removeListener(listener);
+        stillThere.stop();
         super.onStop();
     }
 

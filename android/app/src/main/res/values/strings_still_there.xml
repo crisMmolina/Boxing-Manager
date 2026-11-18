@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- AND-032: «¿La pelea sigue?» tras 10 min sin mensajes de la central (spec 008). -->
+<resources>
+    <string name="still_there_title">¿La pelea sigue?</string>
+    <string name="still_there_message">Hace 10 minutos que no llega nada de la central.</string>
+    <string name="still_there_keep_waiting">Seguir esperando</string>
+    <string name="still_there_leave">Salir de la pelea</string>
+    <plurals name="still_there_kept">
+        <item quantity="one">%1$d tarjeta sigue sin llegar. Se guardó: se enviará al volver a unirte.</item>
+        <item quantity="other">%1$d tarjetas siguen sin llegar. Se guardaron: se enviarán al volver a unirte.</item>
+    </plurals>
+</resources>
