@@ -118,3 +118,4 @@ Why: a reversible option after 15 min keeps work moving.
 - 1794373577 | allow | zoe | test change: AND-025 | Why: solo se quita el ejemplo del nombre
 - 1794427512 | deadline lease/DSK-051/1794426525 | REQUIRES_RECOVERY | Claim kept; read the summary and use release --expired --read-summary. No work is deleted.
 - 1794985553 | allow | zoe | freeze exception: DSK-054 | Why: renombrar marca a Box Central en SmokeTest, ExportServiceTest, XlsxExportTest
+- 1794986150 | allow | zoe | test change: DSK-054 | Why: renombrar marca a Box Central en SmokeTest, ExportServiceTest, XlsxExportTest
