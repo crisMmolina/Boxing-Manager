@@ -27,6 +27,7 @@ public class WaitingActivity extends AppCompatActivity {
 
     private com.sigebox.juez.net.JudgeConnection connection;
     private com.sigebox.juez.ui.CornerNames cornerNames;
+    private com.sigebox.juez.ui.StillThereDialog stillThere;
     /** JOIN_APPROVED trae los nombres de los boxeadores; se guardan para la pantalla de puntuación (DESIGN v3 §5.2). */
     private final com.sigebox.juez.net.JudgeListener namesListener = new com.sigebox.juez.net.JudgeListener() {
         @Override
@@ -58,11 +59,16 @@ public class WaitingActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         connection.addListener(namesListener);
+        if (stillThere == null) {
+            stillThere = new com.sigebox.juez.ui.StillThereDialog(this, () -> false);
+        }
+        stillThere.start();
     }
 
     @Override
     protected void onStop() {
         connection.removeListener(namesListener);
+        stillThere.stop();
         super.onStop();
     }
 

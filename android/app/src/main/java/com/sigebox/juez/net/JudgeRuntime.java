@@ -33,6 +33,9 @@ public final class JudgeRuntime {
     private final SigeboxDatabase database;
     private final JudgeConnection connection;
     private final NetworkBinder networkBinder;
+    private final Outbox outbox;
+    private final SessionStore sessions;
+    private final CentralSilence silence = new CentralSilence(Clock.SYSTEM);
 
     private JudgeRuntime(Context app) {
         this(app, SigeboxDatabase.create(app), new KeystoreSigner());
@@ -45,11 +48,18 @@ public final class JudgeRuntime {
                 .connectTimeout(5, TimeUnit.SECONDS)
                 .readTimeout(0, TimeUnit.MILLISECONDS)
                 .build();
-        Outbox outbox = new Outbox(database.outboxDao(), Clock.SYSTEM);
-        SessionStore sessions = new SessionStore(database.sessionDao());
+        outbox = new Outbox(database.outboxDao(), Clock.SYSTEM);
+        sessions = new SessionStore(database.sessionDao());
         connection = new JudgeConnection(client, outbox, sessions, signer, Clock.SYSTEM,
                 new Backoff(500, 5_000), TICK_MS);
         networkBinder = new NetworkBinder(app.getSystemService(ConnectivityManager.class));
+        // AND-032: cualquier mensaje de la central (PONG incluido) reinicia la cuenta de «¿La pelea sigue?».
+        connection.addListener(new JudgeListener() {
+            @Override
+            public void onMessage(Message message) {
+                silence.onCentralMessage();
+            }
+        });
         // NEXT_FIGHT lleva al juez a la pantalla de puntuación desde donde esté, sin confirmación (spec 002).
         connection.addListener(new JudgeListener() {
             @Override
@@ -88,5 +98,14 @@ public final class JudgeRuntime {
 
     public SigeboxDatabase database() {
         return database;
+    }
+
+    public CentralSilence silence() {
+        return silence;
+    }
+
+    /** AND-032: «Salir de la pelea». Llamar fuera del hilo principal: cuenta y borra en Room. */
+    public LeaveFight leaveFight(Runnable goToJoin) {
+        return new LeaveFight(outbox::pendingCount, sessions::clear, connection::stop, goToJoin);
     }
 }

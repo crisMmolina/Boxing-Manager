@@ -49,6 +49,7 @@ public final class NextFightActivity extends AppCompatActivity {
     private boolean ended;
     private JudgeConnection connection;
     private TextView corners;
+    private com.sigebox.juez.ui.StillThereDialog stillThere;
 
     /** Las pantallas de {@link FightEndFlow}: se abren desde donde esté el juez, sin dejar nada atrás. */
     public static FightEndFlow.Screens screens(Context app) {
@@ -104,6 +105,10 @@ public final class NextFightActivity extends AppCompatActivity {
             handler.postDelayed(backToJoin, BACK_TO_JOIN_MS);
         } else {
             connection.addListener(listener); // repite el NEXT_FIGHT sin lugar que ya llegó
+            if (stillThere == null) {
+                stillThere = new com.sigebox.juez.ui.StillThereDialog(this, () -> false);
+            }
+            stillThere.start();
         }
     }
 
@@ -114,6 +119,7 @@ public final class NextFightActivity extends AppCompatActivity {
             handler.removeCallbacks(backToJoin);
         } else {
             connection.removeListener(listener);
+            stillThere.stop();
         }
     }
 
