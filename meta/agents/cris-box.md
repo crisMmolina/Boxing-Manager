@@ -1,11 +1,11 @@
 # cris-box
 Agent: cris-box
 Started: 1794980253
-Events: 17
-Events-Since-Checkpoint: 17
-Checkpoints: 0
+Events: 18
+Events-Since-Checkpoint: 0
+Checkpoints: 1
 Sessions: 7
-Last-Checkpoint: 0
+Last-Checkpoint: 1795277585
 Human: cris
 Last-Session: cris-box-1795245641
-Updated: 1795245642
+Updated: 1795277585
