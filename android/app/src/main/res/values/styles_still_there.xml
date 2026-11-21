@@ -7,13 +7,10 @@
         <item name="materialAlertDialogTitleTextStyle">@style/Sigebox.StillThere.Title</item>
     </style>
 
-    <style name="Widget.Sigebox.StillThere.Keep" parent="Widget.Material3.Button">
-        <item name="android:minHeight">56dp</item>
-    </style>
+    <!-- Las píldoras de la app: sus colores (pill_bg/pill_text, field_border/ink) cambian solos entre claro y oscuro. -->
+    <style name="Widget.Sigebox.StillThere.Keep" parent="Widget.Sigebox.Pill" />
 
-    <style name="Widget.Sigebox.StillThere.Leave" parent="Widget.Material3.Button.OutlinedButton">
-        <item name="android:minHeight">56dp</item>
-    </style>
+    <style name="Widget.Sigebox.StillThere.Leave" parent="Widget.Sigebox.Pill.Outline" />
 
     <style name="Sigebox.StillThere.Title" parent="MaterialAlertDialog.Material3.Title.Text">
         <item name="android:textStyle">bold</item>

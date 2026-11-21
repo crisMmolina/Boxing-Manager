@@ -91,38 +91,53 @@ public class StillThereShot {
         }
     }
 
+    // Cada tema en su propia prueba: cambiar de tema a mitad de una prueba deja colores en caché en Robolectric.
     @Test
-    public void capturaElDialogoConTarjetasSinConfirmar() throws Exception {
+    public void conPendientesClaro() throws Exception {
+        pending();
+        capture("sigue-pendientes-claro");
+    }
+
+    @Test
+    @Config(qualifiers = "+night")
+    public void conPendientesOscuro() throws Exception {
+        pending();
+        capture("sigue-pendientes-oscuro");
+    }
+
+    @Test
+    public void claro() throws Exception {
+        capture("sigue-claro");
+    }
+
+    @Test
+    @Config(qualifiers = "+night")
+    public void oscuro() throws Exception {
+        capture("sigue-oscuro");
+    }
+
+    private void pending() {
         new com.sigebox.juez.data.Outbox(db.outboxDao(), com.sigebox.juez.data.Clock.SYSTEM)
                 .enqueue(new com.sigebox.core.protocol.SubmitRound("F1", 2, 3, 10, 9));
-        capture("sigue-pendientes-");
     }
 
-    @Test
-    public void capturaElDialogoEnClaroYOscuro() throws Exception {
-        capture("sigue-");
-    }
-
-    private void capture(String prefix) throws Exception {
-        for (String theme : new String[] {"claro", "oscuro"}) {
-            RuntimeEnvironment.setQualifiers(theme.equals("oscuro") ? "+night" : "+notnight");
-            // Diez minutos sin mensajes de la central: la última vez fue en la época 0.
-            ReflectionHelpers.setField(runtime.silence(), "lastContact", 0L);
-            Intent intent = new Intent(ApplicationProvider.getApplicationContext(), NextFightActivity.class)
-                    .putExtra(NextFightActivity.EXTRA_JUDGE_NAME, "María López");
-            Activity activity = Robolectric.buildActivity(NextFightActivity.class, intent).setup().get();
-            shadowOf(Looper.getMainLooper()).idleFor(31, TimeUnit.SECONDS);
-            // Las tarjetas se cuentan fuera del hilo principal y el diálogo llega después.
-            for (int i = 0; i < 50 && (ShadowDialog.getLatestDialog() == null || !ShadowDialog.getLatestDialog().isShowing()); i++) {
-                Thread.sleep(20);
-                shadowOf(Looper.getMainLooper()).idle();
-            }
-            Dialog dialog = ShadowDialog.getLatestDialog();
-            assertNotNull("a los 10 min sin la central aparece «¿La pelea sigue?»", dialog);
-            shot(prefix + theme, activity, dialog);
-            dialog.dismiss();
-            activity.finish();
+    private void capture(String name) throws Exception {
+        // Diez minutos sin mensajes de la central: la última vez fue en la época 0.
+        ReflectionHelpers.setField(runtime.silence(), "lastContact", 0L);
+        Intent intent = new Intent(ApplicationProvider.getApplicationContext(), NextFightActivity.class)
+                .putExtra(NextFightActivity.EXTRA_JUDGE_NAME, "María López");
+        Activity activity = Robolectric.buildActivity(NextFightActivity.class, intent).setup().get();
+        shadowOf(Looper.getMainLooper()).idleFor(31, TimeUnit.SECONDS);
+        // Las tarjetas se cuentan fuera del hilo principal y el diálogo llega después.
+        for (int i = 0; i < 50 && (ShadowDialog.getLatestDialog() == null || !ShadowDialog.getLatestDialog().isShowing()); i++) {
+            Thread.sleep(20);
+            shadowOf(Looper.getMainLooper()).idle();
         }
+        Dialog dialog = ShadowDialog.getLatestDialog();
+        assertNotNull("a los 10 min sin la central aparece «¿La pelea sigue?»", dialog);
+        shot(name, activity, dialog);
+        dialog.dismiss();
+        activity.finish();
     }
 
     /** La pantalla, el velo del diálogo y el diálogo centrado, como se ven en el teléfono. */
