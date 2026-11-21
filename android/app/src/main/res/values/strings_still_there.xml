@@ -3,6 +3,10 @@
 <resources>
     <string name="still_there_title">¿La pelea sigue?</string>
     <string name="still_there_message">Hace 10 minutos que no llega nada de la central.</string>
+    <plurals name="still_there_message_pending">
+        <item quantity="one">Hace 10 minutos que no llega nada de la central. Tienes %1$d tarjeta sin confirmar: si sales, se guarda y se envía al volver a unirte.</item>
+        <item quantity="other">Hace 10 minutos que no llega nada de la central. Tienes %1$d tarjetas sin confirmar: si sales, se guardan y se envían al volver a unirte.</item>
+    </plurals>
     <string name="still_there_keep_waiting">Seguir esperando</string>
     <string name="still_there_leave">Salir de la pelea</string>
     <plurals name="still_there_kept">

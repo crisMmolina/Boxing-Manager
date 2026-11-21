@@ -100,10 +100,15 @@ public class ScoreActivity extends AppCompatActivity {
         findViewById(R.id.score_send).setOnClickListener(v -> confirm());
         vm.ui().observe(this, this::render);
         connection.state().observe(this, vm::onConnection);
-        stillThere = new com.sigebox.juez.ui.StillThereDialog(this, () -> {
-            ScoreUi ui = vm.ui().getValue();
-            return ui != null && ui.roundOpen;
-        });
+        stillThere = new com.sigebox.juez.ui.StillThereDialog(this, () -> judgeIsScoring(vm.ui().getValue()));
+    }
+
+    /**
+     * AND-032: «¿La pelea sigue?» se calla solo mientras el juez califica (round abierto y sin tarjeta, o corrigiendo).
+     * En «Round N enviado» el round sigue abierto en la central, pero el juez ya no califica: ahí sí puede preguntar.
+     */
+    static boolean judgeIsScoring(ScoreUi ui) {
+        return ui != null && ui.inputEnabled();
     }
 
     @Override

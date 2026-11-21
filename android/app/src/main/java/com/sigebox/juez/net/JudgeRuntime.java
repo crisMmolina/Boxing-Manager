@@ -100,6 +100,11 @@ public final class JudgeRuntime {
         return database;
     }
 
+    /** AND-032: tarjetas sin ACK en la Outbox (consulta Room: fuera del hilo principal). */
+    public int pendingCards() {
+        return outbox.pendingCount();
+    }
+
     public CentralSilence silence() {
         return silence;
     }
