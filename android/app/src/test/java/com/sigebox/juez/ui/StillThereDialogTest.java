@@ -42,6 +42,7 @@ public class StillThereDialogTest {
     private final AtomicBoolean scoring = new AtomicBoolean(false);
     private final AtomicInteger leaves = new AtomicInteger();
     private int kept;
+    private int pendingCards;
     private Activity activity;
     private CentralSilence silence;
     private StillThereDialog still;
@@ -51,7 +52,7 @@ public class StillThereDialogTest {
         activity = Robolectric.buildActivity(Activity.class).setup().get();
         activity.setTheme(R.style.Theme_Sigebox);
         silence = new CentralSilence(now::get);
-        still = new StillThereDialog(activity, scoring::get, silence, () -> {
+        still = new StillThereDialog(activity, scoring::get, silence, () -> pendingCards, () -> {
             leaves.incrementAndGet();
             return kept;
         }, Runnable::run);
@@ -120,5 +121,29 @@ public class StillThereDialogTest {
         String toast = ShadowToast.getTextOfLatestToast();
         assertNotNull(toast);
         assertTrue(toast, toast.contains("2"));
+    }
+
+    @Test
+    public void conTarjetasSinConfirmarLoDiceAntesDeDecidir() {
+        pendingCards = 2;
+        tenMinutesOfSilence();
+        ShadowLooper.idleMainLooper();
+        TextView message = shown().findViewById(android.R.id.message);
+        assertTrue(message.getText().toString(), message.getText().toString().contains("2 tarjetas sin confirmar"));
+        still.stop();
+    }
+
+    @Test
+    public void seguirEsperandoEsLaAccionPrincipalRellena() {
+        tenMinutesOfSilence();
+        com.google.android.material.button.MaterialButton keep =
+                (com.google.android.material.button.MaterialButton) shown().getButton(DialogInterface.BUTTON_POSITIVE);
+        com.google.android.material.button.MaterialButton leave =
+                (com.google.android.material.button.MaterialButton) shown().getButton(DialogInterface.BUTTON_NEGATIVE);
+        assertEquals("rellena, sin contorno", 0, keep.getStrokeWidth());
+        assertTrue("salir va de contorno", leave.getStrokeWidth() > 0);
+        float dp = activity.getResources().getDisplayMetrics().density;
+        assertTrue(keep.getMinHeight() >= 56 * dp - 1);
+        still.stop();
     }
 }

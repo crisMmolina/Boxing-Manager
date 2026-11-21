@@ -35,25 +35,30 @@ public final class StillThereDialog {
     private final BooleanSupplier roundOpen;
     /** Sin inyectar se toman de {@link JudgeRuntime} al primer uso. */
     private CentralSilence silence;
+    private IntSupplier pending;
     private IntSupplier leaveAction;
+    /** Entre que se decide preguntar y que el diálogo aparece (se cuentan las tarjetas fuera del hilo principal). */
+    private boolean asking;
     private final Executor io;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final Runnable check = this::check;
     private AlertDialog dialog;
 
     public StillThereDialog(Activity activity, BooleanSupplier roundOpen) {
-        this(activity, roundOpen, null, null, IO);
+        this(activity, roundOpen, null, null, null, IO);
     }
 
     /**
-     * Para pruebas: {@code silence} cuenta el tiempo sin la central, {@code leaveAction} sale de la pelea y devuelve
-     * las tarjetas sin ACK que quedan guardadas, {@code io} corre la salida fuera del hilo principal.
+     * Para pruebas: {@code silence} cuenta el tiempo sin la central, {@code pending} cuenta las tarjetas sin ACK,
+     * {@code leaveAction} sale de la pelea y devuelve las que quedan guardadas, {@code io} corre lo que toca Room fuera
+     * del hilo principal.
      */
-    public StillThereDialog(Activity activity, BooleanSupplier roundOpen, CentralSilence silence, IntSupplier leaveAction,
-            Executor io) {
+    public StillThereDialog(Activity activity, BooleanSupplier roundOpen, CentralSilence silence, IntSupplier pending,
+            IntSupplier leaveAction, Executor io) {
         this.activity = activity;
         this.roundOpen = roundOpen;
         this.silence = silence;
+        this.pending = pending;
         this.leaveAction = leaveAction;
         this.io = io;
     }
@@ -80,6 +85,7 @@ public final class StillThereDialog {
 
     public void stop() {
         handler.removeCallbacks(check);
+        asking = false;
         if (dialog != null) {
             dialog.dismiss();
             dialog = null;
@@ -87,16 +93,33 @@ public final class StillThereDialog {
     }
 
     private void check() {
-        if (dialog == null && silence().shouldAsk(roundOpen.getAsBoolean())) {
-            show();
+        if (dialog == null && !asking && silence().shouldAsk(roundOpen.getAsBoolean())) {
+            asking = true;
+            if (pending == null) {
+                pending = () -> runtime().pendingCards();
+            }
+            io.execute(() -> {
+                int cards = pending.getAsInt();
+                handler.post(() -> {
+                    asking = false;
+                    if (dialog == null && !activity.isFinishing()) {
+                        show(cards);
+                    }
+                });
+            });
         }
         handler.postDelayed(check, CHECK_EVERY_MS);
     }
 
-    private void show() {
-        dialog = new MaterialAlertDialogBuilder(activity)
+    /** {@code cards}: tarjetas sin ACK; si hay, el juez sabe antes de decidir que salir no las borra. */
+    private void show(int cards) {
+        CharSequence message = cards > 0
+                ? activity.getResources().getQuantityString(R.plurals.still_there_message_pending, cards, cards)
+                : activity.getString(R.string.still_there_message);
+        // «Seguir esperando» es la acción principal (rellena); «Salir de la pelea», la secundaria (contorno).
+        dialog = new MaterialAlertDialogBuilder(activity, R.style.ThemeOverlay_Sigebox_StillThere)
                 .setTitle(R.string.still_there_title)
-                .setMessage(R.string.still_there_message)
+                .setMessage(message)
                 .setCancelable(false)
                 .setPositiveButton(R.string.still_there_keep_waiting, (d, w) -> {
                     dialog = null;

@@ -92,7 +92,18 @@ public class StillThereShot {
     }
 
     @Test
+    public void capturaElDialogoConTarjetasSinConfirmar() throws Exception {
+        new com.sigebox.juez.data.Outbox(db.outboxDao(), com.sigebox.juez.data.Clock.SYSTEM)
+                .enqueue(new com.sigebox.core.protocol.SubmitRound("F1", 2, 3, 10, 9));
+        capture("sigue-pendientes-");
+    }
+
+    @Test
     public void capturaElDialogoEnClaroYOscuro() throws Exception {
+        capture("sigue-");
+    }
+
+    private void capture(String prefix) throws Exception {
         for (String theme : new String[] {"claro", "oscuro"}) {
             RuntimeEnvironment.setQualifiers(theme.equals("oscuro") ? "+night" : "+notnight");
             // Diez minutos sin mensajes de la central: la última vez fue en la época 0.
@@ -101,9 +112,14 @@ public class StillThereShot {
                     .putExtra(NextFightActivity.EXTRA_JUDGE_NAME, "María López");
             Activity activity = Robolectric.buildActivity(NextFightActivity.class, intent).setup().get();
             shadowOf(Looper.getMainLooper()).idleFor(31, TimeUnit.SECONDS);
+            // Las tarjetas se cuentan fuera del hilo principal y el diálogo llega después.
+            for (int i = 0; i < 50 && (ShadowDialog.getLatestDialog() == null || !ShadowDialog.getLatestDialog().isShowing()); i++) {
+                Thread.sleep(20);
+                shadowOf(Looper.getMainLooper()).idle();
+            }
             Dialog dialog = ShadowDialog.getLatestDialog();
             assertNotNull("a los 10 min sin la central aparece «¿La pelea sigue?»", dialog);
-            shot("sigue-" + theme, activity, dialog);
+            shot(prefix + theme, activity, dialog);
             dialog.dismiss();
             activity.finish();
         }

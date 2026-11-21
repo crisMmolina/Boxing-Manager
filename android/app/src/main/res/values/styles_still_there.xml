@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- AND-032: «¿La pelea sigue?» con una acción principal rellena y la salida de contorno (design-critic). -->
+<resources>
+    <style name="ThemeOverlay.Sigebox.StillThere" parent="ThemeOverlay.Material3.MaterialAlertDialog">
+        <item name="buttonBarPositiveButtonStyle">@style/Widget.Sigebox.StillThere.Keep</item>
+        <item name="buttonBarNegativeButtonStyle">@style/Widget.Sigebox.StillThere.Leave</item>
+        <item name="materialAlertDialogTitleTextStyle">@style/Sigebox.StillThere.Title</item>
+    </style>
+
+    <style name="Widget.Sigebox.StillThere.Keep" parent="Widget.Material3.Button">
+        <item name="android:minHeight">56dp</item>
+    </style>
+
+    <style name="Widget.Sigebox.StillThere.Leave" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="android:minHeight">56dp</item>
+    </style>
+
+    <style name="Sigebox.StillThere.Title" parent="MaterialAlertDialog.Material3.Title.Text">
+        <item name="android:textStyle">bold</item>
+    </style>
+</resources>
