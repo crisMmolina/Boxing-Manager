@@ -644,12 +644,12 @@ Fuente: [`docs/specs/009-ux-movil/investigacion.md`](specs/009-ux-movil/investig
 - **Sin valor por defecto** (principio 2): cada esquina empieza en «—».
 - **− y +, nunca teclado numérico**: subir y bajar da menos errores sin detectar que teclear (Oladimeji et al., 2011).
 - **Esquina en tres señales**: color, lado fijo (Roja arriba, Azul abajo) y texto con el nombre del boxeador. El color solo no basta (WCAG 1.4.1); el único incidente documentado con tabletas de jueces fue un juez que marcó la esquina por el color del casco.
-- **Intención con un gesto, no con un diálogo repetido**: las confirmaciones que aparecen cada round dejan de leerse a las 2–3 veces. «Mantén para enviar» (0,8 s, anillo) con una acción de accesibilidad «Enviar round» que no exige mantener (WCAG 2.5.7).
+- **Intención con un gesto, no con un diálogo repetido**: las confirmaciones que aparecen cada round dejan de leerse a las 2–3 veces. «Mantén para enviar» (anillo; 0,8 s dentro del rango 0,6–1 s que la investigación propone validar con jueces) con una acción de accesibilidad «Enviar round» que no exige mantener (WCAG 2.5.7).
 - **El borrador sobrevive a todo**: cada toque de − o + se guarda en Room; un cierre forzado vuelve al mismo round con los mismos números.
 
 ### 14.2 Movimiento en controles de calificación
-- − y + usan el esquema **estándar** de Material 3 (amortiguación 0.9, sin rebote visible). El rebote Expressive (0.6–0.8) queda para momentos destacados, nunca para controles repetidos.
-- El estado presionado **cambia el fondo** con contraste ≥ 3:1 frente al reposo: la capa del 10 % de Material no se ve bajo la luz del ring.
+- − y + usan el esquema **estándar** de Material 3 (amortiguación 0.9, sin rebote visible). El esquema Expressive (amortiguación 0.6, rebote visible) es para «hero interactions»: puede quedarse en la palomita de «Round enviado», nunca en controles repetidos.
+- El estado presionado **cambia el fondo** de forma que se vea bajo la luz del ring: la capa del 10 % de Material no basta. El contraste exacto se fija y se mide en AND-039.
 - Con «quitar animaciones» nada se anima, pero los tiempos de gesto (mantener 0,8 s) se respetan.
 
 ### 14.3 Confirmación de la central
