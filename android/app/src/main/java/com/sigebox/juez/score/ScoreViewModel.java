@@ -31,7 +31,28 @@ public class ScoreViewModel extends ViewModel {
         void submit(Message message);
     }
 
+    /**
+     * AND-035: el borrador del round abierto en Room. {@code save} se llama en cada toque de − o +; la implementación
+     * escribe fuera del hilo principal, en orden.
+     */
+    public interface Drafts {
+        Drafts NONE = new Drafts() {
+            @Override
+            public void save(String fightId, int seat, int round, Integer red, Integer blue) {
+            }
+
+            @Override
+            public void clear() {
+            }
+        };
+
+        void save(String fightId, int seat, int round, Integer red, Integer blue);
+
+        void clear();
+    }
+
     private final Submitter submitter;
+    private final Drafts drafts;
     private final MutableLiveData<ScoreUi> ui = new MutableLiveData<>();
 
     private String fightId;
@@ -55,10 +76,67 @@ public class ScoreViewModel extends ViewModel {
     private Integer lateRequest;
     /** Esta instancia captura un round tardío: el round no cambia y se califica aunque esté cerrado. */
     private boolean lateMode;
+    /** AND-035: borrador leído de Room que espera a saber pelea, lugar y round para restaurarse. */
+    private Integer[] draft;
+    private String draftFight;
+    private int draftSeat;
+    private int draftRound;
 
     public ScoreViewModel(Submitter submitter) {
+        this(submitter, Drafts.NONE);
+    }
+
+    public ScoreViewModel(Submitter submitter, Drafts drafts) {
         this.submitter = submitter;
+        this.drafts = drafts;
         publish();
+    }
+
+    /** AND-035: el borrador guardado (al abrir la pantalla tras un cierre). */
+    public void onDraft(String draftFight, int draftSeat, int draftRound, Integer draftRed, Integer draftBlue) {
+        this.draftFight = draftFight;
+        this.draftSeat = draftSeat;
+        this.draftRound = draftRound;
+        this.draft = new Integer[] {draftRed, draftBlue};
+        publish();
+    }
+
+    /**
+     * Aplica el borrador si es de esta pelea, este lugar y el round abierto sin tarjeta; si es de otra pelea, otro
+     * lugar o un round ya pasado, se descarta y se borra. Mientras no se sepa el round, espera.
+     */
+    private void restoreDraft() {
+        if (draft == null || fightId == null || round <= 0 || lateMode) {
+            return;
+        }
+        boolean mine = draftFight.equals(fightId) && draftSeat == seat;
+        if (!mine || draftRound < round) {
+            discardDraft();
+            return;
+        }
+        if (draftRound > round) {
+            return; // el round del borrador todavía no llega a este teléfono
+        }
+        if (isRoundOpen() && cards.get(round) == null && !editing && red == null && blue == null) {
+            red = draft[0];
+            blue = draft[1];
+            selected = red == null ? ScoreUi.Corner.RED : ScoreUi.Corner.BLUE;
+            draft = null;
+        } else if (cards.get(round) != null || roundStatus == EstadoRound.CERRADO) {
+            discardDraft();
+        }
+    }
+
+    private void discardDraft() {
+        draft = null;
+        drafts.clear();
+    }
+
+    /** AND-035: guarda lo que hay en pantalla del round abierto (no en tardío ni corrigiendo). */
+    private void saveDraft() {
+        if (fightId != null && round > 0 && !lateMode && !editing) {
+            drafts.save(fightId, seat, round, red, blue);
+        }
     }
 
     public LiveData<ScoreUi> ui() {
@@ -168,6 +246,7 @@ public class ScoreViewModel extends ViewModel {
         } else {
             blue = value;
         }
+        saveDraft();
         publish();
     }
 
@@ -190,6 +269,7 @@ public class ScoreViewModel extends ViewModel {
             blue = next;
         }
         selected = corner;
+        saveDraft();
         publish();
     }
 
@@ -199,6 +279,7 @@ public class ScoreViewModel extends ViewModel {
         } else {
             blue = null;
         }
+        saveDraft();
         publish();
     }
 
@@ -228,6 +309,7 @@ public class ScoreViewModel extends ViewModel {
         selected = ScoreUi.Corner.RED;
         lastError = null;
         submitter.submit(message);
+        discardDraft(); // la tarjeta ya está en la Outbox
         publish();
     }
 
@@ -280,6 +362,7 @@ public class ScoreViewModel extends ViewModel {
     }
 
     private void publish() {
+        restoreDraft();
         ui.setValue(current());
     }
 }

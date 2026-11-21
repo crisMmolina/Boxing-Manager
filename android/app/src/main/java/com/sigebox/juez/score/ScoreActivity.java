@@ -88,7 +88,7 @@ public class ScoreActivity extends AppCompatActivity {
             @Override
             @SuppressWarnings("unchecked")
             public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-                return (T) new ScoreViewModel(connection::submit);
+                return (T) new ScoreViewModel(connection::submit, drafts(database));
             }
         }).get(ScoreViewModel.class);
 
@@ -107,6 +107,33 @@ public class ScoreActivity extends AppCompatActivity {
      * AND-032: «¿La pelea sigue?» se calla solo mientras el juez califica (round abierto y sin tarjeta, o corrigiendo).
      * En «Round N enviado» el round sigue abierto en la central, pero el juez ya no califica: ahí sí puede preguntar.
      */
+    /**
+     * AND-035: el borrador en Room, escrito en un solo hilo de fondo para que los toques queden en orden (Room no
+     * permite escribir en el hilo principal).
+     */
+    private ScoreViewModel.Drafts drafts(com.sigebox.juez.data.SigeboxDatabase db) {
+        return new ScoreViewModel.Drafts() {
+            @Override
+            public void save(String fightId, int seat, int round, Integer redValue, Integer blueValue) {
+                com.sigebox.juez.data.DraftEntity draft = new com.sigebox.juez.data.DraftEntity();
+                draft.fightId = fightId;
+                draft.seat = seat;
+                draft.round = round;
+                draft.red = redValue;
+                draft.blue = blueValue;
+                DRAFTS.execute(() -> db.draftDao().save(draft));
+            }
+
+            @Override
+            public void clear() {
+                DRAFTS.execute(() -> db.draftDao().clear());
+            }
+        };
+    }
+
+    private static final java.util.concurrent.ExecutorService DRAFTS =
+            java.util.concurrent.Executors.newSingleThreadExecutor();
+
     static boolean judgeIsScoring(ScoreUi ui) {
         return ui != null && ui.inputEnabled();
     }
@@ -124,11 +151,15 @@ public class ScoreActivity extends AppCompatActivity {
             }
             Map<Integer, OwnCards.Row> rows = OwnCards.load(database.getOpenHelper().getReadableDatabase(),
                     session.fightId);
+            com.sigebox.juez.data.DraftEntity draft = database.draftDao().load();
             runOnUiThread(() -> {
                 currentFightId = session.fightId;
                 showNames(session.fightId);
                 vm.setSession(session.fightId, session.seat, session.judgeName);
                 vm.onOwnCards(rows);
+                if (draft != null) {
+                    vm.onDraft(draft.fightId, draft.seat, draft.round, draft.red, draft.blue);
+                }
             });
         });
     }
