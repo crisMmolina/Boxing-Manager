@@ -11,3 +11,4 @@
 ## History
 - 1795245302 | CLAIMED | cris-box | claim; next: prueba de ScoreViewModel: puntaje 9–10 sin enviar, recrear con la misma base → 9–10
 - 1795245517 | REVIEW | cris-box | done; PR https://github.com/crisMmolina/Boxing-Manager/pull/164; evidence: android assembleDebug + testDebugUnitTest BUILD SUCCESSFUL (ScoreDraftTest 8, DraftMigrationTest 1) · red at 230f9ae:     java.lang.AssertionError: expected:<9> but was:<null>; reviewer: -
+- 1795245558 | REVIEW | cris-2 | review; approve; SHA 635e64d3e3a69822d92d021365beeec6ad8ed1b8; reviewer cris-2
