@@ -1,7 +1,7 @@
 # STATE
 
 Phase: execution
-Updated: 1795241913
+Updated: 1795241937
 AVAILABLE: AND-033 DOC-002 AND-035 AND-036 AND-037 AND-038 AND-039 
 CLAIMED: -
 BLOCKED: -
@@ -11,7 +11,7 @@ CANCELLED: -
 
 Claims (first 24; status --task ID shows detail):
 AND-032 | REVIEW | zoe-1 | until 1795094930
-DSN-007 | REVIEW | cris-box | until 1795328279
+DSN-007 | REVIEW | cris-box | until 1795328337
 
 Blockers: BLOCKED tasks; use status --task ID --summary.
 Current decisions (last 5):
