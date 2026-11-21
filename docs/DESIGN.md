@@ -221,7 +221,7 @@ Rejilla de 4: 4, 8, 12, 16, 20, 24, 32, 40 y 56. Margen de 20 dp en el teléfono
 
 ### 3.7 Movimiento
 
-- **Android:** resortes Material 3 (`Motion.Material3.Spring.Standard.Fast.Spatial` para posición y tamaño, `...Fast.Effects` para color y opacidad). Rebote Expressive solo en − y +.
+- **Android:** resortes Material 3 (`Motion.Material3.Spring.Standard.Fast.Spatial` para posición y tamaño, `...Fast.Effects` para color y opacidad). Rebote Expressive solo en − y + (spec 009 lo quita: ver §14.2).
 - **Central:** transiciones de 150 a 200 ms con salida suave (`Interpolator.EASE_OUT`).
 - **Logo «medio animado»** (solo en la pantalla de carga): los guantes entran con un balanceo desde los cordones: giro de −8° a 0° en 420 ms con resorte (eje en el punto donde cuelgan), y después un vaivén de ±2° cada 1.6 s mientras carga. En la barra superior el logo **no** se mueve.
 - **Skeleton:** un brillo que recorre el bloque de izquierda a derecha cada 1.4 s (opacidad 0.6 ↔ 1.0).
@@ -240,7 +240,7 @@ Rejilla de 4: 4, 8, 12, 16, 20, 24, 32, 40 y 56. Margen de 20 dp en el teléfono
 
 - **v5, cambio de pantalla.** Central: la pantalla nueva entra con `motion_enter`; la vieja no se anima. Juez: transición de eje compartido (Material `MaterialSharedAxis` X) de ≤ 300 ms entre actividades.
 - **v5, reducir movimiento:** sin desplazamientos, latidos, rodar ni dibujar; la palomita aparece completa; solo fundidos de ≤ 150 ms. En la central lo activa el ajuste "Reducir movimiento" o la preferencia del sistema; en el juez, la escala de animación en 0.
-- **Háptica:** vibración corta al tocar − o +, al enviar y al abrirse un round (`HapticFeedbackConstants`); nada de sonidos.
+- **Háptica:** vibración corta al tocar − o +, al enviar y al abrirse un round (`HapticFeedbackConstants`); nada de sonidos. Spec 009: la confirmación de la central vibra aparte (§14.3).
 
 ### 3.8 Tokens v5
 
@@ -569,7 +569,7 @@ Frase en minúscula con mayúscula inicial, verbos claros, sin signos de exclama
 - AA medido en los dos temas (§3.2): ≥ 4.5 en texto y ≥ 3 en componentes.
 - Esquinas con texto y posición fija; conexión con forma y descripción ("Juez 2, conectado"); errores con ícono y texto.
 - Etiquetas de campo asociadas al campo; el placeholder nunca es la única pista.
-- Zonas táctiles ≥ 48 dp; − y + de 76. Fuente del sistema hasta 130 % sin recortes.
+- Zonas táctiles ≥ 48 dp; − y + de 76. Fuente del sistema hasta 130 % sin recortes (spec 009 sube la meta a 200 %, §14.4).
 - Movimiento reducido respetado en logo, skeleton y transiciones.
 - En la central todo funciona con teclado y el foco es visible en la barra negra y en el contenido.
 
@@ -634,4 +634,45 @@ Spec 007. Aditiva: los tokens y pantallas v4/v5 que no se nombran aquí no cambi
 - **Fila de esquina (`view_corner_row`):** superficie `arena_2`, radio 20, sin borde ni sombra. Número arriba a la izquierda, debajo la barrita de color, la píldora y el nombre del boxeador; − (contorno) y + (lleno del color de la esquina) de 56 dp a la derecha. Mismos ids que la tarjeta v5.
 - **Píldoras (`Widget.Sigebox.Pill*`):** 56 dp, radio 28. Sobre arena la principal es dorada con texto negro (`Pill.Arena`) y la secundaria es de contorno (`Pill.Outline.Arena`).
 - **Barra:** la marca nunca se recorta a 390 dp; si falta espacio, cede "Juez N".
+
+## 14. Investigación móvil (spec 009)
+
+Fuente: [`docs/specs/009-ux-movil/investigacion.md`](specs/009-ux-movil/investigacion.md). Aditiva: lo que no se nombra aquí no cambia.
+
+### 14.1 Principios para calificar bajo presión
+- **Una decisión por round.** Nada que pulsar mientras el round corre; la tarjeta se llena al cerrar.
+- **Sin valor por defecto** (principio 2): cada esquina empieza en «—».
+- **− y +, nunca teclado numérico**: subir y bajar da menos errores sin detectar que teclear (Oladimeji et al., 2011).
+- **Esquina en tres señales**: color, lado fijo (Roja arriba, Azul abajo) y texto con el nombre del boxeador. El color solo no basta (WCAG 1.4.1); el único incidente documentado con tabletas de jueces fue un juez que marcó la esquina por el color del casco.
+- **Intención con un gesto, no con un diálogo repetido**: las confirmaciones que aparecen cada round dejan de leerse a las 2–3 veces. «Mantén para enviar» (0,8 s, anillo) con una acción de accesibilidad «Enviar round» que no exige mantener (WCAG 2.5.7).
+- **El borrador sobrevive a todo**: cada toque de − o + se guarda en Room; un cierre forzado vuelve al mismo round con los mismos números.
+
+### 14.2 Movimiento en controles de calificación
+- − y + usan el esquema **estándar** de Material 3 (amortiguación 0.9, sin rebote visible). El rebote Expressive (0.6–0.8) queda para momentos destacados, nunca para controles repetidos.
+- El estado presionado **cambia el fondo** con contraste ≥ 3:1 frente al reposo: la capa del 10 % de Material no se ve bajo la luz del ring.
+- Con «quitar animaciones» nada se anima, pero los tiempos de gesto (mantener 0,8 s) se respetan.
+
+### 14.3 Confirmación de la central
+- El estado de la tarjeta dice la verdad: «Round N enviado» solo tras el `ACK` (como hoy).
+- Al `ACK` correcto: háptico `CONFIRM` (API 30+; `VIRTUAL_KEY` en API 26–29) y anuncio de TalkBack «Round N enviado». Con error: `REJECT` y el anuncio del error.
+- La vibración **nunca** es la única señal: desde API 33 el usuario puede apagarla. Sin sonidos (la arena es ruidosa).
+- Perder la conexión se anuncia una vez a TalkBack («Sin conexión»); el chip sigue gris, no rojo: estar sin conexión no es un error del juez.
+
+### 14.4 Legibilidad y texto
+- Números críticos (puntaje, round) con meta de contraste **≥ 7:1** como margen contra el reflejo (bajo reflejo el contraste medido cae a 1.2–3.3:1). Es una meta del proyecto, no un requisito WCAG para texto grande.
+- Texto del sistema hasta **200 %** (Android 14 escala de forma no lineal): `sp` en texto, nunca en márgenes.
+- Pendiente de validar en la arena: la superficie negra de §13 con luces bajas (blanco sobre negro en penumbra fue lo menos legible en Dobres et al., 2017).
+
+### 14.5 Unirse
+- Un solo campo numérico que muestra «123 456», acepta pegar con espacios o guiones y consulta solo al sexto dígito; nunca seis cajitas (rompen pegar y TalkBack).
+- El escáner sigue siendo ML Kit integrado (`barcode-scanning`): funciona sin internet. Google Code Scanner depende de un módulo descargable y en la arena no hay red.
+
+### 14.6 Lo que no se adopta
+| Idea | Por qué no |
+|---|---|
+| «Deshacer» retrasando el envío unos segundos | Rompe la entrega en ≤ 1 s y la tarjeta firmada |
+| Botón dividido, menú FAB, cambio de forma al presionar en − y + | Añaden ambigüedad en un control de datos |
+| Color dinámico del fondo de pantalla | Rojo y azul deben significar siempre lo mismo |
+| Deslizar para enviar sin alternativa | Falla WCAG 2.5.7 (arrastre) |
+| Ganador + margen (10-9, 10-8) | Requiere decidir la regla de 10 puntos obligatoria (spec 009, decisión abierta 1) |
 
