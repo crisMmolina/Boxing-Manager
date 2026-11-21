@@ -1851,3 +1851,101 @@ En Windows (zoe) los comandos `Verify` se corren en Git Bash.
   - Con CODE_INFO de la misma pelea y lugar, las tarjetas sin ACK se reenvían tras el JOIN (prueba)
 - **Verify:** `android/gradlew -p android :app:testDebugUnitTest --tests 'com.sigebox.juez.net.*' --tests 'com.sigebox.juez.join.*'`
 - **Next step:** prueba de JudgeConnection: join con código + CODE_UNKNOWN deja el SessionStore como estaba
+
+## AND-035 · El puntaje a medio poner sobrevive a un cierre forzado
+
+- **Type:** bug
+- **Priority:** P0
+- **Estimate:** 1 d
+- **Rubric / Spec:** spec 009
+- **Depends on:** None
+- **Paths:** android/app/src/main/java/com/sigebox/juez/data/, android/app/src/main/java/com/sigebox/juez/score/, android/app/src/main/java/com/sigebox/juez/late/, android/app/src/test/java/com/sigebox/juez/
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - Tocar − o + guarda el puntaje en Room antes de mostrarlo; tras recrear la pantalla y el ViewModel con la misma base, el round abierto muestra el mismo puntaje (prueba)
+  - Tras el ACK de ese round, o con el round cerrado, el borrador no se restaura (prueba)
+  - Una esquina sin tocar sigue en «—» (prueba)
+  - Migración de Room sin perder sesión ni Outbox (prueba de migración)
+- **Verify:** `android/gradlew -p android :app:testDebugUnitTest`
+- **Next step:** prueba de ScoreViewModel: puntaje 9–10 sin enviar, recrear con la misma base → 9–10
+
+## AND-036 · Vibración y TalkBack dicen si la central recibió la tarjeta
+
+- **Type:** feature
+- **Priority:** P1
+- **Estimate:** 0.5 d
+- **Rubric / Spec:** spec 009
+- **Depends on:** AND-035
+- **Paths:** android/app/src/main/java/com/sigebox/juez/score/, android/app/src/main/java/com/sigebox/juez/late/, android/app/src/main/java/com/sigebox/juez/ui/, android/app/src/main/res/values/, android/app/src/test/java/com/sigebox/juez/
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - ACK correcto: CONFIRM en API 30+ y VIRTUAL_KEY en API 26–29, y anuncio «Round N enviado» (prueba con sdk 29 y 34)
+  - ACK con error: REJECT y anuncio del error (prueba)
+  - Al perder la conexión se anuncia «Sin conexión» una sola vez (prueba)
+- **Verify:** `android/gradlew -p android :app:testDebugUnitTest`
+- **Next step:** prueba de ScoreActivity: ACK ok en sdk 34 → háptico CONFIRM y anuncio
+
+## AND-037 · Código de 6 dígitos agrupado que se consulta solo
+
+- **Type:** feature
+- **Priority:** P1
+- **Estimate:** 0.5 d
+- **Rubric / Spec:** spec 009
+- **Depends on:** None
+- **Paths:** android/app/src/main/java/com/sigebox/juez/join/, android/app/src/main/res/layout/, android/app/src/main/res/values/, android/app/src/test/java/com/sigebox/juez/join/, android/app/src/test/java/com/sigebox/juez/shots/
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - El campo muestra «123 456» y entrega 123456 (prueba)
+  - Pegar «123-456» o «123 456» deja 123456 (prueba)
+  - Con nombre escrito, el sexto dígito consulta sin pulsar Unirme; sin nombre, pide el nombre (prueba)
+  - Capturas claro y oscuro revisadas por design-critic
+- **Verify:** `android/gradlew -p android :app:testDebugUnitTest`
+- **Next step:** prueba de JoinActivity: escribir 123456 → texto visible «123 456»
+
+## AND-038 · Mantén para enviar en lugar de la hoja ¿Enviar este round?
+
+- **Type:** feature
+- **Priority:** P1
+- **Estimate:** 1 d
+- **Rubric / Spec:** spec 009
+- **Depends on:** AND-036
+- **Paths:** android/app/src/main/java/com/sigebox/juez/score/, android/app/src/main/java/com/sigebox/juez/late/, android/app/src/main/java/com/sigebox/juez/ui/, android/app/src/main/res/layout/, android/app/src/main/res/values/, android/app/src/main/res/drawable/, android/app/src/test/java/com/sigebox/juez/
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - Enviar muestra el resumen grande de la tarjeta y «Mantén para enviar»: mantener 0,8 s envía, soltar antes no envía (prueba con reloj de animación)
+  - Acción de accesibilidad «Enviar round» envía sin mantener (prueba)
+  - Con animaciones apagadas el anillo no se anima y el tiempo se respeta (prueba)
+  - Las pruebas que fijan la hoja de confirmación solo cambian con uak allow de cris
+  - Capturas claro y oscuro revisadas por design-critic
+- **Verify:** `android/gradlew -p android :app:testDebugUnitTest`
+- **Next step:** prueba de ScoreActivity: soltar a los 0,4 s no envía
+
+## AND-039 · − y + sin rebote y con estado presionado visible
+
+- **Type:** feature
+- **Priority:** P2
+- **Estimate:** 0.5 d
+- **Rubric / Spec:** spec 009
+- **Depends on:** AND-038
+- **Paths:** android/app/src/main/java/com/sigebox/juez/ui/, android/app/src/main/res/values/, android/app/src/main/res/color/, android/app/src/main/res/drawable/, android/app/src/test/java/com/sigebox/juez/
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - − y + usan el esquema estándar, sin OvershootInterpolator (prueba)
+  - El estado presionado cambia el fondo con contraste ≥ 3:1 frente al reposo (prueba)
+  - Capturas claro y oscuro revisadas por design-critic
+- **Verify:** `android/gradlew -p android :app:testDebugUnitTest`
+- **Next step:** prueba de CornerCard: el interpolador de presión no es Overshoot
+
+## DSN-007 · DESIGN.md recoge las reglas de la investigación móvil
+
+- **Type:** docs
+- **Priority:** P2
+- **Estimate:** 0.25 d
+- **Rubric / Spec:** spec 009
+- **Depends on:** None
+- **Paths:** docs/DESIGN.md
+- **Freeze-Allowed:** no
+- **Acceptance:**
+  - DESIGN.md: movimiento estándar en controles de calificación, números críticos ≥ 7:1, hápticos según el ACK, texto hasta 200 %, anuncios de TalkBack, con enlace a spec 009
+- **Verify:** `bash tools/smoke.sh`
+- **Next step:** sección nueva en DESIGN.md §3
