@@ -13,6 +13,9 @@ import com.sigebox.juez.R;
 import com.sigebox.juez.net.JudgeRuntime;
 
 import java.util.concurrent.ExecutorService;
+import com.sigebox.juez.net.CentralSilence;
+import java.util.function.IntSupplier;
+import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.function.BooleanSupplier;
 
@@ -30,13 +33,44 @@ public final class StillThereDialog {
     private final Activity activity;
     private JudgeRuntime runtime;
     private final BooleanSupplier roundOpen;
+    /** Sin inyectar se toman de {@link JudgeRuntime} al primer uso. */
+    private CentralSilence silence;
+    private IntSupplier leaveAction;
+    private final Executor io;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final Runnable check = this::check;
     private AlertDialog dialog;
 
     public StillThereDialog(Activity activity, BooleanSupplier roundOpen) {
+        this(activity, roundOpen, null, null, IO);
+    }
+
+    /**
+     * Para pruebas: {@code silence} cuenta el tiempo sin la central, {@code leaveAction} sale de la pelea y devuelve
+     * las tarjetas sin ACK que quedan guardadas, {@code io} corre la salida fuera del hilo principal.
+     */
+    public StillThereDialog(Activity activity, BooleanSupplier roundOpen, CentralSilence silence, IntSupplier leaveAction,
+            Executor io) {
         this.activity = activity;
         this.roundOpen = roundOpen;
+        this.silence = silence;
+        this.leaveAction = leaveAction;
+        this.io = io;
+    }
+
+    private CentralSilence silence() {
+        if (silence == null) {
+            silence = runtime().silence();
+        }
+        return silence;
+    }
+
+    private JudgeRuntime runtime() {
+        if (runtime == null) {
+            // Perezoso: Siguiente pelea puede correr con una conexión de prueba, sin llave del equipo.
+            runtime = JudgeRuntime.get(activity);
+        }
+        return runtime;
     }
 
     public void start() {
@@ -53,11 +87,7 @@ public final class StillThereDialog {
     }
 
     private void check() {
-        if (runtime == null) {
-            // Perezoso: Siguiente pelea puede correr con una conexión de prueba, sin llave del equipo.
-            runtime = JudgeRuntime.get(activity);
-        }
-        if (dialog == null && runtime.silence().shouldAsk(roundOpen.getAsBoolean())) {
+        if (dialog == null && silence().shouldAsk(roundOpen.getAsBoolean())) {
             show();
         }
         handler.postDelayed(check, CHECK_EVERY_MS);
@@ -70,7 +100,7 @@ public final class StillThereDialog {
                 .setCancelable(false)
                 .setPositiveButton(R.string.still_there_keep_waiting, (d, w) -> {
                     dialog = null;
-                    runtime.silence().keepWaiting();
+                    silence().keepWaiting();
                 })
                 .setNegativeButton(R.string.still_there_leave, (d, w) -> {
                     dialog = null;
@@ -82,8 +112,11 @@ public final class StillThereDialog {
     private void leave() {
         handler.removeCallbacks(check);
         // Cuenta y borra en Room: fuera del hilo principal; la navegación vuelve al principal.
-        IO.execute(() -> {
-            int kept = runtime.leaveFight(() -> { }).leave();
+        if (leaveAction == null) {
+            leaveAction = () -> runtime().leaveFight(() -> { }).leave();
+        }
+        io.execute(() -> {
+            int kept = leaveAction.getAsInt();
             handler.post(() -> {
                 if (kept > 0) {
                     Toast.makeText(activity.getApplicationContext(), activity.getResources()
