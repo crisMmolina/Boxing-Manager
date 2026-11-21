@@ -6,9 +6,10 @@
 - Why: Parallel work without touching the main checkout
 - Failing: No validation run yet
 - Commands: `android/gradlew -p android :app:testDebugUnitTest`
-- Next: Another agent reviews https://github.com/crisMmolina/Boxing-Manager/pull/164; run .uak/bin/smoke
+- Next: Integrated in main: 87c9d73b252103f9bf32b6e5baa767d53a8f278e
 
 ## History
 - 1795245302 | CLAIMED | cris-box | claim; next: prueba de ScoreViewModel: puntaje 9–10 sin enviar, recrear con la misma base → 9–10
 - 1795245517 | REVIEW | cris-box | done; PR https://github.com/crisMmolina/Boxing-Manager/pull/164; evidence: android assembleDebug + testDebugUnitTest BUILD SUCCESSFUL (ScoreDraftTest 8, DraftMigrationTest 1) · red at 230f9ae:     java.lang.AssertionError: expected:<9> but was:<null>; reviewer: -
 - 1795245558 | REVIEW | cris-2 | review; approve; SHA 635e64d3e3a69822d92d021365beeec6ad8ed1b8; reviewer cris-2
+- 1795245626 | INTEGRATED | cris-box | merge; smoke and Verify PASS; commit 87c9d73b252103f9bf32b6e5baa767d53a8f278e; reviewer cris-2
