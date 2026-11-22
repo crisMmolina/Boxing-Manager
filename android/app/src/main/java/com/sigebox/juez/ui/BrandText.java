@@ -6,7 +6,7 @@ import android.util.AttributeSet;
 import androidx.appcompat.widget.AppCompatTextView;
 
 /**
- * La marca "SIGEBOX" de la barra con una inclinación leve hacia adelante (v6 «Esquina», spec 007): el único
+ * La marca «Box Juez» de la barra con una inclinación leve hacia adelante (v6 «Esquina», spec 007): el único
  * gesto deportivo de la interfaz. Solo la marca; títulos y texto van rectos.
  */
 public class BrandText extends AppCompatTextView {

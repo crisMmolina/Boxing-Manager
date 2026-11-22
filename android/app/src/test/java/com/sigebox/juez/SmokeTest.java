@@ -34,7 +34,7 @@ public class SmokeTest {
     @Test
     public void appNameYClaseApplication() {
         Context context = ApplicationProvider.getApplicationContext();
-        assertEquals("SIGEBOX Juez", context.getString(R.string.app_name));
+        assertEquals("Box Juez", context.getString(R.string.app_name));
         assertTrue(context instanceof SigeboxApp);
     }
 

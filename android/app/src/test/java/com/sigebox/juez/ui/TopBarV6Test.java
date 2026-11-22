@@ -56,7 +56,7 @@ public class TopBarV6Test {
         screen.layout(0, 0, width, screen.getMeasuredHeight());
         TextView brand = brand(screen);
         String text = brand.getText().toString();
-        assertTrue(text, text.startsWith("SIGEBOX"));
+        assertTrue(text, text.startsWith("Box Juez"));
         float needed = brand.getPaint().measureText(text) + brand.getPaddingStart() + brand.getPaddingEnd();
         assertTrue("la marca mide " + brand.getWidth() + " px y necesita " + needed,
                 brand.getWidth() >= needed);
