@@ -1,16 +1,15 @@
 # STATE
 
 Phase: execution
-Updated: 1795388592
-AVAILABLE: AND-033 DOC-002 AND-036 AND-038 AND-039 
-CLAIMED: AND-037 
+Updated: 1795389034
+AVAILABLE: AND-033 DOC-002 AND-036 AND-038 AND-039 AND-037 
+CLAIMED: -
 BLOCKED: -
 REVIEW: -
 INTEGRATED: (109; last 12) ... DSK-055 DSN-001 DSN-002 DSN-003 DSN-004 DSN-005 DSN-006 DSN-007 QA-001 QA-002 QA-003 QA-004 
 CANCELLED: -
 
 Claims (first 24; status --task ID shows detail):
-AND-037 | CLAIMED | cris-box | until 1795291985 (EXPIRED: release --expired --read-summary TOKEN)
 
 Blockers: BLOCKED tasks; use status --task ID --summary.
 Current decisions (last 5):

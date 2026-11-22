@@ -11,3 +11,4 @@
 ## History
 - 1795245642 | CLAIMED | cris-box | claim; next: prueba de JoinActivity: escribir 123456 → texto visible «123 456»
 - 1795277585 | CLAIMED | cris-box | checkpoint; next: esperar respuesta: uak allow para cambiar JoinCodeTest:110 o quitar autoJoin; nada commiteado
+- 1795389034 | AVAILABLE | zoe-1 | release; claim released by zoe-1; reason: -; summary kept
