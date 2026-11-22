@@ -6,7 +6,7 @@
     <string name="status_waiting_approval">Esperando aprobación</string>
 
     <string name="terms_title">Antes de empezar</string>
-    <string name="terms_body">• Tus datos (nombre y calificaciones) se quedan en los equipos del evento.\n\n• No salen de la red local: SIGEBOX no usa internet.\n\n• El organizador conserva las peleas hasta que él mismo las borre.\n\n• Tu teléfono guarda una llave propia para identificarte ante la central; no se comparte.\n\n• Prohibido usar SIGEBOX para apuestas.\n\n• El software es propiedad de sus desarrolladores.</string>
+    <string name="terms_body">• Tus datos (nombre y calificaciones) se quedan en los equipos del evento.\n\n• No salen de la red local: Box Juez no usa internet.\n\n• El organizador conserva las peleas hasta que él mismo las borre.\n\n• Tu teléfono guarda una llave propia para identificarte ante la central; no se comparte.\n\n• Prohibido usar Box Juez para apuestas.\n\n• El software es propiedad de sus desarrolladores.</string>
     <string name="terms_check">Leí y acepto</string>
     <string name="terms_accept">Aceptar y continuar</string>
 
@@ -17,7 +17,7 @@
     <string name="join_host_label">IP de la central</string>
     <string name="join_host_example">192.168.43.1</string>
     <string name="join_submit">Unirme</string>
-    <string name="join_not_sigebox">Este código no es de SIGEBOX</string>
+    <string name="join_not_sigebox">Este código no es de Box Juez</string>
 
     <string name="join_error_name_empty">Escribe tu nombre</string>
     <string name="join_error_name_too_long">El nombre es demasiado largo</string>

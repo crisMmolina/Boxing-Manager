@@ -1,8 +1,8 @@
 <resources>
     <!-- Solo el nombre de la app. Los textos de cada pantalla van en strings_<feature>.xml (DESIGN.md §5 y §8). -->
-    <string name="app_name">SIGEBOX Juez</string>
+    <string name="app_name">Box Juez</string>
     <!-- Chip de conexión de la barra (DESIGN.md v5 §5.17); "Conectado" y "Sin conexión" están en strings_join.xml. -->
     <string name="chip_help_action">Ver cómo reconectar</string>
-    <!-- v6: la marca de la barra es solo "SIGEBOX" para que quepa "Juez N" a 390 dp. -->
-    <string name="brand" translatable="false">SIGEBOX</string>
+    <!-- AND-033: la marca de la barra es «Box Juez» (spec 008); cabe con "Juez N", el chip y el «?» a 390 dp. -->
+    <string name="brand" translatable="false">Box Juez</string>
 </resources>
