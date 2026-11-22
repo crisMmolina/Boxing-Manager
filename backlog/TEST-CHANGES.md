@@ -7,3 +7,4 @@ Append-only. Format: - ID | epoch | human | reason. Why: a test is a spec; chang
 - DSK-049 | 1794370913 | zoe | Autorizo invertir InicioV5Test:81 y exentar el campo Nombre en ScreensTourTest (quitar el texto de ejemplo)
 - AND-025 | 1794373577 | zoe | solo se quita el ejemplo del nombre
 - DSK-054 | 1794986150 | zoe | renombrar marca a Box Central en SmokeTest, ExportServiceTest, XlsxExportTest
+- AND-033 | 1795389544 | zoe | renombrar marca a Box Juez en SmokeTest y TopBarV6Test
