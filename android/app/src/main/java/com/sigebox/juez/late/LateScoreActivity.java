@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.os.VibratorManager;
-import android.view.HapticFeedbackConstants;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
@@ -150,7 +149,29 @@ public class LateScoreActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
+    private com.sigebox.juez.score.SendFeedback sendFeedback;
+
+    /** AND-036: el aviso del ACK sale por la vista raíz (vibración y TalkBack). */
+    private com.sigebox.juez.score.SendFeedback sendFeedback() {
+        if (sendFeedback == null) {
+            View root = findViewById(R.id.late_root);
+            sendFeedback = new com.sigebox.juez.score.SendFeedback(this, new com.sigebox.juez.score.SendFeedback.Sink() {
+                @Override
+                public void haptic(int constant) {
+                    root.performHapticFeedback(constant);
+                }
+
+                @Override
+                public void announce(CharSequence text) {
+                    root.announceForAccessibility(text);
+                }
+            });
+        }
+        return sendFeedback;
+    }
+
     private void render(ScoreUi ui) {
+        sendFeedback().onUi(ui);
         boolean online = ui.connection == com.sigebox.juez.net.ConnectionState.Status.CONNECTED;
         TopBar.bind(findViewById(R.id.late_root), online,
                 ui.seat > 0 ? getString(R.string.score_judge, ui.seat) : getString(R.string.status_disconnected));
@@ -198,7 +219,6 @@ public class LateScoreActivity extends AppCompatActivity {
             return;
         }
         ConfirmSheet.show(this, round, ui.red, ui.blue, () -> {
-            findViewById(R.id.late_send).performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
             vm.submit();
         });
     }

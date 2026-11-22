@@ -184,12 +184,33 @@ public class ScoreActivity extends AppCompatActivity {
             return;
         }
         ConfirmSheet.show(this, ui.round, ui.red, ui.blue, () -> {
-            findViewById(R.id.score_send).performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
             vm.submit();
         });
     }
 
+    private SendFeedback sendFeedback;
+
+    /** AND-036: el aviso del ACK sale por la vista raíz (vibración y TalkBack). */
+    private SendFeedback sendFeedback() {
+        if (sendFeedback == null) {
+            View root = findViewById(R.id.score_root);
+            sendFeedback = new com.sigebox.juez.score.SendFeedback(this, new com.sigebox.juez.score.SendFeedback.Sink() {
+                @Override
+                public void haptic(int constant) {
+                    root.performHapticFeedback(constant);
+                }
+
+                @Override
+                public void announce(CharSequence text) {
+                    root.announceForAccessibility(text);
+                }
+            });
+        }
+        return sendFeedback;
+    }
+
     private void render(ScoreUi ui) {
+        sendFeedback().onUi(ui);
         boolean online = ui.connection == ConnectionState.Status.CONNECTED;
         TopBar.bind(findViewById(R.id.score_root), online,
                 ui.seat > 0 ? getString(R.string.score_judge, ui.seat) : getString(R.string.status_disconnected));
