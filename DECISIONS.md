@@ -123,3 +123,4 @@ Why: a reversible option after 15 min keeps work moving.
 - 1795388592 | deadline lease/AND-037/1795291985 | REQUIRES_RECOVERY | Claim kept; read the summary and use release --expired --read-summary. No work is deleted.
 - 1795389544 | allow | zoe | test change: AND-033 | Why: renombrar marca a Box Juez en SmokeTest y TopBarV6Test
 - 1795389951 | AND-033 | solo textos visibles; paquete y esquema sigebox intactos | Why: AND-033 pide marca Box Juez sin romper protocolo
+- 1795391338 | AND-036 | feedback al ACK, no al tocar | Why: AND-036 pide confirmar recepción real
