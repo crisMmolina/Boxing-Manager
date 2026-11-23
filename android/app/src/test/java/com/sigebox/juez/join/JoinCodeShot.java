@@ -26,7 +26,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.GraphicsMode;
 
@@ -71,21 +70,29 @@ public class JoinCodeShot {
     }
 
     @Test
-    public void codigoAgrupadoEnClaroYOscuroYAvisoDeNombre() throws Exception {
-        for (String theme : new String[] {"claro", "oscuro"}) {
-            RuntimeEnvironment.setQualifiers(theme.equals("oscuro") ? "+night" : "+notnight");
-            Activity grouped = open();
-            fill(grouped, R.id.join_name, "María López");
-            fill(grouped, R.id.join_host, "192.168.43.1");
-            fill(grouped, R.id.join_code, "48291");
-            shot("unirse-codigo-" + theme, grouped);
+    @Config(sdk = 36, qualifiers = "w390dp-h844dp-port-notnight-xxhdpi")
+    public void codigoAgrupadoYAvisoDeNombreEnClaro() throws Exception {
+        capture("claro");
+    }
 
-            Activity noName = open();
-            fill(noName, R.id.join_host, "192.168.43.1");
-            fill(noName, R.id.join_code, "482913");
-            shot("unirse-sin-nombre-" + theme, noName);
-        }
-        assertTrue(new File(DIR, "unirse-codigo-claro.png").length() > 0);
+    @Test
+    @Config(sdk = 36, qualifiers = "w390dp-h844dp-port-night-xxhdpi")
+    public void codigoAgrupadoYAvisoDeNombreEnOscuro() throws Exception {
+        capture("oscuro");
+    }
+
+    private static void capture(String theme) throws IOException {
+        Activity grouped = open();
+        fill(grouped, R.id.join_name, "María López");
+        fill(grouped, R.id.join_host, "192.168.43.1");
+        fill(grouped, R.id.join_code, "48291");
+        shot("unirse-codigo-" + theme, grouped);
+
+        Activity noName = open();
+        fill(noName, R.id.join_host, "192.168.43.1");
+        fill(noName, R.id.join_code, "482913");
+        shot("unirse-sin-nombre-" + theme, noName);
+        assertTrue(new File(DIR, "unirse-codigo-" + theme + ".png").length() > 0);
     }
 
     private static Activity open() {
