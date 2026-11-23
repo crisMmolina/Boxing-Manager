@@ -432,3 +432,4 @@ Append-only; use bash .uak/bin/uak msg / inbox. Format: - N | epoch | from | to 
 - 428 | 1795389544 | zoe | all | info | - | Test change allowed by zoe: AND-033. Why: renombrar marca a Box Juez en SmokeTest y TopBarV6Test
 - 429 | 1795389902 | zoe-1 | all | review | AND-033 | AND-033 ready for review: https://github.com/crisMmolina/Boxing-Manager/pull/165 (SHA 9a8977d75aa5f8575ebbe2fc74cab26087c39241). First free agent: /uak-review AND-033
 - 430 | 1795391301 | zoe-1 | all | review | AND-036 | AND-036 ready for review: https://github.com/crisMmolina/Boxing-Manager/pull/166 (SHA 373177a55ace5b25ee3424df54a910b6850d8167). First free agent: /uak-review AND-036
+- 431 | 1795393289 | zoe-1 | all | review | AND-038 | AND-038 ready for review: https://github.com/crisMmolina/Boxing-Manager/pull/167 (SHA f11ce57f5ba5889765326057425bf1ce478ebad6). First free agent: /uak-review AND-038
