@@ -2,11 +2,10 @@ package com.sigebox.juez.ui;
 
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
-import android.content.res.ColorStateList;
 import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.animation.OvershootInterpolator;
+import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 
 import androidx.core.content.ContextCompat;
@@ -20,7 +19,7 @@ import java.util.function.IntConsumer;
 /**
  * Une una {@code view_corner_card} con su esquina (DESIGN.md v3 §5.1–5.2): píldora en el color de la esquina, nombre
  * del boxeador, número en su color numeral, − en {@code surface_2} y + en el color de la esquina. − y + se aplanan al
- * presionarlos con un rebote leve.
+ * presionarlos con la curva estándar ({@code motion_curve}) y cambian a un fondo presionado (AND-039).
  */
 public final class CornerCard {
     /** Duración del aplanado; con movimiento reducido (escala 0) ValueAnimator salta al final. */
@@ -50,8 +49,10 @@ public final class CornerCard {
         label.setBackgroundResource(red ? R.drawable.pill_red : R.drawable.pill_blue);
         int onCorner = ContextCompat.getColor(ctx, red ? R.color.on_red : R.color.on_blue);
         label.setTextColor(onCorner);
-        plus.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(ctx, red ? R.color.red : R.color.blue)));
-        plus.setIconTint(ColorStateList.valueOf(onCorner));
+        plus.setBackgroundTintList(ContextCompat.getColorStateList(ctx,
+                red ? R.color.corner_plus_red_bg : R.color.corner_plus_blue_bg));
+        plus.setIconTint(ContextCompat.getColorStateList(ctx,
+                red ? R.color.corner_plus_red_icon : R.color.corner_plus_blue_icon));
         // v6: en la fila de arena (tag "arena") el número usa el tono claro de su esquina, que pasa AA sobre negro.
         arena = "arena".equals(root.getTag());
         valueColor = ContextCompat.getColor(ctx, arena
@@ -61,8 +62,9 @@ public final class CornerCard {
         if (arena) {
             // El rojo/azul del tema claro no llega a 3:1 sobre arena_2: el "+" toma el tono claro e ícono oscuro.
             plus.setStrokeWidth(0);
-            plus.setBackgroundTintList(ColorStateList.valueOf(valueColor));
-            plus.setIconTint(ColorStateList.valueOf(ContextCompat.getColor(ctx, R.color.arena)));
+            plus.setBackgroundTintList(ContextCompat.getColorStateList(ctx,
+                    red ? R.color.corner_plus_arena_red_bg : R.color.corner_plus_arena_blue_bg));
+            plus.setIconTint(ContextCompat.getColorStateList(ctx, R.color.corner_plus_arena_icon));
         }
         flattenOnPress(minus);
         flattenOnPress(plus);
@@ -117,10 +119,15 @@ public final class CornerCard {
         });
     }
 
+    /** Curva del aplanado: la estándar del sistema de movimiento, sin rebote. */
+    static android.view.animation.Interpolator pressInterpolator(android.content.Context ctx) {
+        return AnimationUtils.loadInterpolator(ctx, R.anim.motion_curve);
+    }
+
     private static void animateCorners(MaterialButton button, float from, float to) {
         ValueAnimator animator = ValueAnimator.ofFloat(from, to);
         animator.setDuration(PRESS_MS);
-        animator.setInterpolator(new OvershootInterpolator(1.2f));
+        animator.setInterpolator(pressInterpolator(button.getContext()));
         animator.addUpdateListener(a -> button.setShapeAppearanceModel(
                 ShapeAppearanceModel.builder().setAllCornerSizes((float) a.getAnimatedValue()).build()));
         animator.start();

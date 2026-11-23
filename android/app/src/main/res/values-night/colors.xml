@@ -36,4 +36,7 @@
     <color name="nav_ink">#B9B3A8</color>
     <color name="nav_ink_dim">#8F897E</color>
     <color name="nav_active">#2A2418</color>
+    <!-- AND-039: fondo presionado de + (3:1 o más contra el reposo). -->
+    <color name="red_pressed">#7A1A32</color>
+    <color name="blue_pressed">#1D4F86</color>
 </resources>

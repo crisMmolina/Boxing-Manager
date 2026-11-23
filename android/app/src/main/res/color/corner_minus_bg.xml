@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- AND-039: fondo de − en la tarjeta; presionado se oscurece -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:color="@color/ink_2" android:state_pressed="true" />
+    <item android:color="@color/surface_2" />
+</selector>

@@ -67,4 +67,10 @@
     <!-- Palomita de Round enviado sobre arena: círculo verde oscuro y trazo verde claro. -->
     <color name="arena_success">#16301F</color>
     <color name="arena_success_ink">#7FE0A2</color>
+    <!-- AND-039: fondo presionado de + (3:1 o más contra el reposo); el ícono pasa a ink. -->
+    <color name="red_pressed">#F08AA0</color>
+    <color name="blue_pressed">#B4D2F5</color>
+    <!-- + presionado en la fila de arena (igual en ambos temas). -->
+    <color name="arena_red_pressed">#7A1A32</color>
+    <color name="arena_blue_pressed">#1D4F86</color>
 </resources>

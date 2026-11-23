@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- AND-039: fondo de − en la fila de arena; presionado se rellena -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:color="@color/arena_control" android:state_pressed="true" />
+    <item android:color="@android:color/transparent" />
+</selector>
