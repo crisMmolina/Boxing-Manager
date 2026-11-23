@@ -46,10 +46,10 @@
         <item name="android:minWidth">@dimen/corner_row_button</item>
         <item name="android:minHeight">@dimen/corner_row_button</item>
         <item name="iconSize">26dp</item>
-        <item name="backgroundTint">@android:color/transparent</item>
+        <item name="backgroundTint">@color/corner_minus_arena_bg</item>
         <item name="strokeWidth">2dp</item>
         <item name="strokeColor">@color/arena_control</item>
-        <item name="iconTint">@color/on_arena</item>
+        <item name="iconTint">@color/corner_minus_arena_icon</item>
     </style>
 
     <!-- El número de la esquina en la fila: Barlow Condensed 800, más compacto que en la tarjeta v5. -->
