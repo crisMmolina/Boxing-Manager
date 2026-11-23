@@ -6,13 +6,13 @@ import android.widget.TextView;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.sigebox.juez.R;
 
-/** Hoja "¿Enviar este round?" con el resultado en grande (DESIGN.md v2 §5.6). */
+/** Hoja con la tarjeta en grande y «Mantén para enviar» (DESIGN.md v2 §5.6, spec 009). */
 public final class ConfirmSheet {
 
     private ConfirmSheet() {
     }
 
-    /** Muestra la hoja; {@code onSend} corre solo si el juez toca Enviar. */
+    /** Muestra la hoja; {@code onSend} corre solo si el juez mantiene el botón o usa la acción «Enviar round». */
     public static BottomSheetDialog show(Context context, int round, int red, int blue, Runnable onSend) {
         var dialog = new BottomSheetDialog(context);
         var view = LayoutInflater.from(context).inflate(R.layout.view_confirm_sheet, null, false);

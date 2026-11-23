@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Hoja de confirmación (DESIGN.md v2 §5.6): el resultado del round en grande, Enviar y Revisar. -->
+<!-- Hoja de confirmación (DESIGN.md v2 §5.6): la tarjeta del round en grande, «Mantén para enviar» y Revisar. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -55,7 +55,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="20dp" />
 
-    <com.google.android.material.button.MaterialButton
+    <com.sigebox.juez.ui.HoldToSendButton
         android:id="@+id/confirm_send"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
