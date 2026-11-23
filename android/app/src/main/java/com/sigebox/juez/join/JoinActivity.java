@@ -7,6 +7,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.text.Editable;
 import android.text.InputFilter;
+import android.text.Spanned;
 import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
@@ -58,6 +59,10 @@ public class JoinActivity extends AppCompatActivity {
     private boolean lookupFailed;
     private final Handler timeouts = new Handler(Looper.getMainLooper());
     private final Runnable lookupTimeout = this::onLookupTimeout;
+    /** Al escribir el sexto dígito se busca solo, en la siguiente vuelta del hilo (no dentro del setText). */
+    private final Runnable autoJoin = this::join;
+    /** Sexto dígito sin nombre: se muestra el aviso aunque el nombre siga vacío. */
+    private boolean askName;
 
     private final ActivityResultLauncher<Intent> scanLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(), result -> {
@@ -96,8 +101,8 @@ public class JoinActivity extends AppCompatActivity {
         error = findViewById(R.id.join_error);
         submit = findViewById(R.id.join_submit);
         // Solo dígitos y a lo más 6, también al pegar (el teclado numérico no basta).
+        // Primero se quitan guion y espacios y luego se corta a 6: «123-456» pegado deja los seis dígitos.
         code.setFilters(new InputFilter[] {
-                new InputFilter.LengthFilter(JoinRequest.CODE_LENGTH),
                 (source, start, end, dest, dstart, dend) -> {
                     StringBuilder digits = new StringBuilder();
                     for (int i = start; i < end; i++) {
@@ -107,7 +112,32 @@ public class JoinActivity extends AppCompatActivity {
                         }
                     }
                     return digits.length() == end - start ? null : digits;
+                },
+                new InputFilter.LengthFilter(JoinRequest.CODE_LENGTH)
+        });
+        // Va antes del watcher común, que llama a render() y ya ve el aviso de nombre.
+        code.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                groupCode(s);
+                timeouts.removeCallbacks(autoJoin);
+                askName = false;
+                if (filling || s.length() != JoinRequest.CODE_LENGTH) {
+                    return;
                 }
+                if (text(name).trim().isEmpty()) {
+                    askName = true; // el sexto dígito sin nombre: se pide el nombre en vez de buscar
+                    name.requestFocus();
+                } else {
+                    timeouts.post(autoJoin);
+                }
+            }
         });
 
         TextWatcher watcher = new TextWatcher() {
@@ -122,6 +152,9 @@ public class JoinActivity extends AppCompatActivity {
                 if (!filling && s != name.getText()) {
                     legacy = null; // escribir IP o código a mano deja de lado el QR viejo
                     scannedPin = null;
+                }
+                if (s == name.getText() && !text(name).isEmpty()) {
+                    askName = false;
                 }
                 codeRejected = false;
                 lookupFailed = false;
@@ -139,6 +172,7 @@ public class JoinActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         timeouts.removeCallbacks(lookupTimeout);
+        timeouts.removeCallbacks(autoJoin);
         if (listening != null) {
             listening.removeListener(codeListener);
             if (looking != null) {
@@ -184,7 +218,8 @@ public class JoinActivity extends AppCompatActivity {
         int message = codeRejected ? R.string.join_code_unknown
                 : lookupFailed ? R.string.join_lookup_timeout
                 : looking != null ? R.string.join_looking : messageFor(result.error);
-        boolean show = message != 0 && (codeRejected || lookupFailed || looking != null || !text(name).isEmpty());
+        boolean show = message != 0
+                && (codeRejected || lookupFailed || looking != null || askName || !text(name).isEmpty());
         error.setVisibility(show ? View.VISIBLE : View.GONE);
         if (show) {
             error.setText(message);
@@ -192,6 +227,7 @@ public class JoinActivity extends AppCompatActivity {
     }
 
     private void join() {
+        timeouts.removeCallbacks(autoJoin);
         JoinRequest.Result result = current();
         if (result.error != null || looking != null) {
             return;
@@ -273,6 +309,37 @@ public class JoinActivity extends AppCompatActivity {
             default:
                 return 0;
         }
+    }
+
+    /** Tras el tercer dígito va un hueco dibujado; el texto sigue siendo solo dígitos. */
+    private static final int GROUP = 3;
+
+    private static void groupCode(Editable s) {
+        for (CodeGapSpan old : s.getSpans(0, s.length(), CodeGapSpan.class)) {
+            s.removeSpan(old);
+        }
+        if (s.length() > GROUP) {
+            s.setSpan(new CodeGapSpan(), GROUP - 1, GROUP, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+    }
+
+    /** Lo que ve el juez: un espacio donde el campo dibuja el hueco («123 456»). */
+    static String visibleCode(CharSequence s) {
+        if (s == null) {
+            return "";
+        }
+        StringBuilder out = new StringBuilder();
+        Spanned spanned = s instanceof Spanned sp ? sp : null;
+        for (int i = 0; i < s.length(); i++) {
+            out.append(s.charAt(i));
+            boolean gap = spanned != null
+                    ? spanned.getSpans(i, i + 1, CodeGapSpan.class).length > 0
+                    : i == GROUP - 1 && s.length() > GROUP;
+            if (gap) {
+                out.append(' ');
+            }
+        }
+        return out.toString();
     }
 
     private static String text(EditText field) {
