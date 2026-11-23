@@ -125,3 +125,4 @@ Why: a reversible option after 15 min keeps work moving.
 - 1795389951 | AND-033 | solo textos visibles; paquete y esquema sigebox intactos | Why: AND-033 pide marca Box Juez sin romper protocolo
 - 1795391338 | AND-036 | feedback al ACK, no al tocar | Why: AND-036 pide confirmar recepción real
 - 1795393325 | AND-038 | ticker SystemClock en vez de ValueAnimator | Why: el animador adelantaba el envío
+- 1795413855 | allow | zoe | freeze exception: AND-037 | Why: reanudar
