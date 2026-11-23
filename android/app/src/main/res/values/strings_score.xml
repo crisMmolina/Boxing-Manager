@@ -44,8 +44,9 @@
     <string name="sent_card_a11y">Tu tarjeta del round %1$d: roja %2$d, azul %3$d</string>
     <string name="sent_correct">Corregir esta tarjeta</string>
 
-    <string name="confirm_title">¿Enviar este round?</string>
-    <string name="confirm_send">Enviar</string>
+    <string name="confirm_title">Tu tarjeta</string>
+    <string name="confirm_send">Mantén para enviar</string>
+    <string name="confirm_send_a11y">Enviar round</string>
     <string name="confirm_review">Revisar</string>
     <string name="confirm_a11y">Round %1$d: roja %2$d, azul %3$d</string>
 
