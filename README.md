@@ -1,4 +1,4 @@
-# SIGEBOX · Tarjetas de box sin papel ni internet
+# Box Central y Box Juez · Tarjetas de box sin papel ni internet
 
 Los jueces califican cada round en su teléfono Android y la central (una laptop con Windows) recibe todo en ≤ 1 s por una red local sin router ni internet: el hotspot de un teléfono. Al cerrar la pelea, la central calcula el resultado y exporta PDF/CSV.
 
@@ -73,7 +73,7 @@ Opciones: `--host` (por defecto `localhost`), `--port` (por defecto `8765`), `--
 central/gradlew -p central jpackage -PinstallerType=app-image
 ```
 
-Deja la app en `central/build/jpackage/SIGEBOX Central/`, con su propio Java; se abre con `SIGEBOX Central.exe`. El instalador `.msi` necesita WiX y aún no se ha generado: ver `docs/spikes/DSK-002.md` §3.
+Deja la app en `central/build/jpackage/Box Central/`, con su propio Java; se abre con `Box Central.exe`. El instalador `.msi` necesita WiX y aún no se ha generado: ver `docs/spikes/DSK-002.md` §3.
 
 ## Guía corta del evento
 

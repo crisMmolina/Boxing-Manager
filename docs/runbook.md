@@ -1,4 +1,4 @@
-# Runbook del evento · SIGEBOX
+# Runbook del evento · Box Central y Box Juez
 
 Guía para el día del evento: montar la red sin router ni internet, instalar las dos apps sin tienda, y qué hacer si algo falla. Basado en lo medido en `docs/spikes/AND-002.md` (hotspot y Android 16) y `docs/spikes/DSK-002.md` (servidor, firewall y jpackage).
 
@@ -33,14 +33,14 @@ Guía para el día del evento: montar la red sin router ni internet, instalar la
 Se instala antes del evento; en el evento no hace falta internet.
 
 - **Con instalador `.msi`:** ejecútalo y sigue el asistente; crea acceso en el menú Inicio y no necesita Java instalado. **Aún no se ha generado ni probado un `.msi`**: construirlo pide WiX en la máquina de build (ver `README.md`). Mientras tanto, usa el plan B.
-- **Sin `.msi` (plan B):** copia la carpeta *app-image* (`SIGEBOX Central/`, trae su propio Java; el del spike pesó 128 MB) y abre `SIGEBOX Central.exe`.
+- **Sin `.msi` (plan B):** copia la carpeta *app-image* (`Box Central/`, trae su propio Java; el del spike pesó 128 MB) y abre `Box Central.exe`.
 - La central escucha en el puerto **8765** de todas las interfaces. Los datos quedan en SQLite en la laptop.
 
 ## 3. Instalar la app del juez sin tienda
 
 - Pasa la APK (`app-debug.apk` o la de release) al teléfono por cable USB, USB-OTG o Bluetooth, ábrela y permite "Instalar apps desconocidas" para el administrador de archivos.
 - Con depuración USB: `adb install -r app-debug.apk`.
-- La app se llama **SIGEBOX Juez** y pide la cámara para leer el QR. Sin cámara se puede unir escribiendo el código (§4).
+- La app se llama **Box Juez** y pide la cámara para leer el QR. Sin cámara se puede unir escribiendo el código (§4).
 
 ## 4. Antes de la primera pelea (≈ 5 min)
 
@@ -73,7 +73,7 @@ La pantalla Jueces solo muestra el código de 6 números de cada lugar. Si no ha
 ## 5. Durante la pelea
 
 - **En vivo:** `Abrir round N` / `Cerrar round N`, o `Ctrl+Enter`. El tablero marca a cada juez como Pendiente, Enviado, Tardío o Corregido en cuanto llega su tarjeta, **sin puntos, totales ni ganador**.
-- **Falta conectar un juez:** `Abrir round N` queda desactivado y dice cuál falta. Si su lugar está vacío y no va a llegar, baja los jueces en **Evento** (solo antes del round 1). Si el juez se cayó, que abra SIGEBOX en su teléfono: se reconecta solo.
+- **Falta conectar un juez:** `Abrir round N` queda desactivado y dice cuál falta. Si su lugar está vacío y no va a llegar, baja los jueces en **Evento** (solo antes del round 1). Si el juez se cayó, que abra Box Juez en su teléfono: se reconecta solo.
 - **Falta un juez al cerrar:** la central pide confirmar y escribir **AVANZAR**. El teléfono de ese juez vibra y le exige calificar; su tarjeta llega marcada **Tardío**.
 - **Corregir una tarjeta:** solo el juez puede corregir la suya, desde su teléfono; llega marcada **Corregido**. La mesa no captura ni cambia puntos.
 - **Terminación extraordinaria (KO, descalificación, etc.):** **Terminar pelea** en En vivo. Pide solo el motivo (y la esquina o la razón si el motivo las pide); el round y el tiempo los pone la central. Al confirmar, la pelea se cierra con su resultado y se abre su hoja en **Resultado**.

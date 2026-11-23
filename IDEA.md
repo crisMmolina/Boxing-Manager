@@ -1,4 +1,4 @@
-# IDEA · SIGEBOX
+# IDEA · Box Central y Box Juez
 
 > Proyecto: app desde cero (no es challenge) · Cliente: organizador de funciones de box profesional · Equipo: desarrolladores dueños del software · Fecha de corte: 24 oct 2026.
 > Tags: **[Decided]** · **[Recommended]** · **[To validate]**.
@@ -6,13 +6,13 @@
 > Todo número de esta idea sale de §10 con fuente. §4 → tareas verticales · §6 → contrato · §7 → spikes · §8 → aceptación.
 
 ## 0. Name and brand (fixed at T0)
-- Name: **SIGEBOX** [Decided, provisional] · repo: `sigebox` (monorepo Gradle: `core/`, `desktop/`, `android/`, `tools/`, `docs/`) · dominio: no aplica, no hay web.
+- Name: **Box Central** (central) y **Box Juez** (app del juez) [Decided] · antes SIGEBOX; cambio decidido por cris (spec 008 §Nombre, DSK-054 y AND-033): solo cambian los nombres visibles, los identificadores técnicos `sigebox` (repo, paquetes, esquema `sigebox://`, carpeta de datos) siguen igual · repo: `sigebox` (monorepo Gradle: `core/`, `desktop/`, `android/`, `tools/`, `docs/`) · dominio: no aplica, no hay web.
 - Tagline: **Tarjetas de box sin papel ni internet** (7 palabras).
 - Logotipo: ninguno por ahora [Decided]; pantallas y PDF reservan un espacio para él.
 - Renombrar después de T−50% requiere un `uak decision` humano.
 
 ## 1. One line
-Para el **organizador de una función de box profesional**, que hoy recoge tarjetas en papel y suma a mano **hasta 120 calificaciones por pelea (5 jueces × 12 rounds × 2 esquinas)**, **SIGEBOX** le permite **recibir la calificación de cada juez en su laptop en 1 segundo o menos y obtener el resultado calculado al cerrar la pelea, todo sin internet ni router**, a diferencia de **las tarjetas de papel y la calculadora**.
+Para el **organizador de una función de box profesional**, que hoy recoge tarjetas en papel y suma a mano **hasta 120 calificaciones por pelea (5 jueces × 12 rounds × 2 esquinas)**, **Box Central** (y **Box Juez** en el teléfono de cada juez) le permite **recibir la calificación de cada juez en su laptop en 1 segundo o menos y obtener el resultado calculado al cerrar la pelea, todo sin internet ni router**, a diferencia de **las tarjetas de papel y la calculadora**.
 
 Diferencia frente a otras soluciones: funciona 100% en red local creada por un teléfono, con recuperación total si se cae la red o se cierra una app, y el resultado no se muestra en vivo para no influir. [To validate: revisar apps de puntuación existentes (por ejemplo, Controlboxing) y confirmar cuáles dependen de internet.]
 

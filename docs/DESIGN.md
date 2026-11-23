@@ -1,4 +1,4 @@
-# DESIGN · Guía visual de SIGEBOX (v5 «Arena nocturna»)
+# DESIGN · Guía visual de Box Central y Box Juez (v5 «Arena nocturna»)
 
 Guía visual y de experiencia de las dos apps: la del juez (Android, `android/`) y la central (JavaFX, `central/`). Es la fuente de verdad visual para DSK-041 a DSK-045 y AND-022 a AND-024 (spec 006), y **reemplaza a la v4** (DSN-004). Lo que la v5 no cambia sigue como en la v4: los principios, la paleta base, las esquinas, la tipografía, el logo, los textos y la accesibilidad.
 
@@ -32,9 +32,9 @@ Se conserva de la v4: negro, blanco y dorado; rojo y azul solo para las esquinas
 | v3 | v4 |
 |---|---|
 | Fondo crema «cantera» `#F7F4EF` y noche cálida `#14120F` | **Blanco** puro `#FFFFFF` con tarjetas `#FFFFFF`, y **negro** `#0E0E0C`. Menos beige, más contraste: se lee como blanco y negro |
-| Dorado solo en detalles finos | El dorado sube de rango: **marca** (barra negra con SIGEBOX en dorado), paso activo, foco, selección y, en tema oscuro, el **botón principal**. Sigue sin aparecer en bloques de fondo grandes ni junto a una esquina |
+| Dorado solo en detalles finos | El dorado sube de rango: **marca** (barra negra con el nombre de la app en dorado), paso activo, foco, selección y, en tema oscuro, el **botón principal**. Sigue sin aparecer en bloques de fondo grandes ni junto a una esquina |
 | Barra superior del color del fondo | **Barra superior negra en los dos temas**, con un filete dorado de 1 px abajo. Es la firma visual de las dos apps |
-| Marca: la palabra SIGEBOX | Logo de **guantes rojos** (ilustración de licencia libre, §3.6) + la palabra SIGEBOX |
+| Marca: el nombre de la app | Logo de **guantes rojos** (ilustración de licencia libre, §3.6) + el nombre de la app (Box Central o Box Juez) |
 | Sin pantalla de carga | Pantalla de carga con el logo animado (§5.1) |
 | Etiqueta arriba solo en algunos formularios de la central | **Todo campo** de las dos apps: etiqueta arriba siempre visible + ejemplo dentro (§5.4) |
 | "Cargando…" o pantallas vacías | *Skeletons* (§5.6) |
@@ -68,7 +68,7 @@ Inspirado en el cinturón de campeonato y la tarjeta impresa del juez: papel bla
 - **Tema claro.** Fondo blanco puro `#FFFFFF`, tarjetas blancas `#FFFFFF` con sombra suave, texto casi negro `#111110`. Botón principal negro.
 - **Tema oscuro.** Fondo negro `#0E0E0C`, tarjetas de carbón `#1A1917` y `#24221F`, texto marfil. Botón principal **dorado** con texto negro: en la arena oscura el dorado es lo que se ve primero.
 - **En los dos temas:**
-  - **Barra superior negra** (`bar`) con el logo y SIGEBOX en Barlow Condensed 700 dorado (`bar_accent`), y un filete dorado de 1 px en el borde inferior.
+  - **Barra superior negra** (`bar`) con el logo y Box Juez en Barlow Condensed 700 dorado (`bar_accent`), y un filete dorado de 1 px en el borde inferior.
   - Superficies sólidas que se separan por tono; formas grandes y redondeadas.
   - El dorado nunca es fondo de una zona grande: solo marca, filete, paso activo, foco, selección (`accent_soft` como fondo tenue de la fila elegida, siempre con su franja de 3 px `accent`) y el botón principal en oscuro.
   - **En claro**, el dorado vivo (`bar_accent` `#C9A35E`) vive en la barra negra, donde pasa AA; sobre blanco se usa su versión profunda `accent` `#7A5A2A`, que es la que pasa AA como texto y foco. Son el mismo dorado a distinta luz, no un café aparte.
@@ -97,7 +97,7 @@ Ninguna pantalla usa valores sueltos.
 | `accent_soft` | `#F4F4F5` | `#3A3020` | Fondo de la fila o tarjeta seleccionada (con texto `ink`) |
 | `bar` / `on_bar` | `#111110` / `#F7F5F0` | `#0E0E0C` / `#F5F3EE` | Barra superior negra y su texto |
 | `on_bar_2` | `#B9B3A8` | `#E8E4DC` | Pasos inactivos y texto secundario en la barra |
-| `bar_accent` | `#C9A35E` | `#D4AF5A` | SIGEBOX, filete y línea del paso activo en la barra |
+| `bar_accent` | `#C9A35E` | `#D4AF5A` | Nombre de la app, filete y línea del paso activo en la barra |
 | `red` / `on_red` | `#9F2241` / `#FFFFFF` | `#E58A9D` / `#111110` | **Solo** esquina roja: píldora, botón + |
 | `red_numeral` | `#9F2241` | `#E58A9D` | Números de la esquina roja |
 | `blue` / `on_blue` | `#266CB4` / `#FFFFFF` | `#8CB8EE` / `#111110` | **Solo** esquina azul |
@@ -163,7 +163,7 @@ Las esquinas se distinguen entre sí con cualquier tipo de daltonismo. Los pares
 
 ### 3.4 Tipografía
 
-- **Barlow Condensed**, recta (sin cursiva): 800 para números y títulos, 700 para la marca SIGEBOX.
+- **Barlow Condensed**, recta (sin cursiva): 800 para números y títulos, 700 para la marca (Box Central, Box Juez).
 - **Inter** 400, 500, 600 y 700 para todo lo demás.
 - Las dos son OFL y ya van empaquetadas con su licencia (`android/app/src/main/res/font/` y `central/src/main/resources/com/sigebox/central/fonts/`).
 - Cifras tabulares (`tnum`) en todo número que cambia.
@@ -175,7 +175,7 @@ Las esquinas se distinguen entre sí con cualquier tipo de daltonismo. Los pares
 | Estado grande (bento) | Barlow Condensed 800 | — | 56 |
 | Título de pantalla | Barlow Condensed 800 | 40 | 34 |
 | Título de tarjeta | Barlow Condensed 800 | 26 | 24 |
-| Marca SIGEBOX en la barra | Barlow Condensed 700, espaciado +2 % | 22 | 22 |
+| Marca (Box Central, Box Juez) en la barra | Barlow Condensed 700, espaciado +2 % | 22 | 22 |
 | Etiqueta de campo | Inter 600 | 14 | 13 |
 | Cuerpo | Inter 400–500 | 16 | 15 |
 | Apoyo, ejemplo dentro del campo | Inter 400 | 13–16 | 13–15 |
@@ -204,7 +204,7 @@ Rejilla de 4: 4, 8, 12, 16, 20, 24, 32, 40 y 56. Margen de 20 dp en el teléfono
 
 - **Qué es:** una ilustración de guantes de box rojos, estilo caricatura, con licencia CC0 (dominio público). Fuente, autor, URL y licencia verificada en `docs/design/CREDITOS.md`. El archivo elegido vive en `docs/design/logo/` (SVG, o PNG ≥ 1024 px) y se copia a cada app; nada se descarga en ejecución.
 - **Elegido (cris, 2026-11-03):** opción B, par de guantes rojos colgando de sus cordones, `docs/design/logo/guantes-colgando.svg`. En la pantalla de carga el «medio animado» es un balanceo leve desde los cordones (§3.7).
-- **Composición (lockup):** guantes a la izquierda + SIGEBOX en Barlow Condensed 700 `bar_accent`, separados 8 px. Altura del logo = 1.4 × la altura de la «S».
+- **Composición (lockup):** guantes a la izquierda + el nombre de la app en Barlow Condensed 700 `bar_accent`, separados 8 px. Altura del logo = 1.4 × la altura de la «B».
 - **Versión chica (≤ 32 px):** para la barra y los íconos pequeños se prepara una versión simplificada (un solo guante o la silueta del par, sin brillos ni trazos finos). Se prueba sobre la barra negra a 28 px antes de darla por buena.
 - **Limpieza:** si la ilustración trae texto, se quita en el SVG antes de usarla. Se permite simplificar trazos para tamaños chicos; no se cambia el rojo por otro color de la interfaz.
 - **Usos:**
@@ -212,8 +212,8 @@ Rejilla de 4: 4, 8, 12, 16, 20, 24, 32, 40 y 56. Margen de 20 dp en el teléfono
 | Lugar | Tamaño | Fondo |
 |---|---|---|
 | Pantalla de carga (las dos apps) | 160 dp / 200 px de alto | `bg` |
-| Barra superior de la central | 28 px de alto, con SIGEBOX | `bar` |
-| Barra superior del teléfono | 24 dp de alto, con SIGEBOX | `bar` |
+| Barra superior de la central | 28 px de alto, con Box Central | `bar` |
+| Barra superior del teléfono | 24 dp de alto, con Box Juez | `bar` |
 | Ícono de Android | ícono adaptativo: guantes en la zona segura de 66 dp sobre fondo `#111110` con filete dorado | — |
 | Ícono de la central (`jpackage`) | `.ico` / `.png` de 16 a 256 px, guantes sobre `#111110` | — |
 
@@ -329,7 +329,7 @@ Tabla de la v4 (sigue vigente):
 ┌──────────────────────────────┐
 │                              │
 │           (guantes)          │  logo 160 dp, balanceo (§3.7)        
-│           SIGEBOX            │  Barlow 700, 32, ink
+│          Box Juez            │  Barlow 700, 32, ink
 │    ────────────────────      │  barra de progreso indeterminada, 2 dp, accent
 │    Abriendo la base…         │  Inter 13, ink_2 (central) · "Preparando…" (juez)
 └──────────────────────────────┘
@@ -395,7 +395,7 @@ Código                         ← etiqueta: Inter 600, ink, siempre visible
 
 ### 5.7 Barra de pasos con paso activo
 
-- **Central (barra superior, 52 px, fondo `bar`):** logo + SIGEBOX a la izquierda y, junto a la marca, **Inicio** (ícono de casa + texto, `on_bar`; clic en la marca también lleva a Inicio); al centro **Evento · Jueces · En vivo · Resultado** en Inter 600 15 px; a la derecha "Terminación" y "Bitácora" como dos enlaces secundarios separados 16 px, con zona de clic de 36 px (`on_bar_2`), el "?" y el botón de tema.
+- **Central (barra superior, 52 px, fondo `bar`):** logo + Box Central a la izquierda y, junto a la marca, **Inicio** (ícono de casa + texto, `on_bar`; clic en la marca también lleva a Inicio); al centro **Evento · Jueces · En vivo · Resultado** en Inter 600 15 px; a la derecha "Terminación" y "Bitácora" como dos enlaces secundarios separados 16 px, con zona de clic de 36 px (`on_bar_2`), el "?" y el botón de tema.
   - Paso activo: texto `on_bar` + línea de 3 px `bar_accent` debajo + `aria`/`accessibleRole` de pestaña seleccionada.
   - Pasos completados: `on_bar` con un check pequeño; pendientes: `on_bar_2`.
   - Navegable con teclado (`Ctrl+1…4`) y foco visible en `bar_accent`.
@@ -428,7 +428,7 @@ Código                         ← etiqueta: Inter 600, ink, siempre visible
 
 ```
 ┌──────────────────────┐
-│ (guantes) SIGEBOX    │  Barlow 700 24, bar_accent
+│ (guantes) Box Central│  Barlow 700 24, bar_accent
 │ ┌──────────────────┐ │
 │ │ Evento en curso  │ │  ink_3 12 · nombre Inter 600 15
 │ │ Copa Delegación  │ │
@@ -474,7 +474,7 @@ Cápsula de 28 dp en la barra: **Conectado** = punto de 7 dp `connected` que lat
 - **v5:** chip de conexión en la barra (§5.17) y segmentos de rounds (§5.16) en Puntuar, Round enviado y Round tardío. Cada esquina lleva una franja izquierda de 6 dp de su color además de su píldora. Al tocar − o +, el número rueda (`motion_number`) con háptica. Tras el `ACK`, **Round enviado**: palomita que se dibuja (`motion_check`), "Round N enviado", "La central lo recibió. Espera a que abra el round N+1.", la tarjeta enviada (solo la propia, principio 3) y "Corregir esta tarjeta" (secundario).
 
 - **Referencia:** 390 × 844 dp en vertical. Desde 720 dp de ancho, las tarjetas van lado a lado (Roja a la izquierda).
-- **Barra superior negra** con logo + SIGEBOX, el punto o anillo de conexión con "Juez 2", y el "?".
+- **Barra superior negra** con logo + Box Juez, el punto o anillo de conexión con "Juez 2", y el "?".
 - Bordes a bordes con insets aplicados a la raíz; pantalla encendida en puntuación y espera.
 
 ### 6.1 Carga y términos
@@ -484,7 +484,7 @@ Pantalla de carga (§5.1) → Términos en el primer uso (texto en tarjeta con d
 
 ```
 ┌────────────────────────────────┐
-│▓(guantes) SIGEBOX    ○ Sin conexión  (?)▓│  barra negra
+│▓(guantes) Box Juez   ○ Sin conexión  (?)▓│  barra negra
 │ Unirme a la pelea              │  título Barlow 800 40
 │ [  Escanear QR  ]              │  botón principal
 │ ── o escribe los datos ──      │
@@ -522,7 +522,7 @@ Como en la v3 (tarjeta doble, hoja "¿Enviar este round?", "Round 4 enviado", "C
 ### 7.1 Inicio (lista de eventos)
 
 ```
-┌▓(guantes) SIGEBOX                         (?) ◐ ▓┐
+┌▓(guantes) Box Central                     (?) ◐ ▓┐
 │  Eventos                       [ Nuevo evento ] │  título Barlow 800 34 · botón principal
 │ ┌───────────────────────────────────────────┐   │
 │ │ Noche de box Iztapalapa         3 nov 2026│   │  tarjeta-fila: nombre Inter 600 16
@@ -616,7 +616,7 @@ Spec 007. Aditiva: los tokens y pantallas v4/v5 que no se nombran aquí no cambi
 | "Round 1/10" en la esquina | "Round N de M" arriba a la izquierda | Totales o marcador | Principio 3 |
 | Filas "valor · etiqueta · − +" | Fila por esquina: número 96 sp, píldora "Roja"/"Azul", − y + de 56 dp | Stepper pequeño | El pulgar llega; el número manda |
 | Botones píldora | Llena = la única acción principal; contorno = secundaria | Rojo como color de botón | El rojo es la esquina Roja |
-| Marca en itálica | Inclinación leve solo en "SIGEBOX" de la barra (`BrandText`) | Itálica en títulos | Un solo gesto deportivo |
+| Marca en itálica | Inclinación leve solo en el nombre de la app en la barra (`BrandText`) | Itálica en títulos | Un solo gesto deportivo |
 | Acento rojo, barra de pestañas, cuadrícula de mosaicos | **No** | — | Rojo = esquina; flujo lineal; tic del look generado |
 
 ### 13.2 Tokens arena (iguales en claro y oscuro)
