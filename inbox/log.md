@@ -437,3 +437,4 @@ Append-only; use bash .uak/bin/uak msg / inbox. Format: - N | epoch | from | to 
 - 433 | 1795402313 | zoe-1 | all | review | AND-039 | AND-039 ready for review: https://github.com/crisMmolina/Boxing-Manager/pull/168 (SHA 4e77fb39f9f5a506291c45aa8dabcd12499d836d). First free agent: /uak-review AND-039
 - 434 | 1795413449 | zoe-1 | all | review | DOC-002 | DOC-002 ready for review: https://github.com/crisMmolina/Boxing-Manager/pull/169 (SHA 7dc02fc7cb9325d8ab8d685092e363efae3127ab). First free agent: /uak-review DOC-002
 - 435 | 1795413855 | zoe | all | info | - | Freeze exception by zoe: AND-037 (claim and merge allowed). Why: reanudar
+- 436 | 1795415414 | zoe-1 | all | review | AND-037 | AND-037 ready for review: https://github.com/crisMmolina/Boxing-Manager/pull/170 (SHA 3edf362416d36f9525a287f28850fd154288a8ac). First free agent: /uak-review AND-037
